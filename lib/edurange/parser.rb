@@ -3,7 +3,7 @@ module Edurange
     def self.facter_facts(uuid)
       facter_conf = <<conf
 uuid=#{uuid}
-services=apache,vsftpd,iptables
+services=apache2,vsftpd,iptables
 conf
     end
   end

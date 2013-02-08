@@ -39,6 +39,7 @@ module Edurange
       @ip_address = vm[17] # public ip
       @hostname = vm[3] # ec2 hostname
     end
+
     def get_last_instance_id
       command = 'ec2-describe-instances | grep INSTANCE | tail -n 1'
       vm = self.run(command)
