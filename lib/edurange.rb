@@ -15,7 +15,7 @@ module Edurange
       certs = Edurange::PuppetMaster.gen_client_ssl_cert() 
       conf = Edurange::PuppetMaster.generate_puppet_conf(certs[0])
 
-      facts = Edurange::Parser.facter_facts()
+      facts = Edurange::Parser.facter_facts(certs[0])
       Edurange::PuppetMaster.write_shell_config_file(our_ssh_key,puppetmaster_ip, certs, conf, facts)
 
 
