@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 require 'edurange'
 
-Edurange::Init.init
+yaml_file = ARGV.shift
+Edurange::Init.init(yaml_file)
+
+
 
