@@ -37,5 +37,5 @@ Software:
 
     Packages: # References to puppet modules so we can support different OS options. Otherwise we need to know what OS we're on...
       - iptables
-      - apache
+      - apache2
 

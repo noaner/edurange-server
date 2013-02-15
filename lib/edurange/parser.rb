@@ -1,9 +1,10 @@
 module Edurange
   class Parser
-    def self.facter_facts(uuid)
+    def self.facter_facts(uuid, services)
+      services = services.join(',')
       facter_conf = <<conf
 uuid=#{uuid}
-services=apache2,vsftpd,iptables
+services=#{services}
 conf
     end
     def self.parse_yaml(filename)
