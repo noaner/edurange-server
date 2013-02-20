@@ -1,7 +1,7 @@
 module Edurange
   class Parser
     def self.puppet_firewall_rules(uuid, rules)
-      puppet_rules = ""
+      puppet_rules = "if $uuid == '#{uuid}' {"
       rules.each do |rule|
         protocol = rule[0]
         port = rule[1]
@@ -16,6 +16,8 @@ module Edurange
         p puppet_rule
         puppet_rules += puppet_rule
       end
+      puppet_rules += "\n}"
+      puppet_rules
 
     end
     def self.facter_facts(uuid, services)
