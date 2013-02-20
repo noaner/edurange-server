@@ -28,9 +28,10 @@ module Edurange
       end
     end
     def self.write_puppet_conf(instance_id, conf)
-      File.open("/etc/puppet/manifests/#{instance_id}.pp", "a+") do |file|
+      File.open("/home/ubuntu/edurange/derp.pp", "w") do |file|
         file.write(conf)
       end
+      `sudo mv /home/ubuntu/edurange/derp.pp /etc/puppet/manifests/#{instance_id}#{Time.now.to_s.gsub(' ','')}.pp`
     end
     def self.write_shell_config_file(ssh_key, puppetmaster_ip, certs, puppet_conf, facter_facts)
       File.open("my-user-script.sh", 'w') do |file|

@@ -40,7 +40,7 @@ module Edurange
 
         puppet_rules = Edurange::Parser.puppet_firewall_rules(uuid, firewall_rules)
         
-        #write_puppet_conf(uuid, conf)
+        write_puppet_conf(uuid, puppet_rules)
         p machine_details
       end
     end
