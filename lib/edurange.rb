@@ -15,14 +15,42 @@ module Edurange
       nodes.each do |node|
         node_name = node[0]
         ami_id = node[1]
+        users = node[2]
+        firewall_rules = node[3]
         packages = node[4]
         puts "Preparing #{node_name} - Packages: #{packages} ami_id: #{ami_id}"
+        puts "Got users: #{users} and fw rules: #{firewall_rules}"
         certs = Edurange::PuppetMaster.gen_client_ssl_cert() 
         conf = Edurange::PuppetMaster.generate_puppet_conf(certs[0])
         facts = Edurange::Parser.facter_facts(certs[0], packages)
         Edurange::PuppetMaster.write_shell_config_file(our_ssh_key,puppetmaster_ip, certs, conf, facts)
+
+        #users_script = self.users_to_bash(users)
+        #p users_script
+        #Edurange::PuppetMaster.append_to_config(users_script)
+
+        
+
         machine = Edurange::EduMachine.new(certs[0], keyname, ami_id)
-        p machine.spin_up()
+        machine.users(users)
+        
+        machine_details = machine.spin_up()
+        #write_puppet_conf(instance_id, conf)
+        p machine_details
+      end
+    end
+    
+    def self.users_to_bash(users)
+      shell = ""
+      users.each do |user|
+        p user
+        if user[:password]
+          shell += "\n"
+          shell += "sudo useradd -m #{user[:login]}"
+          shell += ''
+        elsif user[:pass_file]
+          #TODO implement pass files
+        end
       end
     end
   end

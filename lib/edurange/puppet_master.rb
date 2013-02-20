@@ -22,6 +22,16 @@ module Edurange
       private_key = `sudo cat /var/lib/puppet/ssl/private_keys/#{uuid}.pem`.chomp
       return [uuid, ssl_cert, ca_cert, private_key]
     end
+    def self.append_to_config(conf)
+      File.open("my-user-script.sh", 'a+') do |file|
+        file.write(conf)
+      end
+    end
+    def self.write_puppet_conf(instance_id, conf)
+      File.open("/etc/puppet/manifests/#{instance_id}.pp", "a+") do |file|
+        file.write(conf)
+      end
+    end
     def self.write_shell_config_file(ssh_key, puppetmaster_ip, certs, puppet_conf, facter_facts)
       File.open("my-user-script.sh", 'w') do |file|
         file_contents = <<contents

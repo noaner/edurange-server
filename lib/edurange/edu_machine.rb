@@ -1,6 +1,6 @@
 module Edurange
   class EduMachine
-    attr_reader :uuid, :ami_id, :key_name, :vm_size, :ip_address
+    attr_reader :uuid, :ami_id, :key_name, :vm_size, :ip_address, :users
 
     EC2_UTILS_PATH = "/home/ubuntu/.ec2/bin/"
 
@@ -11,6 +11,9 @@ module Edurange
       @key_name = key_name
       @vm_size = vm_size
       @ami_id = ami_id
+    end
+    def initial_users(users)
+      @users = users
     end
     def run(command)
       # runs an ec2 command with full path.

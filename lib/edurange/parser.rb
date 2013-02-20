@@ -1,5 +1,11 @@
 module Edurange
   class Parser
+    def self.puppet_firewall_rules(uuid, rules)
+      rules.each do |rule|
+        p rule
+      end
+
+    end
     def self.facter_facts(uuid, services)
       services = services.join(',')
       facter_conf = <<conf
