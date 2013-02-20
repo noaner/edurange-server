@@ -1,8 +1,20 @@
 module Edurange
   class Parser
     def self.puppet_firewall_rules(uuid, rules)
+      puppet_rules = ""
       rules.each do |rule|
-        p rule
+        protocol = rule[0]
+        port = rule[1]
+        dest = (rule[2] == 'All') ? '0.0.0.0/24' : rule[2]
+
+        puppet_rule = "iptables { '#{uuid} iptables: #{protocol}://#{dest}:#{port}':
+        proto => '#{protocol}',
+        dport => '#{port}',
+        destination => '#{dest}
+        }"
+
+        p puppet_rule
+        puppet_rules += puppet_rule
       end
 
     end
