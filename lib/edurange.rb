@@ -32,10 +32,15 @@ module Edurange
         
 
         machine = Edurange::EduMachine.new(certs[0], keyname, ami_id)
-        machine.users(users)
+        #machine.users(users)
         
         machine_details = machine.spin_up()
-        #write_puppet_conf(instance_id, conf)
+
+        uuid = machine_details.uuid
+
+        puppet_rules = puppet_firewall_rules(firewall_rules)
+        
+        #write_puppet_conf(uuid, conf)
         p machine_details
       end
     end
