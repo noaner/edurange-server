@@ -16,9 +16,10 @@ Nodes:
 
 Groups:
   Team_1:
-    - { login: sboesen, pass: password }
+    - { login: sboesen, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZOg/RVwsrNvDuCETa1wTaQynNOBFVQIVbzZ4PnMUh+5XlYA40Z4AJ5Yzd6VhuH6vCqnsil2saPsedJK1Me7dl5P08Drqhhf2RbBUW9ZYE2VvtpneZXSGneL70NRJgnoCV55IMY4Btf+3vCV0Ddog5uXkH/Zkgxl3fI5E/6wF82JizMF1BQlg0N7vdWnPbqkn82/VYsIXK0jo8pXFrxjli1jfLN9y/UWL8b5AGpfr5punMWVqh+FsAThPd7sbbu//HRguocZRBSaaDJ8H7qVWJNPPWKecR12AViPjnmFkUMZMPObQWrIOTRyTOcSr5vU1fAxPVWSwFhELtLmxsy7hh stefanboesen@Derp' }
+
   Instructor:
-    - { login: weissr, pass: pass2 }
+    - { login: weissr, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZOg/RVwsrNvDuCETa1wTaQynNOBFVQIVbzZ4PnMUh+5XlYA40Z4AJ5Yzd6VhuH6vCqnsil2saPsedJK1Me7dl5P08Drqhhf2RbBUW9ZYE2VvtpneZXSGneL70NRJgnoCV55IMY4Btf+3vCV0Ddog5uXkH/Zkgxl3fI5E/6wF82JizMF1BQlg0N7vdWnPbqkn82/VYsIXK0jo8pXFrxjli1jfLN9y/UWL8b5AGpfr5punMWVqh+FsAThPd7sbbu//HRguocZRBSaaDJ8H7qVWJNPPWKecR12AViPjnmFkUMZMPObQWrIOTRyTOcSr5vU1fAxPVWSwFhELtLmxsy7hh stefanboesen@Derp' }
 
 Software:
   Victim_CTF:
