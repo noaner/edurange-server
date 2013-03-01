@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+puts "===Edurange setup script==="
+puts "Where is your ec2 private key?"
+priv_key_loc = gets
+
+File.open(config.yml, "w") do |file|
+  file.puts "ec2_key: #{priv_key_loc}"
+end
+
+
+
+
+
