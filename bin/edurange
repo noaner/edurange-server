@@ -2,6 +2,10 @@
 require 'edurange'
 
 yaml_file = ARGV.shift
+if yaml_file.nil?
+  puts "Must provide config file"
+  exit -1
+end
 Edurange::Init.init(yaml_file)
 
 
