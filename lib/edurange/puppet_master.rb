@@ -5,10 +5,10 @@ module Edurange
     end
     def self.get_our_ssh_key
       # make some ssh keys
-      `ssh-keygen -t rsa -f #{ENV['HOME']}/.ssh/id_rsa -N '' -q` unless File.exists?("#{ENV['HOME'}/.ssh/id_rsa")
+      `ssh-keygen -t rsa -f #{ENV['HOME']}/.ssh/id_rsa -N '' -q` unless File.exists?("#{ENV['HOME']}/.ssh/id_rsa")
       # return our public key
 
-      file = File.open("#{ENV["HOME"]}/.ssh/id_rsa.pub", "rb")
+      file = File.open("#{ENV['HOME']}/.ssh/id_rsa.pub", "rb")
       contents = file.read
     end
 
@@ -29,10 +29,10 @@ module Edurange
       end
     end
     def self.write_puppet_conf(instance_id, conf)
-      File.open("/home/ubuntu/edurange/derp.pp", "w") do |file|
+      File.open("#{ENV['HOME']}/edurange/derp.pp", "w") do |file|
         file.write(conf)
       end
-      `sudo mv /home/ubuntu/edurange/derp.pp /etc/puppet/manifests/#{instance_id}#{Time.now.to_s.gsub(' ','')}.pp`
+      `sudo mv #{ENV['HOME']}/edurange/derp.pp /etc/puppet/manifests/#{instance_id}#{Time.now.to_s.gsub(' ','')}.pp`
     end
     def self.write_shell_config_file(ssh_key, puppetmaster_ip, certs, puppet_conf, facter_facts)
       File.open("my-user-script.sh", 'w') do |file|
