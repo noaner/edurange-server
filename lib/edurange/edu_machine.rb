@@ -2,7 +2,7 @@ module Edurange
   class EduMachine
     attr_reader :uuid, :ami_id, :key_name, :vm_size, :ip_address, :users
 
-    EC2_UTILS_PATH = "/home/ubuntu/.ec2/bin/"
+    EC2_UTILS_PATH = ENV['HOME'] + "/.ec2/bin/"
 
     def initialize(uuid, key_name, ami_id, vm_size="t1.micro")
       # generate uuid

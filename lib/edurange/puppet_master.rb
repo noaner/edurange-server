@@ -5,9 +5,10 @@ module Edurange
     end
     def self.get_our_ssh_key
       # make some ssh keys
-      `ssh-keygen -t rsa -f /home/ubuntu/.ssh/id_rsa -N '' -q` unless File.exists?("/home/ubuntu/.ssh/id_rsa")
-      # return our public key                                                                                                                                                                        
-      file = File.open("/home/ubuntu/.ssh/id_rsa.pub", "rb")
+      `ssh-keygen -t rsa -f #{ENV['HOME']}/.ssh/id_rsa -N '' -q` unless File.exists?("#{ENV["HOME"}/.ssh/id_rsa")
+      # return our public key
+
+      file = File.open("#{ENV["HOME"]}/.ssh/id_rsa.pub", "rb")
       contents = file.read
     end
 
