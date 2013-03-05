@@ -46,7 +46,6 @@ module Edurange
     def self.users_to_bash(users)
       shell = ""
       users.each do |user|
-        p user
         if user['password']
           #shell += "\n"
           #shell += "sudo useradd -m #{user[:login]}"
