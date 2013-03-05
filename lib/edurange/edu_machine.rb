@@ -19,6 +19,7 @@ module Edurange
       # runs an ec2 command with full path.
       command = EC2_UTILS_PATH + command
       puts "Creating instance (ami id: #{@ami_id})"
+      puts "#{@uuid} #{@instance_id} #{@vm_size}"
       `#{command}`
     end
 

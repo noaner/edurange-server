@@ -13,7 +13,6 @@ module Edurange
         destination => '#{dest}
         }"
 
-        p puppet_rule
         puppet_rules += puppet_rule
       end
       puppet_rules += "\n}"
