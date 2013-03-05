@@ -9,6 +9,11 @@ File.open('config.yml', "w") do |file|
 end
 
 
+# Puppetmaster install
+# .ec2 folder
+# EC2_home and such
+# java
+
 
 
 

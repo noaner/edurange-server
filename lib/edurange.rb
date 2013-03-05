@@ -19,15 +19,12 @@ module Edurange
         firewall_rules = node[3]
         packages = node[4]
         puts "Preparing #{node_name} - Packages: #{packages} ami_id: #{ami_id}"
-        puts "Got users: #{users} and fw rules: #{firewall_rules}"
         certs = Edurange::PuppetMaster.gen_client_ssl_cert() 
         conf = Edurange::PuppetMaster.generate_puppet_conf(certs[0])
         facts = Edurange::Parser.facter_facts(certs[0], packages)
         Edurange::PuppetMaster.write_shell_config_file(our_ssh_key,puppetmaster_ip, certs, conf, facts)
 
         users_script = self.users_to_bash(users)
-        p users_script
-        puts 'user_script above...'
         Edurange::PuppetMaster.append_to_config(users_script)
 
         

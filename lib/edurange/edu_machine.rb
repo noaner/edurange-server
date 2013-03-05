@@ -18,6 +18,7 @@ module Edurange
     def run(command)
       # runs an ec2 command with full path.
       command = EC2_UTILS_PATH + command
+      puts "Creating instance (ami id: #{@ami_id})"
       `#{command}`
     end
 
@@ -26,7 +27,6 @@ module Edurange
 
       # Create & run instance, setting instance_id and IP to match the newly created ami
       command = "ec2-run-instances #{@ami_id} -t #{@vm_size} --region us-east-1 --key #{@key_name} --user-data-file my-user-script.sh"
-      puts "Would run: #{command}"
       self.run(command)
       @instance_id = self.get_last_instance_id()
       puts "Waiting for instance #{@instance_id} to spin up..."
@@ -38,7 +38,6 @@ module Edurange
     def update_ec2_info
       command = "ec2-describe-instances | grep INSTANCE | grep '#{@instance_id}'"
       vm = self.run(command).split("\t")
-      p vm
       @ip_address = vm[17] # public ip
       @hostname = vm[3] # ec2 hostname
     end
