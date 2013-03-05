@@ -53,8 +53,8 @@ mkdir -p /var/lib/puppet/ssl/certs
 mkdir -p /var/lib/puppet/ssl/private_keys
 mkdir -p /etc/puppet
 
-mkdir -p /etc/facter/facts.d
-echo '#{facter_facts}' >> "/etc/facter/facts.d/facts.txt"
+mkdir -p /etc/facts.d
+echo '#{facter_facts}' >> "/etc/facts.d/facts.txt"
 
 echo '#{certs[1]}' >> "/var/lib/puppet/ssl/certs/#{certs[0]}.pem"
 echo '#{certs[2]}' >> "/var/lib/puppet/ssl/certs/ca.pem"
