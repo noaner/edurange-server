@@ -29,6 +29,7 @@ module Edurange
       command = "ec2-run-instances #{@ami_id} -t #{@vm_size} --region us-east-1 --key #{@key_name} --user-data-file my-user-script.sh"
       self.run(command)
       @instance_id = self.get_last_instance_id()
+      puts "Instance created."
       puts "Waiting for instance #{@instance_id} to spin up..."
       sleep(40)
       self.update_ec2_info()
