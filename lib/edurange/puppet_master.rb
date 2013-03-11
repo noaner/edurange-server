@@ -41,10 +41,11 @@ module Edurange
 set -e
 set -x
 echo "Hello World.  The time is now $(date -R)!" | tee /root/output.txt
-apt-get update; apt-get upgrade -y
 
 key='#{ssh_key.chomp}'
 echo $key >> /home/ubuntu/.ssh/authorized_keys
+
+apt-get update; apt-get upgrade -y
 
 echo #{puppetmaster_ip} puppet >> /etc/hosts
 apt-get -y install puppet
@@ -65,7 +66,7 @@ echo '#{puppet_conf.chomp}' > /etc/puppet/puppet.conf
 sed -i /etc/default/puppet -e 's/START=no/START=yes/'
 service puppet restart
 
-echo "Goodbye World.  The time is now $(date -R)!" | tee /root/output.txt
+echo "Goodbye World.  The time is now $(date -R)!" >> /root/output.txt
 contents
         file.write(file_contents)
       end
