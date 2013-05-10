@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+require 'edurange'
+require 'yaml'
+
+yaml_file = ARGV.shift
+if yaml_file.nil?
+  puts "Must provide config file"
+  exit -1
+end
+
+yaml = YAML.load_file(yaml_file)
+puts yaml
+
+
+
