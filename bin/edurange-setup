@@ -1,12 +1,31 @@
 #!/usr/bin/env ruby
 
 puts "===Edurange setup script==="
-puts "Where is your ec2 private key?"
-priv_key_loc = gets
+
+# EC2 Private Key
+puts "Where is your EC2 private key?" # Request
+priv_key_loc = gets # Directory where EC2 private key is stored
 
 File.open('config.yml', "w") do |file|
-  file.puts "ec2_key: #{priv_key_loc}"
+  file.puts "ec2_key: #{priv_key_loc}" # Writes location of key to config.yml
 end
+
+# AWS Access Key
+puts "What is your AWS Access Key?" # Request
+aws_access_key = gets
+
+# AWS Secret Access Key
+puts "What is your AWS Secret Access Key?" # Request
+aws_secret_access_key = gets
+
+File.open('.bashrc', "a") do |file|
+	file.puts "export EC2_URL=https://ec2.amazonaws.com"
+	file.puts "export AWS_ACCESS_KEY=#{aws_access_key}"
+	file.puts "export AWS_ACCESS_KEY_ID=#{aws_access_key}"
+	file.puts "export AWS_SECRET_ACCESS_KEY=#{aws_secret_access_key}"
+	file.puts "export AWS_SECRET_KEY=#{aws_secret_access_key}"
+	file.puts "export PATH=$PATH:~/.ec2/bin/"
+	file.puts "export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386/jre"
 
 
 # Puppetmaster install
