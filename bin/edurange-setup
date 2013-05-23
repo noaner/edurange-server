@@ -8,8 +8,8 @@ priv_key_loc = gets # Directory where EC2 private key is stored
 
 File.open('config.yml', "w") do |file|
   file.puts "ec2_key: #{priv_key_loc}" # Writes location of key to config.yml
+  file.close
 end
-file.close
 
 # AWS Access Key
 puts "What is your AWS Access Key?" # Request
@@ -27,8 +27,8 @@ File.open(File.expand_path('~/.bash_profile'), "a") do |file|
 	file.puts "export AWS_SECRET_KEY=#{aws_secret_access_key}"
 	file.puts "export PATH=$PATH:~/.ec2/bin/"
 	file.puts "export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386/jre"
+	file.close
 end
-file.close
 
 # Puppetmaster install
 # .ec2 folder
