@@ -1,14 +1,23 @@
 #!/usr/bin/env ruby
 
+# Writes new config.yml file stored in ~/.edurange directory
+# Non-destructively (ideally) adds lines to ~/.bash_profile
+
 puts "===Edurange setup script==="
 
 # EC2 Private Key
 puts "Where is your EC2 private key?" # Request
 priv_key_loc = gets # Directory where EC2 private key is stored
 
-File.open('config.yml', "w") do |file|
+# Delete config.yml if it already exists
+path = File.expand_path('~/.edurange/config.yml')
+if File.exist?(path)
+	File.delete(path)
+end
+
+# Write fresh config.yml
+File.open(path), "w") do |file|
   file.puts "ec2_key: #{priv_key_loc}" # Writes location of key to config.yml
-  file.close
 end
 
 # AWS Access Key
@@ -19,15 +28,28 @@ aws_access_key = gets
 puts "What is your AWS Secret Access Key?" # Request
 aws_secret_access_key = gets
 
-File.open(File.expand_path('~/.bash_profile'), "a") do |file|
-	file.puts "export EC2_URL=https://ec2.amazonaws.com"
-	file.puts "export AWS_ACCESS_KEY=#{aws_access_key}"
-	file.puts "export AWS_ACCESS_KEY_ID=#{aws_access_key}"
-	file.puts "export AWS_SECRET_ACCESS_KEY=#{aws_secret_access_key}"
-	file.puts "export AWS_SECRET_KEY=#{aws_secret_access_key}"
-	file.puts "export PATH=$PATH:~/.ec2/bin/"
-	file.puts "export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386/jre"
-	file.close
+# Write to ~/.bash_profile after checking for existing EDURange install
+# TODO: implement a solution that doesn't put a comment after each line
+
+# Remove existing EDURange lines from .bash_profile
+path = File.expand_path("~/.bash_profile")
+text = File.open(path, "r").read
+File.open(path, "w") do |file|
+	text.each_line do |line|
+		file.puts line unless line.include?("#edurange")
+	end
+end
+
+
+File.open(path), "a") do |file|
+	file.puts "# EDURange Environment Variables set by edurange-setup #edurange"
+	file.puts "export EC2_URL=https://ec2.amazonaws.com #edurange"
+	file.puts "export AWS_ACCESS_KEY=#{aws_access_key} #edurange"
+	file.puts "export AWS_ACCESS_KEY_ID=#{aws_access_key} #edurange"
+	file.puts "export AWS_SECRET_ACCESS_KEY=#{aws_secret_access_key} #edurange"
+	file.puts "export AWS_SECRET_KEY=#{aws_secret_access_key} #edurange"
+	file.puts "export PATH=$PATH:~/.ec2/bin/ #edurange"
+	file.puts "export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386/jre #edurange"
 end
 
 # Puppetmaster install
