@@ -1,6 +1,8 @@
 module Edurange
   class Parser
     def self.puppet_firewall_rules(uuid, rules)
+      # This part isn't working - something is buggy. What it should do: (TODO)
+      # Create puppet IPtables rules for each service required. Specific to instance (check based on UUID fact)
       puppet_rules = "if $uuid == '#{uuid}' {"
       rules.each do |rule|
         protocol = rule[0]
@@ -20,6 +22,7 @@ module Edurange
 
     end
     def self.facter_facts(uuid, services)
+      # Generate facts based on config. These facts are referenced in puppet configuration manifests
       services = services.join(',')
       facter_conf = <<conf
 uuid=#{uuid}
@@ -27,6 +30,7 @@ services=#{services}
 conf
     end
     def self.parse_yaml(filename)
+      # This is where the parsing actually occurs.
       nodes = []
       file = YAML.load_file(filename)
 
@@ -41,6 +45,15 @@ conf
       end
 
       file["Nodes"].each do |node|
+        # Actually run through the nodes in the configuration file and grab required info
+        # Should look like this at the end:
+        # [
+        #   node_name,
+        #   ami_id,
+        #   users,
+        #   iptables_rules,
+        #   packages
+        # ]
         node_name = node[0]
         ami_id = node[1]["AMI_ID"]
 
