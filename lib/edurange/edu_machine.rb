@@ -5,7 +5,6 @@ module Edurange
     EC2_UTILS_PATH = ENV['HOME'] + "/.ec2/bin/"
 
     def initialize(uuid, key_name, ami_id, vm_size="t1.micro")
-      # generate uuid
       @uuid = uuid
       @instance_id = nil
       @key_name = key_name
@@ -17,14 +16,13 @@ module Edurange
     end
     def run(command)
       # runs an ec2 command with full path.
+      # TODO this should be replaced, as well as places calling it, with AWS-SDK specific commands
       command = EC2_UTILS_PATH + command
       `#{command}`
     end
 
     def spin_up
-      # Pref user-data-file for ourselves
-
-      # Create & run instance, setting instance_id and IP to match the newly created ami
+      # Create & run instance, setting instance variables instance_id and IP to match the newly created ami
       puts "Creating instance (ami id: #{@ami_id}, size: #{@vm_size})"
       command = "ec2-run-instances #{@ami_id} -t #{@vm_size} --region us-east-1 --key #{@key_name} --user-data-file my-user-script.sh"
       self.run(command)
@@ -37,6 +35,7 @@ module Edurange
     end
 
     def update_ec2_info
+      # Get connectivity information assuming we have instance ID
       command = "ec2-describe-instances | grep INSTANCE | grep '#{@instance_id}'"
       vm = self.run(command).split("\t")
       @ip_address = vm[17] # public ip
@@ -44,6 +43,8 @@ module Edurange
     end
 
     def get_last_instance_id
+      # TODO When these commands are replaced with AWS-SDK we won't need this.
+      # When we create an instance the "AWS way" it returns a hash with all of the variables we care about
       command = 'ec2-describe-instances | grep INSTANCE | tail -n 1'
       vm = self.run(command)
       return vm.split("\t")[1]
