@@ -7,9 +7,8 @@ module Edurange
   class Init
     def self.init(config_filename)
       # Takes a configuration file
-      # Miles, here's where the keyname comes in TODO
-      keyname = "newkey"
-      
+      # this is dependent on line number in config.yml (and not very readable), refactor TODO
+      keyname = IO.readlines(File.expand_path('~/.edurange/config.yml'))[0].gsub("ec2_key:", "").strip 
       # Get required info for generating config file
       our_ssh_key = Edurange::PuppetMaster.get_our_ssh_key()
       puppetmaster_ip = Edurange::PuppetMaster.puppetmaster_ip()
