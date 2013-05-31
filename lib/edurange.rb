@@ -5,10 +5,18 @@ require "edurange/edu_machine"
 
 module Edurange
   class Init
+    # ==== Attributes
+    # 
+    # * +config_filename+ - Takes a YAML configuration file.
+    #
+    # === Example
+    #
+    #   init = Init.new(filename.yaml)
     def self.init(config_filename)
-      # Takes a configuration file
-      # this is dependent on line number in config.yml (and not very readable), refactor TODO
+
+      # one-line to get name of public key from config.yml, depends on line number 
       keyname = IO.readlines(File.expand_path('~/.edurange/config.yml'))[0].gsub("ec2_key:", "").strip
+      
       # Get required info for generating config file
       our_ssh_key = Edurange::PuppetMaster.get_our_ssh_key()
       puppetmaster_ip = Edurange::PuppetMaster.puppetmaster_ip()
@@ -56,16 +64,22 @@ module Edurange
         p machine_details
       end
     end
-
+    
+    # Creates Bash lines to create user account and set password file or password given users
+    #
+    # ==== Attributes
+    #
+    # * +users+ - Takes parsed users
+    # 
     def self.users_to_bash(users)
-      # Takes parsed users, creates bash lines to create user account and set password file or password
       shell = ""
       users.each do |user|
         if user['password']
           shell += "\n"
           shell += "sudo useradd -m #{user['login']} -s /bin/bash\n"
-          shell += "echo #{user['login']}:#{user['password'].gsub(/[^a-zA-Z0-9]/, "")} | chpasswd\n" # Regex for alphanum only
- 	  # TODO - do something
+          # Regex for alphanum only in password input
+          shell += "echo #{user['login']}:#{user['password'].gsub(/[^a-zA-Z0-9]/, "")} | chpasswd\n" 
+      # TODO - do something
         elsif user['pass_file']
           shell += "\n"
           shell += "sudo useradd -m #{user['login']} -s /bin/bash\n"
