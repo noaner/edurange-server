@@ -1,5 +1,16 @@
 module Edurange
   class Parser
+    
+    # Creates Puppet IPTables rules for required services
+    # TODO: "something is buggy"
+    #
+    # ==== Attributes
+    # * +uuid+ - Uses UUID of each specific instance to individually assign rules
+    # * +rules+ - A list of IPTables rules to implement on the instance specified by +uuid+
+    # 
+    # === Example
+    # * 
+
     def self.puppet_firewall_rules(uuid, rules)
       # This part isn't working - something is buggy. What it should do: (TODO)
       # Create puppet IPtables rules for each service required. Specific to instance (check based on UUID fact)
