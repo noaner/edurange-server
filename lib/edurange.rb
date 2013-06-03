@@ -9,12 +9,12 @@ module Edurange
     # 
     # * +config_filename+ - Takes a YAML configuration file.
     #
-    # === Example
+    # === Usage
     #
-    #   init = Init.new(filename.yaml)
+    #   Edurange::Init.init(yaml_file)
     def self.init(config_filename)
 
-      # one-line to get name of public key from config.yml, depends on line number 
+      # Gets name of key file in use from config.yml, depends on line number 
       keyname = IO.readlines(File.expand_path('~/.edurange/config.yml'))[0].gsub("ec2_key:", "").strip
       
       # Get required info for generating config file
