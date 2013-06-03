@@ -6,8 +6,8 @@
 puts "===Edurange setup script==="
 
 # EC2 Private Key
-puts "Where is your EC2 private key?" # Request
-priv_key_loc = gets.chomp # Directory where EC2 private key is stored
+puts "What is your EC2 keypair named?" # Request
+keypair_name = gets.chomp # Directory where EC2 private key is stored
 
 # Delete config.yml if it already exists
 path = File.expand_path('~/.edurange/config.yml')
@@ -19,7 +19,7 @@ end
 dirpath = File.expand_path('~/.edurange')
 Dir::mkdir(dirpath) unless File.exists?(dirpath)
 File.open(path, "w") do |file|
-  file.puts "ec2_key: #{priv_key_loc}" # Writes location of key to config.yml
+  file.puts "ec2_key: #{keypair_name}" # Writes location of key to config.yml
 end
 
 # AWS Access Key
@@ -58,6 +58,18 @@ File.open(path, "a") do |file|
 end
 
 `source #{path}`
+
+# Print lines to add to .bash_profile
+	puts "The following lines were added to your .bash_profile, appended with #edurange"
+	puts "# EDURange Environment Variables set by edurange-setup"
+	puts "export EC2_URL=https://ec2.amazonaws.com"
+	puts "export AWS_ACCESS_KEY=#{aws_access_key}"
+	puts "export AWS_ACCESS_KEY_ID=#{aws_access_key}"
+	puts "export AWS_SECRET_ACCESS_KEY=#{aws_secret_access_key}"
+	puts "export AWS_SECRET_KEY=#{aws_secret_access_key}"
+	puts "export PATH=$PATH:~/.ec2/bin/"
+	puts "export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/jre"
+	puts "export EC2_HOME=~/.ec2"
 
 # Puppetmaster install
 # .ec2 folder
