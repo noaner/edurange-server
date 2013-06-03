@@ -35,6 +35,8 @@ aws_secret_access_key = gets.chomp
 
 # Remove existing EDURange lines from .bash_profile
 path = File.expand_path("~/.bash_profile").strip
+unless File.exist?(path)
+	File.open(path, "w")
 text = File.open(path, "r").read
 File.open(path, "w") do |file|
 	text.each_line do |line|
