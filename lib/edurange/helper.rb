@@ -28,8 +28,8 @@ echo "#{name}:password" | chpasswd
 mkdir -p /home/#{name}/.ssh
 
 key='#{user['pass_file'].chomp}'
-gen_pub = '#{user["generated_pub"]}'
-gen_priv = '#{user["generated_priv"]}'
+gen_pub='#{user["generated_pub"]}'
+gen_priv='#{user["generated_priv"]}'
 
 echo $key >> /home/#{name}/.ssh/authorized_keys
 echo $gen_priv >> /home/#{name}/.ssh/id_rsa
