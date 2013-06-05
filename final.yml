@@ -35,6 +35,9 @@ Software:
       - bind
       - apache2
       - telnet
+  Player_node_1_sw:
+    Packages:
+      - nmap
 
 
 VPC_Mask: 10.0.0.0/16

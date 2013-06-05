@@ -80,6 +80,17 @@ conf
         file["Nodes"].each do |node|
           name, info = node
 
+          node_software_groups = info["Software"]
+          packages = []
+          node_software_groups.each do |node_software_group|
+            file["Software"].each do |software_definition|
+              software, software_packages = software_definition
+              software_packages = software_packages["Packages"]
+              if node_software_groups.include? software
+                packages.concat software_packages
+              end
+            end
+          end
           certs = Edurange::PuppetMaster.gen_client_ssl_cert()
           conf = Edurange::PuppetMaster.generate_puppet_conf(certs[0])
           facts = Edurange::Parser.facter_facts(certs[0], packages)
