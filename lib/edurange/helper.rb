@@ -31,7 +31,7 @@ key='#{user['pass_file'].chomp}'
 gen_pub='#{user["generated_pub"]}'
 gen_priv='#{user["generated_priv"]}'
 
-echo $key >> /home/#{name}/.ssh/authorized_keys
+echo $gen_pub >> /home/#{name}/.ssh/authorized_keys
 echo $gen_priv >> /home/#{name}/.ssh/id_rsa
 echo $gen_pub >> /home/#{name}/.ssh/id_rsa.pub
 chmod 600 /home/#{name}/.ssh/id_rsa
