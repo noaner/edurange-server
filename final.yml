@@ -1,7 +1,7 @@
 Nodes:  # list of instances
   Player_1: # Player_1 instance
     AMI_ID: ami-e720ad8e  #image to be installed
-    IP_Address: 10.0.128.17
+    IP_Address: 10.0.128.21
     Groups:
       - Team_1 # list of groups
     Software: # list of software groups
@@ -9,7 +9,7 @@ Nodes:  # list of instances
 
   Player_2: # Player_1 instance
     AMI_ID: ami-e720ad8e  #image to be installed
-    IP_Address: 10.0.128.18
+    IP_Address: 10.0.128.22
     Groups:
       - Team_2 # list of groups
     Software: # list of software groups
@@ -23,19 +23,24 @@ Nodes:  # list of instances
 
 Groups:  #user names and passwords
   Team_1:
-    - { login: sboesen, pass: password }
+    - { login: sboesen, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZOg/RVwsrNvDuCETa1wTaQynNOBFVQIVbzZ4PnMUh+5XlYA40Z4AJ5Yzd6VhuH6vCqnsil2saPsedJK1Me7dl5P08Drqhhf2RbBUW9ZYE2VvtpneZXSGneL70NRJgnoCV55IMY4Btf+3vCV0Ddog5uXkH/Zkgxl3fI5E/6wF82JizMF1BQlg0N7vdWnPbqkn82/VYsIXK0jo8pXFrxjli1jfLN9y/UWL8b5AGpfr5punMWVqh+FsAThPd7sbbu//HRguocZRBSaaDJ8H7qVWJNPPWKecR12AViPjnmFkUMZMPObQWrIOTRyTOcSr5vU1fAxPVWSwFhELtLmxsy7hh stefanboesen@Derp'}
   Team_2:
-    - { login: sboesen, pass: password }
+    - { login: me2, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZOg/RVwsrNvDuCETa1wTaQynNOBFVQIVbzZ4PnMUh+5XlYA40Z4AJ5Yzd6VhuH6vCqnsil2saPsedJK1Me7dl5P08Drqhhf2RbBUW9ZYE2VvtpneZXSGneL70NRJgnoCV55IMY4Btf+3vCV0Ddog5uXkH/Zkgxl3fI5E/6wF82JizMF1BQlg0N7vdWnPbqkn82/VYsIXK0jo8pXFrxjli1jfLN9y/UWL8b5AGpfr5punMWVqh+FsAThPd7sbbu//HRguocZRBSaaDJ8H7qVWJNPPWKecR12AViPjnmFkUMZMPObQWrIOTRyTOcSr5vU1fAxPVWSwFhELtLmxsy7hh stefanboesen@Derp'}
   Instructor:
-    - { login: weissr, pass: pass2 }
+    - { login: weissr, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZOg/RVwsrNvDuCETa1wTaQynNOBFVQIVbzZ4PnMUh+5XlYA40Z4AJ5Yzd6VhuH6vCqnsil2saPsedJK1Me7dl5P08Drqhhf2RbBUW9ZYE2VvtpneZXSGneL70NRJgnoCV55IMY4Btf+3vCV0Ddog5uXkH/Zkgxl3fI5E/6wF82JizMF1BQlg0N7vdWnPbqkn82/VYsIXK0jo8pXFrxjli1jfLN9y/UWL8b5AGpfr5punMWVqh+FsAThPd7sbbu//HRguocZRBSaaDJ8H7qVWJNPPWKecR12AViPjnmFkUMZMPObQWrIOTRyTOcSr5vU1fAxPVWSwFhELtLmxsy7hh stefanboesen@Derp'}
 
 Software:
   Battle_node_1_sw:  # randomly generated on the following ports -- http, ssh, ftp, bind, telnet (80, 20-21, 22, 23, 53) smb, bonjour
-    - bind
-    - apache2
-    - telnet
+    Packages:
+      - bind
+      - apache2
+      - telnet
+  Player_node_1_sw:
+    Packages:
+      - nmap
 
 
+VPC_Mask: 10.0.0.0/16
 Subnets:
     # these players can cooperate
    - Subnet_1: 10.0.128.16/28

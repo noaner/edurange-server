@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 require 'edurange'
+require 'aws-sdk'
+require 'yaml'
+require 'pry'
 
 yaml_file = ARGV.shift
 if yaml_file.nil?

@@ -2,7 +2,8 @@ module Edurange
   class PuppetMaster
     def self.puppetmaster_ip
       # Get external IP using Amazon's API
-      `curl http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null`
+      puts "Obtaining external ip"
+      `curl ifconfig.me 2>/dev/null`
     end
     def self.get_our_ssh_key
       # Either returns our current SSH key or generates a new one (and returns it)
@@ -37,7 +38,7 @@ module Edurange
       end
       `sudo mv #{ENV['HOME']}/edurange/derp.pp /etc/puppet/manifests/#{instance_id}#{Time.now.to_s.gsub(' ','')}.pp`
     end
-    def self.write_shell_config_file(ssh_key, puppetmaster_ip, certs, puppet_conf, facter_facts)
+    def self.write_shell_config_file(puppetmaster_ip, certs, puppet_conf, facter_facts)
       # This is the startup script run once per instance, generated for each instance.
       # Things done in here include:
       # - Adding puppetmaster's (instructor's) ssh key to instance
@@ -53,12 +54,13 @@ set -e
 set -x
 echo "Hello World.  The time is now $(date -R)!" | tee /root/output.txt
 
-key='#{ssh_key.chomp}'
-echo $key >> /home/ubuntu/.ssh/authorized_keys
+killall dpkg || true
+sleep 5
+dpkg --configure -a
 
 apt-get update; apt-get upgrade -y
 
-echo #{puppetmaster_ip} puppet >> /etc/hosts
+echo #{puppetmaster_ip.chomp} puppet >> /etc/hosts
 apt-get -y install puppet
 
 mkdir -p /var/lib/puppet/ssl/certs
