@@ -56,7 +56,7 @@ echo "Hello World.  The time is now $(date -R)!" | tee /root/output.txt
 
 apt-get update; apt-get upgrade -y
 
-echo #{puppetmaster_ip} puppet >> /etc/hosts
+echo #{puppetmaster_ip.chomp} puppet >> /etc/hosts
 apt-get -y install puppet
 
 mkdir -p /var/lib/puppet/ssl/certs

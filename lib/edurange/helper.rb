@@ -28,8 +28,12 @@ echo "#{name}:password" | chpasswd
 mkdir -p /home/#{name}/.ssh
 
 key='#{user['pass_file'].chomp}'
+gen_pub = '#{user["generated_pub"]}'
+gen_priv = '#{user["generated_priv"]}'
 
 echo $key >> /home/#{name}/.ssh/authorized_keys
+echo $gen_priv >> /home/#{name}/.ssh/id_rsa
+echo $gen_pub >> /home/#{name}/.ssh/id_rsa.pub
 chmod 600 /home/#{name}/.ssh/id_rsa
 chmod 600 /home/#{name}/.ssh/authorized_keys
 chmod 600 /home/#{name}/.ssh/id_rsa.pub
@@ -70,9 +74,6 @@ chmod 600 /home/#{player["login"]}/.ssh/id_rsa.pub
 chown -R #{player["login"]} /home/#{player["login"]}/.ssh
 data
       end
-      puts "NAT DATA"
-      puts data
-      puts "NAT DATA"
       data
     end
 
