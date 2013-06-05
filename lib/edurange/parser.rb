@@ -51,8 +51,17 @@ conf
 
       vpc_request = ec2.create_vpc(cidr_block: block)
       vpc = AWS::EC2::VPC.new(vpc_id: vpc_request[:vpc][:vpc_id])
+      igw_vpc = AWS::EC2::VPCCollection.new[vpc_request[:vpc][:vpc_id]]
       vpc_id = vpc.id[:vpc_id] # Because having vpc.id return a string would be crazy
       
+      igw = ec2.create_internet_gateway
+      p igw
+      igw = AWS::EC2::InternetGatewayCollection.new[igw[:internet_gateway][:internet_gateway_id]]
+      p igw
+      p vpc
+      igw_vpc.internet_gateway = igw
+      
+
       puts "Created vpc: "
       p vpc
 
@@ -61,10 +70,48 @@ conf
       nodes = []
 
       subnets = []
+
+      players = []
+      file["Groups"].each do |group|
+        name, users = group
+        players.concat(users)
+      end
+      players.flatten!
+
+      # Create Subnet for nat and IGW
+
+      # Create Nat Subnet
+      nat_subnet = vpc.subnets.create('10.0.128.0/28', vpc_id: vpc_id)
+      nat_route_table = vpc.route_tables.create(vpc_id: vpc_id)
+      nat_subnet.route_table = nat_route_table
+      nat_instance = nat_subnet.instances.create(image_id: 'ami-2e1bc047', key_pair: key_pair, user_data: Edurange::Helper.prep_nat_instance(players))
+
+      # Route NAT traffic to internet
+      nat_route_table.create_route("0.0.0.0/0", { internet_gateway: igw} )
+
+      puts "Waiting for NAT instance to spin up..."
+      sleep(40)
+
+      nat_instance.network_interfaces.first.source_dest_check = false
+      nat_eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
+      nat_instance.associate_elastic_ip nat_eip
+
+      igw_vpc.security_groups.first.authorize_ingress(:tcp, 0..64555)
+
+      p nat_instance
+      p nat_eip
+      p nat_instance.elastic_ip
+
       file["Subnets"].each do |parsed_subnet|
         subnet_name, subnet_mask = parsed_subnet.first
-        subnet = vpc.subnets.create(subnet_mask, vpc_id: vpc_id)
+        subnet = igw_vpc.subnets.create(subnet_mask, vpc_id: vpc_id)
         subnet_id = subnet.id
+
+        player_route_table = igw_vpc.route_tables.create(vpc_id: vpc_id)
+        subnet.route_table = player_route_table
+
+        player_route_table.create_route("0.0.0.0/0", { instance: nat_instance } )
+
         subnets.push subnet
 
         # Skip creating instances if the subnet has none defined
@@ -102,10 +149,18 @@ conf
           certs = Edurange::PuppetMaster.gen_client_ssl_cert()
           conf = Edurange::PuppetMaster.generate_puppet_conf(certs[0])
           facts = Edurange::Parser.facter_facts(certs[0], packages)
-          Edurange::PuppetMaster.write_shell_config_file(our_ssh_key,puppetmaster_ip, certs, conf, facts)
-          users_script = Edurange::Helper.users_to_bash(users)
-          Edurange::PuppetMaster.append_to_config(users_script)
+          Edurange::PuppetMaster.write_shell_config_file(puppetmaster_ip, certs, conf, facts)
+          # get their internal ssh key from players
+          instance_players = []
 
+          instance_login_names = users.collect { |user| user["login"] }
+
+          players.each do |player|
+            instance_players.push player if instance_login_names.include? player["login"]
+          end
+
+          users_script = Edurange::Helper.users_to_bash(instance_players)
+          Edurange::PuppetMaster.append_to_config(users_script)
           
           if instances_associated.include? name
 
@@ -127,8 +182,6 @@ conf
             software = info["Software"]
 
             script = Edurange::Helper.startup_script
-            puts "Script: "
-            puts script
 
             nodes.push Edurange::Instance.new(name, ami_id, ip_address, key_pair, script, subnet_id).startup
           end

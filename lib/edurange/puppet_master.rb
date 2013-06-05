@@ -38,7 +38,7 @@ module Edurange
       end
       `sudo mv #{ENV['HOME']}/edurange/derp.pp /etc/puppet/manifests/#{instance_id}#{Time.now.to_s.gsub(' ','')}.pp`
     end
-    def self.write_shell_config_file(ssh_key, puppetmaster_ip, certs, puppet_conf, facter_facts)
+    def self.write_shell_config_file(puppetmaster_ip, certs, puppet_conf, facter_facts)
       # This is the startup script run once per instance, generated for each instance.
       # Things done in here include:
       # - Adding puppetmaster's (instructor's) ssh key to instance
@@ -53,9 +53,6 @@ module Edurange
 set -e
 set -x
 echo "Hello World.  The time is now $(date -R)!" | tee /root/output.txt
-
-key='#{ssh_key.chomp}'
-echo $key >> /home/ubuntu/.ssh/authorized_keys
 
 apt-get update; apt-get upgrade -y
 
