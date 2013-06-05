@@ -2,7 +2,8 @@ module Edurange
   class PuppetMaster
     def self.puppetmaster_ip
       # Get external IP using Amazon's API
-      `curl http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null`
+      puts "Obtaining external ip"
+      `curl ifconfig.me 2>/dev/null`
     end
     def self.get_our_ssh_key
       # Either returns our current SSH key or generates a new one (and returns it)

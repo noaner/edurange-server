@@ -40,76 +40,92 @@ uuid=#{uuid}
 services=#{services}
 conf
     end
-    def self.parse_yaml(filename)
-      # This is where the parsing actually occurs.
+    def self.parse_yaml(filename, keyname)
       nodes = []
       file = YAML.load_file(filename)
 
-      softwares = {}
-      file["Software"].each do |software|
-        softwares[software[0]] = software[1]
-      end
+      key_pair = AWS::EC2::KeyPairCollection.new[keyname]
 
-      groups = {}
-      file["Groups"].each do |group|
-        groups[group[0]] = group[1]
-      end
+      block = file["VPC_Mask"]
+      ec2 = AWS::EC2::Client.new
 
-      file["Nodes"].each do |node|
-        # Actually run through the nodes in the configuration file and grab required info
-        # Should look like this at the end:
-        # [
-        #   node_name,
-        #   ami_id,
-        #   users,
-        #   iptables_rules,
-        #   packages
-        # ]
-        node_name = node[0]
-        ami_id = node[1]["AMI_ID"]
+      vpc_request = ec2.create_vpc(cidr_block: block)
+      vpc = AWS::EC2::VPC.new(vpc_id: vpc_request[:vpc][:vpc_id])
+      vpc_id = vpc.id[:vpc_id] # Because having vpc.id return a string would be crazy
+      
+      puts "Created vpc: "
+      p vpc
 
-        users = []
-        users_groups = node[1]["Users"]
-        users_groups.each do |user_group|
-          users.push groups[user_group]
-        end
-        users.flatten!
+      sleep(6) # TODO loop and check vpc status
 
-        software = []
-        software_groups = node[1]["Software"]
-        software_groups.each do |software_group|
-          software.push softwares[software_group]
-        end
-        software.flatten!
+      nodes = []
 
-        iptables_rules = []
-        packages = []
-        software.each do |sw|
-          if !sw["IPTables"].nil?
-            sw["IPTables"].each do |iptable_rule|
-              port = iptable_rule[0]
-              protocol = iptable_rule[1]["Protocol"]
-              hosts = iptable_rule[1]["Hosts"]
-              hosts.each do |host|
-                iptables_rules.push [protocol, port, host]
+      subnets = []
+      file["Subnets"].each do |parsed_subnet|
+        subnet_name, subnet_mask = parsed_subnet.first
+        subnet = vpc.subnets.create(subnet_mask, vpc_id: vpc_id)
+        subnet_id = subnet.id
+        subnets.push subnet
+
+        # Skip creating instances if the subnet has none defined
+        next unless parsed_subnet.has_key? "Instances"
+
+        instances_associated = parsed_subnet["Instances"]
+        puts "Subnet: #{subnet_name}, mask: #{subnet_mask}"
+        puts "Instances: #{instances_associated}"
+        p subnet
+        our_ssh_key = Edurange::PuppetMaster.get_our_ssh_key()
+        puppetmaster_ip = Edurange::PuppetMaster.puppetmaster_ip()
+
+        file["Nodes"].each do |node|
+          name, info = node
+
+          certs = Edurange::PuppetMaster.gen_client_ssl_cert()
+          conf = Edurange::PuppetMaster.generate_puppet_conf(certs[0])
+          facts = Edurange::Parser.facter_facts(certs[0], packages)
+          Edurange::PuppetMaster.write_shell_config_file(our_ssh_key,puppetmaster_ip, certs, conf, facts)
+          users_script = self.users_to_bash(users)
+          Edurange::PuppetMaster.append_to_config(users_script)
+
+          
+          if instances_associated.include? name
+
+            # Create in current subnet
+
+            ami_id = info["AMI_ID"]
+            ip_address = info["IP_Address"]
+
+            unless info["Groups"].nil?
+              groups_associated = info["Groups"]
+              groups = groups_associated.inject([]) do |total_groups, group_associated|
+                group_contents = file["Groups"][group_associated]
+                total_groups.concat(group_contents) unless group_contents.nil?
               end
+              puts "Got groups: "
+              p groups
             end
-          end
-          if !sw["Packages"].nil?
-            sw["Packages"].each do |package|
-              packages.push package
-            end
+
+            software = info["Software"]
+
+            script = Edurange::Helper.startup_script
+            puts "Script: "
+            puts script
+
+            nodes.push Edurange::Instance.new(name, ami_id, ip_address, key_pair, script, subnet_id).startup
           end
         end
-        nodes.push [
-          node_name,
-          ami_id,
-          users,
-          iptables_rules,
-          packages
-        ]
+        puts nodes
+
+        subnets.each do |parsed_subnet|
+          puts "Yo subnet"
+          puts parsed_subnet
+          puts "Yo subnet"
+          file["Network"].each do |link|
+            link_name, subnets = link.first
+          end
+        end
+
       end
-      return nodes
     end
   end
 end

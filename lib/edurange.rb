@@ -2,6 +2,8 @@ require "edurange/version"
 require "edurange/parser"
 require "edurange/puppet_master"
 require "edurange/edu_machine"
+require "edurange/instance"
+require "edurange/helper"
 
 module Edurange
   class Init
@@ -18,11 +20,13 @@ module Edurange
       keyname = IO.readlines(File.expand_path('~/.edurange/config.yml'))[0].gsub("ec2_key:", "").strip
       
       # Get required info for generating config file
-      our_ssh_key = Edurange::PuppetMaster.get_our_ssh_key()
-      puppetmaster_ip = Edurange::PuppetMaster.puppetmaster_ip()
+      #our_ssh_key = Edurange::PuppetMaster.get_our_ssh_key()
+      #puppetmaster_ip = Edurange::PuppetMaster.puppetmaster_ip()
 
       # Parse the configuration file, extract list of nodes
-      nodes = Edurange::Parser.parse_yaml(config_filename) # format: nodes[node_name, ami_id, users, firewall_rules, packages]
+      nodes = Edurange::Parser.parse_yaml(config_filename, keyname) # format: nodes[node_name, ami_id, users, firewall_rules, packages]
+      #puts nodes
+      return 
 
       # For each node
       nodes.each do |node|
