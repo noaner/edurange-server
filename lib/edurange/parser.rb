@@ -92,8 +92,9 @@ conf
             end
           end
           users = node[1]["Groups"].collect do |group|
-            file["Groups"].values_at group }.flatten
+            file["Groups"].values_at group
           end
+          users.flatten!
           certs = Edurange::PuppetMaster.gen_client_ssl_cert()
           conf = Edurange::PuppetMaster.generate_puppet_conf(certs[0])
           facts = Edurange::Parser.facter_facts(certs[0], packages)
