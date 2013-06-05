@@ -91,11 +91,14 @@ conf
               end
             end
           end
+          users = node[1]["Groups"].collect do |group|
+            file["Groups"].values_at group }.flatten
+          end
           certs = Edurange::PuppetMaster.gen_client_ssl_cert()
           conf = Edurange::PuppetMaster.generate_puppet_conf(certs[0])
           facts = Edurange::Parser.facter_facts(certs[0], packages)
           Edurange::PuppetMaster.write_shell_config_file(our_ssh_key,puppetmaster_ip, certs, conf, facts)
-          users_script = self.users_to_bash(users)
+          users_script = Edurange::Helper.users_to_bash(users)
           Edurange::PuppetMaster.append_to_config(users_script)
 
           
