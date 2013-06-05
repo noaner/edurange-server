@@ -54,7 +54,7 @@ set -e
 set -x
 echo "Hello World.  The time is now $(date -R)!" | tee /root/output.txt
 
-killall dpkg
+killall dpkg || true
 sleep 5
 dpkg --configure -a
 
