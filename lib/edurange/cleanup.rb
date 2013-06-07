@@ -20,30 +20,32 @@ vpc_ids.each do |vpc_id|
 
 	if vpc.instances
 		vpc.instances.each do |instance|
-			instance.disassociate_elastic_ip
+			if instance.elastic_ip
+				puts "Disassociating Elastic IP for #{instance}"
+				instance.disassociate_elastic_ip
+			end
 			instance.delete
+			puts "Deleting instance #{instance}"
 		end
 	end	
 
+	# Waiting 
+	sleeptime = 60
+	puts "Waiting #{sleeptime} seconds for instances to terminate"
+	sleep(sleeptime)
+
 	if vpc.security_groups
 		vpc.security_groups.each do |security_group|
-			unless security_group.name == 'default'
+			unless security_group.name == "default"
+				puts "Deleting security group #{security_group}"
 				security_group.delete
 			end
 		end
 	end
 
-	if vpc.instances
-		vpc.instances.each do |instance|
-			if instance.elastic_ip
-				instance.disassociate_elastic_ip
-			end
-			instance.delete
-		end
-	end
-
 	if vpc.subnets
 		vpc.subnets.each do |subnet|
+			puts "Deleting subnet #{subnet}"	
 			subnet.delete
 		end
 	end
@@ -51,6 +53,7 @@ vpc_ids.each do |vpc_id|
 	if vpc.route_tables
 		vpc.route_tables.each do |route_table|
 			unless route_table.main?
+				puts "Deleting route table #{route_table}"
 				route_table.delete
 			end
 		end
@@ -58,25 +61,27 @@ vpc_ids.each do |vpc_id|
 
 	if vpc.network_interfaces
 		vpc.network_interfaces.each do |network_interface|
+			puts "Deleting network interface #{network_interface}"
 			network_interface.delete
 		end
 	end
 
 	if vpc.internet_gateway
+		puts "Deleting internet gateway #{vpc.internet_gateway.internet_gateway_id}"
 		vpc.internet_gateway.detach(vpc)
 		vpc.internet_gateway.delete
-		ec2.new.select { |ip| !ip.associated? }.each(&:release)
 	end
 
 	if vpc.network_acls
 		vpc.network_acls.each do |network_acl|
 			unless network_acl.default?
+				puts "Deleting network acl #{network_acl}"
 				network_acl.delete
 			end
 		end
 	end
 	if vpc
-
+		puts "Deleting VPC #{vpc}"
 		vpc.delete
 	end
 end
