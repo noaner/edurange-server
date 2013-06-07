@@ -29,7 +29,8 @@ vpc_ids.each do |vpc_id|
 		vpc.security_groups.each do |security_group|
 			security_group.delete
 		end
-	
+	end
+
 	if vpc.instances
 		vpc.instances.each do |instance|
 			if instance.elastic_ip
@@ -38,7 +39,6 @@ vpc_ids.each do |vpc_id|
 			instance.delete
 		end
 	end
-
 
 	if vpc.subnets
 		vpc.subnets.each do |subnet|
