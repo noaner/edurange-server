@@ -27,7 +27,9 @@ vpc_ids.each do |vpc_id|
 
 	if vpc.security_groups
 		vpc.security_groups.each do |security_group|
-			security_group.delete
+			unless security_group.name == 'default'
+				security_group.delete
+			end
 		end
 	end
 
@@ -48,7 +50,9 @@ vpc_ids.each do |vpc_id|
 
 	if vpc.route_tables
 		vpc.route_tables.each do |route_table|
-			route_table.delete
+			unless route_table.main?
+				route_table.delete
+			end
 		end
 	end
 
@@ -58,18 +62,21 @@ vpc_ids.each do |vpc_id|
 		end
 	end
 
-	if vpc.dhcp_options
-		vpc.dhcp_options.each do |dhcp_option|
-			dhcp_option.delete
-		end
-	end
-
 	if vpc.internet_gateway
+		vpc.internet_gateway.detach(vpc)
 		vpc.internet_gateway.delete
 		ec2.new.select { |ip| !ip.associated? }.each(&:release)
 	end
 
+	if vpc.network_acls
+		vpc.network_acls.each do |network_acl|
+			unless network_acl.default?
+				network_acl.delete
+			end
+		end
+	end
 	if vpc
+
 		vpc.delete
 	end
 end
