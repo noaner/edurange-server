@@ -1,9 +1,9 @@
-require "edurange/version"
-require "edurange/parser"
-require "edurange/puppet_master"
-require "edurange/edu_machine"
-require "edurange/instance"
-require "edurange/helper"
+require 'edurange/version'
+require 'edurange/parser'
+require 'edurange/puppet_master'
+require 'edurange/edu_machine'
+require 'edurange/instance'
+require 'edurange/helper'
 
 module Edurange
   class Init
@@ -11,13 +11,14 @@ module Edurange
     # 
     # * +config_filename+ - Takes a YAML configuration file.
     #
-    # === Example
+    # === Usage
     #
-    #   init = Init.new(filename.yaml)
+    #   Edurange::Init.init(yaml_file)
     def self.init(config_filename)
 
-      # one-line to get name of public key from config.yml, depends on line number 
-      keyname = IO.readlines(File.expand_path('~/.edurange/config.yml'))[0].gsub("ec2_key:", "").strip
+      # Gets name of key file in use from config.yml, depends on line number 
+      # keyname = IO.readlines(File.expand_path('~/.edurange/config.yml'))[0].gsub("ec2_key:", "").strip
+			keyname = File.open(File.expand_path('~/.edurange/config.yml'), 'r') { |f| f.readline.gsub('ec2_key:', '').strip }
       
       # Get required info for generating config file
       #our_ssh_key = Edurange::PuppetMaster.get_our_ssh_key()
