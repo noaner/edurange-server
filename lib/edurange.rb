@@ -18,7 +18,7 @@ module Edurange
 
       # Gets name of key file in use from config.yml, depends on line number 
       # keyname = IO.readlines(File.expand_path('~/.edurange/config.yml'))[0].gsub("ec2_key:", "").strip
-			keyname = File.open(File.expand_path('~/.edurange/config.yml'), 'r') { |f| f.readline.gsub('ec2_key:', '').strip }
+      keyname = File.open(File.expand_path('~/.edurange/config.yml'), 'r') { |f| f.readline.gsub('ec2_key:', '').strip }
       
       # Get required info for generating config file
       #our_ssh_key = Edurange::PuppetMaster.get_our_ssh_key()
