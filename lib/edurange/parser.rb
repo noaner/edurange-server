@@ -194,6 +194,10 @@ conf
           puts "Yo subnet"
           file["Network"].each do |link|
             link_name, subnets = link.first
+            puts "Got link:"
+            p link_name
+            puts "Got subnet:"
+            p subnets
           end
         end
 
