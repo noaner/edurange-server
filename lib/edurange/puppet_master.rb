@@ -1,7 +1,7 @@
 module Edurange
   class PuppetMaster
     def self.puppetmaster_ip
-      # Get external IP using Amazon's API
+      # Get external IP using in a way that works in any environment
       puts "Obtaining external ip"
       `curl ifconfig.me 2>/dev/null`
     end
