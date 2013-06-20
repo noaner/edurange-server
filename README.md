@@ -1,24 +1,17 @@
 # Edurange
 
-TODO: Write a gem description
+Join us in #edurange on irc.freenode.net!
+
+
+EDURange is a project sponsored by the National Science Foundation intended to help automate creation of cyber security training games.
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-    gem 'edurange'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install edurange
+Currently installation is a multistep process. Ask loocorez on IRC if you need help.
 
 ## Usage
 
-TODO: Write usage instructions here
+    edurange recon.yml
 
 ## Contributing
 
