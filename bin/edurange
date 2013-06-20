@@ -6,7 +6,5 @@ if yaml_file.nil?
   puts "Must provide config file"
   exit -1
 end
-Edurange::Init.init(yaml_file)
 
-
-
+Edurange::Runtime.start(yaml_file)
