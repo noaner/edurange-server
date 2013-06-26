@@ -86,6 +86,8 @@ conf
         end
       end
       players.flatten!
+      p players
+      exit
 
       # Create Subnet for nat and IGW
 
@@ -167,6 +169,7 @@ conf
           players.each do |player|
             instance_players.push player if instance_login_names.include? player["login"]
           end
+
 
           users_script = Edurange::Helper.users_to_bash(instance_players)
           Edurange::PuppetMaster.append_to_config(users_script)
