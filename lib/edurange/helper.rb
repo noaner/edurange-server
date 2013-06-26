@@ -1,7 +1,8 @@
 module Edurange
   class Helper
     def self.startup_script
-      File.open('my-user-script.sh', 'rb').read
+      `gzip < my-user-script.sh > my-user-script.sh.gz`
+      File.open('my-user-script.sh.gz', 'rb').read
     end
     # Creates Bash lines to create user account and set password file or password given users
     #
