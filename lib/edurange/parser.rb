@@ -74,6 +74,8 @@ conf
       players = []
       file["Groups"].each do |group|
         name, users = group
+        puts "Found users in group:"
+        p users
         players.concat(users)
       end
       players.flatten!
