@@ -75,7 +75,11 @@ chmod 600 /home/#{player["login"]}/.ssh/id_rsa.pub
 chown -R #{player["login"]} /home/#{player["login"]}/.ssh
 data
       end
-      data
+      File.open('nat_data', 'w') do |nat_data|
+        nat_data.puts data
+      end
+      `gzip < nat_data > nat_data.gz`
+      File.open('nat_data.gz', 'rb').read
     end
 
   end
