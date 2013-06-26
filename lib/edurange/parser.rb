@@ -79,7 +79,11 @@ conf
         puts "Group we're splting: "
         p group
         next if users == []
-        players.concat(users.values)
+        if users.class == Array
+          players.concat(users)
+        else
+          players.concat(users.values)
+        end
       end
       players.flatten!
 
