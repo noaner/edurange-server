@@ -151,7 +151,9 @@ conf
           end
           if node[1].has_key? "Groups"
             users = node[1]["Groups"].collect do |group|
-              file["Groups"].values_at group
+              puts "Enumerating groups"
+              p group
+              p file["Groups"]
             end
             users.flatten!
           else
