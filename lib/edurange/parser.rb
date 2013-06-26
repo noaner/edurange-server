@@ -76,7 +76,7 @@ conf
         name, users = group
         puts "Found users in group:"
         p users
-        players.concat(users)
+        players.concat(users.values)
       end
       players.flatten!
 
