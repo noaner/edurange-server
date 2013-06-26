@@ -154,6 +154,7 @@ conf
               puts "Enumerating groups"
               p group
               p file["Groups"]
+              file["Groups"].values_at group
             end
             users.flatten!
           else
