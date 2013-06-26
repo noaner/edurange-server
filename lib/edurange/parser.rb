@@ -86,8 +86,8 @@ conf
         end
       end
       players.flatten!
+      puts "\nFinal players:"
       p players
-      exit
 
       # Create Subnet for nat and IGW
 
@@ -166,9 +166,14 @@ conf
 
           instance_login_names = users.collect { |user| user["login"] }
 
+          p players
+          p instance_login_names
           players.each do |player|
             instance_players.push player if instance_login_names.include? player["login"]
           end
+
+          puts "Instance players:"
+          p instance_players
 
 
           users_script = Edurange::Helper.users_to_bash(instance_players)
