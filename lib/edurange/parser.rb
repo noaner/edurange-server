@@ -182,7 +182,8 @@ conf
               groups_associated = info["Groups"]
               groups = groups_associated.inject([]) do |total_groups, group_associated|
                 group_contents = file["Groups"][group_associated]
-                total_groups.concat(group_contents) unless group_contents.nil?
+                p group_contents
+                total_groups.concat(group_contents.values) unless group_contents.nil?
               end
               puts "Got groups: "
               p groups
