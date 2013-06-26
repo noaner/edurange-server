@@ -76,6 +76,9 @@ conf
         name, users = group
         puts "Found users in group:"
         p users
+        puts "Group we're splting: "
+        p group
+        next if users == []
         players.concat(users.values)
       end
       players.flatten!

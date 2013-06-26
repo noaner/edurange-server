@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'edurange'
 
 # Make new ec2 object
