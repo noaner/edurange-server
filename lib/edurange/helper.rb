@@ -1,14 +1,11 @@
 module Edurange
-  def self.debug(message)
-    puts "In debug!"
+  def debug(message)
     Edurange.logger.debug message
   end
-  def self.info(message)
-    puts "In info!"
+  def info(message)
     Edurange.logger.info message
   end
-  def self.warn(message)
-    puts "In warn!"
+  def warn(message)
     Edurange.logger.warn message
   end
 

@@ -13,8 +13,6 @@ module Edurange
       # keyname = IO.readlines(File.expand_path('~/.edurange/config.yml'))[0].gsub("ec2_key:", "").strip
       keyname = Settings.ec2_key
       
-      debug "info"
-      exit
       # Parse the configuration file, extract list of nodes
       nodes = Edurange::Parser.parse_yaml(config_filename, keyname) # format: nodes[node_name, ami_id, users, firewall_rules, packages]
     end
