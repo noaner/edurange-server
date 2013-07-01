@@ -1,6 +1,22 @@
 #!/usr/bin/env ruby
 require 'edurange'
 
+options = {}
+
+optparse = OptionParser.new do |opts|
+  opts.on '-h', '--help', 'Display this screen' do
+    puts opts
+    exit
+  end
+  opts.on '-d', '--debug', 'Enable debug logging' do
+    puts "Got debug flag"
+    Edurange::Settings.logging_level = Logger::DEBUG
+  end
+  opts.on '--dry-run', 'Dry run (does not execute AWS commands) (incomplete)' do
+    
+  end
+end
+
 yaml_file = ARGV.shift
 if yaml_file.nil?
   puts "Must provide config file"

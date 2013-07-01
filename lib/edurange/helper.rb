@@ -1,4 +1,17 @@
 module Edurange
+  def self.debug(message)
+    puts "In debug!"
+    Edurange.logger.debug message
+  end
+  def self.info(message)
+    puts "In info!"
+    Edurange.logger.info message
+  end
+  def self.warn(message)
+    puts "In warn!"
+    Edurange.logger.warn message
+  end
+
   class Helper
     def self.startup_script
       `gzip < my-user-script.sh > my-user-script.sh.gz`
