@@ -52,19 +52,12 @@ conf
       vpc_request = ec2.create_vpc(cidr_block: block)
       vpc = AWS::EC2::VPC.new(vpc_id: vpc_request[:vpc][:vpc_id])
       igw_vpc = AWS::EC2::VPCCollection.new[vpc_request[:vpc][:vpc_id]]
-      vpc_id = vpc.id[:vpc_id] # Because having vpc.id return a string would be crazy
+      vpc_id = vpc.id[:vpc_id] # Because having vpc_id be a string would be crazy
       
       igw = ec2.create_internet_gateway
-      p igw
       igw = AWS::EC2::InternetGatewayCollection.new[igw[:internet_gateway][:internet_gateway_id]]
-      p igw
-      p vpc
       igw_vpc.internet_gateway = igw
       
-
-      puts "Created vpc: "
-      p vpc
-
       sleep(6) # TODO loop and check vpc status
 
       nodes = []
