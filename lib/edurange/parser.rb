@@ -1,37 +1,6 @@
 module Edurange
   class Parser
-    
-    # Creates Puppet IPTables rules for required services
-    # TODO: "something is buggy"
-    #
-    # ==== Attributes
-    # * +uuid+ - Uses UUID of each specific instance to individually assign rules
-    # * +rules+ - A list of IPTables rules to implement on the instance specified by +uuid+
-    # 
-    # === Example
-    # * 
 
-    def self.puppet_firewall_rules(uuid, rules)
-      # This part isn't working - something is buggy. What it should do: (TODO)
-      # Create puppet IPtables rules for each service required. Specific to instance (check based on UUID fact)
-      puppet_rules = "if $uuid == '#{uuid}' {"
-      rules.each do |rule|
-        protocol = rule[0]
-        port = rule[1]
-        dest = (rule[2] == 'All') ? '0.0.0.0/24' : rule[2]
-
-        puppet_rule = "iptables { '#{uuid} iptables: #{protocol}://#{dest}:#{port}':
-        proto => '#{protocol}',
-        dport => '#{port}',
-        destination => '#{dest}
-        }"
-
-        puppet_rules += puppet_rule
-      end
-      puppet_rules += "\n}"
-      puppet_rules
-
-    end
     def self.facter_facts(uuid, services)
       # Generate facts based on config. These facts are referenced in puppet configuration manifests
       services = services.join(',')
@@ -53,6 +22,8 @@ conf
       vpc = AWS::EC2::VPC.new(vpc_id: vpc_request[:vpc][:vpc_id])
       igw_vpc = AWS::EC2::VPCCollection.new[vpc_request[:vpc][:vpc_id]]
       vpc_id = vpc.id[:vpc_id] # Because having vpc_id be a string would be crazy
+
+      info "Created VPC #{vpc_id}"
       
       igw = ec2.create_internet_gateway
       igw = AWS::EC2::InternetGatewayCollection.new[igw[:internet_gateway][:internet_gateway_id]]
@@ -60,27 +31,20 @@ conf
       
       sleep(6) # TODO loop and check vpc status
 
+      info "Created IGW #{igw.id}"
+
       nodes = []
-
-      subnets = []
-
       players = []
+      
+      # Iterate through groups. Create list of users (For nat instance logins)
       file["Groups"].each do |group|
         name, users = group
-        puts "Found users in group:"
-        p users
-        puts "Group we're splting: "
-        p group
-        next if users == []
-        if users.class == Array
-          players.concat(users)
-        else
-          players.concat(users.values)
-        end
+        players.concat(users)
       end
+
       players.flatten!
-      puts "\nFinal players:"
-      p players
+
+      debug "Got players: " + p players
 
       # Create Subnet for nat and IGW
 
@@ -93,7 +57,7 @@ conf
       # Route NAT traffic to internet
       nat_route_table.create_route("0.0.0.0/0", { internet_gateway: igw} )
 
-      puts "Waiting for NAT instance to spin up..."
+      info "Waiting for NAT instance to spin up (~40 seconds)"
       sleep(40)
 
       nat_instance.network_interfaces.first.source_dest_check = false
@@ -102,9 +66,9 @@ conf
 
       igw_vpc.security_groups.first.authorize_ingress(:tcp, 0..64555)
 
-      p nat_instance
-      p nat_eip
-      p nat_instance.elastic_ip
+      info "NAT EIP: " + nat_eip
+
+      subnets = []
 
       file["Subnets"].each do |parsed_subnet|
         subnet_name, subnet_mask = parsed_subnet.first
@@ -122,9 +86,9 @@ conf
         next unless parsed_subnet.has_key? "Instances"
 
         instances_associated = parsed_subnet["Instances"]
-        puts "Subnet: #{subnet_name}, mask: #{subnet_mask}"
-        puts "Instances: #{instances_associated}"
-        p subnet
+        info "Created subnet #{subnet_name}, mask: #{subnet_mask}"
+        info "Instances in subnet: #{instances_associated}"
+
         our_ssh_key = Edurange::PuppetMaster.get_our_ssh_key()
         puppetmaster_ip = Edurange::PuppetMaster.puppetmaster_ip()
 
@@ -142,41 +106,35 @@ conf
               end
             end
           end
+          users = []
           if node[1].has_key? "Groups"
-            users = node[1]["Groups"].collect do |group|
-              puts "Enumerating groups"
-              p group
-              p file["Groups"]
-              file["Groups"].values_at group
+            node[1]["Groups"].each do |group|
+              # Collect all users for each group name
+              debug "Got group name #{group} in instance. Adding users #{file["Groups"].values_at group}"
+              users.concat file["Groups"].values_at group
             end
-            users.flatten!
-          else
-            users = []
           end
+          users.flatten! # Should be fine, but for good measure...
+
           certs = Edurange::PuppetMaster.gen_client_ssl_cert()
           conf = Edurange::PuppetMaster.generate_puppet_conf(certs[0])
           facts = Edurange::Parser.facter_facts(certs[0], packages)
           Edurange::PuppetMaster.write_shell_config_file(puppetmaster_ip, certs, conf, facts)
-          # get their internal ssh key from players
-          instance_players = []
 
+          # Get all of the instance names
           instance_login_names = users.collect { |user| user["login"] }
 
-          p players
-          p instance_login_names
+          # Get all of the information required (ssh key, etc) from the players matching instance_login_names
+          instance_players = []
           players.each do |player|
             instance_players.push player if instance_login_names.include? player["login"]
           end
-
-          puts "Instance players:"
-          p instance_players
 
 
           users_script = Edurange::Helper.users_to_bash(instance_players)
           Edurange::PuppetMaster.append_to_config(users_script)
           
           if instances_associated.include? name
-
             # Create in current subnet
 
             ami_id = info["AMI_ID"]
@@ -200,21 +158,15 @@ conf
             nodes.push Edurange::Instance.new(name, ami_id, ip_address, key_pair, script, subnet_id).startup
           end
         end
-        puts nodes
 
         subnets.each do |parsed_subnet|
-          puts "Yo subnet ACLS"
           puts parsed_subnet
-          puts "Yo subnet"
           file["Network"].each do |link|
             link_name, subnets = link.first
-            puts "Got link:"
             p link_name
-            puts "Got subnet:"
             p subnets
           end
         end
-
       end
     end
   end
