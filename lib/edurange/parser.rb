@@ -68,6 +68,9 @@ conf
 
       nat_instance.startup
 
+      nodes.push nat_instance
+      nat_aws_object = nat_instance.aws_object
+
       # Route NAT traffic to internet
       nat_route_table.create_route("0.0.0.0/0", { internet_gateway: igw} )
 
@@ -84,7 +87,7 @@ conf
         player_route_table = igw_vpc.route_tables.create(vpc_id: vpc_id)
         subnet.route_table = player_route_table
 
-        player_route_table.create_route("0.0.0.0/0", { instance: nat_instance } )
+        player_route_table.create_route("0.0.0.0/0", { instance: nat_aws_object } )
 
         subnets.push subnet
 
