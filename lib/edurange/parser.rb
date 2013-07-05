@@ -9,11 +9,11 @@ uuid=#{uuid}
 services=#{services}
 conf
     end
-    def self.parse_yaml(filename, keyname)
+    def self.parse_yaml(contents)
       nodes = []
-      file = YAML.load_file(filename)
+      file = YAML.load(contents)
 
-      key_pair = AWS::EC2::KeyPairCollection.new[keyname]
+      key_pair = AWS::EC2::KeyPairCollection.new[Settings.ec2_key]
 
       block = file["VPC_Mask"]
       ec2 = AWS::EC2::Client.new
@@ -44,7 +44,7 @@ conf
 
       players.flatten!
 
-      debug "Got players: " + p players
+      debug "Got players: #{p players}"
 
       # Create Subnet for nat and IGW
 
