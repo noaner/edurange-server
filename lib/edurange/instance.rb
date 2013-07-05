@@ -12,9 +12,6 @@ module Edurange
     end
 
     def startup
-      # Get the subnet we should be a part of (doesn't actually create the subnet)
-      subnet = AWS::EC2::Subnet.new @subnet_id
-
       if @ami_id.nil? || @subnet.nil? || @uuid.nil?
         raise "Tried to start instance without enough information."
       end
@@ -31,15 +28,13 @@ module Edurange
       puppet_setup_script = Helper.puppet_setup_script(@uuid)
 
       if @ip_address.nil?
-        @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, subnet: subnet)
-        debug "AWS Returned #{pp @aws_object}"
+        @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, subnet: @subnet)
         binding.pry
       else
-        @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: subnet)
+        @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: @subnet)
       end
+      @instance_id = @aws_object.id
       if @is_nat
-        debug "Nat instance: #{@aws_object}"
-
         sleep_until_running
 
         @aws_object.network_interfaces.first.source_dest_check = false
