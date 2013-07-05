@@ -10,6 +10,11 @@ module Edurange
   end
 
   class Helper
+    def self.dry_run
+      AWS.stub!
+      # Stub individual things required
+      
+    end
     def self.startup_script
       `gzip < my-user-script.sh > my-user-script.sh.gz`
       File.open('my-user-script.sh.gz', 'rb').read
