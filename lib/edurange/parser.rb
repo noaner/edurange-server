@@ -26,6 +26,7 @@ conf
       info "Created VPC #{vpc_id}"
       
       igw = ec2.create_internet_gateway
+
       igw = AWS::EC2::InternetGatewayCollection.new[igw[:internet_gateway][:internet_gateway_id]]
       igw_vpc.internet_gateway = igw
       
@@ -44,15 +45,27 @@ conf
 
       players.flatten!
 
-      debug "Got players: #{p players}"
-
       # Create Subnet for nat and IGW
 
       # Create Nat Subnet
       nat_subnet = vpc.subnets.create('10.0.128.0/28', vpc_id: vpc_id)
       nat_route_table = vpc.route_tables.create(vpc_id: vpc_id)
       nat_subnet.route_table = nat_route_table
-      nat_instance = nat_subnet.instances.create(image_id: 'ami-2e1bc047', key_pair: key_pair, user_data: Edurange::Helper.prep_nat_instance(players))
+
+      players = Helper.generate_ssh_keys_for players
+
+      uuid = `uuidgen`.chomp
+      facts = Edurange::Parser.facter_facts(uuid, [])
+
+      nat_instance = Instance.new
+      nat_instance.ami_id = 'ami-2e1bc047'
+      nat_instance.name = "NAT Instance"
+      nat_instance.subnet = nat_subnet
+      nat_instance.users = players
+      nat_instance.uuid = uuid
+      nat_instance.facts = facts
+
+      nat_instance.startup
 
       # Route NAT traffic to internet
       nat_route_table.create_route("0.0.0.0/0", { internet_gateway: igw} )
@@ -73,6 +86,7 @@ conf
       file["Subnets"].each do |parsed_subnet|
         subnet_name, subnet_mask = parsed_subnet.first
         subnet = igw_vpc.subnets.create(subnet_mask, vpc_id: vpc_id)
+        debug subnet
         subnet_id = subnet.id
 
         player_route_table = igw_vpc.route_tables.create(vpc_id: vpc_id)
@@ -116,10 +130,6 @@ conf
           end
           users.flatten! # Should be fine, but for good measure...
 
-          certs = Edurange::PuppetMaster.gen_client_ssl_cert()
-          conf = Edurange::PuppetMaster.generate_puppet_conf(certs[0])
-          facts = Edurange::Parser.facter_facts(certs[0], packages)
-          Edurange::PuppetMaster.write_shell_config_file(puppetmaster_ip, certs, conf, facts)
 
           # Get all of the instance names
           instance_login_names = users.collect { |user| user["login"] }
@@ -130,10 +140,9 @@ conf
             instance_players.push player if instance_login_names.include? player["login"]
           end
 
+          debug "Players in new instance: #{p instance_players}"
 
-          users_script = Edurange::Helper.users_to_bash(instance_players)
-          Edurange::PuppetMaster.append_to_config(users_script)
-          
+
           if instances_associated.include? name
             # Create in current subnet
 
@@ -155,7 +164,18 @@ conf
 
             script = Edurange::Helper.startup_script
 
-            nodes.push Edurange::Instance.new(name, ami_id, ip_address, key_pair, script, subnet_id).startup
+            uuid = `uuidgen`.chomp
+            facts = Edurange::Parser.facter_facts(uuid, packages)
+
+            instance = Instance.new
+            instance.name = name
+            instance.ip_address = ip_address
+            instance.subnet = subnet
+            instance.uuid = uuid
+            instance.facts = facts
+            instance.users = instance_players
+
+            nodes.push instance.startup
           end
         end
 

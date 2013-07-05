@@ -2,8 +2,8 @@ module Edurange
   class PuppetMaster
     def self.puppetmaster_ip
       # Get external IP using in a way that works in any environment
-      puts "Obtaining external ip"
-      `curl ifconfig.me 2>/dev/null`
+      debug "Obtaining external ip"
+      ip ||= `curl ifconfig.me 2>/dev/null`
     end
     def self.get_our_ssh_key
       # Either returns our current SSH key or generates a new one (and returns it)
@@ -13,18 +13,17 @@ module Edurange
       contents = file.read
     end
 
-    def self.gen_client_ssl_cert
+    def self.gen_client_ssl_cert(uuid)
       # This generates certificates so puppet can authenticate our client. The certs and such are passed through securely using EC2's API
       # Generates a UUID
       # Creates certificate using puppet
       # Read the cert auth file
       # Read the private key generated for client
-      uuid = `uuidgen`.chomp
       `sudo puppet cert --generate #{uuid}`
       ssl_cert = `sudo cat /var/lib/puppet/ssl/certs/#{uuid}.pem`.chomp
       ca_cert = `sudo cat /var/lib/puppet/ssl/certs/ca.pem`.chomp
       private_key = `sudo cat /var/lib/puppet/ssl/private_keys/#{uuid}.pem`.chomp
-      return [uuid, ssl_cert, ca_cert, private_key]
+      return [ssl_cert, ca_cert, private_key]
     end
     def self.append_to_config(conf)
       File.open("my-user-script.sh", 'a+') do |file|
@@ -48,39 +47,6 @@ module Edurange
       # - Creating a directory to store facts in (facts later referenced in puppet to install software. Essentially "tagging" our instances)
       # - Reloading puppet
       File.open("my-user-script.sh", 'w') do |file|
-        file_contents = <<contents
-#!/bin/sh
-set -e
-set -x
-echo "Hello World.  The time is now $(date -R)!" | tee /root/output.txt
-
-killall dpkg || true
-sleep 5
-dpkg --configure -a
-
-apt-get update; apt-get upgrade -y
-
-echo #{puppetmaster_ip.chomp} puppet >> /etc/hosts
-apt-get -y install puppet
-
-mkdir -p /var/lib/puppet/ssl/certs
-mkdir -p /var/lib/puppet/ssl/private_keys
-mkdir -p /etc/puppet
-
-mkdir -p /etc/facts.d
-echo '#{facter_facts}' >> "/etc/facts.d/facts.txt"
-
-echo '#{certs[1]}' >> "/var/lib/puppet/ssl/certs/#{certs[0]}.pem"
-echo '#{certs[2]}' >> "/var/lib/puppet/ssl/certs/ca.pem"
-echo '#{certs[3]}' >> "/var/lib/puppet/ssl/private_keys/#{certs[0]}.pem"
-
-echo '#{puppet_conf.chomp}' > /etc/puppet/puppet.conf
-
-sed -i /etc/default/puppet -e 's/START=no/START=yes/'
-service puppet restart
-
-echo "Goodbye World.  The time is now $(date -R)!" >> /root/output.txt
-contents
         file.write(file_contents)
       end
     end

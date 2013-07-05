@@ -13,7 +13,43 @@ module Edurange
     def self.dry_run
       AWS.stub!
       # Stub individual things required
-      
+    end
+    def self.puppet_setup_script(uuid)
+      # Install / configure puppet. Should be fixed size and < 16kb for user-data max file requirement
+
+      # Get SSL certs required to connect to PuppetMaster
+      certs = Edurange::PuppetMaster.gen_client_ssl_cert(uuid)
+
+      file_contents = <<contents
+#!/bin/sh
+set -e
+set -x
+echo "Hello World.  The time is now $(date -R)!" | tee /root/output.txt
+
+killall dpkg || true
+sleep 5
+dpkg --configure -a
+
+apt-get update; apt-get upgrade -y
+
+echo #{PuppetMaster.puppetmaster_ip} puppet >> /etc/hosts
+apt-get -y install puppet
+
+mkdir -p /var/lib/puppet/ssl/certs
+mkdir -p /var/lib/puppet/ssl/private_keys
+mkdir -p /etc/puppet
+
+echo '#{certs[0]}' >> "/var/lib/puppet/ssl/certs/#{uuid}.pem"
+echo '#{certs[1]}' >> "/var/lib/puppet/ssl/certs/ca.pem"
+echo '#{certs[2]}' >> "/var/lib/puppet/ssl/private_keys/#{uuid}.pem"
+
+echo '#{PuppetMaster.generate_puppet_conf(uuid)}' > /etc/puppet/puppet.conf
+
+sed -i /etc/default/puppet -e 's/START=no/START=yes/'
+service puppet restart
+
+echo "Goodbye World.  The time is now $(date -R)!" >> /root/output.txt
+contents
     end
     def self.startup_script
       `gzip < my-user-script.sh > my-user-script.sh.gz`
@@ -60,6 +96,17 @@ stuff
       end
       shell
     end
+    def self.generate_ssh_keys_for(players)
+      players.each do |player|
+        `rm id_rsa id_rsa.pub 2>/dev/null`
+        `ssh-keygen -t rsa -f id_rsa -q -N ''`
+        priv_key = File.open('id_rsa', 'rb').read
+        pub_key = File.open('id_rsa.pub', 'rb').read
+
+        player["generated_pub"] = pub_key
+        player["generated_priv"] = pub_key
+      end
+    end
     def self.prep_nat_instance(players)
       # get nat instance ready
       data = <<data
@@ -70,13 +117,6 @@ echo "Hello World.  The time is now $(date -R)!" | tee /root/output.txt
 curl http://ccdc.boesen.me/edurange.txt > /etc/motd
 data
   players.each do |player|
-    `rm id_rsa id_rsa.pub`
-    `ssh-keygen -t rsa -f id_rsa -q -N ''`
-    priv_key = File.open('id_rsa', 'rb').read
-    pub_key = File.open('id_rsa.pub', 'rb').read
-
-    player["generated_pub"] = pub_key
-    player["generated_priv"] = pub_key
 
     data += <<data
 adduser -m #{player["login"]}
