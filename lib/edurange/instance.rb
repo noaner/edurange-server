@@ -5,7 +5,7 @@ module Edurange
     def initialize
       @instance_id = nil
       @running = false
-      @key_pair = Settings.ec2_key
+      @key_pair = AWS::EC2::KeyPairCollection.new[Settings.ec2_key]
       @users = []
     end
 
