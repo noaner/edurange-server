@@ -12,7 +12,7 @@ optparse = OptionParser.new do |opts|
     Edurange.logger_level = Logger::DEBUG
   end
   opts.on '--dry-run', 'Dry run (does not execute AWS commands) (incomplete implementation)' do
-    
+    AWS.stub!
   end
 end
 
