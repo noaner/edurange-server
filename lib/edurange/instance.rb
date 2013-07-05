@@ -36,6 +36,7 @@ module Edurange
         @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: subnet)
       end
       if @is_nat
+        debug "Nat instance: #{p @aws_object}"
         @aws_object.network_interfaces.first.source_dest_check = false
         nat_eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
         @aws_object.associate_elastic_ip nat_eip
