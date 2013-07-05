@@ -41,7 +41,7 @@ module Edurange
         sleep 2 until nat_eip.exists?
 
         @aws_object.associate_elastic_ip nat_eip
-        info "NAT EIP: " + nat_eip
+        info "NAT EIP: " + nat_eip.to_s
       end
     end
 
