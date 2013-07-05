@@ -39,6 +39,8 @@ module Edurange
 
         @aws_object.network_interfaces.first.source_dest_check = false
         nat_eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
+        sleep 2 until nat_eip.exists?
+
         @aws_object.associate_elastic_ip nat_eip
         info "NAT EIP: " + nat_eip
       end
