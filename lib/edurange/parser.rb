@@ -71,9 +71,6 @@ conf
       # Route NAT traffic to internet
       nat_route_table.create_route("0.0.0.0/0", { internet_gateway: igw} )
 
-      info "Waiting for NAT instance to spin up (~40 seconds)"
-      sleep(40)
-
       igw_vpc.security_groups.first.authorize_ingress(:tcp, 0..64555)
 
       subnets = []

@@ -32,11 +32,15 @@ module Edurange
 
       if @ip_address.nil?
         @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, subnet: subnet)
+        debug "AWS Returned #{p @aws_object}"
       else
         @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: subnet)
       end
       if @is_nat
         debug "Nat instance: #{p @aws_object}"
+
+        sleep_until_running
+
         @aws_object.network_interfaces.first.source_dest_check = false
         nat_eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
         @aws_object.associate_elastic_ip nat_eip
@@ -46,6 +50,11 @@ module Edurange
 
     def to_s
       "<Edurange::Instance name:#{@name} ami_id: #{@ami_id} ip: #{@ip_address} key: #{@key_pair} running: #{@running} instance_id: #{@instance_id}>"
+    end
+
+    def sleep_until_running
+      info "Waiting for instance to spin up (~40 seconds)"
+      sleep 5 while @aws_object.status == :pending
     end
 
 
