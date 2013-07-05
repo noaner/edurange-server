@@ -23,7 +23,7 @@ module Edurange
 
       # Take users, write to manifest
 
-      puts "Spinning up instance at subnet #{@subnet_id} - #{@ip_address}"
+      puts "Spinning up instance at subnet #{@subnet.id} - #{@ip_address}"
       # Actually run instance
       puppet_setup_script = Helper.puppet_setup_script(@uuid)
 
