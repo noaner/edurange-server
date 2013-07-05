@@ -29,7 +29,6 @@ module Edurange
 
       if @ip_address.nil?
         @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, subnet: @subnet)
-        binding.pry
       else
         @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: @subnet)
       end
