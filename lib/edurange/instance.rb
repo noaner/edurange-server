@@ -32,12 +32,12 @@ module Edurange
 
       if @ip_address.nil?
         @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, subnet: subnet)
-        debug "AWS Returned #{p @aws_object}"
+        debug "AWS Returned #{@aws_object}"
       else
         @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: subnet)
       end
       if @is_nat
-        debug "Nat instance: #{p @aws_object}"
+        debug "Nat instance: #{@aws_object}"
 
         sleep_until_running
 
@@ -56,7 +56,6 @@ module Edurange
       info "Waiting for instance to spin up (~40 seconds)"
       sleep 5 while @aws_object.status == :pending
     end
-
 
   end
 end
