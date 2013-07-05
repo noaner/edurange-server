@@ -1,12 +1,14 @@
 module Edurange
   class Instance
-    attr_accessor :name, :ami_id, :ip_address, :key_pair, :users, :uuid, :facts, :subnet
+    attr_accessor :name, :ami_id, :ip_address, :key_pair, :users, :uuid, :facts, :subnet, :is_nat
 
     def initialize
       @instance_id = nil
       @running = false
       @key_pair = AWS::EC2::KeyPairCollection.new[Settings.ec2_key]
       @users = []
+      @is_nat = false
+      @aws_object = nil
     end
 
     def startup
@@ -16,6 +18,7 @@ module Edurange
       if @ami_id.nil? || @subnet.nil? || @uuid.nil?
         raise "Tried to start instance without enough information."
       end
+
 
       # Set up puppetmaster to handle our instance
 
@@ -28,9 +31,15 @@ module Edurange
       puppet_setup_script = Helper.puppet_setup_script(@uuid)
 
       if @ip_address.nil?
-        @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, subnet: subnet)
+        @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, subnet: subnet)
       else
-        @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: subnet)
+        @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: subnet)
+      end
+      if @is_nat
+        @aws_object.network_interfaces.first.source_dest_check = false
+        nat_eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
+        @aws_object.associate_elastic_ip nat_eip
+        info "NAT EIP: " + nat_eip
       end
     end
 

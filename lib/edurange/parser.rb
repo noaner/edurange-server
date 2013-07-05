@@ -64,6 +64,7 @@ conf
       nat_instance.users = players
       nat_instance.uuid = uuid
       nat_instance.facts = facts
+      nat_instance.is_nat = true
 
       nat_instance.startup
 
@@ -73,13 +74,7 @@ conf
       info "Waiting for NAT instance to spin up (~40 seconds)"
       sleep(40)
 
-      nat_instance.network_interfaces.first.source_dest_check = false
-      nat_eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
-      nat_instance.associate_elastic_ip nat_eip
-
       igw_vpc.security_groups.first.authorize_ingress(:tcp, 0..64555)
-
-      info "NAT EIP: " + nat_eip
 
       subnets = []
 
