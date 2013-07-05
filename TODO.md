@@ -1,5 +1,9 @@
 # Edurange TODO list
 
+- Migrate from user-data setup to having user-data only configure puppet.
+  Reason being: Any user can request ec2 api from instance to see setup data. In addition, there is a max user data file size.
+  Any configuration per node should be done via puppet.
+
 - Document installation in README.md
 - Document code walkthrough in WALKTHROUGH.md. Discuss player/team/instance relation.
 - Refactor parse()
