@@ -3,9 +3,10 @@ module Edurange
     # Internal object representation of AWS VPCs
     # This is OK to do at the moment, as our YAML file contains a "VPC_Mask" declaration
 
-    attr_accessor :aws_object, :cidr_block, :subnets, :igw, :nat_instance
+    attr_accessor :aws_object, :cidr_block, :igw, :nat_instance
+    attr_reader :subnets
 
-    def subnets<<(subnet)
+    def add(subnet)
       subnet.cloud = self
       @subnets.push subnet
     end

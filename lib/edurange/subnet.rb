@@ -6,6 +6,11 @@ module Edurange
       @instances = []
     end
 
+    def add(instance)
+      instance.subnet = self
+      @instances.push instance
+    end
+
     def startup
       if @cidr_mask.nil? || @cloud.nil?
         raise "Tried to create Subnet without enough information."

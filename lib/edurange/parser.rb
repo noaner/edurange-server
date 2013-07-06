@@ -87,15 +87,14 @@ conf
             end
           end
           users = []
-          if node[1].has_key? "Groups"
-            node[1]["Groups"].each do |group|
+          if info.has_key? "Groups"
+            info["Groups"].each do |group|
               # Collect all users for each group name
               debug "Got group name #{group} in instance. Adding users #{file["Groups"].values_at group}"
               users.concat file["Groups"].values_at group
             end
           end
           users.flatten! # Should be fine, but for good measure...
-
 
           # Get all of the instance names
           instance_login_names = users.collect { |user| user["login"] }
@@ -122,8 +121,6 @@ conf
                 p group_contents
                 total_groups.concat(group_contents.values) unless group_contents.nil?
               end
-              puts "Got groups: "
-              p groups
             end
 
             software = info["Software"]
@@ -141,7 +138,7 @@ conf
             instance.facts = facts
             instance.users = instance_players
 
-            nodes.push instance.startup
+            subnet.add instance
           end
         end
       end
