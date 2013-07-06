@@ -5,6 +5,9 @@ module Edurange
 
     attr_accessor :aws_object, :cidr_block, :igw, :nat_instance
     attr_reader :subnets
+    def initialize
+      @subnets = []
+    end
 
     def add(subnet)
       subnet.cloud = self

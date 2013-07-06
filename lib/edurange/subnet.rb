@@ -1,6 +1,7 @@
 module Edurange
   class Subnet
-    attr_accessor :is_nat, :aws_object, :cidr_block, :instances, :cloud
+    attr_accessor :is_nat, :aws_object, :cidr_block, :cloud
+    attr_reader :instances
     def initialize
       @is_nat = false
       @instances = []
