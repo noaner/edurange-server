@@ -15,4 +15,6 @@ include Edurange
 require 'edurange/parser'
 require 'edurange/puppet_master'
 require 'edurange/instance'
+require 'edurange/subnet'
+require 'edurange/cloud'
 require 'edurange/runtime'
