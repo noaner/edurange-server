@@ -32,7 +32,7 @@ conf
       nat_subnet = Subnet.new
       nat_subnet.is_nat = true
       nat_subnet.cidr_block = '10.0.128.0/28'
-      cloud.subnets << nat_subnet 
+      cloud.add nat_subnet 
 
       players = Helper.generate_ssh_keys_for players
 
@@ -48,7 +48,7 @@ conf
       nat_instance.facts = facts
       nat_instance.is_nat = true
 
-      nat_subnet.instances << nat_instance
+      nat_subnet.add nat_instance
 
       file["Subnets"].each do |parsed_subnet|
         subnet_name, subnet_mask = parsed_subnet.first
