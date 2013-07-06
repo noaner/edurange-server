@@ -52,16 +52,10 @@ conf
 
       file["Subnets"].each do |parsed_subnet|
         subnet_name, subnet_mask = parsed_subnet.first
-        subnet = igw_vpc.subnets.create(subnet_mask, vpc_id: vpc_id)
-        debug "Created subnet: #{subnet}"
-        subnet_id = subnet.id
 
-        player_route_table = igw_vpc.route_tables.create(vpc_id: vpc_id)
-        subnet.route_table = player_route_table
-
-        player_route_table.create_route("0.0.0.0/0", { instance: nat_aws_object } )
-
-        subnets.push subnet
+        subnet = Subnet.new
+        subnet.cidr_block = subnet_mask
+        cloud.add subnet 
 
         # Skip creating instances if the subnet has none defined
         next unless parsed_subnet.has_key? "Instances"
@@ -106,7 +100,6 @@ conf
           end
 
           debug "Players in new instance: #{p instance_players}"
-
 
           if instances_associated.include? name
             # Create in current subnet
