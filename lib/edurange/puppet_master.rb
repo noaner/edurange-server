@@ -5,14 +5,6 @@ module Edurange
       debug "Obtaining external ip"
       ip ||= `curl ifconfig.me 2>/dev/null`
     end
-    def self.get_our_ssh_key
-      # Either returns our current SSH key or generates a new one (and returns it)
-      `ssh-keygen -t rsa -f #{ENV['HOME']}/.ssh/id_rsa -N '' -q` unless File.exists?("#{ENV['HOME']}/.ssh/id_rsa")
-
-      file = File.open("#{ENV['HOME']}/.ssh/id_rsa.pub", "rb")
-      contents = file.read
-    end
-
     def self.gen_client_ssl_cert(uuid)
       # This generates certificates so puppet can authenticate our client. The certs and such are passed through securely using EC2's API
       # Generates a UUID

@@ -13,7 +13,7 @@ module Edurange
 
     def startup
       if @ami_id.nil? || @subnet.nil? || @uuid.nil?
-        raise "Tried to start instance without enough information."
+        raise "Tried to create Instance without enough information."
       end
 
 
@@ -38,10 +38,13 @@ module Edurange
 
         @aws_object.network_interfaces.first.source_dest_check = false
         nat_eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
+
+        # Wait until EIP allocated
         sleep 2 until nat_eip.exists?
 
         @aws_object.associate_elastic_ip nat_eip
         info "NAT EIP: " + nat_eip.to_s
+        @cloud.nat_instance = @aws_object
       end
     end
 

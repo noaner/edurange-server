@@ -16,45 +16,27 @@ conf
       key_pair = AWS::EC2::KeyPairCollection.new[Settings.ec2_key]
 
       block = file["VPC_Mask"]
-      ec2 = AWS::EC2::Client.new
 
-      vpc_request = ec2.create_vpc(cidr_block: block)
-      vpc = AWS::EC2::VPC.new(vpc_id: vpc_request[:vpc][:vpc_id])
-      igw_vpc = AWS::EC2::VPCCollection.new[vpc_request[:vpc][:vpc_id]]
-      vpc_id = vpc.id[:vpc_id] # Because having vpc_id be a string would be crazy
+      cloud = Cloud.new
+      cloud.cidr_block = block
 
-      info "Created VPC #{vpc_id}"
-      
-      igw = ec2.create_internet_gateway
-
-      igw = AWS::EC2::InternetGatewayCollection.new[igw[:internet_gateway][:internet_gateway_id]]
-      igw_vpc.internet_gateway = igw
-      
-      sleep(6) # TODO loop and check vpc status
-
-      info "Created IGW #{igw.id}"
-
-      nodes = []
-      players = []
-      
       # Iterate through groups. Create list of users (For nat instance logins)
+      players = []
       file["Groups"].each do |group|
         name, users = group
         players.concat(users)
       end
-
       players.flatten!
 
-      # Create Subnet for nat and IGW
-
       # Create Nat Subnet
-      nat_subnet = vpc.subnets.create('10.0.128.0/28', vpc_id: vpc_id)
-      nat_route_table = vpc.route_tables.create(vpc_id: vpc_id)
-      nat_subnet.route_table = nat_route_table
+      nat_subnet = Subnet.new
+      nat_subnet.is_nat = true
+      nat_subnet.cidr_block = '10.0.128.0/28'
+      cloud.subnets << nat_subnet 
 
       players = Helper.generate_ssh_keys_for players
 
-      uuid = `uuidgen`.chomp
+      uuid = `uuidgen`.chomp # TODO - replace with securerandom#uuid
       facts = Edurange::Parser.facter_facts(uuid, [])
 
       nat_instance = Instance.new
@@ -66,22 +48,12 @@ conf
       nat_instance.facts = facts
       nat_instance.is_nat = true
 
-      nat_instance.startup
-
-      nodes.push nat_instance
-      nat_aws_object = nat_instance.aws_object
-
-      # Route NAT traffic to internet
-      nat_route_table.create_route("0.0.0.0/0", { internet_gateway: igw} )
-
-      igw_vpc.security_groups.first.authorize_ingress(:tcp, 0..64555)
-
-      subnets = []
+      nat_subnet.instances << nat_instance
 
       file["Subnets"].each do |parsed_subnet|
         subnet_name, subnet_mask = parsed_subnet.first
         subnet = igw_vpc.subnets.create(subnet_mask, vpc_id: vpc_id)
-        debug subnet
+        debug "Created subnet: #{subnet}"
         subnet_id = subnet.id
 
         player_route_table = igw_vpc.route_tables.create(vpc_id: vpc_id)
@@ -98,8 +70,7 @@ conf
         info "Created subnet #{subnet_name}, mask: #{subnet_mask}"
         info "Instances in subnet: #{instances_associated}"
 
-        our_ssh_key = Edurange::PuppetMaster.get_our_ssh_key()
-        puppetmaster_ip = Edurange::PuppetMaster.puppetmaster_ip()
+        puppetmaster_ip = Edurange::PuppetMaster.puppetmaster_ip
 
         file["Nodes"].each do |node|
           name, info = node
@@ -171,15 +142,6 @@ conf
             instance.users = instance_players
 
             nodes.push instance.startup
-          end
-        end
-
-        subnets.each do |parsed_subnet|
-          puts parsed_subnet
-          file["Network"].each do |link|
-            link_name, subnets = link.first
-            p link_name
-            p subnets
           end
         end
       end

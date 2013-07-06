@@ -1,4 +1,6 @@
 module Edurange
+
+  @@ec2_connection = AWS::EC2::Client.new
   class Runtime
     # ==== Attributes
     # 
