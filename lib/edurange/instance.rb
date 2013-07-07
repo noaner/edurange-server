@@ -12,8 +12,12 @@ module Edurange
     end
 
     def startup
-      if @ami_id.nil? || @subnet.nil? || @uuid.nil?
-        raise "Tried to create Instance without enough information."
+      if @ami_id.nil?
+        raise "Tried to create Instance, but AMI ID is nil"
+      elsif @subnet.nil?
+        raise "Tried to create Instance, but Subnet is nil"
+      elsif @uuid.nil?
+        raise "Tried to create Instance, but UUID is nil"
       end
 
 
