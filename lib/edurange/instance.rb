@@ -28,9 +28,9 @@ module Edurange
       puppet_setup_script = Helper.puppet_setup_script(@uuid)
 
       if @ip_address.nil?
-        @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, subnet: @subnet)
+        @aws_object = AWS::EC2::InstanceCollection.new.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, subnet: @subnet)
       else
-        @aws_object = @subnet.instances.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: @subnet)
+        @aws_object = AWS::EC2::InstanceCollection.new.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: @subnet)
       end
       @instance_id = @aws_object.id
       if @is_nat
