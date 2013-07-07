@@ -34,6 +34,7 @@ module Edurange
 
       igw_request = Edurange.ec2.create_internet_gateway
       @igw = AWS::EC2::InternetGatewayCollection.new[igw_request[:internet_gateway][:internet_gateway_id]]
+      @aws_object.internet_gateway = @igw
 
       info "Waiting for #{@igw.id} to be created"
       sleep 2 until @igw.exists?
