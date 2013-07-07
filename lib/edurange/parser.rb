@@ -84,7 +84,6 @@ conf
           if info.has_key? "Groups"
             info["Groups"].each do |group|
               # Collect all users for each group name
-              debug "Got group name #{group} in instance. Adding users #{file["Groups"].values_at group}"
               users.concat file["Groups"].values_at group
             end
           end
@@ -99,7 +98,7 @@ conf
             instance_players.push player if instance_login_names.include? player["login"]
           end
 
-          debug "Players in new instance: #{p instance_players}"
+          debug "Players in instance #{name}: #{p instance_players}"
 
           if instances_associated.include? name
             # Create in current subnet
@@ -111,14 +110,11 @@ conf
               groups_associated = info["Groups"]
               groups = groups_associated.inject([]) do |total_groups, group_associated|
                 group_contents = file["Groups"][group_associated]
-                p group_contents
-                total_groups.concat(group_contents.values) unless group_contents.nil?
+                total_groups.concat group_contents unless group_contents.nil?
               end
             end
 
             software = info["Software"]
-
-            script = Edurange::Helper.startup_script
 
             uuid = `uuidgen`.chomp
             facts = Edurange::Parser.facter_facts(uuid, packages)
