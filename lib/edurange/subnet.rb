@@ -19,7 +19,7 @@ module Edurange
         raise "Tried to create Subnet but cloud = #{@cloud}"
       end
 
-      @aws_object = AWS::EC2::SubnetCollection.new.create(@cidr_mask, vpc_id: @cloud.vpc_id)
+      @aws_object = AWS::EC2::SubnetCollection.new.create(@cidr_block, vpc_id: @cloud.vpc_id)
       route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: @cloud.vpc_id)
       @aws_object.route_table = route_table
       if @is_nat
