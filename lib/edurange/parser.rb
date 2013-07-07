@@ -107,13 +107,14 @@ conf
             warn "Requested names (#{instance_player_names}) do _NOT_ all exist. #{instance_login_names}. Make sure you're referencing valid users in yaml."
           end
 
-          debug "Players in instance #{name}: #{instance_player_names}"
 
           if instances_associated.include? name
             # Create in current subnet
 
             ami_id = info["AMI_ID"]
             ip_address = info["IP_Address"]
+
+            debug "Players in instance #{name}: #{instance_player_names} ip: #{ip_address} subnet: #{subnet_mask}"
 
             unless info["Groups"].nil?
               groups_associated = info["Groups"]
