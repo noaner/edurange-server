@@ -7,6 +7,7 @@
 - Document installation in README.md
 - Document code walkthrough in WALKTHROUGH.md. Discuss player/team/instance relation.
 - Refactor parse()
+  - Refactor user parsing
 - Selective VPC deletion in edurange-cleanup
 - Integrate scoring engine
 - Implement DSL
