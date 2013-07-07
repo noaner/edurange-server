@@ -13,6 +13,8 @@
 - Integrate scoring engine
 - Implement DSL
 - Better integrate cleanup 
+  - Delete volumes, don't leave them leftover
+  - Delete unused IGWs - sometimes they sneak away, just iterate through them all and check usage
   - Create methods in Edurange::Instance for deleting
   - Create object for Edurange::Vpc? Maybe
   - Remove cleanup binary, implement optparse for bin/edurange to allow cleaning up
