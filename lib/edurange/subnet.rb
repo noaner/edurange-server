@@ -26,7 +26,11 @@ module Edurange
         # Create IGW, route traffic from instances to IGW
         route_table.create_route("0.0.0.0/0", { internet_gateway: @cloud.igw} )
       else
-        route_table.create_route("0.0.0.0/0", { instance: @cloud.nat_instance } )
+        route_table.create_route("0.0.0.0/0", { instance: @cloud.nat_instance.id } )
+      end
+
+      @instances.each do |instance|
+        instance.startup
       end
     end
 
