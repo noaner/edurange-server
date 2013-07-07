@@ -44,7 +44,7 @@ module Edurange
 
         @aws_object.associate_elastic_ip nat_eip
         info "NAT EIP: " + nat_eip.to_s
-        @cloud.nat_instance = @aws_object
+        @subnet.cloud.nat_instance = @aws_object
       end
     end
 
