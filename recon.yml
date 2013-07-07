@@ -168,7 +168,7 @@ Subnets:
      Instances: 
        - Player_5
 
-   - Subnet_6: 10.0.128.32/28
+   - Subnet_6: 10.0.127.255/17
      Instances:
        - Recon_battle_node_1
        - Recon_battle_node_2
