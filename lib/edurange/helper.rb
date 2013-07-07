@@ -1,4 +1,8 @@
 module Edurange
+  # Create global ec2 client, so we don't have to instantiate this everywhere (also helps with stubbing in future...)
+  @@ec2 = AWS::EC2::Client.new
+
+  # Define basic logging functions
   def debug(message)
     Edurange.logger.debug message
   end
@@ -51,6 +55,7 @@ service puppet restart
 echo "Goodbye World.  The time is now $(date -R)!" >> /root/output.txt
 contents
     end
+    
     def self.startup_script
     end
     # Creates Bash lines to create user account and set password file or password given users
