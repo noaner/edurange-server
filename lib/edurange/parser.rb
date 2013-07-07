@@ -69,6 +69,9 @@ conf
         file["Nodes"].each do |node|
           name, info = node
 
+          # Skip node if not in subnet
+          next unless instances_associated.include? name
+
           node_software_groups = info["Software"]
           packages = []
           node_software_groups.each do |node_software_group|
@@ -98,7 +101,13 @@ conf
             instance_players.push player if instance_login_names.include? player["login"]
           end
 
-          debug "Players in instance #{name}: #{p instance_players}"
+          instance_player_names = instance_players.collect { |player| player["login"] } # Should be identical to instance_players, but this tells us if there was a mismatch
+
+          if instance_player_names != instance_login_names
+            warn "Requested names (#{instance_player_names}) do _NOT_ all exist. #{instance_login_names}. Make sure you're referencing valid users in yaml."
+          end
+
+          debug "Players in instance #{name}: #{instance_player_names}"
 
           if instances_associated.include? name
             # Create in current subnet
@@ -131,6 +140,8 @@ conf
           end
         end
       end
+      # Recursively create EC2 Objects
+      cloud.startup
     end
   end
 end
