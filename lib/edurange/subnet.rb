@@ -13,8 +13,10 @@ module Edurange
     end
 
     def startup
-      if @cidr_mask.nil? || @cloud.nil?
-        raise "Tried to create Subnet without enough information."
+      if @cidr_mask.nil? 
+        raise "Tried to create Subnet without a cidr_mask."
+      elsif @cloud.nil?
+        raise "Tried to create Subnet without a cloud."
       end
 
       subnet = Edurange.vpc.subnets.create(@cidr_mask, vpc_id: vpc_id)
