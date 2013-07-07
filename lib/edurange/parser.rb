@@ -130,6 +130,7 @@ conf
 
             instance = Instance.new
             instance.name = name
+            instance.ami_id = ami_id
             instance.ip_address = ip_address
             instance.subnet = subnet
             instance.uuid = uuid
