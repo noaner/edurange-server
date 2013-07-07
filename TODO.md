@@ -18,3 +18,4 @@
   - Remove cleanup binary, implement optparse for bin/edurange to allow cleaning up
 - Add more exercises
 - Enable dry run (don't create vpcs/instances, just parse & print debug info)
+- Add interactive console to add users, subnets, instances, etc (and/or cleanup instances or entire vpcs)
