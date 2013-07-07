@@ -12,6 +12,10 @@ module Edurange
       @instances.push instance
     end
 
+    def subnet_id
+      @aws_object.id
+    end
+
     def startup
       if @cidr_block.nil? 
         raise "Tried to create Subnet but cidr_block = #{@cidr_block}"
