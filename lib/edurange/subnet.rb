@@ -19,9 +19,9 @@ module Edurange
         raise "Tried to create Subnet but cloud = #{@cloud}"
       end
 
-      subnet = Edurange.vpc.subnets.create(@cidr_mask, vpc_id: vpc_id)
-      route_table = Edurange.vpc.route_tables.create(vpc_id: vpc_id)
-      subnet.route_table = route_table
+      @aws_object = AWS::EC2::SubnetCollection.new.create(@cidr_mask, vpc_id: @cloud.vpc_id)
+      route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: @cloud.vpc_id)
+      @aws_object.route_table = route_table
       if @is_nat
         # Create IGW, route traffic from instances to IGW
         route_table.create_route("0.0.0.0/0", { internet_gateway: @cloud.igw} )
@@ -31,7 +31,7 @@ module Edurange
     end
 
     def to_s
-      "<Edurange::Subnet Nat? #{@is_nat} Instances: #{@instances.size}"
+      "<Edurange::Subnet Nat? #{@is_nat} Instances: #{@instances.size}>"
     end
   end
 end
