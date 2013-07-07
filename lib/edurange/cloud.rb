@@ -28,7 +28,7 @@ module Edurange
       end
 
       vpc_request = Edurange.ec2.create_vpc(cidr_block: @cidr_block)
-      @aws_object = AWS::EC2::VPC.new(vpc_id: vpc_request[:vpc][:vpc_id])
+      @aws_object = AWS::EC2::VPCCollection.new[vpc_request[:vpc][:vpc_id]]
 
       sleep_until_running
 
