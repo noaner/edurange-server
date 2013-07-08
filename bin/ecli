@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'edurange'
+
+Bombshell.launch(Edurange::ECLI::Shell)
