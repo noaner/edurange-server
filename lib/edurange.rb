@@ -24,3 +24,5 @@ require 'edurange/runtime'
 
 require 'edurange/ecli/shell'
 require 'edurange/ecli/info'
+
+info "Required all files necessary. Starting up..."
