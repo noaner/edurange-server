@@ -8,6 +8,11 @@ module Edurange::ECLI
       Edurange::ECLI::Info.help
     end
 
+    def cleanup
+      Edurange::Management.cleanup
+      puts "Done cleaning up!"
+    end
+
     before_launch do
       Edurange::ECLI::Info.help
     end

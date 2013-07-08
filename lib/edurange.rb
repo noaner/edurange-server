@@ -13,6 +13,7 @@ require 'edurange/logger'
 require 'edurange/helper'
 include Edurange
 
+require 'edurange/management'
 require 'edurange/parser'
 require 'edurange/puppet_master'
 require 'edurange/instance'
