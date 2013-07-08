@@ -39,10 +39,14 @@ module Edurange
       info "Waiting for #{@igw.id} to be created"
       sleep 2 until @igw.exists?
 
+      @aws_object.security_groups.first.authorize_ingress(:tcp, 0..64555)
+
       # Now that we have a vpc, instantiate all of our subnets
       @subnets.each do |subnet|
         subnet.startup
       end
+
+
     end
     def sleep_until_running
       info "Waiting for Cloud to spin up (~10 seconds)"
