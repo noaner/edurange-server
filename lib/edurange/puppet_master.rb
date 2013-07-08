@@ -40,7 +40,8 @@ pluginsync=true
 ssl_client_header = SSL_CLIENT_S_DN 
 ssl_client_verify_header = SSL_CLIENT_VERIFY
 
-[agent]                                                                                                                                                                                          
+[agent]
+environment = #{Edurange.cloud.vpc_id.gsub('-','')}
 certname=#{uuid}
 conf
     end
