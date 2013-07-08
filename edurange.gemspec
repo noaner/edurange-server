@@ -19,5 +19,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "aws-sdk"
   gem.add_runtime_dependency "awesome_print"
   gem.add_runtime_dependency "pry"
+  gem.add_runtime_dependency "bombshell"
   gem.add_runtime_dependency "settingslogic"
 end
