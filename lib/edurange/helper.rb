@@ -33,7 +33,7 @@ dpkg --configure -a
 
 apt-get update; apt-get upgrade -y
 
-echo #{PuppetMaster.puppetmaster_ip} puppet >> /etc/hosts
+echo #{PuppetMaster.puppetmaster_ip.chomp} puppet >> /etc/hosts
 apt-get -y install puppet
 
 mkdir -p /var/lib/puppet/ssl/certs
