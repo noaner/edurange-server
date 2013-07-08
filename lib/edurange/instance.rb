@@ -35,6 +35,7 @@ module Edurange
       else
         @aws_object = AWS::EC2::InstanceCollection.new.create(image_id: @ami_id, key_pair: @key_pair, user_data: puppet_setup_script, private_ip_address: @ip_address, subnet: @subnet.subnet_id)
       end
+      info "Creating instance #{@name}"
       @instance_id = @aws_object.id
       if @is_nat
         sleep_until_running
