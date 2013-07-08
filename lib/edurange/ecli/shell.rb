@@ -4,12 +4,14 @@ module Edurange::ECLI
 
     prompt_with 'edurange'
 
-    before_launch do
-      help
-    end
-
     def help
       Edurange::ECLI::Info.help
     end
+
+    before_launch do
+      Edurange::ECLI::Info.help
+    end
+
+
   end
 end
