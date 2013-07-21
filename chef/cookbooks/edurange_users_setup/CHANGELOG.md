@@ -1,10 +1,10 @@
-# CHANGELOG for aliases
+# CHANGELOG for edurange_users_setup
 
-This file is used to list changes made in each version of aliases.
+This file is used to list changes made in each version of edurange_users_setup.
 
 ## 0.1.0:
 
-* Initial release of aliases
+* Initial release of edurange_users_setup
 
 - - -
 Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.
