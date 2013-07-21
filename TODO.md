@@ -4,6 +4,7 @@
   Reason being: Any user can request ec2 api from instance to see setup data. In addition, there is a max user data file size.
   Any configuration per node should be done via puppet.
 
+- Installation needs to configure knife.rb
 - Document installation in README.md
 - Document code walkthrough in WALKTHROUGH.md. Discuss player/team/instance relation.
 - Refactor parse()
