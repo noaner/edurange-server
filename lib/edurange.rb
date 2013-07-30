@@ -7,6 +7,7 @@ require 'optparse'
 require 'pp'
 require 'bombshell'
 require 'open-uri'
+require 'ridley'
 
 require 'edurange/version'
 require 'edurange/settings'
