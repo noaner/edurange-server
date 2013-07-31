@@ -25,8 +25,8 @@ module Edurange
         priv_key = File.open('id_rsa', 'rb').read
         pub_key = File.open('id_rsa.pub', 'rb').read
 
-        player["generated_pub"] = pub_key
-        player["generated_priv"] = pub_key
+        player["generated_pub"] = pub_key.chomp
+        player["generated_priv"] = priv_key.chomp
       end
     end
   end

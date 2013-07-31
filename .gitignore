@@ -19,3 +19,4 @@ my-user-script.sh
 id_rsa*
 nat_data*
 chef/.chef
+chef/cookbooks/edurange_bootstrap*
