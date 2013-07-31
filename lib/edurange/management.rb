@@ -22,8 +22,10 @@ module Edurange
         if vpc.instances
           vpc.instances.each do |instance|
             if instance.elastic_ip
+              eip = instance.elastic_ip
               puts "Disassociating Elastic IP for #{instance}"
               instance.disassociate_elastic_ip
+              eip.delete
             end
             instance.delete
             puts "Deleting instance #{instance}"
