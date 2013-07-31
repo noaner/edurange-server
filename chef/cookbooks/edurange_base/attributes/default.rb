@@ -1,8 +1,2 @@
-default_attributes(
-  "authorization" => {
-    "sudo" => {
-      "groups" => ["admin", "wheel", "sysadmin"],
-      "passwordless" => true
-    }
-  }
-)
+default['authorization']['sudo']['groups']            = ["admin", "wheel", "sysadmin"]
+default['authorization']['sudo']['passwordless']      = true

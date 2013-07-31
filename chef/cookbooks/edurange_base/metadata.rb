@@ -7,3 +7,5 @@ long_description 'no more'
 version 1.0
 recipe 'edurange_base', 'Base recipe for instances'
 %w{ubuntu debian redhat centos fedora freebsd}.each { |os| supports os }
+depends "user"
+depends "sudo"
