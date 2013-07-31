@@ -41,66 +41,79 @@ Nodes:  # list of instances
 
 
   Recon_battle_node_1:  # instance of target host
+    IP_Address: 10.0.203.28
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_2:  # instance of target host
+    IP_Address: 10.0.219.149
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_3:  # instance of target host
+    IP_Address: 10.0.239.50
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_4:  # instance of target host
+    IP_Address: 10.0.222.30
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_5:  # instance of target host
+    IP_Address: 10.0.255.160
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_6:  # instance of target host
+    IP_Address: 10.0.137.28
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_7:  # instance of target host
+    IP_Address: 10.0.252.225
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_8:  # instance of target host
+    IP_Address: 10.0.208.188
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_9:  # instance of target host
+    IP_Address: 10.0.226.29
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_10:  # instance of target host
+    IP_Address: 10.0.139.224
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_11:  # instance of target host
+    IP_Address: 10.0.253.203
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_12:  # instance of target host
+    IP_Address: 10.0.203.149
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
 
   Recon_battle_node_13:  # instance of target host
+    IP_Address: 10.0.231.68
     AMI_ID: ami-e720ad8e  # image to be installed
     Software:  # list of software groups
       - Battle_node_1_sw
