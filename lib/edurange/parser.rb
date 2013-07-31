@@ -41,7 +41,7 @@ conf
 
       nat_instance = Instance.new
       nat_instance.ami_id = 'ami-2e1bc047'
-      nat_instance.name = "NAT Instance"
+      nat_instance.name = "NAT"
       nat_instance.subnet = nat_subnet
       nat_instance.users = players
       nat_instance.uuid = uuid
@@ -125,6 +125,12 @@ conf
             end
 
             software = info["Software"]
+            packages = software.inject([]) do |collect, software_group|
+              file["Software"][software_group].each do |group_contents|
+                collect.push group_contents
+              end
+            end
+            packages = packages["Packages"] #Could be other config 
 
             uuid = `uuidgen`.chomp
             facts = Edurange::Parser.facter_facts(uuid, packages)
@@ -137,6 +143,7 @@ conf
             instance.uuid = uuid
             instance.facts = facts
             instance.users = instance_players
+            instance.packages = packages
 
             subnet.add instance
           end

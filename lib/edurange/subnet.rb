@@ -26,15 +26,18 @@ module Edurange
       @aws_object = AWS::EC2::SubnetCollection.new.create(@cidr_block, vpc_id: @cloud.vpc_id)
       route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: @cloud.vpc_id)
       @aws_object.route_table = route_table
-      if @is_nat
-        # Create IGW, route traffic from instances to IGW
-        route_table.create_route("0.0.0.0/0", { internet_gateway: @cloud.igw} )
-      else
-        route_table.create_route("0.0.0.0/0", { instance: @cloud.nat_instance.id } )
-      end
 
+      # Ensure network connectivity. After instances are configured, forward traffic to NAT.
+      route_table.create_route("0.0.0.0/0", { internet_gateway: @cloud.igw} )
+
+      info "Creating Subnet's instances"
       @instances.each do |instance|
         instance.startup
+      end
+      unless @is_nat
+        info "Cleaning up setup routes, routing to NAT"
+        route_table.delete_route("0.0.0.0/0")
+        route_table.create_route("0.0.0.0/0", { instance: @cloud.nat_instance.id } )
       end
     end
 

@@ -22,4 +22,5 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "bombshell"
   gem.add_runtime_dependency "settingslogic"
   gem.add_runtime_dependency "ridley"
+  gem.add_runtime_dependency "chef"
 end
