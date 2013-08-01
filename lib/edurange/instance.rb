@@ -130,6 +130,7 @@ module Edurange
 
     def sleep_until_running
       info "Waiting for instance to spin up (~40 seconds)"
+      sleep 10
       sleep 5 while @aws_object.status == :pending
     end
 
