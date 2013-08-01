@@ -112,7 +112,7 @@ module Edurange
         @aws_object.associate_elastic_ip tmp_instance_ip
         info "TMP EIP: " + tmp_instance_ip.to_s
 
-        knife_command = "knife bootstrap #{tmp_instance_ip} -N #{@subnet}-#{@name} --ssh-user ubuntu --sudo --run-list 'recipe[edurange_base],recipe[edurange_bootstrap_#{@subnet.cloud.vpc_id}_#{@name}]'"
+        knife_command = "knife bootstrap #{tmp_instance_ip} -N #{@subnet.cloud.vpc_id}-#{@name} --ssh-user ubuntu --sudo --run-list 'recipe[edurange_base],recipe[edurange_bootstrap_#{@subnet.cloud.vpc_id}_#{@name}]'"
         
         info "Creating #{knife_command}"
         Dir.chdir(Settings.chef_path) do
