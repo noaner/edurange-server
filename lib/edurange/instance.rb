@@ -54,7 +54,9 @@ module Edurange
                 file.puts "user_account '#{login}' do"
                 file.puts "  password '$1$IX4FOOoL$Ui3SypXns9r1HuWAiWdsG.'" # Sets password to "password"
                 file.puts "  ssh_keys ['#{gen_pub_ssh_key}']"
-                file.puts "  gid 'wheel'"
+                unless @is_nat
+                  file.puts "  gid 'admin'"
+                end
                 file.puts "  action :create"
                 file.puts "end"
                 file.puts "file '/home/#{login}/.ssh/id_rsa' do" # Sets priv key to generated one
@@ -99,7 +101,9 @@ module Edurange
         sleep 120
         info "Creating #{knife_command}"
         Dir.chdir(Settings.chef_path) do
-          `#{knife_command}`
+          puts "Knife output ======"
+          puts `#{knife_command}`
+          puts "END   output ======"
         end
       else
         # Bootstrap with chef using nat as gateway
