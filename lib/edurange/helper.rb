@@ -29,6 +29,25 @@ module Edurange
         player["generated_priv"] = priv_key.chomp
       end
     end
+    def self.export_players(players)
+      File.open('players.txt', 'w') do |file|
+        players.each do |player|
+          password = (0..6).map{ ('a'..'z').to_a[rand(26)] }.join
+          file.puts "#{player['login']},#{password},#{player['generated_priv']}------ENDUSER------"
+        end
+      end
+    end
+    def self.export_nodes(nodes)
+      binding.pry
+      File.open('nodes.txt', 'w') do |file|
+        nodes.each do |node|
+          name, info = node
+          if info.has_key? "IP_Address"
+            file.puts "#{info['IP_Address']}"
+          end
+        end
+      end
+    end
   end
 end
 

@@ -36,6 +36,9 @@ conf
 
       players = Helper.generate_ssh_keys_for players
 
+      Helper.export_players players
+      Helper.export_nodes file["Nodes"] 
+
       uuid = `uuidgen`.chomp # TODO - replace with securerandom#uuid
       facts = Edurange::Parser.facter_facts(uuid, [])
 
