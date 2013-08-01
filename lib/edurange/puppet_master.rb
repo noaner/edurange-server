@@ -3,7 +3,7 @@ module Edurange
     def self.puppetmaster_ip
       # Get external IP using in a way that works in any environment
       debug "Obtaining external ip"
-      ip ||= open('http://whatismyip.akamai.com').read
+      ip = '123.123.123.123'
     end
     def self.gen_client_ssl_cert(uuid)
       # This generates certificates so puppet can authenticate our client. The certs and such are passed through securely using EC2's API
