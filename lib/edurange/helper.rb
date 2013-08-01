@@ -38,7 +38,6 @@ module Edurange
       end
     end
     def self.export_nodes(nodes)
-      binding.pry
       File.open('nodes.txt', 'w') do |file|
         nodes.each do |node|
           name, info = node
