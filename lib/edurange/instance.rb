@@ -45,7 +45,7 @@ module Edurange
           Dir.chdir(Dir.getwd + recipes_path) do
             File.open('default.rb', 'w') do |file|
               @packages.each do |package|
-                file.puts "package #{package}"
+                file.puts "package '#{package}'"
               end
               @users.each do |user|
                 login = user["login"]
