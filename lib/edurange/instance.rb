@@ -62,6 +62,7 @@ module Edurange
                 file.puts "file '/home/#{login}/.ssh/id_rsa' do" # Sets priv key to generated one
                 file.puts "  owner '#{login}'"
                 file.puts "  content '#{gen_priv_ssh_key}'"
+                file.puts "  mode 0600"
                 file.puts "end"
               end
             end
