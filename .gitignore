@@ -20,3 +20,5 @@ id_rsa*
 nat_data*
 chef/.chef
 chef/cookbooks/edurange_bootstrap*
+nodes.txt
+players.txt
