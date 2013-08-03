@@ -1,3 +1,5 @@
+require 'socket'
+require 'timeout'
 require 'settingslogic'
 require 'aws-sdk'
 require 'yaml'

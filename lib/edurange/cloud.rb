@@ -45,6 +45,9 @@ module Edurange
       @subnets.each do |subnet|
         subnet.startup
       end
+      @subnets.each do |subnet|
+        subnet.configure_subnet
+      end
 
 
     end

@@ -3,11 +3,6 @@ module Edurange
 
     def self.facter_facts(uuid, services)
       # Generate facts based on config. These facts are referenced in puppet configuration manifests
-      services = services.join(',')
-      facter_conf = <<conf
-uuid=#{uuid}
-services=#{services}
-conf
     end
     def self.parse_yaml(contents)
       nodes = []
@@ -44,6 +39,7 @@ conf
 
       nat_instance = Instance.new
       nat_instance.ami_id = 'ami-2e1bc047'
+      nat_instance.ip_address = '10.0.128.5'
       nat_instance.name = "NAT"
       nat_instance.subnet = nat_subnet
       nat_instance.users = players
@@ -82,7 +78,9 @@ conf
               software, software_packages = software_definition
               software_packages = software_packages["Packages"]
               if node_software_groups.include? software
-                packages.concat software_packages
+                unless software_packages.nil?
+                  packages.concat software_packages
+                end
               end
             end
           end
