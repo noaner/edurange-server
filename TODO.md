@@ -5,6 +5,7 @@
   Any configuration per node should be done via puppet.
 
 - Installation needs to configure knife.rb
+- Add checks for knife being configured right, chef server reachable, aws credentials valid, etc.
 - Document installation in README.md
 - Document code walkthrough in WALKTHROUGH.md. Discuss player/team/instance relation.
 - Refactor parse()
