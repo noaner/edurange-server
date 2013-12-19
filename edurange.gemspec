@@ -23,4 +23,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "settingslogic"
   gem.add_runtime_dependency "ridley"
   gem.add_runtime_dependency "chef"
+  gem.add_runtime_dependency "activerecord"
+  gem.add_runtime_dependency "sqlite3"
 end
