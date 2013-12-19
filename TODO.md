@@ -3,6 +3,8 @@
 - Needs to configure chef: knife.rb, test valid
 - AWS test credentials valid, etc
 - Plugin system for AWS, OpenStack, etc
+- Installation needs to configure knife.rb
+- Add testing via rspec for all objects
 - Document installation in README.md
 - Document code walkthrough in WALKTHROUGH.md. Discuss player/team/instance relation.
 
