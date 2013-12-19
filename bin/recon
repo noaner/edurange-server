@@ -1,38 +1,37 @@
+#!/usr/bin/env ruby
 require 'edurange'
 
 # Create scenario
 scenario = Scenario.new
 scenario.game_type = :host_discovery # Any predefined ones, determines method of scoring.
+scenario.name = "EDURange"
 
 # Define roles
-web_server_role = scenario.roles.new
+web_server_role = Role.new
 web_server_role.packages << 'apache2'
-scenario.roles << web_server_role
 
-dns_server_role = scenario.roles.new
+dns_server_role = Role.new
 dns_server_role.packages << 'bind9'
-scenario.roles << dns_server_role
 
-attacker_role = scenario.roles.new
+attacker_role = Role.new
 attacker_role.packages << 'nmap'
-scenario.roles << attacker_role
 
 # Create battlespace monitor unit
 battlespace_monitoring_unit = scenario.monitoring_units.new
 battlespace_monitoring_unit.cidr_block = '10.0.2.0/23'
 
-battlespace_control_subnet = players_monitoring_unit.subnets.new 
+battlespace_control_subnet = battlespace_monitoring_unit.subnets.new 
 battlespace_control_subnet.cidr_block = '10.0.1.0/24'
 battlespace_control_subnet.control = true
 
 battlespace_subnet = battlespace_monitoring_unit.subnets.new
 battlespace_subnet.cidr_block = '10.0.2.0/24'
-battlespace_subnet.allow_traffic :all, '10.0.0.0/24'
+battlespace_subnet.allow_traffic '10.0.0.0/24', all: :all
 
 # Create battlespace instances
 (0..10).each do
   instance = battlespace_subnet.instances.new
-  instance.ip = battlespace_subnet.get_ip :random
+  instance.ip = battlespace_subnet.assign_ip :random
   instance.os = :ubuntu
   instance.roles << web_server_role
   if Random.new.rand(1..5) == 2
@@ -45,25 +44,25 @@ players_monitoring_unit = scenario.monitoring_units.new
 players_monitoring_unit.cidr_block = '10.0.0.0/23'
 
 players_control_subnet = players_monitoring_unit.subnets.new 
-players_control_subnet.allow_traffic tcp: :ssh, '0.0.0.0/0' # Allow internet ssh traffic
+players_control_subnet.allow_traffic '0.0.0.0/0', tcp: :ssh # Allow internet ssh traffic
 players_control_subnet.cidr_block = '10.0.1.0/24'
 players_control_subnet.control = true
 
-players_gateway = players_control_subnet.intances.new
+players_gateway = players_control_subnet.instances.new
 players_gateway.internet_accessible = true
 
 players_subnet = players_monitoring_unit.subnets.new
 players_subnet.cidr_block = '10.0.0.0/24'
-players_subnet.allow_traffic :all, '10.0.1.0/24' # Allow control subnet (NAT)
-players_subnet.allow_traffic :all, '10.0.2.0/24'
+players_subnet.allow_traffic '10.0.1.0/24', all: :all # Allow control subnet (NAT)
+players_subnet.allow_traffic '10.0.2.0/24', all: :all # Allow control subnet (NAT)
 
 # Create player instances
 (1..5).each do |team_num|
   instance = players_subnet.instances.new
-  instance.ip = players_subnet.get_ip :sequential
+  instance.ip = players_subnet.assign_ip :sequential
   instance.roles << attacker_role
 
-  group = scenario.groups.new
+  group = Group.new
   group.name = "team_#{team_num}"
   (1..3).map {|i| (3 * team_num) + i}.each do |player_num|
     user = group.users.new
@@ -74,4 +73,5 @@ players_subnet.allow_traffic :all, '10.0.2.0/24'
   end
 end
 
+binding.pry
 scenario.save! # Recursive save. Should let us know if we missed anything.
