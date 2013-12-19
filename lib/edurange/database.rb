@@ -16,7 +16,7 @@ end
 ActiveRecord::Migration.create_table :monitoring_units do |t|
   t.string :cidr_block, null: false
   t.boolean :control, null: false, default: false
-  t.integer :scenario_id, null: false
+  t.references :scenario, null: false
   t.timestamps
 end
 
@@ -24,15 +24,16 @@ end
 ActiveRecord::Migration.create_table :subnets do |t|
   t.string :cidr_block, null: false
   t.boolean :control, null: false, default: false
-  t.integer :monitoring_unit_id, null: false
+  t.references :monitoring_unit, null: false
   t.timestamps
 end
 
 # Instances
 ActiveRecord::Migration.create_table :instances do |t|
-  t.string :cidr_block, null: false
+  t.string :ip, null: false
+  t.string :os, null: false
   t.boolean :internet_accessible, null: false, default: false
-  t.integer :subnet_id, null: false
+  t.references :subnet, null: false
   t.timestamps
 end
 
@@ -45,22 +46,28 @@ end
 
 # Instances_Roles
 ActiveRecord::Migration.create_table :instances_roles do |t|
-  t.integer :instance_id, null: false
-  t.integer :role_id, null: false
+  t.references :instance, null: false
+  t.references :role, null: false
   t.timestamps
 end
 
+# Groups
+ActiveRecord::Migration.create_table :groups do |t|
+  t.string :name
+  t.timestamps
+end
 # Users
-ActiveRecord::Migration.create_table :users do |t|
+ActiveRecord::Migration.create_table :players do |t|
   t.string :login, null: false
   t.string :ssh_key, null: false
+  t.references :group, null: false
   t.timestamps
 end
 
-# Instances_Users
-ActiveRecord::Migration.create_table :instances_users do |t|
-  t.integer :user_id, null: false
-  t.integer :instance_id, null: false
+# Instances_Groups
+ActiveRecord::Migration.create_table :instances_groups do |t|
+  t.references :group, null: false
+  t.references :instance, null: false
   t.boolean :administrator, null: false, default: false
   t.timestamps
 end
