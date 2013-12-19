@@ -1,210 +1,171 @@
-Nodes:  # list of instances
-  Player_1: # Player_1 instance
-    AMI_ID: ami-e720ad8e  #image to be installed
-    IP_Address: 10.0.128.21
-    Groups:
-      - Team_1 # list of groups
-    Software: # list of software groups
-      - Player_node_1_sw
+  # List of Monitoring units.
+  #
+  # EDURange is only able to capture traffic between monitoring units, not within.
+  #
+  # Use this fact when designing scenarios. A monitoring unit for competing players may be fine if
+  # they are not allowed to communicate to each other.
+  #
+  # Each monitoring unit has a CIDR block which it occupies. This can range from
+  # a /17 to a /27 on AWS (28 technically, but we cannot bridge VPCs using anything smaller
+  # a /27 as we need to implicitely create a VPN/NAT subnet)
+Monitoring_Units: 
+  Monitoring_Unit_1:
+    CIDR_Block: 10.0.0.0/23
+    Subnets:
+      Control: # Required control block
+        CIDR_Block: 10.0.1.0/24
+      Players_Subnet:
+        ACL:
+          - {all: '10.0.2.0/24'} # [tcp|udp|all]: [cidr_block]
+        CIDR_Block: 10.0.0.0/24
+        Instances:
+          Team_1_Node:
+            IP_Address: 10.0.0.3
+            Roles:
+              - attacker
+          Team_2_Node:
+            IP_Address: 10.0.0.4
+            Roles:
+              - attacker
+          Team_3_Node:
+            IP_Address: 10.0.0.5
+            Roles:
+              - attacker
+          Team_4_Node:
+            IP_Address: 10.0.0.6
+            Roles:
+              - attacker 
+          Team_5_Node:
+            IP_Address: 10.0.0.7
+            Roles:
+              - attacker
 
-  Player_2: # Player_2 instance
-    AMI_ID: ami-e720ad8e  #image to be installed
-    IP_Address: 10.0.128.37
-    Groups:
-      - Team_2 # list of groups
-    Software: # list of software groups
-      - Player_node_1_sw
 
-  Player_3: # Player_3 instance
-    AMI_ID: ami-e720ad8e  #image to be installed
-    IP_Address: 10.0.128.53
-    Groups:
-      - Team_3 # list of groups
-    Software: # list of software groups
-      - Player_node_1_sw
+  # To monitor the traffic to our battlespace instances
+  Monitoring_Unit_2:
+    CIDR_Block: 10.0.2.0/23
+    Subnets:
+      Control: # Required control block
+        CIDR_Block: 10.0.3.0/24
+      Battlespace_Subnet:
+        CIDR_Block: 10.0.2.0/24
+        Instances:
+          Victim_1:
+            IP_Address: 10.0.2.1
+            Roles: 
+              - web_server
+          Victim_2:
+            IP_Address: 10.0.2.3
+            Roles: 
+              - dns_server
+          Victim_3:
+            IP_Address: 10.0.2.6
+            Roles: 
+              - web_server
+          Victim_4:
+            IP_Address: 10.0.2.91
+            Roles: 
+              - web_server
+          Victim_5:
+            IP_Address: 10.0.2.34
+            Roles: 
+              - web_server
+          Victim_6:
+            IP_Address: 10.0.2.66
+            Roles: 
+              - web_server
+          Victim_7:
+            IP_Address: 10.0.2.71
+            Roles: 
+              - web_server
+          Victim_8:
+            IP_Address: 10.0.2.103
+            Roles: 
+              - web_server
+          Victim_9:
+            IP_Address: 10.0.2.120
+            Roles: 
+              - web_server
+          Victim_10:
+            IP_Address: 10.0.2.99
+            Roles: 
+              - web_server
+          Victim_11:
+            IP_Address: 10.0.2.105
+            Roles: 
+              - web_server
+          Victim_12:
+            IP_Address: 10.0.2.41
+            Roles: 
+              - web_server
+          Victim_13:
+            IP_Address: 10.0.2.45
+            Roles: 
+              - web_server
+  
 
-  Player_4: # Player_4 instance
-    AMI_ID: ami-e720ad8e  #image to be installed
-    IP_Address: 10.0.128.69
-    Groups:
-      - Team_4 # list of groups
-    Software: # list of software groups
-      - Player_node_1_sw
-
-  Player_5: # Player_5 instance
-    AMI_ID: ami-e720ad8e  #image to be installed
-    IP_Address: 10.0.128.85
-    Groups:
-      - Team_5 # list of groups
-    Software: # list of software groups
-      - Player_node_1_sw
-
-
-  Recon_battle_node_1:  # instance of target host
-    IP_Address: 10.0.0.4
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_2:  # instance of target host
-    IP_Address: 10.0.0.9
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_3:  # instance of target host
-    IP_Address: 10.0.0.12
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_4:  # instance of target host
-    IP_Address: 10.0.0.17
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_5:  # instance of target host
-    IP_Address: 10.0.0.27
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_6:  # instance of target host
-    IP_Address: 10.0.0.55
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_7:  # instance of target host
-    IP_Address: 10.0.0.87
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_8:  # instance of target host
-    IP_Address: 10.0.0.127
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_9:  # instance of target host
-    IP_Address: 10.0.0.168
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_10:  # instance of target host
-    IP_Address: 10.0.0.174
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_11:  # instance of target host
-    IP_Address: 10.0.0.190
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_12:  # instance of target host
-    IP_Address: 10.0.0.209
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-  Recon_battle_node_13:  # instance of target host
-    IP_Address: 10.0.0.251
-    AMI_ID: ami-e720ad8e  # image to be installed
-    Software:  # list of software groups
-      - Battle_node_1_sw
-
-Groups:  #user names and passwords
+Groups:  #List of all of the groups. Can
   Team_1: 
-    - { login: stefanboesen, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZOg/RVwsrNvDuCETa1wTaQynNOBFVQIVbzZ4PnMUh+5XlYA40Z4AJ5Yzd6VhuH6vCqnsil2saPsedJK1Me7dl5P08Drqhhf2RbBUW9ZYE2VvtpneZXSGneL70NRJgnoCV55IMY4Btf+3vCV0Ddog5uXkH/Zkgxl3fI5E/6wF82JizMF1BQlg0N7vdWnPbqkn82/VYsIXK0jo8pXFrxjli1jfLN9y/UWL8b5AGpfr5punMWVqh+FsAThPd7sbbu//HRguocZRBSaaDJ8H7qVWJNPPWKecR12AViPjnmFkUMZMPObQWrIOTRyTOcSr5vU1fAxPVWSwFhELtLmxsy7hh stefanboesen@Derp'}
-    - { login: edurange_1, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzgG7S4JstbGvE2tbSp0N1kXWx6ODuG8xgfAGdhzlh0pSCOh16WPsTJzp3Rp3WT0Kd2JOAtTyOeHuvx5W6yA0lJdgSJv2s8FCrT4rE4Ggy53tEYuI93VXxsYRPBoG+H8/COtC6l6vEIPbL4vHymDECwhzjCzKKWDIQuwcGSOuXu0wI+IH72c72hZbYZ9SKPgYO5lMTVO8rK0Sh8JY+8xXuHQ8X9f+d5DGtMmM0Y3f6IUaadv7fe80K9b3W4qIQB9Fv0uCZzucahasytpNuy+4+Xz2G9fPaSRlJb2Z6NsbdWeJcmK5FQEJMQ1pP7BPElhU0baabLO0LeVowfzs3Ujwp stefanboesen@MBA.local'}
-    - { login: edurange_2, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIYsHQlq/ahrae3fLJaY8dDNfXepZ75L7I/ZMJHZTRhhAKliVDqWWgbL3VTobwMYmlhfHJrzuV/iBCrnzS+HKonO6KdZwdyd2K6G6sGUkHe6OYFNRmjDcRiT6KIaJLC5EVO8Ai7JGfDpQX1CkDJvgzUvFUCUFp0wkHIrTNj7pTFyWhX9XstFHLSmls1tOsoLbC4Kf4SntDaRcONB4ReP1st2XzXT0/+5Qpj3eCV4R+SqFqt791QyZu1NIPoeRT8V7bMG+WvlyVE7G/aRNGjmgoMHRDK8kQTdHl/xSgCfO7kKneYQTcnxjyL9BZ+Npu1fby9KmNqWs0PahIbXFnxGNL stefanboesen@MBA.local'}
-    - { login: edurange_3, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFibHS8X9FiDW1lqaIvk6jVtmCMhwIitx1hFwAfGoaSp+h4et2w3c8ZwkI9I6PKf41Y5FRGnsNfpdHN4Moncbof3y6kzT2IEnaCWnpxnJ1lIp+OKazTogKcT9wT6os7/qWfnbTrbwb/c/NaQ++bvijOBIdPOvskCLC/2HeD0DJW2LR9LsPEj2nt/apDO7sYhkh4Lh1FmS6D0Ucn/J8egxFDiLcKzxpo38zi0ytD7sT2viBXbzKrXKmwvVaL6EQkk0MqkeiGqk6jbYuywUaYx9oYAgCa90WeH+MtgpTqiDAuROFyCMwC37nwE61NhujNVraZGMvK6G5J0yhqZcFNyap stefanboesen@MBA.local'}
+    Access:
+      - { Team_1_Node: administrator }
+    Users:
+      edurange_1:
+        # pass_file: 'ssh-rsa...
+        # or have it generated and output team passwords at the end.
+      edurange_2:
+      edurange_3:
 
   Team_2:
-    - { login: edurange_4, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4OAw7lBb6HYCk/G8K/t/FJgnv1ZnX0SA7qOBtYGYd7Ht76G1oDkK51YY+APg0r4ZnbrKsvgMgVlZztRoCiUoXhFBffjnNlSL8ip09ZRJx76TFVVibjfkq1Rj0ltz95EK/QuV1+vSofmULLYsPqyvrHOeCJwCH7l+hlxpcwGjLAofV3AKDI5YP1gg3H8q6x2y51DQb+VAz5rAn9ObSudumDHioG8Bxi3QQ8v/sZVTowLu6CuazQl1ZaEsWqh8CrOpe5s+ZP2H/vwji0Qjydt/d5n9ejmLFLHOvgFtLrSSfhGbggtVMyTyuDpcUn5DBzq61pPuWOjCX6T6Yd2yYr3rn stefanboesen@MBA.local'}
-    - { login: edurange_5, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCy9/fcN/Qc5FmnvfX2VrUxcuNuEyWH/9p8xc4N1aTLsQs0DyzDqXorqq1jDUFN8UeLV31V74M80XHiBxu71n3lpWS+9k2P1fVONl/AiBnWmj9oO5BU+eAT3omCgrMQ8qghBbrvFtfC49ye2nyADU40/m/7MCsArvlvSwEtP+6NgEncVnuigdD6pBABMnJqlHMn9faCfj9Lg+qYdtphctvjh1QHXyyEZPrcIOVf5rrKHr4ohc8zEI/+4Dx3sJN/H2ufF4G0HY/PRQjnbgQAWWhodVXtRKL3vdsBpRNBW7h+AN2IBPQoqb0HGM+v294aJMXAbqldjuWc2S2oEO6IcPpH stefanboesen@MBA.local'}
-    - { login: edurange_6, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxxW80yhjvg+Sel59itzi+TN2X2TwRyGmzo4ZuhpgZ4mQR9jfPp0DmJb46Sl1eEXYOdTjY9Ok1VJEgUPtfDo/yD+WQ3YZiPQ6nLhDb+HwKpyPSbKaxmYmPezgtYWLxex2W/x+PF1rBV8JULKZjV5aJIT9Xkbzhd2E3XMvgFb/Xd522IS1N/MRvECiALWlx6PyQ+4M58VPFQTXqf4uP6gWODw7Tnr7m+AGFrmEIG3uVggveVpSMvX74wDdz+QZSWvE2lssqpwEVph6Dsg+r9ql6mohjB7R5NRSYH1m8Pg8L9n/GVo+J+A87pKM1v7q1TVrc7li8tZ0D92s9nc+gxIxD stefanboesen@MBA.local'}
+    Access:
+      - { Team_2_Node: administrator }
+    Users:
+      edurange_4:
+      edurange_5:
+      edurange_6:
 
   Team_3:
-    - { login: edurange_7, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVfOcr+U7JcsHpjox1K9M9hXSiDx+T433Tte4UNmDFVLoIeJJpSIFY6y65Q08u/VO64zRZ2CgWUKPkNfwGPxUCDqz2y/x3g/0SQk6piGOqCqpEl0nn9t6tCuz+6YiQL+045HjgbyoepqAFElZ/uK3CRtBjnrhdde3lz2kyDWEIrz/DitAxaCIDSPpNVZtSHJjRjBCKyvNVUSqaeBdOFWWIdTGZtyqKIjk94mR7+b6lEEN6zfNE+ZXySud5+McZU6NHvMLj9gBcC417xFmE47YKVGfB5Rkz2zXBThOEWIEvtiXaqe9EYX//7P1QGbEIDrYpt3nO4HVMWj1U+WKyv+O7 stefanboesen@MBA.local'}
-    - { login: edurange_8, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC9VLl8smo4uEoUmfjVy8FqgjwI61IUs4yilY5QEFuaexC45YxVZezDRuTfTCPTrH3+3g/yr/Q1d8oT3fzRVt49YvtoeIvrbqCWfCEVRNwxBZdkbec/qTrFY5l6eZc5WgCY6ICK1y4+R+CB/WmqkRGkwc3VjicxSpCuw3X5KE5kaM8mOoz+IK2wVAcHOS8e8P/0sa0IbwDeY4Ra1M5uvwAvpdzEUbdt4p9etvPWv3GF8X0QbAgl5maMk2VaCuZ3WVVouNdCzux5FwpokBBlkMK/h3gD+eZEOfmpL1EKRIrFPzVWOdPQxjKlQhrPK9oW7tDmdfZD8Xl/WhfqoJI35mLt stefanboesen@MBA.local'}
-    - { login: edurange_9, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDB76mgqbMbxOYZOxuUn6RN0EsHBXCpV8DSfATMqEbXfnkmJ+HaxDEJlrCdPZvrcFrxRvX2ubpcjDsx+VS7BQq2s5hLYL20v7Ycs7nsG7GZSkBz58Y46DYyZ+1nEsAumZxuVvTbeHZx3P3Fi/GuA9+URWYE254b3bAYWntoWWtjdV2RBgxGnyUmJezIxL7f7i3jItyE27iKk2RWrCEGiJ5D1niFciqbSgEQDw44Mm1rl8HIGo+qDv+Tn3dMtOlXNMii6dHLQ3A/BkJjhiM78JlJZ0oFEdk6NW/lb/jz00AtA+4FlBLuwwStvsX0TN7BU0zWoN4VlPSW3MsyNBRJvL6/ stefanboesen@MBA.local'}
+    Access:
+      - { Team_3_Node: administrator }
+    Users:
+      edurange_7:
+      edurange_8:
+      edurange_9:
 
   Team_4:
-    - { login: edurange_10, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzvqeJiajt2M89Y7nL45O9N5b1n4iIONDl29IqnQaUb/7Ko9WO/FwNOZJ5rLojPtUdqO33qWbMWiQoDzgk7Yu+V9CTm1q8dn02ozbG00arwvPZ8xuury+eZiAnxj/NsxeWzmZBK5LDkZh2KgOvxgHQ2rXugefpozfypeKKYMZc3aubLTu2amz4E+/03d1IcJLn/awVaNrEQbzqZbG8SfOEN/ahqxH5Z53JqnmOjPzb1Jp17Q1cAz7MXg+kPD7N7ZV04FPGWi3nSetUu5DD3dm0Vc73PoHcJvsvdK+l0FBLkm+LBHCwECd+rWuGH+HpSvRiq+axCTs3mROIeDHkMFrv stefanboesen@MBA.local'}
-    - { login: edurange_11, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8c7HCofXtQ2BZDbV/hfTJtQ8s6FPAPwJOb8cLHFu6bRDOVz9EAixqV380/kfhxwUKZ4h9aaBCEc/pTh4sJaaF1SnVYwh8Geg0GBPpo4ITWbzeEMgjlJYdHo0DwtW2ZU2RZQH8G0FleJ8UMjj0OiBpJ2zUovu8Lp24q78pxVh8N4ZYOgZ/0NFA2UICHQV8FSIYJXhBdedsJr+ywJj/OvF6SM4r/uod9uL+F0mex3K3gs/qhn8dXWZuYJCa66im646kRmzUAhIxwz07qNWdu57uqZER8zIoSTXfwnsmu6SwAcTKIpuSKUtJ7EZhUEA3ms/abrkeDGaXpA+mht601Egj stefanboesen@MBA.local'}
-    - { login: edurange_12, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDEHXFp9SqJt0JnZsCZpWzM/d/01YvmokoYRSdM17h75dWleNe3mbw9eWjM+Xdl0hEGs0aTAL7P86VAwZUpHfrkJMqOPv3lChs64zAfgEHMLrxg9QCIuuxWDGI5OOQ85j5fdyw9Fc/sou5Sb09EUfCnTpWFk5Aniej2+TZi6ulFJ4k9asM6G+ufDbsv5nz+K0MmMPfGk4KdM6nuw9WEp+HxP/lFW8CHOTupuLXqZfcsC85emE8RUIOXicTNsu13oeIhmW5utwra+fuMQ1UYYcylDfOwoKidTZ9oXA0lnAyf+ZQrRPvukIIAgUU5JryDlzIJsA5FddszpHLWvrwWbvTR stefanboesen@MBA.local'}
+    Access:
+      - { Team_4_Node: administrator }
+    Users:
+      edurange_10:
+      edurange_11:
+      edurange_12:
 
   Team_5:
-    - { login: edurange_13, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDX+Yuv5rwfiMscWgyqXrJNhr4ryplPYGpMB9kPX6y5ojs/bDcm9mviajimU0iS/ajxM/v5mShm987vp3H40ALd1pVDj8jdCaJfLvowAP/I31Hl0Q1J5krqQs3bSP3LrGSe0ApMou1/ANQFcPKLdrWnmqLnfEZXFhXGAub0w/NwTCbCK13VU8I3Pjs3PpxjPMuYevQy5yWJYesX2+8SkZLVBMg0onQ0+a0c0F26eTj0JRCFkRhUxzSjVjTtZndfsIuuFQO8WpNb030pdWnaC8vyu6yxLuDCLLq/H9VvykczadEbYWYpcSOYOOhI6MqJKVmP/q4Np3VJI7BXJKYAO3gH stefanboesen@MBA.local'}
-    - { login: edurange_14, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCs/WRWU93zjvfYIut5j4WEmvMQVHlyU8bsEBJJSNTxOeolgln5RA0y5iHmtKhnzDXmSPunW46z84xl1DVLY8eY3vJiUVzx4DRDykxHgga5f/FEqfW65N6jhagv6Ai9ir1tGIvHrAMXVuUuEY1fkosUrRJxZyrcn/wUwy+pHH3ApdKrIRIGQ498stbNRQrJnwoFZqnGd8ISpx7LBcfZWKpCPfecGTK36sxNA1aSinytuW7uM9byLdUVuMP9K3nwyoDIaOjLUqODYc+oJjrjCBsdRrRVl8UfIC6R7bqKGA+TJsSMUK7tjIxVgnVwLihP+ztvYw9+O7WnovEUkR96kCv9 stefanboesen@MBA.local'}
-    - { login: edurange_15, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUSf8dppIHWHDJ9KdWi4NkDJZjeP0/27vYEiMtoXhxTZx/sEtVYXX1rMPT1mdfinijF8pCzq3voelIw/0DaVAVaPuIyMUuiof1NH9xDkRI0xOzgJY/9QFyBuCoIinB4Gk2ePHO3ZjKLelwLk9z3zTg4ZIffbcBKnlBuI+hTO57zArV9aG/0gwAk9RSdujQFTZcxHbs2XXhTaKUzJ70PxkWJQoFT/pZfUDX0gvo+QzQUJTbZB3y/76krC/t5yLxgBnnVaQJmldS9WuJGaATkGfdOvsfSVL9bqlPq6KPyDAORa2qvQ988tBkghoAWrv5Vxm+sKrNfq6n6X/zacAomfDr stefanboesen@MBA.local'}
-    - { login: edurange_16, pass_file: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDG+Vr9NMomeXCYuJ+lKvzdkiVMicC7mBLkwqVL9a2zGK6wa0nuAXk9JLC3DH71Ba0jcgE3eAd/vK0Fxgd8r4xHIehOJnD2KaUTCUAKc5afFM30sgrNVIBdx9tttxbjTz8GpLLnGkikHvWbVeBQ0sdL1imJZGx9xXkb9SP5Gs8EG0kfG2ujkLHmPCF4VkZWO2nqC/pWrzFS3JaqDemyy0lGyuPnHYe5Fm5aZffcjYYiIy87V0wCGKnx+fLIujMpvsFfIejVgXNbKfjojg7daA/tYQSBkJgYMmEBjCEPDlFiCqAqWvPwdHgFZICZ6G9LEEok0RjBM0/V/XrCFoGdbjst stefanboesen@MBA.local'}
+    Access:
+      - { Team_5_Node: administrator }
+    Users:
+      edurange_13:
+      edurange_14:
+      edurange_15:
 
-Software:
-  Battle_node_1_sw:  # randomly generated on the following ports -- http, ssh, ftp, bind, telnet (80, 20-21, 22, 23, 53) smb, bonjour
-    Packages:
-      - apache2
-  Player_node_1_sw:
+  Administrator:
+    Access:
+      - { Team_1_Node: administrator }
+      - { Team_2_Node: administrator }
+      - { Team_3_Node: administrator }
+      - { Team_4_Node: administrator }
+      - { Team_5_Node: administrator }
+    Users:
+      stefanboesen:
+
+Roles:
+  attacker:
     Packages:
       - nmap
+  web_server:
+    Packages:
+      - apache2 
+  dns_server:
+    Packages:
+      - bind9
 
 
-VPC_Mask: 10.0.0.0/16
-Subnets:
-    # these players can cooperate
-   - Subnet_1: 10.0.128.16/28
-     Instances: 
-       - Player_1
-   - Subnet_2: 10.0.128.32/28
-     Instances: 
-       - Player_2
-   - Subnet_3: 10.0.128.48/28
-     Instances: 
-       - Player_3
-   - Subnet_4: 10.0.128.64/28
-     Instances: 
-       - Player_4
-   - Subnet_5: 10.0.128.80/28
-     Instances: 
-       - Player_5
-
-   - Subnet_6: 10.0.0.0/24
-     Instances:
-       - Recon_battle_node_1
-       - Recon_battle_node_2
-       - Recon_battle_node_3
-       - Recon_battle_node_4
-       - Recon_battle_node_5
-       - Recon_battle_node_6
-       - Recon_battle_node_7
-       - Recon_battle_node_8
-       - Recon_battle_node_9
-       - Recon_battle_node_10
-       - Recon_battle_node_11
-       - Recon_battle_node_12
-       - Recon_battle_node_13
-
-   # Implicit nat subnet
-
-Network:  #links and subnets
-  - Link_1: 
-    - Subnet_1
-    - Subnet_6
-  - Link_2: 
-    - Subnet_2
-    - Subnet_6
-  - Link_3: 
-    - Subnet_3
-    - Subnet_6
-  - Link_4: 
-    - Subnet_4
-    - Subnet_6
-  - Link_5: 
-    - Subnet_5
-    - Subnet_6
