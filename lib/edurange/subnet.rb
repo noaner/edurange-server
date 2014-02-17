@@ -1,12 +1,26 @@
 module Edurange
   class Subnet < ActiveRecord::Base
-    belongs_to :monitoring_unit
+    belongs_to :cloud
     has_many :instances
-    def allow_traffic(cidr, options)
-      # cidr = '10.0.0.0/24'
-      # options = { all: :all, tcp: :ssh, ...}
+    binding.pry
+    validates_presence_of :cloud, :cidr_block
+
+    def boot 
+      self.provider_boot
+      self.instances.each do |instance|
+        instance.boot
+      end
     end
-    def assign_ip(method = :random)
+    def execute_when_booted
+      # Fork
+      # Poll self.booted?
+      # if true: yield
+      dispatch do
+        until self.booted?
+          sleep 2
+        end
+        yield
+      end
     end
   end
 end

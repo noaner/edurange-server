@@ -1,5 +1,7 @@
 module Edurange
   class Group < ActiveRecord::Base
-    has_and_belongs_to_many :players
+    has_many :instance_groups
+    has_many :instances, through: :instance_groups
+    has_many :players
   end
 end

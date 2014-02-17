@@ -13,9 +13,8 @@ ActiveRecord::Migration.create_table :scenarios do |t|
 end
 
 # Monitoring Units
-ActiveRecord::Migration.create_table :monitoring_units do |t|
+ActiveRecord::Migration.create_table :clouds do |t|
   t.string :cidr_block, null: false
-  t.boolean :control, null: false, default: false
   t.references :scenario, null: false
   t.timestamps
 end
@@ -24,13 +23,14 @@ end
 ActiveRecord::Migration.create_table :subnets do |t|
   t.string :cidr_block, null: false
   t.boolean :control, null: false, default: false
-  t.references :monitoring_unit, null: false
+  t.boolean :internet_accessible, null: false, default: false
+  t.references :cloud, null: false
   t.timestamps
 end
 
 # Instances
 ActiveRecord::Migration.create_table :instances do |t|
-  t.string :ip, null: false
+  t.string :ip_address, null: false
   t.string :os, null: false
   t.boolean :internet_accessible, null: false, default: false
   t.references :subnet, null: false
@@ -45,7 +45,7 @@ ActiveRecord::Migration.create_table :roles do |t|
 end
 
 # Instances_Roles
-ActiveRecord::Migration.create_table :instances_roles do |t|
+ActiveRecord::Migration.create_table :instance_roles do |t|
   t.references :instance, null: false
   t.references :role, null: false
   t.timestamps
@@ -56,7 +56,7 @@ ActiveRecord::Migration.create_table :groups do |t|
   t.string :name
   t.timestamps
 end
-# Users
+# Players
 ActiveRecord::Migration.create_table :players do |t|
   t.string :login, null: false
   t.string :ssh_key, null: false
@@ -65,7 +65,7 @@ ActiveRecord::Migration.create_table :players do |t|
 end
 
 # Instances_Groups
-ActiveRecord::Migration.create_table :instances_groups do |t|
+ActiveRecord::Migration.create_table :instance_groups do |t|
   t.references :group, null: false
   t.references :instance, null: false
   t.boolean :administrator, null: false, default: false

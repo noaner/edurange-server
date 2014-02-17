@@ -1,8 +1,16 @@
 module Edurange
-  # Define basic logging functions
-  def ridley
-    ridley_connection ||= Ridley.from_chef_config(Settings.knife_path, { ssl: { verify: false } } )
+  def pool
+    @pool ||= Thread.pool(Settings.max_threads)
   end
+  def dispatch
+    @pool.process do
+      yield
+    end
+  end
+  def wait_for_jobs
+    @pool.shutdown
+  end
+  # Define basic logging functions
   def debug(message)
     Edurange.logger.debug message
   end
@@ -14,10 +22,6 @@ module Edurange
   end
 
   class Helper
-    def self.dry_run
-      AWS.stub!
-      # Stub individual things required
-    end
     def self.generate_ssh_keys_for(players)
       players.each do |player|
         `rm id_rsa id_rsa.pub 2>/dev/null`

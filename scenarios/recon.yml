@@ -1,108 +1,25 @@
-  # List of Monitoring units.
-  #
-  # EDURange is only able to capture traffic between monitoring units, not within.
-  #
-  # Use this fact when designing scenarios. A monitoring unit for competing players may be fine if
-  # they are not allowed to communicate to each other.
-  #
-  # Each monitoring unit has a CIDR block which it occupies. This can range from
-  # a /17 to a /27 on AWS (28 technically, but we cannot bridge VPCs using anything smaller
-  # a /27 as we need to implicitely create a VPN/NAT subnet)
-Monitoring_Units: 
-  Monitoring_Unit_1:
-    CIDR_Block: 10.0.0.0/23
-    Subnets:
-      Control: # Required control block
-        CIDR_Block: 10.0.1.0/24
-      Players_Subnet:
-        ACL:
-          - {all: '10.0.2.0/24'} # [tcp|udp|all]: [cidr_block]
-        CIDR_Block: 10.0.0.0/24
-        Instances:
-          Team_1_Node:
-            IP_Address: 10.0.0.3
-            Roles:
-              - attacker
-          Team_2_Node:
-            IP_Address: 10.0.0.4
-            Roles:
-              - attacker
-          Team_3_Node:
-            IP_Address: 10.0.0.5
-            Roles:
-              - attacker
-          Team_4_Node:
-            IP_Address: 10.0.0.6
-            Roles:
-              - attacker 
-          Team_5_Node:
-            IP_Address: 10.0.0.7
-            Roles:
-              - attacker
+# a /17 to a /27 on AWS (28 technically, but we cannot bridge VPCs using anything smaller
+# a /27 as we need to implicitely create a VPN/NAT subnet)
+Scenario:
+  CIDR_Block: 10.0.0.0/16
+  Goals:
+      
 
+Instances:
+  Victim_1:
+    IP_Address: 10.0.1.23
+    Roles:
+      - net_stuff
+  Victim_2:
+    IP_Address: 10.0.2.45
+    Roles: 
+      - web_server
 
-  # To monitor the traffic to our battlespace instances
-  Monitoring_Unit_2:
-    CIDR_Block: 10.0.2.0/23
-    Subnets:
-      Control: # Required control block
-        CIDR_Block: 10.0.3.0/24
-      Battlespace_Subnet:
-        CIDR_Block: 10.0.2.0/24
-        Instances:
-          Victim_1:
-            IP_Address: 10.0.2.1
-            Roles: 
-              - web_server
-          Victim_2:
-            IP_Address: 10.0.2.3
-            Roles: 
-              - dns_server
-          Victim_3:
-            IP_Address: 10.0.2.6
-            Roles: 
-              - web_server
-          Victim_4:
-            IP_Address: 10.0.2.91
-            Roles: 
-              - web_server
-          Victim_5:
-            IP_Address: 10.0.2.34
-            Roles: 
-              - web_server
-          Victim_6:
-            IP_Address: 10.0.2.66
-            Roles: 
-              - web_server
-          Victim_7:
-            IP_Address: 10.0.2.71
-            Roles: 
-              - web_server
-          Victim_8:
-            IP_Address: 10.0.2.103
-            Roles: 
-              - web_server
-          Victim_9:
-            IP_Address: 10.0.2.120
-            Roles: 
-              - web_server
-          Victim_10:
-            IP_Address: 10.0.2.99
-            Roles: 
-              - web_server
-          Victim_11:
-            IP_Address: 10.0.2.105
-            Roles: 
-              - web_server
-          Victim_12:
-            IP_Address: 10.0.2.41
-            Roles: 
-              - web_server
-          Victim_13:
-            IP_Address: 10.0.2.45
-            Roles: 
-              - web_server
-  
+Subnets:
+  Gateway_Subnet:
+    CIDR_Block: 10.0.0.0/24
+  Instances_Subnet:
+    IP_Address: 10.0.0.0/17
 
 Groups:  #List of all of the groups. Can
   Team_1: 
@@ -110,10 +27,11 @@ Groups:  #List of all of the groups. Can
       - { Team_1_Node: administrator }
     Users:
       edurange_1:
-        # pass_file: 'ssh-rsa...
-        # or have it generated and output team passwords at the end.
+        password: 'abcd'
       edurange_2:
+        password: 'abcd'
       edurange_3:
+        password: 'abcd'
 
   Team_2:
     Access:
@@ -156,6 +74,7 @@ Groups:  #List of all of the groups. Can
       - { Team_5_Node: administrator }
     Users:
       stefanboesen:
+        password: 'supersecure'
 
 Roles:
   attacker:

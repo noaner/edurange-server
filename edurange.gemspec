@@ -25,4 +25,5 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "chef"
   gem.add_runtime_dependency "activerecord"
   gem.add_runtime_dependency "sqlite3"
+  gem.add_runtime_dependency "thread"
 end

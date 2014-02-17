@@ -31,11 +31,14 @@ module Edurange
             puts "Deleting instance #{instance}"
           end
         end  
+        vpc.instances.each do |instance|
+          if instance.status = :pending
+            sleep 2
+          else
+            puts instance.status
+          end
+        end
 
-        # Waiting 
-        sleeptime = 60
-        puts "Waiting #{sleeptime} seconds for instances to terminate"
-        sleep(sleeptime)
 
         if vpc.security_groups
           vpc.security_groups.each do |security_group|

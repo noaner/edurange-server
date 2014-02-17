@@ -1,30 +1,38 @@
 require 'factory_girl'
 FactoryGirl.define do
-  sequence(:vpc_id) { |i| "vpc-#{i}" }
+  factory :player do 
+    sequence(:login) { |i| "player_#{i}" }
+  end
+  factory :group do 
+    sequence(:group_names) { |i| "group_#{i}" }
+    factory :group_with_three_players do
+      before(:create) do |group|
+	create(:player, group: group)
+	create(:player, group: group)
+	create(:player, group: group)
+      end
+    end
+  end
   factory :instance do
-    name "Test Instance"
-    ami_id "ami-e720ad8e"
-    ip_address "10.0.128.21"
-    factory :nat_instance do
-      is_nat true
-      ip_address "10.0.128.5"
-    end
-    uuid { `uuidgen` }
+    os 'ubuntu'
+    ip '10.0.0.4'
   end
-  # Plain old subnet
   factory :subnet do 
-    cidr_block "10.0.128.16/28"
-    # Running nat subnet with instance
-    factory :nat_subnet do
-      cidr_block "10.0.128.0/28"
-      is_nat true
-    end
-    factory :running_subnet do
-      running true
+    cidr_block '10.0.0.0/24'
+    before(:create) do |subnet|
+      subnet.instances << FactoryGirl.build(:instance, subnet: subnet)
     end
   end
-  # Plain old cloud
-  factory :cloud do
-    cidr_block "10.0.0.0/16"
+  factory :monitoring_unit do 
+    before(:create) do |monitoring_unit|
+      monitoring_unit.subnets << FactoryGirl.build(:subnet, monitoring_unit: monitoring_unit)
+    end
+  end
+  factory :scenario do
+    game_type :recon
+    name "edurange test 1"
+    before(:create) do |scenario|
+      scenario.monitoring_units << FactoryGirl.build(:monitoring_unit, scenario: scenario)
+    end
   end
 end
