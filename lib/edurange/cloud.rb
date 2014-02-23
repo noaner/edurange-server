@@ -11,9 +11,13 @@ module Edurange
     def boot
       self.provider_boot
       execute_when_booted do
+        info "Cloud booted."
+        info self.subnets
         self.subnets.each do |subnet|
+          info "Booting subnets"
           subnet.boot
         end
+        info "Subnets booted."
       end
     end
     def execute_when_booted
@@ -21,7 +25,9 @@ module Edurange
       # Poll self.booted?
       # if true: yield
       dispatch do
+        sleep 2
         until self.booted?
+          puts "Cloud not booted, sleeping."
           sleep 2
         end
         yield

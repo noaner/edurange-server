@@ -15,6 +15,7 @@ end
 # Monitoring Units
 ActiveRecord::Migration.create_table :clouds do |t|
   t.string :cidr_block, null: false
+  t.string :driver_id
   t.references :scenario, null: false
   t.timestamps
 end
@@ -22,6 +23,7 @@ end
 # Subnets
 ActiveRecord::Migration.create_table :subnets do |t|
   t.string :cidr_block, null: false
+  t.string :driver_id
   t.boolean :control, null: false, default: false
   t.boolean :internet_accessible, null: false, default: false
   t.references :cloud, null: false
@@ -31,6 +33,7 @@ end
 # Instances
 ActiveRecord::Migration.create_table :instances do |t|
   t.string :ip_address, null: false
+  t.string :driver_id
   t.string :os, null: false
   t.boolean :internet_accessible, null: false, default: false
   t.references :subnet, null: false

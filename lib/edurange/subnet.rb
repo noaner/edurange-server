@@ -2,13 +2,16 @@ module Edurange
   class Subnet < ActiveRecord::Base
     belongs_to :cloud
     has_many :instances
-    binding.pry
     validates_presence_of :cloud, :cidr_block
 
     def boot 
+      info "In Subnet Boot"
       self.provider_boot
-      self.instances.each do |instance|
-        instance.boot
+      execute_when_booted do
+        info "Subnet booted."
+        self.instances.each do |instance|
+          instance.boot
+        end
       end
     end
     def execute_when_booted

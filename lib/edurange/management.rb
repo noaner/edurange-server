@@ -74,8 +74,9 @@ module Edurange
 
         if vpc.internet_gateway
           puts "Deleting internet gateway #{vpc.internet_gateway.internet_gateway_id}"
+          igw = vpc.internet_gateway
           vpc.internet_gateway.detach(vpc)
-          vpc.internet_gateway.delete
+          igw.delete
         end
 
         if vpc.network_acls

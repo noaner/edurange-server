@@ -1,0 +1,6 @@
+<% players.each do |player| %>
+user_account '<%= player.login %>' do
+  password '<%= player.password_hash %>'
+  action :create
+end
+<% end %>

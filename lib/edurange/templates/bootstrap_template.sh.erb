@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# Install stuff for chef solo
+apt-get -y update
+apt-get -y upgrade
+apt-get -y install build-essential zlib1g-dev libssl-dev libreadline-gplv2-dev libyaml-dev libffi-dev
+apt-get -y install autoconf curl git-core bzip2 
+apt-get -y autoremove
+apt-get -y clean
+ 
+cd /usr/local/src
+wget http://www.canonware.com/download/jemalloc/jemalloc-3.5.0.tar.bz2
+tar -xvjf jemalloc-3.5.0.tar.bz2
+rm /usr/local/src/jemalloc-3.5.0.tar.bz2
+cd jemalloc-3.5.0
+./configure --prefix=/usr/local
+make && make install
+ 
+cd /usr/local/src
+wget http://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.0.tar.gz
+tar -xvzf ruby-2.1.0.tar.gz
+rm /usr/local/src/ruby-2.1.0.tar.gz
+ 
+cd ruby-2.1.0
+LDFLAGS="-L/usr/local/lib" LIBS=-ljemalloc ./configure --prefix=/usr/local --disable-install-rdoc
+LD_LIBRARY_PATH=/usr/local/lib make 
+LD_LIBRARY_PATH=/usr/local/lib make install
+ 
+gem install chef ruby-shadow --no-ri --no-rdoc --verbose
+
+# Put chef stuff in place
+mkdir -p /root/chef/cookbooks/op/recipes
+cd /root/chef
+
+# /root/chef/solo.rb
+cat << EOF > solo.rb
+root = File.absolute_path(File.dirname(__FILE__))
+
+file_cache_path root
+cookbook_path root + '/cookbooks'
+EOF
+
+# /root/chef/solo.json
+cat << EOF > solo.json
+{
+  "run_list": [ "recipe[op::default]" ]
+}
+EOF
+
+# /root/chef/cron.sh - Every 2 minutes get script on internet, place cookbooks/op/recipes/default.rb, run chef-solo
+cat << EOF > cron.sh
+#!/usr/bin/env bash
+cd /root/chef/cookbooks/op/recipes/
+curl -O <%= cookbook_url %>
+cd /root/chef
+chef-solo -c solo.rb -j solo.json
+EOF
+
+# Crontab entry - Run cron.sh every 2 minutes
+crontab -l | { cat; echo "*/2 * * * * /root/chef/cron.sh"; } | crontab -

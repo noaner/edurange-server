@@ -5,70 +5,105 @@ module Edurange
   def self.ec2
     AWS::EC2.new
   end
-  class Chef
-    # Must return http/https/ftp link to cookbook zip
+  attr_accessor :nat_instance # global nat instance. assumes there is only one
+  class Scenario
+    def final_setup
+      info "=== Final setup."
+      # Anything that needs to be performed when the environment is 100% up.
+
+      # Currently assumes there is only one NAT.
+      Subnet.all.each do |subnet|
+        @route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: subnet.cloud.driver_id)
+        info "[x] AWS_Driver::create_route_table #{@route_table}"
+        subnet.driver_object.route_table = @route_table
+        if @internet_accessible
+          # Route traffic straight to internet, avoid the NAT
+            info "NOTE: Subnet.all.each. Subnet #{subnet} adding route to igw"
+          @route_table.create_route("0.0.0.0/0", { internet_gateway: subnet.cloud.igw} )
+        else
+            info "NOTE: Subnet.all.each. Subnet #{subnet} adding route to NAT"
+          # Find the NAT instance
+          @route_table.create_route("0.0.0.0/0", { instance: Edurange.nat_instance.driver_id} )
+        end
+      end
+    end
+  end
+  class InstanceTemplate
+    # Must set self.filepath to s3/http/https url
     def provider_upload
-      s3 = ''
+      cookbook = self.generate_cookbook
+      self.filepath = S3::upload(cookbook)
     end
   end
   class Cloud < ActiveRecord::Base
-    def booted?
-      puts @driver_object.status
+    def driver_object
+      Edurange.ec2.vpcs.find(@driver_id).first
     end
-    def vpc_id
-      if @driver_object
-        @driver_object.id
-      else
-        nil
-      end
+    def booted?
+      self.driver_object.state == :available
     end
     def provider_boot
       info self.inspect
-      info "AWS_Driver::provider_boot"
+      info "AWS_Driver::provider_boot - cloud"
       # Create VPC
       if self.cidr_block.nil?
         raise "Tried to create Cloud without enough information."
       end
 
-      @driver_object = Edurange.ec2.vpcs.create(self.cidr_block)
-      debug "[x] AWS_Driver::create_vpc #{@driver_object}"
+      self.driver_id = Edurange.ec2.vpcs.create(self.cidr_block).id
+      self.save
+      info "[x] AWS_Driver::create_vpc #{@driver_id}"
 
       @igw = Edurange.ec2.internet_gateways.create
-      debug "[x] AWS_Driver::create_internet_gateway #{@igw}"
+      info "[x] AWS_Driver::create_internet_gateway #{@igw}"
       execute_when_booted do
-        @driver_object.internet_gateway = @igw
+        self.driver_object.internet_gateway = @igw
       end
     end
   end
   class Subnet < ActiveRecord::Base
+    def booted?
+      self.driver_object.state == :available
+    end
+    def driver_object
+      self.cloud.driver_object.subnets.find(@driver_id).first
+    end
     def allow_traffic(cidr, options)
       instances.each do |instance|
         instance.allow_traffic(cidr, options)
       end
     end
-    def provider_boot
-      info self.inspect
-      info "AWS_Driver::provider_boot"
-      # Create Subnet
-      @driver_object = AWS::EC2::SubnetCollection.new.create(@cidr_block, vpc_id: @cloud.vpc_id)
-      debug "[x] AWS_Driver::create_subnet #{@driver_object}"
-      @route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: @cloud.vpc_id)
-      debug "[x] AWS_Driver::create_route_table #{@route_table}"
-      @cloud.driver_object.security_groups.first.authorize_ingress(:tcp, 0..64555)
-      # TODO figure out how to only enable inbound tcp
-
-      if @internet_accessible
-        execute_when_booted do
-          @aws_object.route_table = route_table
-        
-          # Route traffic straight to internet, avoid the NAT
-          @route_table.create_route("0.0.0.0/0", { internet_gateway: @cloud.igw} )
+    def closest_nat_instance
+      # Finds the NAT instance closest to us. TODO. Currently just assumes there's one
+      Instance.all.each do |instance|
+        if instance.internet_accessible
+          # Found our NAT
+          if instance.booted?
+            return instance.driver_id
+          else
+            instance.provider_boot
+            return instance.driver_id
+          end
         end
       end
+    end
+    def provider_boot
+      info "AWS_Driver::provider_boot - subnet"
+      # Create Subnet
+      if self.cidr_block.nil?
+        raise "Tried to create Subnet without enough information."
+      end
+      self.driver_id = AWS::EC2::SubnetCollection.new.create(self.cidr_block, vpc_id: self.cloud.driver_id).id
+      self.save
+      info self.inspect
+      info "[x] AWS_Driver::create_subnet #{self.driver_id}"
 
     end
   end
   class Instance < ActiveRecord::Base
+    def driver_object
+      self.subnet.driver_object.instances.find(@driver_id).first
+    end
     def booted?
       self.driver_object.status == :running
     end
@@ -84,19 +119,61 @@ module Edurange
     def nat?
       @internet_accessible
     end
+    def key_pair
+      AWS::EC2::KeyPairCollection.new[Settings.ec2_key]
+    end
+    def ami_id
+      if self.os == 'ubuntu'
+        'ami-e720ad8e' # Basic ubuntu image
+      elsif self.os == 'nat'
+        'ami-2e1bc047' # Basic nat image
+      end
+    end
+    def upload_cookbook(cookbook_text)
+      # Set self.cookbook_url = S3 url, save, return cookbook url
+      s3 = AWS::S3.new
+      bucket = s3.buckets['edurange']
+      unless bucket.exists?
+        s3.buckets.create('edurange')
+      end
+      uuid = `uuidgen`
+      bucket.objects[uuid].write(cookbook_text)
+      cookbook_url = bucket.objects[uuid].url_for(:read).to_s
+      self.update_attributes(cookbook_url: cookbook_url)
+      return cookbook_url
+    end
 
     def provider_boot
-      # We need to:
-      # - Create 1 instance
-      @driver_object = AWS::EC2::InstanceCollection.new.create(image_id: @ami_id, private_ip_address: @ip_address, key_pair: @key_pair, subnet: @subnet.subnet_id)
-      @eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
-      if @internet_accessible
+      info "AWS_Driver::provider_boot - instance"
+      instance_template = InstanceTemplate.new(self)
+      cookbook_text = instance_template.generate_cookbook
+      self.cookbook_url = self.upload_cookbook(cookbook_text)
+      cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
+      puts self.cookbook_url
+      self.driver_id = AWS::EC2::InstanceCollection.new.create(image_id: self.ami_id, # ami_id string of os image
+                                                               private_ip_address: self.ip_address, # ip string
+                                                               key_pair: self.key_pair, # keypair object that has root
+                                                               user_data: cloud_init, # startup data
+                                                               subnet: self.subnet.driver_id).id # subnet id for where this instance goes
+      self.save
+      info self.inspect
+
+      if self.internet_accessible
+        Edurange.nat_instance = self
         execute_when_booted do
-          @driver_object.associate_elastic_ip @eip
-          @driver_object.network_interfaces.first.source_dest_check = false # Set first NIC to not check source/dest. Required in AWS to accept other machines' packets
-          @driver_object.network_interfaces
+          eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
+          info "AWS_Driver:: Allocated EIP #{eip}"
+          self.driver_object.associate_elastic_ip eip
+          self.driver_object.network_interfaces.first.source_dest_check = false # Set first NIC (assumption) to not check source/dest. Required to accept other machines' packets
         end
       end
+
+      # self.cloud.driver_object.security_groups.first.authorize_ingress(:tcp, 0..64555)
+      # Create security group.
+      # TODO figure out how to only enable inbound tcp on the NAT instance
+
+
+
     end
     def allow_traffic(cidr, options)
       # cidr = '10.0.0.0/24'

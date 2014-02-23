@@ -1,14 +1,19 @@
 module Edurange
-  def pool
-    @pool ||= Thread.pool(Settings.max_threads)
-  end
   def dispatch
-    @pool.process do
-      yield
-    end
+    @@pool ||= Thread.pool(Settings.max_threads)
+    #@@pool.process do
+    yield
+    #end
   end
   def wait_for_jobs
-    @pool.shutdown
+    until @@pool.done?
+      info "Waiting for thread pool to finish. #{@@pool}"
+      sleep 5
+    end
+    if @@pool.done?
+      info "Finished. Shutting pool down"
+      @@pool.shutdown
+    end
   end
   # Define basic logging functions
   def debug(message)

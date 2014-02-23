@@ -3,13 +3,9 @@ module Edurange
     belongs_to :group
     
     validates_presence_of :group
-    # Hooks
-    before_validation :generate_valid_ssh_key
-    def generate_valid_ssh_key
-      if self.ssh_key.nil?
-        # TODO Generate an ip from self.subnet.cidr_block.assign_address(:random) or something
-        self.ssh_key = 'ssh-rsa...'
-      end
+    def password_hash
+      # TODO Should read from a passwords.txt or something to avoid specifying anywhere. Or random generated.
+      '$1$IX4FOOoL$Ui3SypXns9r1HuWAiWdsG.'
     end
   end
 end
