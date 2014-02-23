@@ -37,7 +37,7 @@ nat_instance = nat_subnet.instances.new
 nat_instance.allow_traffic '10.0.0.0/24', ingress: {tcp: :ssh} #, egress: {all: :all}
 nat_instance.os = :nat
 nat_instance.internet_accessible = true
-nat_instance.ip_address = '10.0.128.3'
+nat_instance.ip_address = '10.0.128.5'
 nat_instance.save!
 
 
@@ -58,13 +58,13 @@ end
 
 # Create player subnet
 players_subnet = cloud.subnets.new
-players_subnet.cidr_block = '10.0.0.0/24'
+players_subnet.cidr_block = '10.0.129.0/24'
 players_subnet.save!
 
 # Create player instances
 (1..5).each do |team_num|
   instance = players_subnet.instances.new
-  instance.ip_address = "10.0.3.#{team_num}"
+  instance.ip_address = "10.0.129.#{team_num + 5}"
   instance.os = :ubuntu
   instance.roles << attacker_role
   instance.save!
@@ -83,6 +83,4 @@ players_subnet.save!
 end
 
 scenario.boot
-
 Edurange.wait_for_jobs
-
