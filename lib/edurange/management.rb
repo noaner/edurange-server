@@ -1,95 +1,117 @@
 module Edurange
   class Management
     def self.cleanup
-      # Make new ec2 object
       ec2 = AWS::EC2.new
+       
+      # get an array of virtual private clouds
+      vpc_collect = ec2.vpcs
 
-      # Make new ec2_client client object
-      ec2_client = AWS::EC2::Client.new
+      vpc_collect.each do |vpc|
 
-      # Initialize arrays
-      vpc_ids = []
-
-      # Make an array of all vpc_ids and dhcp_option_ids
-      ec2_client.describe_vpcs[:vpc_set].each do |vpc|
-        vpc_ids << vpc[:vpc_id]
-      end
-
-      # Heavy lifting using vpc_id to identify each vpc
-      vpc_ids.each do |vpc_id|
-        vpc = AWS::EC2::VPCCollection.new[vpc_id]
-
-        if vpc.instances
-          vpc.instances.each do |instance|
-            if instance.elastic_ip
-              eip = instance.elastic_ip
-              puts "Disassociating Elastic IP for #{instance}"
-              instance.disassociate_elastic_ip
-              eip.delete
-            end
-            instance.delete
-            puts "Deleting instance #{instance}"
-          end
-        end  
-        vpc.instances.each do |instance|
-          while instance.status == :pending
-            sleep 2
+        vpc.security_groups.each do |security_group|
+          unless security_group.name == "default"
+            puts "Deleting security group #{security_group}"
+            security_group.delete
           end
         end
 
+        vpc.instances.each do |inst|
 
-        if vpc.security_groups
-          vpc.security_groups.each do |security_group|
-            unless security_group.name == "default"
-              puts "Deleting security group #{security_group}"
-              security_group.delete
-            end
+          if inst.has_elastic_ip?
+            eip = inst.elastic_ip
+            puts "Disassociating Elastic IP for #{inst}"
+            inst.disassociate_elastic_ip
+            eip.delete
           end
+
+          puts "Deleting instance #{inst}"
+          inst.delete
+
+          unless inst.status == :terminated then
+            sleep(2)
+          end
+
         end
 
         if vpc.subnets
           vpc.subnets.each do |subnet|
-            puts "Deleting subnet #{subnet}"  
-            subnet.delete
-          end
-        end
-
-        if vpc.route_tables
-          vpc.route_tables.each do |route_table|
-            unless route_table.main?
-              puts "Deleting route table #{route_table}"
-              route_table.delete
+            puts "Deleting subnet #{subnet}" 
+            begin
+              subnet.delete
+            rescue Exception => e
+              puts e.message
+              puts "#{subnet}'s instance statuses are as follows:"
+              subnet.instances.each { |inst|
+                puts "#{inst} status = #{inst.status}"
+              }
+              puts e.backtrace.inspect 
             end
           end
         end
 
         if vpc.network_interfaces
           vpc.network_interfaces.each do |network_interface|
-            puts "Deleting network interface #{network_interface}"
+            puts "Deleting network interface #{network_interface.id}"
             network_interface.delete
           end
         end
 
-        if vpc.internet_gateway
-          puts "Deleting internet gateway #{vpc.internet_gateway.internet_gateway_id}"
+        vpc.route_tables.each do |route_table|
+          unless route_table.main?
+            puts "Deleting route table #{route_table.id}"
+            route_table.delete
+          end
+        end
+
+        unless vpc.internet_gateway == nil then
           igw = vpc.internet_gateway
-          vpc.internet_gateway.detach(vpc)
+          puts "Deleting internet gateway #{vpc.internet_gateway.internet_gateway_id}"
+          igw.detach(vpc)
           igw.delete
         end
 
-        if vpc.network_acls
-          vpc.network_acls.each do |network_acl|
-            unless network_acl.default?
-              puts "Deleting network acl #{network_acl}"
-              network_acl.delete
-            end
+        unless vpc.dhcp_options == nil then
+          dhcp_opt = vpc.dhcp_options
+          vpc.dhcp_options = 'default'
+          unless dhcp_opt.id == "default"
+            puts "Deleting dhcp options #{dhcp_opt.id} from vpc #{vpc.id}"
+            dhcp_opt.delete
           end
         end
-        if vpc
-          puts "Deleting VPC #{vpc}"
-          vpc.delete
+
+        unless vpc.vpn_gateway == nil then
+          puts "Deleting internet gateway #{vpc.vpn_gateway.id}"
+          vpc.vpn_gateway.delete
+        end
+
+        vpc.network_acls.each do |network_acl|
+          unless network_acl.default? then
+            puts "Deleting network acl #{network_acl.id}"
+            network_acl.delete
+          end
+        end
+
+        puts "Deleting VPC #{vpc}"
+        vpc.delete
+
+      end
+
+      vol_collect = ec2.volumes
+
+      vol_collect.each do |volume|
+        unless volume.status == :in_use then
+          puts "Deleting volume #{volume.id}"
+          volume.delete
         end
       end
+
+      elastic_ip_collect = ec2.elastic_ips
+
+      elastic_ip_collect.each do |elastic_ip|
+        puts "Deleting elastic ip #{elastic_ip}"
+        elastic_ip.delete
+      end
+
     end
   end
 end
