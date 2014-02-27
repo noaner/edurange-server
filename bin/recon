@@ -20,6 +20,7 @@ dns_server_role.save!
 
 attacker_role = Role.new
 attacker_role.packages << 'nmap'
+attacker_role.packages << 'wireshark'
 attacker_role.save!
 
 # Create cloud for our scenario
