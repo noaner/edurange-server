@@ -36,7 +36,15 @@ module Edurange
         if vpc.subnets
           vpc.subnets.each { |subnet|
             puts "Deleting subnet #{subnet}" 
-            subnet.delete
+            begin
+              subnet.delete
+            rescue Exception => e
+              puts e.message
+              puts "#{subnet}'s instance statuses are as follows:"
+              subnet.instances.each { |inst|
+                puts "#{inst} status = #{inst.status}"
+              }
+            end
           }
         end
 
@@ -91,6 +99,7 @@ module Edurange
 
       vol_collect.each do |volume|
         unless volume.status == :in_use then
+          puts "Deleting volume #{volume.id}"
           volume.delete
         end
       end
@@ -98,6 +107,7 @@ module Edurange
       elastic_ip_collect = ec2.elastic_ips
 
       elastic_ip_collect.each {|elastic_ip|
+        puts "Deleting elastic ip #{elastic_ip}"
         elastic_ip.delete
       }
 
