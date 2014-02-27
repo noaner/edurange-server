@@ -44,6 +44,7 @@ module Edurange
               subnet.instances.each { |inst|
                 puts "#{inst} status = #{inst.status}"
               }
+              puts e.backtrace.inspect 
             end
           }
         end
