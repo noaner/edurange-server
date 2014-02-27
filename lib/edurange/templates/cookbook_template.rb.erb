@@ -1,6 +1,6 @@
 # Users
 <% users.each do |user| %>
-user_account '<%= user.login %>' do
+user '<%= user.login %>' do
   password '<%= user.password_hash %>'
   action :create
 end
