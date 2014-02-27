@@ -34,6 +34,7 @@ end
 ActiveRecord::Migration.create_table :instances do |t|
   t.string :ip_address, null: false
   t.string :driver_id
+  t.string :cookbook_url
   t.string :os, null: false
   t.boolean :internet_accessible, null: false, default: false
   t.references :subnet, null: false
@@ -62,7 +63,7 @@ end
 # Players
 ActiveRecord::Migration.create_table :players do |t|
   t.string :login, null: false
-  t.string :ssh_key, null: false
+  t.string :password, null: false
   t.references :group, null: false
   t.timestamps
 end

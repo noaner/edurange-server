@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Install stuff for chef solo
+<% if instance.os == 'ubuntu' %>
 apt-get -y update
 apt-get -y upgrade
 apt-get -y install build-essential zlib1g-dev libssl-dev libreadline-gplv2-dev libyaml-dev libffi-dev
@@ -28,6 +29,27 @@ LD_LIBRARY_PATH=/usr/local/lib make install
  
 gem install chef ruby-shadow --no-ri --no-rdoc --verbose
 
+<% elsif instance.os == 'nat' %>
+export PATH=$PATH:/usr/local/bin
+yum groupinstall -y "Development tools"
+yum install -y libxml2-devel libxslt-devel
+yum install -y git
+
+
+yum install -y ruby19 ruby19-devel rubygems19 rubygem19-rdoc rubygem19-rake rubygem19-bigdecimal
+ln -sf /usr/bin/ruby1.9 /usr/bin/ruby
+ln -sf /usr/bin/gem1.9 /usr/bin/gem
+ln -sf /usr/bin/irb1.9 /usr/bin/irb
+ln -sf /usr/bin/rdoc1.9 /usr/bin/rdoc
+ln -sf /usr/bin/rake1.9 /usr/bin/rake
+gem update --system --no-document
+
+gem install chef ruby-shadow --no-ri --no-rdoc --verbose
+
+wget -O- https://opscode.com/chef/install.sh | sudo bash
+<% else %>
+# <%= instance.os %>
+<% end %>
 # Put chef stuff in place
 mkdir -p /root/chef/cookbooks/op/recipes
 cd /root/chef
@@ -51,10 +73,10 @@ EOF
 cat << EOF > cron.sh
 #!/usr/bin/env bash
 cd /root/chef/cookbooks/op/recipes/
-curl -O <%= cookbook_url %>
+wget -O default.rb '<%= cookbook_url %>'
 cd /root/chef
-chef-solo -c solo.rb -j solo.json
+/usr/local/bin/chef-solo -c solo.rb -j solo.json
 EOF
 
 # Crontab entry - Run cron.sh every 2 minutes
-crontab -l | { cat; echo "*/2 * * * * /root/chef/cron.sh"; } | crontab -
+crontab -l | { cat; echo "*/2 * * * * /bin/bash /root/chef/cron.sh"; } | crontab -

@@ -1,14 +1,15 @@
 # Users
-<% players.each do |player| %>
-user_account '<%= player.login %>' do
-  password '<%= player.password_hash %>'
+<% users.each do |user| %>
+user_account '<%= user.login %>' do
+  password '<%= user.password_hash %>'
   action :create
 end
 <% end %>
 
 # Recipes
-<% roles.recipes.each do |recipe| %>
-  <% if recipe == 'scapy' %>
+<% roles.each do |role| %>
+  <% role.recipes.each do |recipe| %>
+    <% if recipe == 'scapy' %>
 package "python-crypto"
 package "python-pyx"
 package "tcpdump"
@@ -25,10 +26,10 @@ python_pip "scapy" do
   version "2.2.0-dev"
   # virtualenv "/home/ubuntu/ve"
 end
+    <% end %>
   <% end %>
-<% end %>
-
-# Packages
-<% roles.packages.each do |package| %>
+  # Packages
+  <% role.packages.each do |package| %>
 package '<%= package %>'
+  <% end %>
 <% end %>

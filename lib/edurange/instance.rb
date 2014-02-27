@@ -10,10 +10,12 @@ module Edurange
 
     # Handy user methods
     def administrators
-      self.instance_groups.select {|instance_group| instance_group.administrator }.map {|instance_group| instance_group.group}
+      groups = self.instance_groups.select {|instance_group| instance_group.administrator }.map {|instance_group| instance_group.group}
+      users = groups.inject([]) {|users, group| users.concat(group.players) }
     end
     def users
-      self.instance_groups.select {|instance_group| !instance_group.administrator }.map {|instance_group| instance_group.group}
+      groups = self.instance_groups.select {|instance_group| !instance_group.administrator }.map {|instance_group| instance_group.group}
+      users = groups.inject([]) {|users, group| users.concat(group.players) }
     end
 
     def add_administrator(group)
@@ -37,11 +39,11 @@ module Edurange
     end
 
     def boot
+
       # Chef create users
       # Chef install required packages
       # Chef configure other stuff
       if self.nat?
-        # Create chef cookbook for nat
       end
       self.provider_boot
     end

@@ -77,10 +77,11 @@ players_subnet.save!
   group.save!
 
   instance.add_administrator group
-  instance.add_user group
+  nat_instance.add_user group
   (1..3).map {|i| (3 * team_num) + i}.each do |player_num|
     player = group.players.new
     player.login = "edurange_#{player_num}"
+    player.password = "ffff"
     player.save!
   end
 end

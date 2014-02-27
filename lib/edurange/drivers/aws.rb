@@ -16,16 +16,21 @@ module Edurange
         @route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: subnet.cloud.driver_id)
         info "[x] AWS_Driver::create_route_table #{@route_table}"
         subnet.driver_object.route_table = @route_table
-        if @internet_accessible
+        if subnet.internet_accessible
           # Route traffic straight to internet, avoid the NAT
-            info "NOTE: Subnet.all.each. Subnet #{subnet} adding route to igw"
+          info "NOTE: Subnet.all.each. Subnet #{subnet} adding route to igw"
           @route_table.create_route("0.0.0.0/0", { internet_gateway: subnet.cloud.igw} )
         else
-            info "NOTE: Subnet.all.each. Subnet #{subnet} adding route to NAT"
+          info "NOTE: Subnet.all.each. Subnet #{subnet} adding route to NAT"
           # Find the NAT instance
           @route_table.create_route("0.0.0.0/0", { instance: Edurange.nat_instance.driver_id} )
         end
       end
+      Cloud.first.driver_object.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)
+      Cloud.first.driver_object.security_groups.first.revoke_egress('0.0.0.0/0') # Disable all outbound
+      Cloud.first.driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 80)  # Enable port 80 outbound
+      Cloud.first.driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 443) # Enable port 443 outbound
+      Cloud.first.driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
     end
   end
   class InstanceTemplate
@@ -36,8 +41,11 @@ module Edurange
     end
   end
   class Cloud < ActiveRecord::Base
+    def igw
+      self.driver_object.internet_gateway
+    end
     def driver_object
-      Edurange.ec2.vpcs.find(@driver_id).first
+      AWS::EC2::VPCCollection.new[self.driver_id]
     end
     def booted?
       self.driver_object.state == :available
@@ -63,10 +71,13 @@ module Edurange
   end
   class Subnet < ActiveRecord::Base
     def booted?
+      if (!self.driver_object)
+        puts "NO DRIVER OBJECT #{@driver_id}"
+      end
       self.driver_object.state == :available
     end
     def driver_object
-      self.cloud.driver_object.subnets.find(@driver_id).first
+      AWS::EC2::SubnetCollection.new[self.driver_id]
     end
     def allow_traffic(cidr, options)
       instances.each do |instance|
@@ -97,12 +108,13 @@ module Edurange
       self.save
       info self.inspect
       info "[x] AWS_Driver::create_subnet #{self.driver_id}"
+      sleep 5
 
     end
   end
   class Instance < ActiveRecord::Base
     def driver_object
-      self.subnet.driver_object.instances.find(@driver_id).first
+      AWS::EC2::InstanceCollection.new[self.driver_id]
     end
     def booted?
       self.driver_object.status == :running

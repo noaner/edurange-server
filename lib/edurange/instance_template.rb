@@ -2,18 +2,19 @@ module Edurange
   class InstanceTemplate
     attr_accessor :instance, :filepath
     def initialize(instance)
-      self.instance instance
+      self.instance = instance
     end
     def generate_cookbook
-      template = File.read("templates/cookbook_template.rb.erb")
+      template = File.read("lib/edurange/templates/cookbook_template.rb.erb")
       template = Erubis::Eruby.new(template)
-      template.result(users: instance.users)
+      info instance.users
+      template.result(users: instance.users, roles: instance.roles)
     end
     def generate_cloud_init(cookbook_url)
       # Returns the bash code to initialize an instance with chef-solo
-      template = File.read("templates/bootstrap_template.sh.erb")
+      template = File.read("lib/edurange/templates/bootstrap_template.sh.erb")
       template = Erubis::Eruby.new(template)
-      result = template.result(cookbook_url: cookbook_url)
+      result = template.result(cookbook_url: cookbook_url, instance: self.instance)
     end
   end
 end

@@ -3,7 +3,7 @@ module Edurange
     # Internal object representation of AWS VPCs
     # This is OK to do at the moment, as our YAML file contains a "VPC_Mask" declaration
 
-    attr_accessor :driver_object, :igw, :nat_instance
+    attr_accessor :driver_object, :nat_instance
     validates_presence_of :cidr_block, :scenario
     belongs_to :scenario
     has_many :subnets

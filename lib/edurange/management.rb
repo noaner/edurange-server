@@ -32,10 +32,8 @@ module Edurange
           end
         end  
         vpc.instances.each do |instance|
-          if instance.status = :pending
+          while instance.status == :pending
             sleep 2
-          else
-            puts instance.status
           end
         end
 
