@@ -27,4 +27,5 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "sqlite3"
   gem.add_runtime_dependency "thread"
   gem.add_runtime_dependency "erubis"
+  gem.add_runtime_dependency "unix-crypt" # For generating hashes for linux
 end
