@@ -19,12 +19,12 @@ module Edurange
 
           if inst.has_elastic_ip?
             eip = inst.elastic_ip
-            puts "Disassociating Elastic IP for #{instance}"
+            puts "Disassociating Elastic IP for #{inst}"
             inst.disassociate_elastic_ip
             eip.delete
           end
 
-          puts "Deleting instance #{instance}"
+          puts "Deleting instance #{inst}"
           inst.delete
 
           unless inst.status == :terminated then
@@ -34,7 +34,7 @@ module Edurange
         end
 
         if vpc.subnets
-          vpc.subnets.each { |subnet|
+          vpc.subnets.each do |subnet|
             puts "Deleting subnet #{subnet}" 
             begin
               subnet.delete
@@ -46,14 +46,14 @@ module Edurange
               }
               puts e.backtrace.inspect 
             end
-          }
+          end
         end
 
         if vpc.network_interfaces
-          vpc.network_interfaces.each { |network_interface|
+          vpc.network_interfaces.each do |network_interface|
             puts "Deleting network interface #{network_interface.id}"
             network_interface.delete
-          }
+          end
         end
 
         vpc.route_tables.each do |route_table|
@@ -107,10 +107,10 @@ module Edurange
 
       elastic_ip_collect = ec2.elastic_ips
 
-      elastic_ip_collect.each {|elastic_ip|
+      elastic_ip_collect.each do |elastic_ip|
         puts "Deleting elastic ip #{elastic_ip}"
         elastic_ip.delete
-      }
+      end
 
     end
   end
