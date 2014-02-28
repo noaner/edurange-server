@@ -80,78 +80,94 @@ Subnets:
   - Name: NAT_Subnet
     Cloud: Cloud_1
     CIDR_Block: 10.0.129.0/24
+    Internet_Accessible: true
 
 Instances: 
   - Name: NAT_Instance
     Subnet: NAT_Subnet
+    OS: nat
     IP_Address: 10.0.129.5
+    Internet_Accessible: true
     Roles: 
       - NAT
 
-  - Name: Team_1_instance
+  - Name: Team_1_Instance
     Subnet: Player_Subnet
+    OS: ubuntu
     IP_Address: 10.0.128.4
     Roles: 
       - attacker
-  - Name: Team_2_instance
+  - Name: Team_2_Instance
     Subnet: Player_Subnet
+    OS: ubuntu
     IP_Address: 10.0.128.5
     Roles: 
       - attacker
-  - Name: Team_3_instance
+  - Name: Team_3_Instance
     Subnet: Player_Subnet
+    OS: ubuntu
     IP_Address: 10.0.128.6
     Roles: 
       - attacker
 
   - Name: Battlespace_1_Instance
     Subnet: Battlespace_Subnet
+    OS: ubuntu
     IP_Address: 10.0.0.9
     Roles: 
       - web_server
   - Name: Battlespace_2_Instance
     Subnet: Battlespace_Subnet
+    OS: ubuntu
     IP_Address: 10.0.1.93
     Roles: 
       - dns_server
   - Name: Battlespace_4_Instance
     Subnet: Battlespace_Subnet
+    OS: ubuntu
     IP_Address: 10.0.3.77
     Roles: 
       - dns_server
   - Name: Battlespace_4_Instance
     Subnet: Battlespace_Subnet
+    OS: ubuntu
     IP_Address: 10.0.7.2
     Roles: 
       - dns_server
       - web_server
   - Name: Battlespace_5_Instance
     Subnet: Battlespace_Subnet
+    OS: ubuntu
     IP_Address: 10.0.7.90
     Roles: 
       - web_server
   - Name: Battlespace_6_Instance
     Subnet: Battlespace_Subnet
+    OS: ubuntu
     IP_Address: 10.0.120.128
     Roles: 
       - web_server
   - Name: Battlespace_7_Instance
     Subnet: Battlespace_Subnet
+    OS: ubuntu
     IP_Address: 10.0.121.122
     Roles: 
       - web_server
   - Name: Battlespace_8_Instance
     Subnet: Battlespace_Subnet
+    OS: ubuntu
     IP_Address: 10.0.123.2
     Roles: 
       - web_server
   - Name: Battlespace_9_Instance
     Subnet: Battlespace_Subnet
+    OS: ubuntu
     IP_Address: 10.0.123.8
     Roles: 
       - web_server
   - Name: Battlespace_10_Instance
     Subnet: Battlespace_Subnet
+    OS: ubuntu
     IP_Address: 10.0.127.127
     Roles: 
       - web_server
