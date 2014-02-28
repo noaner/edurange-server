@@ -14,6 +14,7 @@ Roles:
       - wireshark
     Recipes: 
       - sshd_password_login
+      - wheelie
 
 
 Groups: 
