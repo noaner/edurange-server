@@ -124,7 +124,7 @@ Instances:
     IP_Address: 10.0.1.93
     Roles: 
       - dns_server
-  - Name: Battlespace_4_Instance
+  - Name: Battlespace_3_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.3.77
