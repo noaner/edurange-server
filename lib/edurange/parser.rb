@@ -108,7 +108,24 @@ module Edurange
       end
       Scenario.all.each { |scenario| scenario.boot }
       Edurange.wait_for_jobs
-      binding.pry
+      users = []
+      Group.all.each do |group|
+        users << group.players
+      end
+      users.flatten!
+      subnet = Subnet.find_by_name("Battlespace_Subnet")
+      if subnet
+        File.open(ENV['HOME'] + "/edurange_scoring/db/nodes.txt", "w") do |file|
+          subnet.instances.each do |instance|
+            file.puts instance.ip_address
+          end
+        end
+        File.open(ENV['HOME'] + "/edurange_scoring/db/users.txt", "w") do |file|
+          users.each do |user|
+            file.puts "#{user.login},#{user.password}"
+          end
+        end
+      end
     end
   end
 end
