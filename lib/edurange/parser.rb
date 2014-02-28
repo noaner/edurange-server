@@ -126,10 +126,6 @@ module Edurange
           end
         end
       end
-      cmd = "cd #{ENV['HOME']}/edurange_scoring/; rake db:drop; rake db:migrate; rake db:seed;"
-      info cmd
-      `#{cmd}`
-      `cd #{ENV['HOME']}/edurange_scoring/; rails server`
     end
   end
 end
