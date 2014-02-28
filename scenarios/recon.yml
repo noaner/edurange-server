@@ -2,6 +2,7 @@ Roles:
   - Name: NAT
     Recipes:
       - shellinabox
+      - sshd_password_login
   - Name: dns_server
     Packages: 
       - bind9

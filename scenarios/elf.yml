@@ -1,0 +1,64 @@
+Roles: 
+  - Name: NAT
+    Recipes:
+      - shellinabox
+      - sshd_password_login
+  - Name: infected_level_1
+    Packages: 
+      - build-essential
+      - gdb
+    Recipes: 
+      - elf
+      - sshd_password_login
+      - wheelie
+
+
+Groups: 
+  - Name: Team_1
+    Access: 
+      Administrator: 
+        - Infected_Instance
+      User: 
+        - NAT_Instance
+    Users: 
+      - Login: edurange_1
+        Password: abcd
+      - Login: edurange_2
+        Password: abcd
+      - Login: edurange_3
+        Password: abcd
+
+Scenarios: 
+  - Game_Type: ctf
+    Name: Recon
+
+Clouds: 
+  - Name: Cloud_1
+    CIDR_Block: 10.0.0.0/16
+    Scenario: Recon
+
+Subnets: 
+  - Name: Player_Subnet
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.128.0/24
+
+  - Name: NAT_Subnet
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.129.0/24
+    Internet_Accessible: true
+
+Instances: 
+  - Name: NAT_Instance
+    Subnet: NAT_Subnet
+    OS: nat
+    IP_Address: 10.0.129.5
+    Internet_Accessible: true
+    Roles: 
+      - NAT
+
+  - Name: Infected_Instance
+    Subnet: Player_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.128.4
+    Roles: 
+      - infected_level_1
