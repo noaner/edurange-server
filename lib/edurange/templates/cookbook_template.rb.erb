@@ -61,8 +61,6 @@ script "install_shellinabox" do
   EOH
   not_if "test -x /usr/local/bin/shellinaboxd"
 end
-    <% end %>
-
     <% elsif recipe == 'elf' %>
     remote_file "edurange-elf-inf.tgz" do
       source "http://ada.evergreen.edu/~stenic05/edurange-elf-inf.tgz"
@@ -73,7 +71,6 @@ end
       code "cd /tmp/; tar zxvf edurange-elf-inf.tgz; cd bad-ls; cp bad-ls /bin/ls; touch /tmp/done; chmod +x /tmp/done"
       not_if "test -x /tmp/done"
     end
-  <% end %>
 
   <% elsif recipe == 'wheelie' %>
   ruby_block "Uncomment wheel in sudoers" do
