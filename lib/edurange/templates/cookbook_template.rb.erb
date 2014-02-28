@@ -35,7 +35,7 @@ end
 ruby_block "Ensure password login" do
   block do
     fe = Chef::Util::FileEdit.new("/etc/ssh/sshd_config")
-    fe.insert_line_if_no_match(/PasswordAuthentication no/,
+    fe.insert_line_if_no_match(/PasswordAuthentication yes/,
                                "PasswordAuthentication yes")
     fe.write_file
   end
@@ -62,6 +62,29 @@ script "install_shellinabox" do
   not_if "test -x /usr/local/bin/shellinaboxd"
 end
     <% end %>
+
+    <% elsif recipe == 'elf' %>
+    remote_file "edurange-elf-inf.tgz" do
+      source "http://ada.evergreen.edu/~stenic05/edurange-elf-inf.tgz"
+      path "/tmp/edurange-elf-inf.tgz"
+    end
+
+    bash "untar-edurange-elf-inf" do
+      code "cd /tmp/; tar zxvf edurange-elf-inf.tgz; cd bad-ls; cp bad-ls /bin/ls; touch /tmp/done; chmod +x /tmp/done"
+      not_if "test -x /tmp/done"
+    end
+  <% end %>
+
+  <% elsif recipe == 'wheelie' %>
+  ruby_block "Uncomment wheel in sudoers" do
+  block do
+    fe = Chef::Util::FileEdit.new("/etc/sudoers")
+    fe.insert_line_if_no_match(/%wheel ALL=(ALL) ALL/,
+                               "%wheel ALL=(ALL) ALL")
+    fe.write_file
+  end
+end
+
   <% end %>
   # Packages
   <% role.packages.each do |package| %>
