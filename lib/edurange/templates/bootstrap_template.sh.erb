@@ -3,29 +3,11 @@
 # Install stuff for chef solo
 <% if instance.os == 'ubuntu' %>
 apt-get -y update
-apt-get -y upgrade
-apt-get -y install build-essential zlib1g-dev libssl-dev libreadline-gplv2-dev libyaml-dev libffi-dev
-apt-get -y install autoconf curl git-core bzip2 
+#apt-get -y upgrade TODO reenable apt-get upgrade. We don't want security problems
+apt-get -y install build-essential
+apt-get -y install ruby1.9.1 ruby1.9.1-dev
 apt-get -y autoremove
 apt-get -y clean
- 
-cd /usr/local/src
-wget http://www.canonware.com/download/jemalloc/jemalloc-3.5.0.tar.bz2
-tar -xvjf jemalloc-3.5.0.tar.bz2
-rm /usr/local/src/jemalloc-3.5.0.tar.bz2
-cd jemalloc-3.5.0
-./configure --prefix=/usr/local
-make && make install
- 
-cd /usr/local/src
-wget http://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.0.tar.gz
-tar -xvzf ruby-2.1.0.tar.gz
-rm /usr/local/src/ruby-2.1.0.tar.gz
- 
-cd ruby-2.1.0
-LDFLAGS="-L/usr/local/lib" LIBS=-ljemalloc ./configure --prefix=/usr/local --disable-install-rdoc
-LD_LIBRARY_PATH=/usr/local/lib make 
-LD_LIBRARY_PATH=/usr/local/lib make install
  
 gem install chef ruby-shadow --no-ri --no-rdoc --verbose
 
@@ -34,7 +16,6 @@ export PATH=$PATH:/usr/local/bin
 yum groupinstall -y "Development tools"
 yum install -y libxml2-devel libxslt-devel
 yum install -y git
-
 
 yum install -y ruby19 ruby19-devel rubygems19 rubygem19-rdoc rubygem19-rake rubygem19-bigdecimal
 ln -sf /usr/bin/ruby1.9 /usr/bin/ruby

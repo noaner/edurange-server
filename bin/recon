@@ -21,7 +21,9 @@ dns_server_role.save!
 attacker_role = Role.new
 attacker_role.packages << 'nmap'
 attacker_role.packages << 'wireshark'
+attacker_role.recipes << 'sshd_password_login'
 attacker_role.save!
+
 
 # Create cloud for our scenario
 cloud = Cloud.new
@@ -35,12 +37,18 @@ nat_subnet.cidr_block = '10.0.128.0/24' # above 10.0.0.0/17
 nat_subnet.internet_accessible = true
 nat_subnet.save!
 
+# Create NAT role
+nat_role = Role.new
+nat_role.recipes << 'shellinabox'
+nat_role.save!
+
 # Create NAT instance
 nat_instance = nat_subnet.instances.new
 nat_instance.allow_traffic '10.0.0.0/24', ingress: {tcp: :ssh} #, egress: {all: :all}
 nat_instance.os = :nat
 nat_instance.internet_accessible = true
 nat_instance.ip_address = '10.0.128.5'
+nat_instance.roles << nat_role
 nat_instance.save!
 
 
@@ -81,7 +89,7 @@ players_subnet.save!
   (1..3).map {|i| (3 * team_num) + i}.each do |player_num|
     player = group.players.new
     player.login = "edurange_#{player_num}"
-    player.password = "ffff"
+    player.password = "edurange12"
     player.save!
   end
 end

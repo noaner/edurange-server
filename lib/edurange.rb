@@ -13,6 +13,7 @@ require 'open-uri'
 require 'active_record'
 require 'sqlite3'
 require 'erubis'
+require 'unix_crypt'
 
 require 'edurange/version'
 require 'edurange/settings'

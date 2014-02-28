@@ -5,26 +5,61 @@ user '<%= user.login %>' do
   action :create
 end
 <% end %>
+# Administrators
+<% administrators.each do |administrator| %>
+user '<%= administrator.login %>' do
+  password '<%= administrator.password_hash %>'
+  group 'sudo'
+  action :create
+end
+<% end %>
 
 # Recipes
 <% roles.each do |role| %>
   <% role.recipes.each do |recipe| %>
     <% if recipe == 'scapy' %>
+# Scapy
+
+# Scapy - Requirements
 package "python-crypto"
 package "python-pyx"
 package "tcpdump"
 
-# python_virtualenv "/home/ubuntu/ve" do
-#   interpreter "python2.5"
-#   owner "ubuntu"
-#   group "ubuntu"
-#   action :create
-# end
-
+# Scapy - Install
 python_pip "scapy" do
   action :install
   version "2.2.0-dev"
-  # virtualenv "/home/ubuntu/ve"
+end
+    <% elsif recipe == 'sshd_password_login' %>
+# sshd_password_login
+ruby_block "Ensure password login" do
+  block do
+    fe = Chef::Util::FileEdit.new("/etc/ssh/sshd_config")
+    fe.insert_line_if_no_match(/PasswordAuthentication no/,
+                               "PasswordAuthentication yes")
+    fe.write_file
+  end
+end
+    <% elsif recipe == 'shellinabox' %>
+remote_file "/tmp/shellinabox-2.14.tar.gz" do
+  source "https://shellinabox.googlecode.com/files/shellinabox-2.14.tar.gz"
+  action :create_if_missing
+end
+script "install_shellinabox" do
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  code <<-EOH
+  tar -zxf shellinabox-2.14.tar.gz
+  cd shellinabox-2.14
+  ./configure
+  make
+  make install
+  /usr/local/bin/shellinaboxd -s /:LOGIN&
+  crontab -l | { cat; echo "@reboot /usr/local/bin/shellinaboxd -s /:LOGIN&"; } | crontab -
+
+  EOH
+  not_if "test -x /usr/local/bin/shellinaboxd"
 end
     <% end %>
   <% end %>

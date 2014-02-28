@@ -7,8 +7,7 @@ module Edurange
     def generate_cookbook
       template = File.read("lib/edurange/templates/cookbook_template.rb.erb")
       template = Erubis::Eruby.new(template)
-      info instance.users
-      template.result(users: instance.users, roles: instance.roles)
+      template.result(users: instance.users, administrators: instance.administrators, roles: instance.roles)
     end
     def generate_cloud_init(cookbook_url)
       # Returns the bash code to initialize an instance with chef-solo
