@@ -7,7 +7,14 @@ EDURange is a project sponsored by the National Science Foundation intended to h
 
 ## Installation
 
-Currently installation is a multistep process. Ask loocorez on IRC if you need help.
+1. ```curl -sSL https://get.rvm.io | bash -s stable --ruby```
+2. ```sudo apt-get install git```
+3. ```git clone https://github.com/sboesen/edurange.git```
+4. ```git clone https://github.com/sboesen/edurange_scoring.git```
+5. ```rvm install ruby-2.0.0-p0```
+6. ```rake build```
+7. ```gem install /path/to/edurange/pkg/edurange-0.2.0.gem```
+8. ```/path/to/bin/make_config_yml yourkeyname```
 
 ## Usage
 
