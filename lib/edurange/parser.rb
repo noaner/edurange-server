@@ -1,9 +1,6 @@
 module Edurange
   class Parser
 
-    def self.facter_facts(uuid, services)
-      # Generate facts based on config. These facts are referenced in puppet configuration manifests
-    end
     def self.parse_yaml(contents)
       nodes = []
       file = YAML.load(contents)
