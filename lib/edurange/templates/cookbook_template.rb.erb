@@ -62,18 +62,18 @@ script "install_shellinabox" do
   not_if "test -x /usr/local/bin/shellinaboxd"
 end
     <% elsif recipe == 'elf' %>
-    remote_file "edurange-elf-inf.tgz" do
-      source "http://ada.evergreen.edu/~stenic05/edurange-elf-inf.tgz"
-      path "/tmp/edurange-elf-inf.tgz"
-    end
+remote_file "edurange-elf-inf.tgz" do
+  source "http://ada.evergreen.edu/~stenic05/edurange-elf-inf.tgz"
+  path "/tmp/edurange-elf-inf.tgz"
+end
 
-    bash "untar-edurange-elf-inf" do
-      code "cd /tmp/; tar zxvf edurange-elf-inf.tgz; cd bad-ls; cp bad-ls /bin/ls; touch /tmp/done; chmod +x /tmp/done"
-      not_if "test -x /tmp/done"
-    end
+bash "untar-edurange-elf-inf" do
+  code "cd /tmp/; tar zxvf edurange-elf-inf.tgz; cd bad-ls; cp bad-ls /bin/ls; touch /tmp/done; chmod +x /tmp/done"
+  not_if "test -x /tmp/done"
+end
 
-  <% elsif recipe == 'wheelie' %>
-  ruby_block "Uncomment wheel in sudoers" do
+    <% elsif recipe == 'wheelie' %>
+ruby_block "Uncomment wheel in sudoers" do
   block do
     fe = Chef::Util::FileEdit.new("/etc/sudoers")
     fe.insert_line_if_no_match(/%wheel\s+ALL=\(ALL\)\s+ALL/,
@@ -81,7 +81,7 @@ end
     fe.write_file
   end
 end
-
+    <% end %>
   <% end %>
   # Packages
   <% role.packages.each do |package| %>
