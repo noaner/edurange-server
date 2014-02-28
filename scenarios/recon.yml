@@ -1,90 +1,157 @@
-# a /17 to a /27 on AWS (28 technically, but we cannot bridge VPCs using anything smaller
-# a /27 as we need to implicitely create a VPN/NAT subnet)
-Scenario:
-  CIDR_Block: 10.0.0.0/16
-  Goals:
-      
+Roles: 
+  - Name: NAT
+    Recipes:
+      - shellinabox
+  - Name: dns_server
+    Packages: 
+      - bind9
+  - Name: web_server
+    Packages: 
+      - apache2
+  - Name: attacker
+    Packages: 
+      - nmap
+      - wireshark
+    Recipes: 
+      - sshd_password_login
 
-Instances:
-  Victim_1:
-    IP_Address: 10.0.1.23
-    Roles:
-      - net_stuff
-  Victim_2:
-    IP_Address: 10.0.2.45
+
+Groups: 
+  - Name: Team_1
+    Access: 
+      Administrator: 
+        - Team_1_Instance
+      User: 
+        - NAT_Instance
+    Users: 
+      - Login: edurange_1
+        Password: abcd
+      - Login: edurange_2
+        Password: abcd
+      - Login: edurange_3
+        Password: abcd
+
+  - Name: Team_2
+    Access: 
+      Administrator: 
+        - Team_2_Instance
+      User: 
+        - NAT_Instance
+    Users: 
+      - Login: edurange_4
+        Password: abcd
+      - Login: edurange_5
+        Password: abcd
+      - Login: edurange_6
+        Password: abcd
+
+  - Name: Team_3
+    Access: 
+      Administrator: 
+        - Team_3_Instance
+      User: 
+        - NAT_Instance
+    Users: 
+      - Login: edurange_7
+        Password: abcd
+      - Login: edurange_8
+        Password: abcd
+      - Login: edurange_9
+        Password: abcd
+
+Scenarios: 
+  - Game_Type: ctf
+    Name: Recon
+
+Clouds: 
+  - Name: Cloud_1
+    CIDR_Block: 10.0.0.0/16
+    Scenario: Recon
+
+Subnets: 
+  - Name: Battlespace_Subnet
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.0.0/17
+
+  - Name: Player_Subnet
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.128.0/24
+
+  - Name: NAT_Subnet
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.129.0/24
+
+Instances: 
+  - Name: NAT_Instance
+    Subnet: NAT_Subnet
+    IP_Address: 10.0.129.5
+    Roles: 
+      - NAT
+
+  - Name: Team_1_instance
+    Subnet: Player_Subnet
+    IP_Address: 10.0.128.4
+    Roles: 
+      - attacker
+  - Name: Team_2_instance
+    Subnet: Player_Subnet
+    IP_Address: 10.0.128.5
+    Roles: 
+      - attacker
+  - Name: Team_3_instance
+    Subnet: Player_Subnet
+    IP_Address: 10.0.128.6
+    Roles: 
+      - attacker
+
+  - Name: Battlespace_1_Instance
+    Subnet: Battlespace_Subnet
+    IP_Address: 10.0.0.9
     Roles: 
       - web_server
-
-Subnets:
-  Gateway_Subnet:
-    CIDR_Block: 10.0.0.0/24
-  Instances_Subnet:
-    IP_Address: 10.0.0.0/17
-
-Groups:  #List of all of the groups. Can
-  Team_1: 
-    Access:
-      - { Team_1_Node: administrator }
-    Users:
-      edurange_1:
-        password: 'abcd'
-      edurange_2:
-        password: 'abcd'
-      edurange_3:
-        password: 'abcd'
-
-  Team_2:
-    Access:
-      - { Team_2_Node: administrator }
-    Users:
-      edurange_4:
-      edurange_5:
-      edurange_6:
-
-  Team_3:
-    Access:
-      - { Team_3_Node: administrator }
-    Users:
-      edurange_7:
-      edurange_8:
-      edurange_9:
-
-  Team_4:
-    Access:
-      - { Team_4_Node: administrator }
-    Users:
-      edurange_10:
-      edurange_11:
-      edurange_12:
-
-  Team_5:
-    Access:
-      - { Team_5_Node: administrator }
-    Users:
-      edurange_13:
-      edurange_14:
-      edurange_15:
-
-  Administrator:
-    Access:
-      - { Team_1_Node: administrator }
-      - { Team_2_Node: administrator }
-      - { Team_3_Node: administrator }
-      - { Team_4_Node: administrator }
-      - { Team_5_Node: administrator }
-    Users:
-      stefanboesen:
-        password: 'supersecure'
-
-Roles:
-  attacker:
-    Packages:
-      - nmap
-  web_server:
-    Packages:
-      - apache2 
-  dns_server:
-    Packages:
-      - bind9
-
-
+  - Name: Battlespace_2_Instance
+    Subnet: Battlespace_Subnet
+    IP_Address: 10.0.1.93
+    Roles: 
+      - dns_server
+  - Name: Battlespace_4_Instance
+    Subnet: Battlespace_Subnet
+    IP_Address: 10.0.3.77
+    Roles: 
+      - dns_server
+  - Name: Battlespace_4_Instance
+    Subnet: Battlespace_Subnet
+    IP_Address: 10.0.7.2
+    Roles: 
+      - dns_server
+      - web_server
+  - Name: Battlespace_5_Instance
+    Subnet: Battlespace_Subnet
+    IP_Address: 10.0.7.90
+    Roles: 
+      - web_server
+  - Name: Battlespace_6_Instance
+    Subnet: Battlespace_Subnet
+    IP_Address: 10.0.120.128
+    Roles: 
+      - web_server
+  - Name: Battlespace_7_Instance
+    Subnet: Battlespace_Subnet
+    IP_Address: 10.0.121.122
+    Roles: 
+      - web_server
+  - Name: Battlespace_8_Instance
+    Subnet: Battlespace_Subnet
+    IP_Address: 10.0.123.2
+    Roles: 
+      - web_server
+  - Name: Battlespace_9_Instance
+    Subnet: Battlespace_Subnet
+    IP_Address: 10.0.123.8
+    Roles: 
+      - web_server
+  - Name: Battlespace_10_Instance
+    Subnet: Battlespace_Subnet
+    IP_Address: 10.0.127.127
+    Roles: 
+      - web_server

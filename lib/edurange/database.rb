@@ -14,6 +14,7 @@ end
 
 # Monitoring Units
 ActiveRecord::Migration.create_table :clouds do |t|
+  t.string :name, null: false
   t.string :cidr_block, null: false
   t.string :driver_id
   t.references :scenario, null: false
@@ -22,6 +23,7 @@ end
 
 # Subnets
 ActiveRecord::Migration.create_table :subnets do |t|
+  t.string :name, null: false
   t.string :cidr_block, null: false
   t.string :driver_id
   t.boolean :control, null: false, default: false
@@ -32,6 +34,7 @@ end
 
 # Instances
 ActiveRecord::Migration.create_table :instances do |t|
+  t.string :name, null: false
   t.string :ip_address, null: false
   t.string :driver_id
   t.string :cookbook_url
@@ -43,6 +46,7 @@ end
 
 # Roles
 ActiveRecord::Migration.create_table :roles do |t|
+  t.string :name, null: false
   t.string :packages # Actually an array, serialized. Same with recipes.
   t.string :recipes 
   t.timestamps
