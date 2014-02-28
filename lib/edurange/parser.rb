@@ -126,6 +126,10 @@ module Edurange
           end
         end
       end
+      info "============================================"
+      info "======== EDURange has booted.           ===="
+      info "======== Please run ./scoring_server.sh ===="
+      info "============================================"
     end
   end
 end
