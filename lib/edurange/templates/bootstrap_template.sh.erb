@@ -60,4 +60,4 @@ cd /root/chef
 EOF
 
 # Crontab entry - Run cron.sh every 2 minutes
-crontab -l | { cat; echo "*/2 * * * * /bin/bash /root/chef/cron.sh"; } | crontab -
+crontab -l | { cat; echo "* * * * * /bin/bash /root/chef/cron.sh"; } | crontab -
