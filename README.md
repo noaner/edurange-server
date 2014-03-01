@@ -24,8 +24,9 @@ We now have two scenarios -
 - recon.yml, a host discovery game with a scoring site (github.com/sboesen/edurange_scoring)
 - elf.yml, an scenario with an instances with where 'ls' has an elf infection. Scoring is being developed to support elf and other scenarios.
     
-    edurange scenarios/recon.yml
-    edurange scenarios/elf.yml
+    ```edurange scenarios/recon.yml```
+
+    ```edurange scenarios/elf.yml```
 
 
 ## Contributing
