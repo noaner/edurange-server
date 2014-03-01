@@ -12,6 +12,11 @@ module Edurange
           unless security_group.name == "default"
             puts "Deleting security group #{security_group}"
             security_group.delete
+
+            while security_group.exists?
+              sleep(2)
+            end
+
           end
         end
 
@@ -22,6 +27,11 @@ module Edurange
             puts "Disassociating Elastic IP for #{inst}"
             inst.disassociate_elastic_ip
             eip.delete
+
+            while eip.exists?
+              sleep(2)
+            end
+
           end
 
           puts "Deleting instance #{inst}"
@@ -38,6 +48,11 @@ module Edurange
             puts "Deleting subnet #{subnet}" 
             begin
               subnet.delete
+
+              unless subnet.state != :pending
+                sleep(2)
+              end
+
             rescue Exception => e
               puts e.message
               puts "#{subnet}'s instance statuses are as follows:"
@@ -49,12 +64,6 @@ module Edurange
           end
         end
 
-        if vpc.network_interfaces
-          vpc.network_interfaces.each do |network_interface|
-            puts "Deleting network interface #{network_interface.id}"
-            network_interface.delete
-          end
-        end
 
         vpc.route_tables.each do |route_table|
           unless route_table.main?
@@ -115,3 +124,18 @@ module Edurange
     end
   end
 end
+
+=begin
+        if vpc.network_interfaces
+          vpc.network_interfaces.each do |network_interface|
+            puts "Deleting network interface #{network_interface.id}"
+            network_interface.delete
+          end
+
+          unless network_interface.status == :terminated then
+            sleep(2)
+          end
+
+        end
+=end
+
