@@ -76,14 +76,35 @@ script "install_shellinabox" do
   EOH
   not_if "test -x /usr/local/bin/shellinaboxd"
 end
+
+# ELF Infection
+
     <% elsif recipe == 'elf' %>
+package "git"
+package "nasm"
+
+script "install_elfit" do
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  code <<-EOH
+  git clone https://github.com/NickStephens/elfit.git
+  cd elfit
+  make
+  make install
+  cd /tmp
+    
+  EOH
+  not_if "test -x /usr/bin/elfit"
+end
+
 remote_file "edurange-elf-inf.tgz" do
   source "http://ada.evergreen.edu/~stenic05/edurange-elf-inf.tgz"
   path "/tmp/edurange-elf-inf.tgz"
 end
 
-bash "untar-edurange-elf-inf" do
-  code "cd /tmp/; tar zxvf edurange-elf-inf.tgz; cd bad-ls; cp bad-ls /bin/ls; touch /tmp/done; chmod +x /tmp/done"
+bash "install_elf-inf" do
+  code "cd /tmp/; tar zxvf edurange-elf-inf.tgz; cd bad-ls; make; touch /tmp/done; chmod +x /tmp/done"
   not_if "test -x /tmp/done"
 end
 
