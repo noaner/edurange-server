@@ -136,9 +136,9 @@ module Edurange
     end
     def ami_id
       if self.os == 'ubuntu'
-        'ami-e720ad8e' # Basic ubuntu image
+        'ami-31727d58' # Private ubuntu image with chef and deps, updates etc.
       elsif self.os == 'nat'
-        'ami-2e1bc047' # Basic nat image
+        'ami-51727d38' # Private NAT image with chef and deps, updates etc.
       end
     end
     def upload_cookbook(cookbook_text)
