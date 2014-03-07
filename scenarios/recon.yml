@@ -1,31 +1,31 @@
-Roles: 
+Roles:
   - Name: NAT
     Recipes:
       - shellinabox
       - sshd_password_login
   - Name: dns_server
-    Packages: 
+    Packages:
       - bind9
   - Name: web_server
-    Packages: 
+    Packages:
       - apache2
   - Name: attacker
-    Packages: 
+    Packages:
       - nmap
       - wireshark
-    Recipes: 
+    Recipes:
       - sshd_password_login
       - wheelie
 
 
-Groups: 
+Groups:
   - Name: Team_1
-    Access: 
-      Administrator: 
+    Access:
+      Administrator:
         - Team_1_Instance
-      User: 
+      User:
         - NAT_Instance
-    Users: 
+    Users:
       - Login: edurange_1
         Password: abcd
       - Login: edurange_2
@@ -34,43 +34,71 @@ Groups:
         Password: abcd
 
   - Name: Team_2
-    Access: 
-      Administrator: 
+    Access:
+      Administrator:
         - Team_2_Instance
-      User: 
+      User:
         - NAT_Instance
-    Users: 
+    Users:
       - Login: edurange_4
-        Password: abcd
+        Password: efgh
       - Login: edurange_5
-        Password: abcd
+        Password: efgh
       - Login: edurange_6
-        Password: abcd
+        Password: efgh
 
   - Name: Team_3
-    Access: 
-      Administrator: 
+    Access:
+      Administrator:
         - Team_3_Instance
-      User: 
+      User:
         - NAT_Instance
-    Users: 
+    Users:
       - Login: edurange_7
-        Password: abcd
+        Password: ijkl
       - Login: edurange_8
-        Password: abcd
+        Password: ijkl
       - Login: edurange_9
-        Password: abcd
+        Password: ijkl
 
-Scenarios: 
+  - Name: Team_4
+    Access:
+      Administrator:
+        - Team_4_Instance
+      User:
+        - NAT_Instance
+    Users:
+      - Login: edurange_10
+        Password: mnop
+      - Login: edurange_11
+        Password: mnop
+      - Login: edurange_12
+        Password: mnop
+
+  - Name: Team_5
+    Access:
+      Administrator:
+        - Team_5_Instance
+      User:
+        - NAT_Instance
+    Users:
+      - Login: edurange_13
+        Password: qrst
+      - Login: edurange_14
+        Password: qrst
+      - Login: edurange_15
+        Password: qrst
+
+Scenarios:
   - Game_Type: ctf
     Name: Recon
 
-Clouds: 
+Clouds:
   - Name: Cloud_1
     CIDR_Block: 10.0.0.0/16
     Scenario: Recon
 
-Subnets: 
+Subnets:
   - Name: Battlespace_Subnet
     Cloud: Cloud_1
     CIDR_Block: 10.0.0.0/17
@@ -84,92 +112,104 @@ Subnets:
     CIDR_Block: 10.0.129.0/24
     Internet_Accessible: true
 
-Instances: 
+Instances:
   - Name: NAT_Instance
     Subnet: NAT_Subnet
     OS: nat
     IP_Address: 10.0.129.5
     Internet_Accessible: true
-    Roles: 
+    Roles:
       - NAT
 
   - Name: Team_1_Instance
     Subnet: Player_Subnet
     OS: ubuntu
     IP_Address: 10.0.128.4
-    Roles: 
+    Roles:
       - attacker
   - Name: Team_2_Instance
     Subnet: Player_Subnet
     OS: ubuntu
     IP_Address: 10.0.128.5
-    Roles: 
+    Roles:
       - attacker
   - Name: Team_3_Instance
     Subnet: Player_Subnet
     OS: ubuntu
     IP_Address: 10.0.128.6
-    Roles: 
+    Roles:
+      - attacker
+  - Name: Team_4_Instance
+    Subnet: Player_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.128.7
+    Roles:
+      - attacker
+  - Name: Team_5_Instance
+    Subnet: Player_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.128.8
+    Roles:
       - attacker
 
   - Name: Battlespace_1_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.0.9
-    Roles: 
+    Roles:
       - web_server
   - Name: Battlespace_2_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.1.93
-    Roles: 
+    Roles:
       - dns_server
   - Name: Battlespace_3_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.3.77
-    Roles: 
+    Roles:
       - dns_server
   - Name: Battlespace_4_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.7.2
-    Roles: 
+    Roles:
       - dns_server
       - web_server
   - Name: Battlespace_5_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.7.90
-    Roles: 
+    Roles:
       - web_server
   - Name: Battlespace_6_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.120.128
-    Roles: 
+    Roles:
       - web_server
   - Name: Battlespace_7_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.121.122
-    Roles: 
+    Roles:
       - web_server
   - Name: Battlespace_8_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.123.2
-    Roles: 
+    Roles:
       - web_server
   - Name: Battlespace_9_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.123.8
-    Roles: 
+    Roles:
       - web_server
   - Name: Battlespace_10_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
     IP_Address: 10.0.127.127
-    Roles: 
+    Roles:
       - web_server
