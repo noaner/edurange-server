@@ -7,6 +7,8 @@ EDURange is a project sponsored by the National Science Foundation intended to h
 
 ## Installation
 
+We will soon publish an AMI you can launch in AWS that has all of this installed and ready to go.
+
 1. ```curl -sSL https://get.rvm.io | bash -s stable --ruby```
 2. ```sudo apt-get install git```
 3. ```git clone https://github.com/sboesen/edurange.git```
@@ -17,8 +19,15 @@ EDURange is a project sponsored by the National Science Foundation intended to h
 8. ```/path/to/bin/make_config_yml yourkeyname```
 
 ## Usage
+    
+We now have two scenarios - 
+- recon.yml, a host discovery game with a scoring site (github.com/sboesen/edurange_scoring)
+- elf.yml, an scenario with an instances with where 'ls' has an elf infection. Scoring is being developed to support elf and other scenarios.
+    
+    ```edurange scenarios/recon.yml```
 
-    edurange recon.yml
+    ```edurange scenarios/elf.yml```
+
 
 ## Contributing
 
