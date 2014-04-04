@@ -9,6 +9,8 @@ EDURange is a project sponsored by the National Science Foundation intended to h
 
 We will soon publish an AMI you can launch in AWS that has all of this installed and ready to go.
 
+Run these on a fresh instance (we used 32 bit Ubuntu 12.04 LTS)
+
 1. ```curl -sSL https://get.rvm.io | bash -s stable --ruby```
 2. ```sudo apt-get install git```
 3. ```git clone https://github.com/sboesen/edurange.git```
