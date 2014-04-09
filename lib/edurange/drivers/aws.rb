@@ -63,7 +63,7 @@ module Edurange
       info "[x] AWS_Driver::create_vpc #{@driver_id}"
 
       @igw = Edurange.ec2.internet_gateways.create
-      info "[x] AWS_Driver::create_internet_gateway #{@igw}"
+      info "[x] AWS_Driver::create_internet_gateway #{@igw.internet_gateway_id}"
       execute_when_booted do
         self.driver_object.internet_gateway = @igw
       end
