@@ -9,6 +9,7 @@ module Edurange
       self.provider_boot
       execute_when_booted do
         info "Subnet booted."
+        Edurange.add_progress
         self.instances.each do |instance|
           instance.boot
         end

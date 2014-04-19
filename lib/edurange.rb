@@ -14,6 +14,7 @@ require 'active_record'
 require 'sqlite3'
 require 'erubis'
 require 'unix_crypt'
+require 'ruby-progressbar'
 
 require 'edurange/version'
 require 'edurange/settings'

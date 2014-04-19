@@ -1,4 +1,12 @@
 module Edurange
+  def self.progress_bar(total = 100)
+    @@progress_bar ||= ProgressBar.create(format: '%a |%b>>%i| %p%% %t',
+                                          starting_at: 0,
+                                          total: total)
+  end
+  def self.add_progress
+    Edurange.progress_bar.increment
+  end
   def dispatch
     @@pool ||= Thread.pool(Settings.max_threads)
     #@@pool.process do
@@ -20,7 +28,7 @@ module Edurange
     Edurange.logger.debug message
   end
   def info(message)
-    Edurange.logger.info message
+    Edurange.progress_bar.log message
   end
   def warn(message)
     Edurange.logger.warn message

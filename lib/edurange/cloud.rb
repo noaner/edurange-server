@@ -9,10 +9,13 @@ module Edurange
     has_many :subnets
 
     def boot
+      total = Cloud.all.size + Subnet.all.size + Instance.all.size
+      Edurange.progress_bar(total)
       self.provider_boot
       execute_when_booted do
         info "Cloud booted."
         info self.subnets
+        Edurange.add_progress
         self.subnets.each do |subnet|
           info "Booting subnets"
           subnet.boot

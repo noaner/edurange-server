@@ -28,4 +28,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "thread"
   gem.add_runtime_dependency "erubis"
   gem.add_runtime_dependency "unix-crypt" # For generating hashes for linux
+  gem.add_runtime_dependency "ruby-progressbar"
+
 end

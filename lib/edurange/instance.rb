@@ -46,6 +46,9 @@ module Edurange
       if self.nat?
       end
       self.provider_boot
+      execute_when_booted do
+        Edurange.add_progress
+      end
     end
   end
 end
