@@ -131,9 +131,6 @@ module Edurange
     def nat?
       @internet_accessible
     end
-    def key_pair
-      AWS::EC2::KeyPairCollection.new[Settings.ec2_key]
-    end
     def ami_id
       if self.os == 'ubuntu'
         'ami-31727d58' # Private ubuntu image with chef and deps, updates etc.
@@ -162,9 +159,10 @@ module Edurange
       self.cookbook_url = self.upload_cookbook(cookbook_text)
       cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
       puts self.cookbook_url
-      self.driver_id = AWS::EC2::InstanceCollection.new.create(image_id: self.ami_id, # ami_id string of os image
+      self.driver_id = AWS::EC2::InstanceCollection.new.create(
+                                                               image_id: self.ami_id, # ami_id string of os image
                                                                private_ip_address: self.ip_address, # ip string
-                                                               key_pair: self.key_pair, # keypair object that has root
+                                                               key_name: Settings.ec2_key, # keypair string
                                                                user_data: cloud_init, # startup data
                                                                subnet: self.subnet.driver_id).id # subnet id for where this instance goes
       self.save
