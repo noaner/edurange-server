@@ -17,6 +17,7 @@ test/version_tmp
 tmp
 my-user-script.sh
 id_rsa*
+debug.log
 nat_data*
 chef/.chef
 chef/cookbooks/edurange_bootstrap*
