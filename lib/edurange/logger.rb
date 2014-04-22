@@ -9,12 +9,18 @@ module Edurange
   # debug "This is debug stuff!" 
   # info "Here's some info!"
   # warn "This is a warning"
-  
-  @@logger = Logger.new(STDOUT)
-  Settings['logging_level'] ||= Logger::INFO
-  @@logger.level = Settings['logging_level']
+
+  log_file = File.open("#{Dir.getwd}/debug.log", "a")
+  @@logger_file = Logger.new log_file
+  @@logger_file.level = Logger::INFO
+
+  @@logger = Logger.new STDOUT
+  @@logger.level = Settings['logging_level'] ||= Logger::WARN
   def self.logger
     @@logger
+  end
+  def self.logger_file
+    @@logger_file
   end
   def self.logger_level=(level)
     @@logger.level = level

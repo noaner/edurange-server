@@ -7,31 +7,25 @@ module Edurange
   def self.add_progress
     Edurange.progress_bar.increment
   end
-  def dispatch
-    @@pool ||= Thread.pool(Settings.max_threads)
-    #@@pool.process do
+  def dispatch(&work)
+    #Celluloid::Future.new &work
     yield
+    #pool ||= Thread.pool(Settings.max_threads)
     #end
   end
-  def wait_for_jobs
-    until @@pool.done?
-      info "Waiting for thread pool to finish. #{@@pool}"
-      sleep 5
-    end
-    if @@pool.done?
-      info "Finished. Shutting pool down"
-      @@pool.shutdown
-    end
-  end
+
   # Define basic logging functions
   def debug(message)
     Edurange.logger.debug message
+    Edurange.logger_file.debug message
   end
   def info(message)
-    Edurange.progress_bar.log message
+    Edurange.logger.info message
+    Edurange.logger_file.info message
   end
   def warn(message)
     Edurange.logger.warn message
+    Edurange.logger_file.warn message
   end
 
   class Helper

@@ -107,7 +107,8 @@ module Edurange
         end
       end
       Scenario.all.each { |scenario| scenario.boot }
-      Edurange.wait_for_jobs
+      YAML::dump(Scenario.all)
+      binding.pry
       users = []
       Group.all.each do |group|
         users << group.players

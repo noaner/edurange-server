@@ -158,7 +158,9 @@ module Edurange
       cookbook_text = instance_template.generate_cookbook
       self.cookbook_url = self.upload_cookbook(cookbook_text)
       cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
-      puts self.cookbook_url
+      info self.cookbook_url
+
+      sleep 2 until self.subnet.booted?
       self.driver_id = AWS::EC2::InstanceCollection.new.create(
                                                                image_id: self.ami_id, # ami_id string of os image
                                                                private_ip_address: self.ip_address, # ip string
