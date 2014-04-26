@@ -66,9 +66,8 @@ module Edurange
 	    rescue Exception => e
 	      puts e.message
 	      if subnet.instances
-		puts "#{subnet}'s instance statuses are as follows:"
 		subnet.instances.each { |inst|
-		  puts "#{inst} status = #{inst.status}"
+		  puts "#{inst} on subnet #{subnet}'s status is #{inst.status}"
 		}
 	      end
 	      puts "EDURange cleanup will keep going anyway."
