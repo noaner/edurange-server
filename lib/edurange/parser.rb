@@ -126,11 +126,11 @@ module Edurange
           end
         end
       end
-      info "======================================"
-      info "==== EDURange has booted. Please  ===="
-      info "==== cd into ~/edurange_scoring   ===="
-      info "==== and run ./scoring_server.sh  ===="
-      info "======================================"
+      puts "======================================"
+      puts "==== EDURange has booted. Please  ===="
+      puts "==== cd into ~/edurange_scoring   ===="
+      puts "==== and run ./scoring_server.sh  ===="
+      puts "======================================"
     end
   end
 end
