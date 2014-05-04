@@ -18,8 +18,11 @@ gem 'pundit'
 gem 'simple_form'
 gem 'private_pub'
 gem 'thin'
+gem 'delayed_job_active_record'
+
 
 group :development do
+  gem 'awesome_print'
   gem 'better_errors'
   gem 'binding_of_caller', :platforms=>[:mri_20]
   gem 'guard-bundler'

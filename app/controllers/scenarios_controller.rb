@@ -13,6 +13,16 @@ class ScenariosController < ApplicationController
   end
   
   def boot
+    if @scenario.booted?
+      notice = "Scenario is booted. Monitor output below."
+    elsif @scenario.booting?
+      notice = "Scenario is booting. Monitor output below."
+    else
+      notice = "Scenario is booting. Monitor output below."
+      @scenario.delay.boot
+    end
+
+    redirect_to @scenario, notice: notice
   end
 
   # GET /scenarios/new
