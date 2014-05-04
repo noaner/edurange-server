@@ -1,0 +1,15 @@
+%p#notice= notice
+
+%p
+  %b Group:
+  = @instance_group.group
+%p
+  %b Instance:
+  = @instance_group.instance
+%p
+  %b Administrator:
+  = @instance_group.administrator
+
+= link_to 'Edit', edit_instance_group_path(@instance_group)
+\|
+= link_to 'Back', instance_groups_path

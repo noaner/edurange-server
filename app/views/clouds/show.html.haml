@@ -1,0 +1,18 @@
+%p#notice= notice
+
+%p
+  %b Name:
+  = @cloud.name
+%p
+  %b Cidr block:
+  = @cloud.cidr_block
+%p
+  %b Driver:
+  = @cloud.driver_id
+%p
+  %b Scenario:
+  = @cloud.scenario
+
+= link_to 'Edit', edit_cloud_path(@cloud)
+\|
+= link_to 'Back', clouds_path

@@ -16,6 +16,9 @@ gem 'figaro', :github=>"laserlemon/figaro"
 gem 'haml-rails'
 gem 'pundit'
 gem 'simple_form'
+gem 'private_pub'
+gem 'thin'
+
 group :development do
   gem 'better_errors'
   gem 'binding_of_caller', :platforms=>[:mri_20]

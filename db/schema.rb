@@ -11,7 +11,96 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140504181443) do
+ActiveRecord::Schema.define(version: 20140504223255) do
+
+  create_table "clouds", force: true do |t|
+    t.string   "name"
+    t.string   "cidr_block"
+    t.string   "driver_id"
+    t.integer  "scenario_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "clouds", ["scenario_id"], name: "index_clouds_on_scenario_id"
+
+  create_table "groups", force: true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "instance_groups", force: true do |t|
+    t.integer  "group_id"
+    t.integer  "instance_id"
+    t.boolean  "administrator"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "instance_groups", ["group_id"], name: "index_instance_groups_on_group_id"
+  add_index "instance_groups", ["instance_id"], name: "index_instance_groups_on_instance_id"
+
+  create_table "instance_roles", force: true do |t|
+    t.integer  "instance_id"
+    t.integer  "role_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "instance_roles", ["instance_id"], name: "index_instance_roles_on_instance_id"
+  add_index "instance_roles", ["role_id"], name: "index_instance_roles_on_role_id"
+
+  create_table "instances", force: true do |t|
+    t.string   "name"
+    t.string   "ip_address"
+    t.string   "driver_id"
+    t.string   "cookbook_url"
+    t.string   "os"
+    t.boolean  "internet_accessible"
+    t.integer  "subnet_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "instances", ["subnet_id"], name: "index_instances_on_subnet_id"
+
+  create_table "players", force: true do |t|
+    t.string   "login"
+    t.string   "password"
+    t.integer  "group_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "players", ["group_id"], name: "index_players_on_group_id"
+
+  create_table "roles", force: true do |t|
+    t.string   "name"
+    t.string   "packages"
+    t.string   "recipes"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "scenarios", force: true do |t|
+    t.string   "game_type"
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "subnets", force: true do |t|
+    t.string   "name"
+    t.string   "cidr_block"
+    t.string   "driver_id"
+    t.boolean  "internet_accessible"
+    t.integer  "cloud_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "subnets", ["cloud_id"], name: "index_subnets_on_cloud_id"
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false

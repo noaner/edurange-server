@@ -1,0 +1,31 @@
+%h1 Listing instances
+
+%table
+  %tr
+    %th Name
+    %th Ip address
+    %th Driver
+    %th Cookbook url
+    %th Os
+    %th Internet accessible
+    %th Subnet
+    %th
+    %th
+    %th
+
+  - @instances.each do |instance|
+    %tr
+      %td= instance.name
+      %td= instance.ip_address
+      %td= instance.driver_id
+      %td= instance.cookbook_url
+      %td= instance.os
+      %td= instance.internet_accessible
+      %td= instance.subnet
+      %td= link_to 'Show', instance
+      %td= link_to 'Edit', edit_instance_path(instance)
+      %td= link_to 'Destroy', instance, :method => :delete, :data => { :confirm => 'Are you sure?' }
+
+%br
+
+= link_to 'New Instance', new_instance_path

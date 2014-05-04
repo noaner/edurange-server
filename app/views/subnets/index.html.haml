@@ -1,0 +1,27 @@
+%h1 Listing subnets
+
+%table
+  %tr
+    %th Name
+    %th Cidr block
+    %th Driver
+    %th Internet accessible
+    %th Cloud
+    %th
+    %th
+    %th
+
+  - @subnets.each do |subnet|
+    %tr
+      %td= subnet.name
+      %td= subnet.cidr_block
+      %td= subnet.driver_id
+      %td= subnet.internet_accessible
+      %td= subnet.cloud
+      %td= link_to 'Show', subnet
+      %td= link_to 'Edit', edit_subnet_path(subnet)
+      %td= link_to 'Destroy', subnet, :method => :delete, :data => { :confirm => 'Are you sure?' }
+
+%br
+
+= link_to 'New Subnet', new_subnet_path

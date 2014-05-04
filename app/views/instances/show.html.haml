@@ -1,0 +1,27 @@
+%p#notice= notice
+
+%p
+  %b Name:
+  = @instance.name
+%p
+  %b Ip address:
+  = @instance.ip_address
+%p
+  %b Driver:
+  = @instance.driver_id
+%p
+  %b Cookbook url:
+  = @instance.cookbook_url
+%p
+  %b Os:
+  = @instance.os
+%p
+  %b Internet accessible:
+  = @instance.internet_accessible
+%p
+  %b Subnet:
+  = @instance.subnet
+
+= link_to 'Edit', edit_instance_path(@instance)
+\|
+= link_to 'Back', instances_path

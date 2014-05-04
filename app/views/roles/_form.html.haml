@@ -1,0 +1,10 @@
+= simple_form_for(@role) do |f|
+  = f.error_notification
+
+  .form-inputs
+    = f.input :name
+    = f.input :packages
+    = f.input :recipes
+
+  .form-actions
+    = f.button :submit

@@ -1,0 +1,9 @@
+= simple_form_for(@instance_role) do |f|
+  = f.error_notification
+
+  .form-inputs
+    = f.association :instance
+    = f.association :role
+
+  .form-actions
+    = f.button :submit
