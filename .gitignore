@@ -9,7 +9,7 @@ InstalledFiles
 _yardoc
 coverage
 doc/
-log/*
+log/development.log
 lib/bundler/man
 pkg
 rdoc
