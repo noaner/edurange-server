@@ -100,11 +100,11 @@ ActiveRecord::Schema.define(version: 20140505015507) do
   end
 
   create_table "scenarios", force: true do |t|
-    t.string   "game_type"
     t.string   "name"
+    t.string   "description"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "status",     default: 0
+    t.integer  "status",      default: 0
   end
 
   create_table "subnets", force: true do |t|

@@ -1,9 +1,12 @@
 = simple_form_for(@scenario) do |f|
   = f.error_notification
-
+  %h3 Create from a template
   .form-inputs
-    = f.input :game_type
+    = f.select :template, options_for_select(@templates)
+  %h3 Or create a new Scenario
+  .form-inputs
     = f.input :name
+    = f.input :description
 
   .form-actions
     = f.button :submit

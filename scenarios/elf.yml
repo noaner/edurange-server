@@ -1,3 +1,4 @@
+
 Roles: 
   - Name: NAT
     Recipes:
@@ -29,13 +30,13 @@ Groups:
         Password: abcd
 
 Scenarios: 
-  - Game_Type: ctf
-    Name: Recon
+  - Description: "This game teaches the basics of elf infection. Students can use tools like readelf, objdump, strace, and gdb to determine what files are infected and with what."
+    Name: Elf
 
 Clouds: 
   - Name: Cloud_1
     CIDR_Block: 10.0.0.0/16
-    Scenario: Recon
+    Scenario: Elf
 
 Subnets: 
   - Name: Player_Subnet

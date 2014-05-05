@@ -1,1 +1,1 @@
-json.extract! @scenario, :id, :game_type, :name, :created_at, :updated_at
+json.extract! @scenario, :id, :description, :name, :created_at, :updated_at

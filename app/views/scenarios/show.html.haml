@@ -2,13 +2,17 @@
 = javascript 'scenario_show.js'
 %div#scenario{data: {id: @scenario.id}}
   %p
-    %b Game type:
-    = @scenario.game_type
-  %p
     %b Name:
     = @scenario.name
+  %p
+    %b description
+    = @scenario.description
 
 = link_to 'Boot', boot_scenario_path(@scenario)
+%h3 Clouds
+- @scenario.clouds.each do |cloud|
+  = link_to cloud.name, cloud_path(cloud)
+  %br
 %h3 Console Log
 %pre#console
 

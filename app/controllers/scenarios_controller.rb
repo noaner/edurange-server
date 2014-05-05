@@ -29,6 +29,7 @@ class ScenariosController < ApplicationController
   # GET /scenarios/new
   def new
     @scenario = Scenario.new
+    @templates = YmlRecord.yml_headers.map {|filename,name,desc| [name,filename]}
   end
 
   # GET /scenarios/1/edit
@@ -38,7 +39,11 @@ class ScenariosController < ApplicationController
   # POST /scenarios
   # POST /scenarios.json
   def create
-    @scenario = Scenario.new(scenario_params)
+    if template = scenario_params["template"]
+      @scenario = YmlRecord.load_yml("scenarios/#{template}")
+    else
+      @scenario = Scenario.new(scenario_params)
+    end
 
     respond_to do |format|
       if @scenario.save
@@ -83,6 +88,6 @@ class ScenariosController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def scenario_params
-      params.require(:scenario).permit(:game_type, :name)
+      params.require(:scenario).permit(:game_type, :name, :template)
     end
 end

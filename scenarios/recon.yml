@@ -91,7 +91,7 @@ Groups:
         Password: qrst
 
 Scenarios:
-  - Game_Type: ctf
+  - Description: "This game is a basic nmap exercise that teaches students about TCP/IP."
     Name: Recon
 
 Clouds:

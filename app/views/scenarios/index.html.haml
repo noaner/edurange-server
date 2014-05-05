@@ -2,7 +2,6 @@
 
 %table
   %tr
-    %th Game type
     %th Name
     %th
     %th
@@ -10,7 +9,6 @@
 
   - @scenarios.each do |scenario|
     %tr
-      %td= scenario.game_type
       %td= scenario.name
       %td= link_to 'Show', scenario
       %td= link_to 'Edit', edit_scenario_path(scenario)
