@@ -1,147 +1,44 @@
-Edurange
-=========
+# Edurange
 
-This application was generated with the [rails_apps_composer](https://github.com/RailsApps/rails_apps_composer) gem
-provided by the [RailsApps Project](http://railsapps.github.io/).
-
-Diagnostics
--
-
-This application was built with recipes that are NOT known to work together.
-
-This application was built with preferences that are NOT known to work
-together.
-
-If the application doesn’t work as expected, please [report an issue](https://github.com/RailsApps/rails_apps_composer/issues)
-and include these diagnostics:
-
-We’d also like to know if you’ve found combinations of recipes or
-preferences that do work together.
-
-Recipes:
-
-* controllers
-* core
-* deployment
-* email
-* extras
-* frontend
-* gems
-* git
-* init
-* learn_rails
-* models
-* prelaunch
-* rails_bootstrap
-* rails_devise
-* rails_devise_pundit
-* rails_foundation
-* rails_omniauth
-* rails_signup_download
-* railsapps
-* readme
-* routes
-* saas
-* setup
-* testing
-* tests4
-* views
-
-Preferences:
-
-* git: true
-* apps4: none
-* dev_webserver: webrick
-* prod_webserver: passenger
-* database: sqlite
-* templates: haml
-* tests: rspec
-* continuous_testing: guard
-* frontend: bootstrap3
-* email: none
-* authentication: devise
-* devise_modules: default
-* authorization: pundit
-* form_builder: simple_form
-* starter_app: admin_app
-* rvmrc: true
-* quiet_assets: true
-* local_env_file: figaro
-* better_errors: true
-* pry: true
-
-Ruby on Rails
----
-
-This application requires:
-
--   Ruby
--   Rails
-
-Learn more about [Installing Rails](http://railsapps.github.io/installing-rails.html).
-
-Database
----
-
-This application uses SQLite with ActiveRecord.
-
-Development
--
-
--   Template Engine: Haml
--   Testing Framework: Test::Unit
--   Front-end Framework: Bootstrap 3.0 (Sass)
--   Form Builder: SimpleForm
--   Authentication: Devise
--   Authorization: None
--   Admin: None
+Join us in #edurange on irc.freenode.net!
 
 
+EDURange is a project sponsored by the National Science Foundation intended to help automate creation of cyber security training games.
+
+## Installation
+
+We will soon publish an AMI you can launch in AWS that has all of this installed and ready to go. If you are on the EDURange Amazon account (or a developer for EDURange without access) please contact Stefan at stefan.boesen [at] gmail.com or weissr [at] evergreen.edu.
+
+Run these on a fresh instance (we used a micro 64 bit Amazon Linux instance, AMI ID ami-fb8e9292)
+
+1. ```sudo yum update```
+1. ```sudo yum install git ruby-devel make gcc gcc-g++ sqlite-devel```
+3. ```git clone https://github.com/edurange/edurange.git```
+4. ```git clone https://github.com/edurange/edurange_scoring.git```
+5. ```cd edurange```
+5. ```bundle```
+6. ```./install.sh```
+7. ```/path/to/bin/make_config_yml yourkeyname```
+8. ```./start.sh```
 
 
+Open a web browser to ip:3000
+
+## Usage
+    
+We now have two scenarios - 
+- recon.yml, a host discovery game with a scoring site (github.com/sboesen/edurange_scoring)
+- elf.yml, an scenario with an instances with where 'ls' has an elf infection. Scoring is being developed to support elf and other scenarios.
+    
+    ```edurange scenarios/recon.yml```
+
+    ```edurange scenarios/elf.yml```
 
 
- delivery is disabled in development.
+## Contributing
 
-Getting Started
-
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-Documentation and Support
-
-
-This is the only documentation.
-
-#### Issues
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-Similar Projects
--
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-Contributing
---
-
-If you make improvements to this application, please share with others.
-
--   Fork the project on GitHub.
--   Make your feature addition or bug fix.
--   Commit with Git.
--   Send the author a pull request.
-
-If you add functionality to this application, create an alternative
-implementation, or build an application that is similar, please contact
-me and I’ll add a note to the README so that others can find your work.
-
-Credits
---
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-License
---
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
