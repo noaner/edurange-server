@@ -22,6 +22,8 @@ gem 'delayed_job_active_record'
 
 
 group :development do
+  gem 'pry-rescue'
+  gem 'pry-stack_explorer'
   gem 'awesome_print'
   gem 'better_errors'
   gem 'binding_of_caller', :platforms=>[:mri_20]

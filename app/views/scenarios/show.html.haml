@@ -1,11 +1,17 @@
-%p#notice= notice
+= subscribe_to "/scenarios/#{@scenario.id}"
+= javascript 'scenario_show.js'
+%div#scenario{data: {id: @scenario.id}}
+  %p
+    %b Game type:
+    = @scenario.game_type
+  %p
+    %b Name:
+    = @scenario.name
 
-%p
-  %b Game type:
-  = @scenario.game_type
-%p
-  %b Name:
-  = @scenario.name
+= link_to 'Boot', boot_scenario_path(@scenario)
+%h3 Console Log
+%pre#console
+
 
 = link_to 'Edit', edit_scenario_path(@scenario)
 \|
