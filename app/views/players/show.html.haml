@@ -8,7 +8,7 @@
   = @player.password
 %p
   %b Group:
-  = @player.group
+  = link_to @player.group.name, group_path(@player.group)
 
 = link_to 'Edit', edit_player_path(@player)
 \|

@@ -8,13 +8,18 @@
   = @subnet.cidr_block
 %p
   %b Driver:
-  = @subnet.driver_id
+  = @subnet.driver_id || "Nil"
 %p
   %b Internet accessible:
   = @subnet.internet_accessible
 %p
   %b Cloud:
-  = @subnet.cloud
+  = link_to @subnet.cloud.name, cloud_path(@subnet.cloud)
+
+%h3 Instances
+- @subnet.instances.each do |instance|
+  = link_to instance.name, instance_path(instance)
+  %br
 
 = link_to 'Edit', edit_subnet_path(@subnet)
 \|

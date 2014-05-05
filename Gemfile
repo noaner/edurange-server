@@ -20,11 +20,10 @@ gem 'private_pub'
 gem 'underscore-rails'
 gem 'thin'
 gem 'delayed_job_active_record'
+gem 'jquery-turbolinks'
 
 
 group :development do
-  gem 'pry-stack_explorer'
-  gem 'awesome_print'
   gem 'better_errors'
   gem 'binding_of_caller', :platforms=>[:mri_20]
   gem 'guard-bundler'
@@ -40,6 +39,8 @@ group :development do
   gem 'rb-inotify', :require=>false
 end
 group :development, :test do
+  gem 'pry-stack_explorer'
+  gem 'awesome_print'
   gem 'factory_girl_rails'
   gem 'pry-rails'
   gem 'pry-rescue'

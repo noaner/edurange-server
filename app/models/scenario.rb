@@ -7,6 +7,7 @@ class Scenario < ActiveRecord::Base
   def boot
     self.status = "booting"
     # delayed_job, 5.times sleep 10 sec, print to /scenarios/#{1}
+    PrivatePub.publish_to "/scenarios/#{self.id}", :log_message => "Booting..."
     5.times do
       sleep 1
       # PrivatePub it, as well as append to @scenario's log & update.

@@ -8,10 +8,13 @@
   = @instance.ip_address
 %p
   %b Driver:
-  = @instance.driver_id
+  = @instance.driver_id || "Nil"
 %p
   %b Cookbook url:
-  = @instance.cookbook_url
+  - if @instance.cookbook_url
+    = link_to @instance.cookbook_url, @instance.cookbook_url
+  - else
+    = "Nil"
 %p
   %b Os:
   = @instance.os
@@ -20,7 +23,18 @@
   = @instance.internet_accessible
 %p
   %b Subnet:
-  = @instance.subnet
+  = link_to @instance.subnet.name, subnet_path(@instance.subnet)
+
+%h3 Players 
+- @instance.users.each do |player|
+  = link_to player.login, player_path(player)
+  = link_to player.group.name, group_path(player.group)
+  %br
+%h3 Administrators
+- @instance.administrators.each do |player|
+  = link_to player.login, player_path(player)
+  = link_to player.group.name, group_path(player.group)
+  %br
 
 = link_to 'Edit', edit_instance_path(@instance)
 \|
