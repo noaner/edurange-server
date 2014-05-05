@@ -22,18 +22,15 @@ Run these on a fresh instance (we used a micro 64 bit Amazon Linux instance, AMI
 8. ```./start.sh```
 
 
-Open a web browser to ip:3000
+Open a web browser to ip:3000. Make sure to allow TCP 3000 and 9292 to the internet. 3000 is the web interface, 9292 is the faye port.
 
 ## Usage
     
 We now have two scenarios - 
 - recon.yml, a host discovery game with a scoring site (github.com/sboesen/edurange_scoring)
 - elf.yml, an scenario with an instances with where 'ls' has an elf infection. Scoring is being developed to support elf and other scenarios.
-    
-    ```edurange scenarios/recon.yml```
 
-    ```edurange scenarios/elf.yml```
-
+Browse to http://ip:3000/scenarios/new, and select from a template if you want to use one of them.
 
 ## Contributing
 
