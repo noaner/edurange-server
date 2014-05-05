@@ -21,6 +21,7 @@ gem 'underscore-rails'
 gem 'thin'
 gem 'delayed_job_active_record'
 gem 'jquery-turbolinks'
+gem 'therubyracer'
 
 
 group :development do
