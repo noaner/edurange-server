@@ -17,12 +17,12 @@ gem 'haml-rails'
 gem 'pundit'
 gem 'simple_form'
 gem 'private_pub'
+gem 'underscore-rails'
 gem 'thin'
 gem 'delayed_job_active_record'
 
 
 group :development do
-  gem 'pry-rescue'
   gem 'pry-stack_explorer'
   gem 'awesome_print'
   gem 'better_errors'
