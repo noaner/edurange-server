@@ -111,7 +111,7 @@ ActiveRecord::Schema.define(version: 20140505015507) do
     t.string   "name"
     t.string   "cidr_block"
     t.string   "driver_id"
-    t.boolean  "internet_accessible"
+    t.boolean  "internet_accessible", default: false
     t.integer  "cloud_id"
     t.datetime "created_at"
     t.datetime "updated_at"
