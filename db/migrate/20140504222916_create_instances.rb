@@ -1,12 +1,12 @@
 class CreateInstances < ActiveRecord::Migration
   def change
     create_table :instances do |t|
-      t.string :name
-      t.string :ip_address
+      t.string :name, required: true
+      t.string :ip_address, required: true
       t.string :driver_id
-      t.string :cookbook_url
-      t.string :os
-      t.boolean :internet_accessible
+      t.string :cookbook_url, required: true
+      t.string :os, required: true
+      t.boolean :internet_accessible, required: true
       t.references :subnet, index: true
 
       t.timestamps
