@@ -23,6 +23,7 @@ gem 'delayed_job_active_record'
 gem 'jquery-turbolinks'
 gem 'therubyracer'
 gem 'rails_config'
+gem 'aws-sdk'
 
 
 
