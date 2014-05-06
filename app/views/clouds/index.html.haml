@@ -3,6 +3,7 @@
 %table
   %tr
     %th Name
+    %th Status
     %th Cidr block
     %th Driver
     %th Scenario
@@ -13,6 +14,7 @@
   - @clouds.each do |cloud|
     %tr
       %td= cloud.name
+      %td= cloud.status
       %td= cloud.cidr_block
       %td= cloud.driver_id || "Nil"
       %td= link_to cloud.scenario.name, scenario_path(cloud.scenario)

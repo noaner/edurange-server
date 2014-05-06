@@ -3,6 +3,7 @@
 %table
   %tr
     %th Name
+    %th Status
     %th Ip address
     %th Driver
     %th Cookbook url
@@ -16,6 +17,7 @@
   - @instances.each do |instance|
     %tr
       %td= instance.name
+      %td= instance.status
       %td= instance.ip_address
       %td= instance.driver_id
       %td= instance.cookbook_url || "Not Set"

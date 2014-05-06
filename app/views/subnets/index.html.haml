@@ -3,6 +3,7 @@
 %table
   %tr
     %th Name
+    %th Status
     %th Cidr block
     %th Driver
     %th Internet accessible
@@ -14,6 +15,7 @@
   - @subnets.each do |subnet|
     %tr
       %td= subnet.name
+      %td= subnet.status
       %td= subnet.cidr_block
       %td= subnet.driver_id || "Nil"
       %td= subnet.internet_accessible
