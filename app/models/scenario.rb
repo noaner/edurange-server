@@ -9,6 +9,11 @@ class Scenario < ActiveRecord::Base
       self.status = "booting"
       # delayed_job, 5.times sleep 10 sec, print to /scenarios/#{1}
       debug "Booting scenario..."
+      AWS.config({
+                   :access_key_id => Settings.access_key_id,
+                   :secret_access_key => Settings.secret_access_key,
+                 })
+
       
       # Boot Clouds
       self.clouds.each { |cloud| cloud.boot }
