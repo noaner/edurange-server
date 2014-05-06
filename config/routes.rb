@@ -1,4 +1,7 @@
 Edurange::Application.routes.draw do
+  get 'management/clean'
+  get 'management/status'
+
   resources :instance_groups
 
   resources :players
