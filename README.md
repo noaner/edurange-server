@@ -19,8 +19,9 @@ Run these on a fresh instance (we used a micro 64 bit Amazon Linux instance, AMI
 5. ```bundle```
 6. ```./install.sh```
 7. ```vim config/private_pub.yml, set your public IP as the development server. Change the secret, too!```
-7. ```/path/to/bin/make_config_yml yourkeyname```
-8. ```./start.sh```
+7. ```vim config/settings.yml, set your ec2_key.```
+8. ```/path/to/bin/make_config_yml yourkeyname```
+9. ```./start.sh```
 
 Open a web browser to ip:3000. Make sure to allow TCP 3000 and 9292 to the internet. 3000 is the web interface, 9292 is the faye port.
 
