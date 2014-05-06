@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
-require 'edurange'
 
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'config', 'environment'))
 """
 CLEANUP:
 	for each virtual private cloud {
