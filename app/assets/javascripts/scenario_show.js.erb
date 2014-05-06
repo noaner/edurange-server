@@ -4,6 +4,7 @@ var ready = function() {
   if (id) {
     PrivatePub.subscribe("/scenarios/" + id, function(data, channel) {
       $("#console").append(data.log_message + '<br>');
+      $('#console').scrollTop($('#console').prop("scrollHeight"));
     });
   }
   

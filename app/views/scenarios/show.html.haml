@@ -13,6 +13,8 @@
   %br
 %h3 Console Log
 %pre#console
+  - if @scenario.log
+    = @scenario.log
 
 
 = link_to 'Boot', boot_scenario_path(@scenario)

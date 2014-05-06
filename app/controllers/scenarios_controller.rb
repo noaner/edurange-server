@@ -19,10 +19,10 @@ class ScenariosController < ApplicationController
     elsif @scenario.booting?
       notice = "Scenario is booting. Monitor output below."
     else
+      @scenario.delay.boot
       notice = "Scenario is booting. Monitor output below."
     end
 
-    @scenario.delay.boot
     redirect_to @scenario, notice: notice
   end
 
@@ -88,6 +88,6 @@ class ScenariosController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def scenario_params
-      params.require(:scenario).permit(:game_type, :name, :template)
+      params.require(:scenario).permit(:game_type, :name, :template, :log)
     end
 end

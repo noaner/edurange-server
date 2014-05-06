@@ -1,4 +1,5 @@
 class Instance < ActiveRecord::Base
+  enum status: [:stopped, :booting, :booted]
   validates_presence_of :name, :os, :subnet
   validates_associated :subnet
   belongs_to :subnet
@@ -21,6 +22,24 @@ class Instance < ActiveRecord::Base
   def ip_address_must_be_within_subnet
     # TODO fix
     true
+  end
+  def boot
+    if self.stopped?
+      # delayed_job, 5.times sleep 10 sec, print to /scenarios/#{1}
+      debug "Booting instance..."
+      
+      # "Boot"
+      5.times do
+        sleep 1
+        # PrivatePub it, as well as append to @scenario's log & update.
+        debug "Hello, world - instance!"
+      end
+    end
+  end
+  def debug(message)
+    log = self.subnet.cloud.scenario.log
+    self.subnet.cloud.scenario.update_attributes(log: log + message + "\n")
+    PrivatePub.publish_to "/scenarios/#{self.id}", log_message: message
   end
   
 
