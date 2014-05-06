@@ -12,8 +12,8 @@
   - @players.each do |player|
     %tr
       %td= player.login
-      %td= player.password
-      %td= player.group
+      %td ********
+      %td= link_to player.group.name, player_path(player.group)
       %td= link_to 'Show', player
       %td= link_to 'Edit', edit_player_path(player)
       %td= link_to 'Destroy', player, :method => :delete, :data => { :confirm => 'Are you sure?' }

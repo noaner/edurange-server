@@ -15,9 +15,9 @@
     %tr
       %td= subnet.name
       %td= subnet.cidr_block
-      %td= subnet.driver_id
+      %td= subnet.driver_id || "Nil"
       %td= subnet.internet_accessible
-      %td= subnet.cloud
+      %td= link_to subnet.cloud.name, cloud_path(subnet.cloud)
       %td= link_to 'Show', subnet
       %td= link_to 'Edit', edit_subnet_path(subnet)
       %td= link_to 'Destroy', subnet, :method => :delete, :data => { :confirm => 'Are you sure?' }

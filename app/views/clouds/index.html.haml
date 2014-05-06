@@ -14,8 +14,8 @@
     %tr
       %td= cloud.name
       %td= cloud.cidr_block
-      %td= cloud.driver_id
-      %td= cloud.scenario
+      %td= cloud.driver_id || "Nil"
+      %td= link_to cloud.scenario.name, scenario_path(cloud.scenario)
       %td= link_to 'Show', cloud
       %td= link_to 'Edit', edit_cloud_path(cloud)
       %td= link_to 'Destroy', cloud, :method => :delete, :data => { :confirm => 'Are you sure?' }
