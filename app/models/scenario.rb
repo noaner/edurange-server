@@ -35,7 +35,7 @@ class Scenario < ActiveRecord::Base
       else
         debug "NOTE: Subnet.all.each. Subnet #{subnet} adding route to NAT"
         # Find the NAT instance
-        @route_table.create_route("0.0.0.0/0", { instance: NAT_INSTANCE.driver_id} )
+        @route_table.create_route("0.0.0.0/0", { instance: Instance.where(internet_accessible: true).first.driver_id } )
       end
     end
     Cloud.first.driver_object.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)

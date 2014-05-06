@@ -30,7 +30,11 @@ class Subnet < ActiveRecord::Base
     self.send("#{Settings.driver}_check_status".to_sym)
   end
   def aws_check_status
-    self.driver_object.state == :available
+    if self.driver_object.state == :available
+      self.status = "booted"
+      self.save!
+    end
+
   end
   def driver_object
     AWS::EC2::SubnetCollection.new[self.driver_id]
@@ -68,23 +72,22 @@ class Subnet < ActiveRecord::Base
       self.status = "booted"
       self.save!
     end
-    def run_when_booted
-      until self.booted?
-        self.reload
-        sleep 2
-        provider_check_status
-      end
-      yield
+  end
+  def run_when_booted
+    until self.booted?
+      self.reload
+      sleep 2
+      provider_check_status
     end
-    handle_asynchronously :run_when_booted
-    def add_progress
-      debug "Adding progress to subnet"
-      PrivatePub.publish_to "/scenarios/#{self.cloud.scenario.id}", subnet_progress: 1
-    end
-    def debug(message)
-      log = self.cloud.scenario.log
-      self.cloud.scenario.update_attributes(log: log + message + "\n")
-      PrivatePub.publish_to "/scenarios/#{self.cloud.scenario.id}", log_message: message
-    end
+    yield
+  end
+  def add_progress
+    debug "Adding progress to subnet"
+    PrivatePub.publish_to "/scenarios/#{self.cloud.scenario.id}", subnet_progress: 1
+  end
+  def debug(message)
+    log = self.cloud.scenario.log
+    self.cloud.scenario.update_attributes(log: log + message + "\n")
+    PrivatePub.publish_to "/scenarios/#{self.cloud.scenario.id}", log_message: message
   end
 end

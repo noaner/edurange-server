@@ -12,8 +12,6 @@ class Cloud < ActiveRecord::Base
       
       # Boot
       self.provider_boot
-      self.status = "booted"
-      self.save!
       add_progress
       
       # Boot Subnets
@@ -33,7 +31,10 @@ class Cloud < ActiveRecord::Base
     AWS::EC2::VPCCollection.new[self.driver_id]
   end
   def aws_check_status
-    self.driver_object.state == :available
+    if self.driver_object.state == :available
+      self.status = "booted"
+      self.save!
+    end
   end
   def aws_boot
     debug "Called aws_boot!"
@@ -62,7 +63,6 @@ class Cloud < ActiveRecord::Base
     end
     yield
   end
-  handle_asynchronously :run_when_booted
   def add_progress
     PrivatePub.publish_to "/scenarios/#{self.scenario.id}", cloud_progress: 1
   end

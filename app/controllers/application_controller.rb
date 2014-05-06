@@ -1,3 +1,4 @@
+require 'unix_crypt'
 class ApplicationController < ActionController::Base
   AWS.config({
     :access_key_id => Settings.access_key_id,
@@ -11,7 +12,13 @@ class ApplicationController < ActionController::Base
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
+  helper_method :nat_instance
+
   private
+
+  def nat_instance(nat_instance = nil)
+    @nat_instance ||= nat_instance
+  end
 
   def user_not_authorized
     flash[:alert] = "Access denied."

@@ -38,13 +38,32 @@ class Instance < ActiveRecord::Base
   def provider_boot
     self.send("#{Settings.driver}_boot".to_sym)
   end
+  def upload_cookbook(cookbook_text)
+    return self.send("#{Settings.driver}_upload_cookbook".to_sym, cookbook_text)
+  end
+  def aws_upload_cookbook(cookbook_text)
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange']
+    unless bucket.exists?
+      s3.buckets.create('edurange')
+    end
+    uuid = `uuidgen`
+    bucket.objects[uuid].write(cookbook_text)
+    cookbook_url = bucket.objects[uuid].url_for(:read, expires: 1000).to_s # 1000 minutes
+    self.update_attributes(cookbook_url: cookbook_url)
+    return cookbook_url
+  end
   def aws_boot
     debug "Called aws_boot in instance!"
     debug "AWS_Driver::provider_boot - instance"
     instance_template = InstanceTemplate.new(self)
+    debug "AWS_Driver::InstanceTemplate.new"
     cookbook_text = instance_template.generate_cookbook
+    debug "AWS_Driver::instance_template.generate_cookbook"
     self.cookbook_url = self.upload_cookbook(cookbook_text)
+    debug "AWS_Driver::self.upload_cookbook"
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
+    debug "AWS_Driver::self.generate cloud init"
     debug self.cookbook_url
 
     sleep 2 until self.subnet.booted?
@@ -64,7 +83,6 @@ class Instance < ActiveRecord::Base
     debug self.inspect
 
     if self.internet_accessible
-      Edurange.nat_instance = self
       run_when_booted do
         eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
         debug "AWS_Driver:: Allocated EIP #{eip}"
@@ -74,11 +92,17 @@ class Instance < ActiveRecord::Base
     end
     add_progress
   end
+  def driver_object
+    AWS::EC2::InstanceCollection.new[self.driver_id]
+  end
   def provider_check_status
     self.send("#{Settings.driver}_check_status".to_sym)
   end
   def aws_check_status
-    self.driver_object.status == :running
+    if self.driver_object.status == :running
+      self.status = "booted"
+      self.save!
+    end
   end
   def nat?
     @internet_accessible
@@ -98,7 +122,6 @@ class Instance < ActiveRecord::Base
     end
     yield
   end
-  handle_asynchronously :run_when_booted
   def add_progress
     debug "Adding progress to instance!"
     PrivatePub.publish_to "/scenarios/#{self.subnet.cloud.scenario.id}", instance_progress: 1
