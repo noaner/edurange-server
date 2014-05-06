@@ -11,6 +11,29 @@
 - @scenario.clouds.each do |cloud|
   = link_to cloud.name, cloud_path(cloud)
   %br
+%h3 Boot Progress
+%ul
+  %li
+    %span#cloud-count
+      = @cloud_booted
+    %span#cloud-count
+      of
+      = @cloud_count
+      Clouds
+  %li
+    %span#subnet-count
+      = @subnet_booted
+    %span#subnet-total
+      of 
+      = @subnet_count
+      Subnets
+  %li
+    %span#instance-count
+      = @instance_booted
+    %span#instance-total
+      of
+      = @instance_count
+      Instances
 %h3 Console Log
 %pre#console
   - if @scenario.log

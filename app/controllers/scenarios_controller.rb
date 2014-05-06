@@ -10,6 +10,12 @@ class ScenariosController < ApplicationController
   # GET /scenarios/1
   # GET /scenarios/1.json
   def show
+    @cloud_booted = @scenario.clouds.select { |cloud| cloud.booted? }.size
+    @cloud_count = @scenario.clouds.size
+    @subnet_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.select { |subnet| subnet.booted? }.size
+    @subnet_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.size
+    @instance_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.select { |instance| instance.booted? }.size
+    @instance_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.size
   end
   
   def boot
@@ -34,6 +40,7 @@ class ScenariosController < ApplicationController
 
   # GET /scenarios/1/edit
   def edit
+    @templates = []
   end
 
   # POST /scenarios

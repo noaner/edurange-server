@@ -24,6 +24,7 @@ gem 'jquery-turbolinks'
 gem 'therubyracer'
 gem 'rails_config'
 gem 'aws-sdk'
+gem 'erubis'
 
 
 

@@ -46,16 +46,16 @@ module YmlRecord
     
     cloud = nil
     clouds.each do |yaml_cloud|
-      cloud = Cloud.new
+      scenario = Scenario.find_by_name yaml_cloud["Scenario"]
+      cloud = scenario.clouds.new
       cloud.name = yaml_cloud["Name"]
       cloud.cidr_block = yaml_cloud["CIDR_Block"]
-      cloud.scenario = Scenario.find_by_name yaml_cloud["Scenario"]
       cloud.save!
     end
 
     subnets.each do |yaml_subnet|
-      subnet = Subnet.new
-      subnet.cloud = Cloud.find_by_name yaml_subnet["Cloud"]
+      cloud = Cloud.find_by_name yaml_subnet["Cloud"]
+      subnet = cloud.subnets.new
       subnet.name = yaml_subnet["Name"]
       subnet.cidr_block = yaml_subnet["CIDR_Block"]
       if yaml_subnet["Internet_Accessible"]
