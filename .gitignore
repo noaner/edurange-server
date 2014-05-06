@@ -9,7 +9,7 @@ InstalledFiles
 _yardoc
 coverage
 doc/
-db/*
+db/*.sqlite3
 log/*
 public/assets/*
 lib/bundler/man
