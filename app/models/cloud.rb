@@ -4,5 +4,5 @@ class Cloud < ActiveRecord::Base
   validates_associated :scenario
 
   belongs_to :scenario
-  has_many :subnets
+  has_many :subnets, dependent: :delete_all
 end

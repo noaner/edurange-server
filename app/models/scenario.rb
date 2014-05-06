@@ -1,5 +1,5 @@
 class Scenario < ActiveRecord::Base
-  has_many :clouds
+  has_many :clouds, dependent: :delete_all
   validates_presence_of :name, :description
   attr_accessor :template # For picking a template when creating a new scenario
   enum status: [:stopped, :booting, :booted]

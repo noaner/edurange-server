@@ -3,8 +3,8 @@ class Instance < ActiveRecord::Base
   validates_associated :subnet
   belongs_to :subnet
 
-  has_many :instance_groups
-  has_many :instance_roles
+  has_many :instance_groups, dependent: :delete_all
+  has_many :instance_roles, dependent: :delete_all
   has_many :groups, through: :instance_groups
   has_many :roles, through: :instance_roles
   
