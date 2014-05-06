@@ -1,4 +1,3 @@
-require 'unix_crypt'
 class ApplicationController < ActionController::Base
   AWS.config({
     :access_key_id => Settings.access_key_id,

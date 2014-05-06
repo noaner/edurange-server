@@ -53,6 +53,13 @@ class Instance < ActiveRecord::Base
     self.update_attributes(cookbook_url: cookbook_url)
     return cookbook_url
   end
+  def public_ip
+    self.send("#{Settings.driver}_public_ip".to_sym)
+  end
+  def aws_public_ip
+    return false unless self.internet_accessible
+    @public_ip ||= self.driver_object.public_ip_address
+  end
   def aws_boot
     debug "Called aws_boot in instance!"
     debug "AWS_Driver::provider_boot - instance"

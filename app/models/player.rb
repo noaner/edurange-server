@@ -1,3 +1,4 @@
+require 'unix_crypt'
 class Player < ActiveRecord::Base
   belongs_to :group
   validates_presence_of :group
