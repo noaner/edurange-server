@@ -8,6 +8,7 @@ Gemfile.lock
 InstalledFiles
 _yardoc
 coverage
+cron.log
 doc/
 db/*.sqlite3
 log/*
