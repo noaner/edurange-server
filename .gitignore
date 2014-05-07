@@ -12,7 +12,6 @@ cron.log
 doc/
 db/*.sqlite3
 log/*
-config/settings.yml
 public/assets/*
 lib/bundler/man
 pkg
