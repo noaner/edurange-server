@@ -124,6 +124,9 @@ module YmlRecord
     end
   end
 
-  def self.write_yml(scenario, yaml_file)
+  def self.write_yml(yaml_file, scenario)
+    File.open(yaml_file, 'w') do |f|
+      f.puts scenario.to_yaml
+    end
   end
 end
