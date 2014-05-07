@@ -57,6 +57,7 @@ class Instance < ActiveRecord::Base
     self.send("#{Settings.driver}_public_ip".to_sym)
   end
   def aws_public_ip
+    return false unless self.driver_id
     return false unless self.internet_accessible
     @public_ip ||= self.driver_object.public_ip_address
   end
