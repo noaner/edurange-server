@@ -167,7 +167,6 @@ class Management
       debug "Deleting elastic ip #{elastic_ip}"
       elastic_ip.delete
     end
-    debug "Finished cleaning up."
   end
   handle_asynchronously :cleanup
 end
