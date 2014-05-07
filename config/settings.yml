@@ -1,4 +1,4 @@
 ec2_key: stefanskey # Change to be your EC2 key
 driver: aws
-access_key_id: AKIAIC77ZQT2W7UAJSEQ
-secret_access_key: siAwojEZanke6HRa8X1D9yIrbcFlmKyfdWM5vkIG
+access_key_id: CHANGE_ME
+secret_access_key: CHANGE_ME
