@@ -1,6 +1,7 @@
 Edurange::Application.routes.draw do
   get 'management/clean'
   get 'management/status'
+  get 'management/purge'
 
   resources :instance_groups
 

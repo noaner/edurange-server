@@ -2,8 +2,20 @@ class Management
   def debug(message)
     PrivatePub.publish_to "/cleanup", log_message: message
   end
+  def purge
+    Scenario.delete_all
+    Cloud.delete_all
+    Subnet.delete_all
+    Instance.delete_all
+    Player.delete_all
+    Group.delete_all
+    Role.delete_all
+    InstanceGroup.delete_all
+    InstanceRole.delete_all
+    debug "Finished purging local DB!"
+  end
+  handle_asynchronously :purge
   def cleanup
-
     ec2 = AWS::EC2.new
     vpc_collect = ec2.vpcs
 
@@ -14,9 +26,9 @@ class Management
           debug "Deleting security group #{security_group}"
           security_group.delete
           if security_group.exists?
-            $stdout.write("Waiting for #{security_group} to terminate ")
+            debug "Waiting for #{security_group} to terminate "
             while security_group.exists?
-              $stdout.write(".. ")
+              debug ".. "
               sleep(2)
             end
             debug " OK\n"
@@ -33,9 +45,9 @@ class Management
           eip.delete
 
           if eip.exists?
-            $stdout.write("Waiting for Elastic IP to terminate ")
+            debug "Waiting for Elastic IP to terminate "
             while eip.exists?
-              $stdout.write(".. ")
+              debug ".. "
               sleep(2)
             end
             debug " OK\n"
@@ -45,9 +57,9 @@ class Management
         debug "Deleting instance #{inst}"
         inst.delete
         if inst.exists?
-          $stdout.write("Waiting for Instance #{inst} to terminate ")
+          debug "Waiting for Instance #{inst} to terminate "
           unless inst.status == :terminated then
-            $stdout.write(".. ")
+            debug ".. "
             sleep(2)
           end
           debug " OK\n"
@@ -155,6 +167,7 @@ class Management
       debug "Deleting elastic ip #{elastic_ip}"
       elastic_ip.delete
     end
+    debug "Finished cleaning up."
   end
   handle_asynchronously :cleanup
 end

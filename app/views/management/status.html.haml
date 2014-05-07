@@ -1,4 +1,6 @@
 = subscribe_to "/cleanup"
 %pre#status
 
-= link_to 'Clean', management_clean_path
+= link_to 'Purge Web DB', management_purge_path
+\|
+= link_to 'Clean AWS', management_clean_path

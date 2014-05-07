@@ -19,8 +19,6 @@ module Edurange
         request_specs: false
       g.fixture_replacement :factory_girl, dir: "spec/factories"
     end
-    # Whitelist action specific js files -- annoying, but ok and understandable
-    config.assets.precompile += %w(scenario_show.js)
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
