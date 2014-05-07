@@ -9,7 +9,7 @@ apt-get -y install ruby1.9.1 ruby1.9.1-dev
 apt-get -y autoremove
 apt-get -y clean
  
-gem install chef ruby-shadow --no-ri --no-rdoc --verbose
+gem install chef ruby-shadow librarian-chef --no-ri --no-rdoc --verbose
 
 <% elsif instance.os == 'nat' %>
 export PATH=$PATH:/usr/local/bin
@@ -25,14 +25,14 @@ ln -sf /usr/bin/rdoc1.9 /usr/bin/rdoc
 ln -sf /usr/bin/rake1.9 /usr/bin/rake
 gem update --system --no-document
 
-gem install chef ruby-shadow --no-ri --no-rdoc --verbose
+gem install chef ruby-shadow librarian-chef --no-ri --no-rdoc --verbose
 
 wget -O- https://opscode.com/chef/install.sh | sudo bash
 <% else %>
 # <%= instance.os %>
 <% end %>
 # Put chef stuff in place
-mkdir -p /root/chef/cookbooks/op/recipes
+mkdir -p /root/chef/cookbooks/
 cd /root/chef
 
 # /root/chef/solo.rb
@@ -46,16 +46,22 @@ EOF
 # /root/chef/solo.json
 cat << EOF > solo.json
 {
-  "run_list": [ "recipe[op::default]" ]
+  "run_list": [
+  <% instance.roles.each do |role| %>
+    <% role.recipes.each do |recipe| %>
+      <%= '"recipe[' + recipe + '::default]",' %>
+    <% end %>
+  <% end %>
+  ]
 }
 EOF
 
 # /root/chef/cron.sh - Every 2 minutes get script on internet, place cookbooks/op/recipes/default.rb, run chef-solo
 cat << EOF > cron.sh
 #!/usr/bin/env bash
-cd /root/chef/cookbooks/op/recipes/
+cd /root/chef/
+/usr/local/bin/chef-librarian install
 wget -O default.rb '<%= cookbook_url %>'
-cd /root/chef
 /usr/local/bin/chef-solo -c solo.rb -j solo.json
 EOF
 
