@@ -1,49 +1,61 @@
 = subscribe_to "/scenarios/#{@scenario.id}"
-%div#scenario{data: {id: @scenario.id}}
-  %p
-    %b Name:
-    = @scenario.name
-  %p
-    %b Status:
-    = @scenario.status
-  %p
-    %b description
-    = @scenario.description
+%div.panel.panel-default#scenario{data: {id: @scenario.id}}
+  %div.panel-heading
+    %b
+      Scenario - 
+      =@scenario.name
+  %div.panel-body
+    %dl
+      %dt Status:
+      %dd= @scenario.status
+      %dt Description:
+      %dd= @scenario.description
 
-%h3 Clouds
-- @scenario.clouds.each do |cloud|
-  = link_to cloud.name, cloud_path(cloud)
-  %br
-%h3 Boot Progress
-%ul
-  %li
-    %span#cloud-count
-      = @cloud_booted
-    %span#cloud-count
-      of
-      = @cloud_count
-      Clouds
-  %li
-    %span#subnet-count
-      = @subnet_booted
-    %span#subnet-total
-      of 
-      = @subnet_count
-      Subnets
-  %li
-    %span#instance-count
-      = @instance_booted
-    %span#instance-total
-      of
-      = @instance_count
-      Instances
-%h3 Console Log
-%pre#console
-  - if @scenario.log
-    = @scenario.log
+    %div.page-header
+      %h3 Clouds [ ]
+
+    %dl
+      %br
+      - @scenario.clouds.each do |cloud|
+        %dt= link_to cloud.name, cloud_path(cloud)
+
+    %div.page-header
+      %h3 Boot Progress
+
+    %dl
+      %dt
+        Clouds Booted:
+      %dd
+        %span#cloud-count
+          = @cloud_booted
+        of 
+        %span#cloud-total
+          = @cloud_count
+      %dt
+        Subnets Booted:
+      %dd
+        %span#subnet-count
+          = @subnet_booted
+        of
+        %span#subnet-total
+          = @subnet_booted
+
+      %dt
+        Instances Booted:
+      %dd
+        %span#instance-count
+          = @instance_booted
+        of
+        %span#instance-total
+          = @instance_booted
+
+  %h3#console-header Console Log
+  %pre#console
+    - if @scenario.log
+      = @scenario.log
 
 
-%div.btn-group
-  = link_to 'Boot', boot_scenario_path(@scenario), class: 'btn btn-primary'
-  = link_to 'Edit', edit_scenario_path(@scenario), class: 'btn btn-default'
-  = link_to 'Back', scenarios_path, class: 'btn btn-default'
+  %div.btn-group#scenario-buttons
+    = link_to 'Boot', boot_scenario_path(@scenario), class: 'btn btn-primary'
+    = link_to 'Edit', edit_scenario_path(@scenario), class: 'btn btn-default'
+    = link_to 'Back', scenarios_path, class: 'btn btn-default'

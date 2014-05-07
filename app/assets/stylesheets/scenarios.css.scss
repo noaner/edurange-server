@@ -4,4 +4,16 @@
 #console {
   overflow-y: scroll;
   height: 220px;
+  margin: 0 10px 10px 10px;
+}
+
+#console-header {
+  margin: 10px 10px;
+}
+
+.page-header, dl {
+  margin-left: 10px;
+}
+#scenario-buttons {
+  margin: 0 10px 10px 10px;
 }
