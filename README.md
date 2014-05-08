@@ -4,6 +4,16 @@ Join us in #edurange on irc.freenode.net!
 
 
 EDURange is a project sponsored by the National Science Foundation intended to help automate creation of cyber security training games.
+## Introduction
+This is a draft. A working version should be ready by June 1. EDURange is both a collection of interactive, collaborative cybersecurity exercises and a framework for creating these exercises. Currently, we have
+two exercises: Recon I and ELF Infection. Recon I was the first exercise created and was based on a scenario
+from PacketWars. It focuses on reconnaissance to determine hosts in an unknown network. The standard
+tool for this is nmap, and while the student will need to learn how to use that tool in order to do this exercise,
+that is not the most important learning goal. The most important learning goal is developing analytical skills
+with respect to complex systems and complex data. Similarly, the Elf Infection exercise uses standard tools
+such as netstat but requires that students reason about the behavior of a complex system to discover which
+binary is infected and what it is doing, e.g. it opens a port and listens for connections, which it should not
+be doing. There are several more exercises planned, and they can be found in the Future Work section
 
 ## Installation
 
