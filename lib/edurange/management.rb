@@ -80,13 +80,18 @@ module Edurange
 	  unless route_table.main?
 	    puts "Deleting route table #{route_table.id}"
 
-	    if route_table.subnets 
-	      route_table.subnets.each do |subnet|
-		subnet.set_route_table(ec2.route_tables.main_route_table)
+            begin
+	      if route_table.subnets 
+	        route_table.subnets.each do |subnet|
+		  subnet.set_route_table(ec2.route_tables.main_route_table)
+	        end
 	      end
-	    end
 
-	    route_table.delete
+	      route_table.delete
+            rescue Exception => e
+              puts e.message
+              puts "EDURange cleanup will keep going anyway."
+            end
 	  end
 	end
 
@@ -155,7 +160,8 @@ module Edurange
       end
       return
     end
-
+  end
+end
 
 
 
