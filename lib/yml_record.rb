@@ -84,7 +84,6 @@ module YmlRecord
     
     
     groups.each do |yaml_group|
-      binding.pry
       users = yaml_group["Users"]
       access = yaml_group["Access"]
       admin = access["Administrator"]
