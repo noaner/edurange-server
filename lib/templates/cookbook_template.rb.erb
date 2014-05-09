@@ -1,6 +1,7 @@
 # Users
 <% users.each do |user| %>
 user '<%= user.login %>' do
+  supports :manage_home => true
   password '<%= user.password_hash %>'
   action :create
 end
@@ -8,6 +9,7 @@ end
 # Administrators
 <% administrators.each do |administrator| %>
 user '<%= administrator.login %>' do
+  supports :manage_home => true
   password '<%= administrator.password_hash %>'
   group 'sudo'
   action :create
