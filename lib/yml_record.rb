@@ -84,6 +84,7 @@ module YmlRecord
     
     
     groups.each do |yaml_group|
+      binding.pry
       users = yaml_group["Users"]
       access = yaml_group["Access"]
       admin = access["Administrator"]
@@ -120,8 +121,8 @@ module YmlRecord
           instance.save!
         end
       end
-      return scenario # Return the scenario we created
     end
+    return scenario # Return the scenario we created
   end
 
   def self.write_yml(yaml_file, scenario)
