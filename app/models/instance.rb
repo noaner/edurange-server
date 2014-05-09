@@ -49,7 +49,7 @@ class Instance < ActiveRecord::Base
     end
     uuid = `uuidgen`
     bucket.objects[uuid].write(cookbook_text)
-    cookbook_url = bucket.objects[uuid].url_for(:read, expires: 1000).to_s # 1000 minutes
+    cookbook_url = bucket.objects[uuid].url_for(:read, expires: 1000.minutes).to_s # 1000 minutes
     self.update_attributes(cookbook_url: cookbook_url)
     return cookbook_url
   end
