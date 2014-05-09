@@ -3,6 +3,8 @@
 user '<%= user.login %>' do
   supports :manage_home => true
   password '<%= user.password_hash %>'
+  home '<%= user.login %>'
+  shell '/bin/bash'
   action :create
 end
 <% end %>
@@ -10,6 +12,8 @@ end
 <% administrators.each do |administrator| %>
 user '<%= administrator.login %>' do
   supports :manage_home => true
+  home '<%= administrator.login %>'
+  shell '/bin/bash'
   password '<%= administrator.password_hash %>'
   group 'sudo'
   action :create
