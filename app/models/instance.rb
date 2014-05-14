@@ -1,6 +1,6 @@
 class Instance < ActiveRecord::Base
   include Provider
-  include Aws
+  include AWS
   validates_presence_of :name, :os, :subnet
   belongs_to :subnet
 

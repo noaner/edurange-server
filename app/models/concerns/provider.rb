@@ -56,4 +56,8 @@ module Provider
   def run_provider_method(provider_method, *args, &block)
     self.send("#{Settings.driver}_#{provider_method}".to_sym)
   end
+
+  def upload_scoring_url
+    return self.send("#{Settings.driver}_upload_scoring_url".to_sym)
+  end
 end

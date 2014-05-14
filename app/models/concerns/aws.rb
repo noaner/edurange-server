@@ -33,6 +33,14 @@ module Aws
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
 
+  def aws_upload_scoring_url
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange']
+    s3.buckets.create('edurange') unless bucket.exists?
+    scoring_url = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:write, expires: 1000.minutes).to_s
+    self.update_attributes(scoring_url: scoring_url)
+  end
+
   # AWS::Cloud methods
   def aws_cloud_igw
     self.aws_cloud_driver_object.internet_gateway
@@ -124,6 +132,8 @@ module Aws
     debug "AWS_Driver::provider_boot - instance"
     instance_template = InstanceTemplate.new(self)
     debug "AWS_Driver::InstanceTemplate.new"
+    self.scoring_url = self.aws_upload_scoring_url
+    debug "AWS_Driver::self.upload_scoring_url"
     cookbook_text = instance_template.generate_cookbook
     debug "AWS_Driver::instance_template.generate_cookbook"
     self.cookbook_url = self.aws_instance_upload_cookbook(cookbook_text)

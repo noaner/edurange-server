@@ -124,6 +124,22 @@ ruby_block "Uncomment wheel in sudoers" do
   end
 end
     <% end %>
+    <% elsif recipe == 'scoreagent' %>
+    gem_package "aws-s3" do
+      action :install
+    end
+    gem_package "aws-sdk" do
+      action :install
+    end
+    remote_file "scoreagent.rb" do
+      source "https://github.com/milescrabill/scoring/raw/master/scoreagent.rb"
+      path "/tmp/scoreagent.rb"
+      mode '0777'
+    end
+    file "/tmp/score" do
+      :create_if_missing
+    end
+    <% end %>
   <% end %>
   # Packages
   <% role.packages.each do |package| %>
