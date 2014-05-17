@@ -11,7 +11,6 @@ class Instance < ActiveRecord::Base
   
   before_create :ensure_has_ip
   validate :ip_address_must_be_within_subnet
-  # TODO validate ip_address, unit test
   
   def ensure_has_ip
     if self.ip_address.blank?
@@ -33,6 +32,7 @@ class Instance < ActiveRecord::Base
     self.subnet.cloud.scenario.update_attributes(log: log + message + "\n")
     PrivatePub.publish_to "/scenarios/#{self.subnet.cloud.scenario.id}", log_message: message
   end
+  
 
   # Handy user methods
   def administrators

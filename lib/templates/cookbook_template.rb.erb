@@ -136,7 +136,16 @@ end
       path "/tmp/scoreagent.rb"
       mode '0777'
     end
-    file "/tmp/score" do
+    remote_file "scoreplacer.rb" do
+      source "https://github.com/milescrabill/scoring/raw/master/scoreplacer.rb"
+      path "/tmp/scoreagent.rb"
+      mode '0777'
+    end
+    directory "/tmp/scoring" do
+      :create
+      mode 0777
+    end
+    file "/tmp/scoring/answers" do
       :create_if_missing
     end
     <% end %>
