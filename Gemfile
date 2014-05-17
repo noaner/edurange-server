@@ -58,4 +58,6 @@ group :test do
   gem 'faker'
   gem 'launchy'
   gem 'selenium-webdriver'
+  gem 'plymouth'
+  gem 'pry'
 end
