@@ -16,7 +16,7 @@ module Provider
       # Boot child objects
       if self.class == Scenario
         self.clouds.each { |cloud| cloud.boot }
-        self.provider_final_setup
+        self.provider_scenario_final_setup
       elsif self.class == Cloud
         self.subnets.each { |subnet| subnet.boot }
       elsif self.class == Subnet
@@ -42,7 +42,7 @@ module Provider
       self.reload
       sleep 2
       classname = self.class.to_s.downcase
-      provider_#{classname}_check_status
+      self.run_provider_method("#{classname}_check_status")
     end
     yield
   end

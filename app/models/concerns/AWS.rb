@@ -1,7 +1,10 @@
-module AWS
+module Aws
   extend ActiveSupport::Concern
 
   # AWS::Scenario methods
+  def aws_scenario_boot
+
+  end
   def aws_scenario_final_setup
     debug "=== Final setup."
     # Anything that needs to be performed when the environment is 100% up.
@@ -10,11 +13,11 @@ module AWS
     Subnet.all.each do |subnet|
       @route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: subnet.cloud.driver_id)
       debug "[x] AWS_Driver::create_route_table #{@route_table}"
-      subnet.driver_object.route_table = @route_table
+      subnet.aws_subnet_driver_object.route_table = @route_table
       if subnet.internet_accessible
         # Route traffic straight to internet, avoid the NAT
         debug "NOTE: Subnet.all.each. Subnet #{subnet} adding route to igw"
-        @route_table.create_route("0.0.0.0/0", { internet_gateway: subnet.cloud.igw} )
+        @route_table.create_route("0.0.0.0/0", { internet_gateway: subnet.cloud.aws_cloud_igw} )
       else
         debug "NOTE: Subnet.all.each. Subnet #{subnet} adding route to NAT"
         # Find the NAT instance
@@ -22,23 +25,23 @@ module AWS
       end
     end
     # Hardcoded firewall rules - TODO
-    Cloud.first.driver_object.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)
-    Cloud.first.driver_object.security_groups.first.revoke_egress('0.0.0.0/0') # Disable all outbound
-    Cloud.first.driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 80)  # Enable port 80 outbound
-    Cloud.first.driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 443) # Enable port 443 outbound
+    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)
+    Cloud.first.aws_cloud_driver_object.security_groups.first.revoke_egress('0.0.0.0/0') # Disable all outbound
+    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 80)  # Enable port 80 outbound
+    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 443) # Enable port 443 outbound
     # TODO -- SECURITY -- delayed job in 20 min disable firewall.
-    Cloud.first.driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
+    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
 
   # AWS::Cloud methods
   def aws_cloud_igw
-    self.driver_object.internet_gateway
+    self.aws_cloud_driver_object.internet_gateway
   end
   def aws_cloud_driver_object
     AWS::EC2::VPCCollection.new[self.driver_id]
   end
   def aws_cloud_check_status
-    if self.driver_object.state == :available
+    if self.aws_cloud_driver_object.state == :available
       self.status = "booted"
       self.save!
     end
@@ -59,7 +62,7 @@ module AWS
     @igw = AWS::EC2.new.internet_gateways.create
     debug "[x] AWS_Driver::create_internet_gateway #{@igw.internet_gateway_id}"
     run_when_booted do
-      self.driver_object.internet_gateway = @igw
+      self.aws_cloud_driver_object.internet_gateway = @igw
     end
   end
 
@@ -68,7 +71,7 @@ module AWS
     @internet_accessible
   end
   def aws_subnet_check_status
-    if self.driver_object.state == :available
+    if self.aws_subnet_driver_object.state == :available
       self.status = "booted"
       self.save!
     end
@@ -114,7 +117,7 @@ module AWS
   def aws_instance_public_ip
     return false unless self.driver_id
     return false unless self.internet_accessible
-    @public_ip ||= self.driver_object.public_ip_address
+    @public_ip ||= self.aws_instance_driver_object.public_ip_address
   end
   def aws_instance_boot
     debug "Called aws_boot in instance!"
@@ -123,15 +126,15 @@ module AWS
     debug "AWS_Driver::InstanceTemplate.new"
     cookbook_text = instance_template.generate_cookbook
     debug "AWS_Driver::instance_template.generate_cookbook"
-    self.cookbook_url = self.upload_cookbook(cookbook_text)
-    debug "AWS_Driver::self.upload_cookbook"
+    self.cookbook_url = self.aws_instance_upload_cookbook(cookbook_text)
+    debug "AWS_Driver::self.aws_instance_upload_cookbook"
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
     debug self.cookbook_url
 
     sleep 2 until self.subnet.booted?
     self.driver_id = AWS::EC2::InstanceCollection.new.create(
-                                                             image_id: self.ami_id, # ami_id string of os image
+                                                             image_id: self.aws_instance_ami_id, # ami_id string of os image
                                                              private_ip_address: self.ip_address, # ip string
                                                              key_name: Settings.ec2_key, # keypair string
                                                              user_data: cloud_init, # startup data

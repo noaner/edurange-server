@@ -1,6 +1,6 @@
 class Subnet < ActiveRecord::Base
   include Provider
-  include AWS
+  include Aws
   validates_presence_of :cidr_block, :cloud
 
   belongs_to :cloud
