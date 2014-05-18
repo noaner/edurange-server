@@ -214,3 +214,11 @@ Instances:
     IP_Address: 10.0.127.127
     Roles:
       - web_server
+
+Answers:
+  - { prot: tcp, ip: 10.0.123.8 }
+  - Battlespace_10_Instance.IP_Address
+  - Battlespace_9_Instance.IP_Address
+  - "Answer_1"
+    
+    
