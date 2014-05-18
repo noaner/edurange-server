@@ -25,7 +25,7 @@ class ScenariosController < ApplicationController
     elsif @scenario.booting?
       notice = "Scenario is booting. Monitor output below."
     else
-      @scenario.delayed.boot
+      @scenario.delay.boot
       notice = "Scenario is booting. Monitor output below."
     end
 
