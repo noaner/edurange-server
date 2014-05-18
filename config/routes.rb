@@ -22,6 +22,7 @@ Edurange::Application.routes.draw do
   resources :scenarios do
     member do
       get 'boot'
+      get 'dev_boot'
     end
   end
 

@@ -25,6 +25,20 @@ class ScenariosController < ApplicationController
     elsif @scenario.booting?
       notice = "Scenario is booting. Monitor output below."
     else
+      @scenario.delayed.boot
+      notice = "Scenario is booting. Monitor output below."
+    end
+
+    redirect_to @scenario, notice: notice
+  end
+
+  def dev_boot
+    @scenario = Scenario.find(params[:id])
+    if @scenario.booted?
+      notice = "Scenario is booted. Monitor output below."
+    elsif @scenario.booting?
+      notice = "Scenario is booting. Monitor output below."
+    else
       @scenario.boot
       notice = "Scenario is booting. Monitor output below."
     end
