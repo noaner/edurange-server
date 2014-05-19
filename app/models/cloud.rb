@@ -3,7 +3,7 @@ MIN_CLOUD_CIDR_BLOCK = 28 # AWS Min
 
 class Cloud < ActiveRecord::Base
   include Provider
-  include Aws
+  include AWS
 
   belongs_to :scenario
   has_many :subnets, dependent: :delete_all
