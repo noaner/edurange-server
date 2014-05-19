@@ -1,4 +1,6 @@
 require File.expand_path('../boot', __FILE__)
+require File.expand_path('../../app/models/concerns/AWS.rb', __FILE__)
+require File.expand_path('../../app/models/concerns/provider.rb', __FILE__)
 
 require 'rails/all'
 
