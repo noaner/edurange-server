@@ -39,7 +39,9 @@ module Aws
     bucket = s3.buckets['edurange']
     s3.buckets.create('edurange') unless bucket.exists?
     scoring_url = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:write, expires: 1000.minutes).to_s
+    scoring_page = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:read, expires: 1000.minutes).to_s
     self.update_attributes(scoring_url: scoring_url)
+    self.update_attributes(scoring_url: scoring_page)
   end
 
   # AWS::Cloud methods
@@ -142,6 +144,10 @@ module Aws
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
     debug self.cookbook_url
+
+    self.public_ip = self.aws_instance_public_ip
+    debug "Setting public_ip"
+
 
     sleep 2 until self.subnet.booted?
     self.driver_id = AWS::EC2::InstanceCollection.new.create(
