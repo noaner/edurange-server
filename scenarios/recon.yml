@@ -17,6 +17,7 @@ Roles:
     Recipes:
       - sshd_password_login
       - wheelie
+      - scoring
 
 
 Groups:
