@@ -1,6 +1,6 @@
 class Instance < ActiveRecord::Base
   include Provider
-  include Aws
+  include ip_address_must_be_within_subnet
 
   validates_presence_of :name, :os, :subnet
   belongs_to :subnet
