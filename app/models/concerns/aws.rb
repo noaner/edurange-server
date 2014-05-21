@@ -38,9 +38,15 @@ module Aws
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange']
     s3.buckets.create('edurange') unless bucket.exists?
-    scoring_url = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:write, expires: 1000.minutes).to_s
-    scoring_page = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:read, expires: 1000.minutes).to_s
+    self.scoring_url = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:write, expires: 1000.minutes).to_s
     self.update_attributes(scoring_url: scoring_url)
+  end
+
+  def aws_upload_scoring_page
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange']
+    s3.buckets.create('edurange') unless bucket.exists?
+    self.scoring_page = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:read, expires: 1000.minutes).to_s
     self.update_attributes(scoring_url: scoring_page)
   end
 
@@ -135,15 +141,20 @@ module Aws
     debug "AWS_Driver::provider_boot - instance"
     instance_template = InstanceTemplate.new(self)
     debug "AWS_Driver::InstanceTemplate.new"
-    self.scoring_url = self.aws_upload_scoring_url
-    debug "AWS_Driver::self.upload_scoring_url"
+
     cookbook_text = instance_template.generate_cookbook
     debug "AWS_Driver::instance_template.generate_cookbook"
     self.cookbook_url = self.aws_instance_upload_cookbook(cookbook_text)
     debug "AWS_Driver::self.aws_instance_upload_cookbook"
+
+    self.scoring_url = self.aws_upload_scoring_url
+    debug "AWS_Driver::self.upload_scoring_url"
+
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
     debug self.cookbook_url
+    debug self.aws_upload_scoring_url
+    debug self.aws_upload_scoring_page
 
     self.public_ip = self.aws_instance_public_ip
     debug "Setting public_ip"
