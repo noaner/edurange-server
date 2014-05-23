@@ -3,12 +3,15 @@ Roles:
     Recipes:
       - shellinabox
       - sshd_password_login
+      - scoring
   - Name: dns_server
     Packages:
       - bind9
   - Name: web_server
     Packages:
       - apache2
+    Recipes:
+      - scoring
   - Name: attacker
     Packages:
       - nmap

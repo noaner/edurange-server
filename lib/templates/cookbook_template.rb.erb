@@ -123,7 +123,6 @@ ruby_block "Uncomment wheel in sudoers" do
     fe.write_file
   end
 end
-    <% end %>
     <% elsif recipe == 'scoring' %>
     gem_package "aws-s3" do
       action :install

@@ -39,7 +39,7 @@ module Aws
     bucket = s3.buckets['edurange']
     s3.buckets.create('edurange') unless bucket.exists?
     self.scoring_url = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:write, expires: 1000.minutes).to_s
-    self.update_attributes(scoring_url: scoring_url)
+    self.update_attributes(scoring_url: self.scoring_url)
   end
 
   def aws_upload_scoring_page
@@ -47,7 +47,7 @@ module Aws
     bucket = s3.buckets['edurange']
     s3.buckets.create('edurange') unless bucket.exists?
     self.scoring_page = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:read, expires: 1000.minutes).to_s
-    self.update_attributes(scoring_url: scoring_page)
+    self.update_attributes(scoring_page: self.scoring_page)
   end
 
   # AWS::Cloud methods
@@ -154,13 +154,14 @@ module Aws
     debug "AWS_Driver::self.generate cloud init"
     debug self.cookbook_url
     debug self.aws_upload_scoring_url
-    debug self.aws_upload_scoring_page
+    debug self.aws_upload_scoring_page + "test scoring page"
 
-    self.public_ip = self.aws_instance_public_ip
-    debug "Setting public_ip"
+    # self.public_ip = self.aws_instance_public_ip
+    debug "Setting public_ip" + "test public ip"
 
 
     sleep 2 until self.subnet.booted?
+    debug "subnet booted"
     self.driver_id = AWS::EC2::InstanceCollection.new.create(
                                                              image_id: self.aws_instance_ami_id, # ami_id string of os image
                                                              private_ip_address: self.ip_address, # ip string
