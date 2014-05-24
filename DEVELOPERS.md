@@ -20,3 +20,4 @@ Run these on a fresh instance (we used a micro 64 bit Amazon Linux instance, AMI
 Open a web browser to ip:3000. Make sure to allow TCP 3000 and 9292 to the internet. 3000 is the web interface, 9292 is the faye port.
 
 If your IP changes, edit private_pub.yml again and run ./stop.sh, ./start.sh.
+
