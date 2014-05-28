@@ -12,10 +12,6 @@ class Instance < ActiveRecord::Base
   
   before_create :ensure_has_ip
   validate :ip_address_must_be_within_subnet
-  
-  def public_ip
-    "my ip! :)"
-  end
 
   def ensure_has_ip
     if self.ip_address.blank?
