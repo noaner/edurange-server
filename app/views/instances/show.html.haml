@@ -29,6 +29,12 @@
   - else
     = "Nil"
 %p
+  %b Scoring page:
+  - if @instance.scoring_page
+    = link_to @instance.scoring_page, @instance.scoring_page
+  - else
+    = "Nil"
+%p
   %b Os:
   = @instance.os
 %p
