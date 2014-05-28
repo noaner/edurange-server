@@ -9,10 +9,10 @@
 %p
   %b Ip address:
   = @instance.ip_address
-- if @instance.internet_accessible && @instance.public_ip
+- if @instance.internet_accessible && @instance.provider_instance_public_ip
   %p
     %b Public Ip address:
-    = @instance.public_ip
+    = @instance.provider_instance_public_ip
 %p
   %b Driver:
   = @instance.driver_id || "Nil"

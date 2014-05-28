@@ -20,7 +20,7 @@
       %td= instance.status
       %td= instance.driver_id
       %td= instance.ip_address
-      %td= instance.public_ip || "Not Set"
+      %td= instance.provider_instance_public_ip || "Not Set"
       %td= instance.os
       %td= instance.internet_accessible || "false"
       %td= link_to instance.subnet.name, subnet_path(instance.subnet)
