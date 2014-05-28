@@ -7,11 +7,11 @@
   %b Status
   = @instance.status
 %p
-  %b Ip address:
+  %b IP address:
   = @instance.ip_address
 - if @instance.internet_accessible && @instance.provider_instance_public_ip
   %p
-    %b Public Ip address:
+    %b Public IP address:
     = @instance.provider_instance_public_ip
 %p
   %b Driver:
@@ -19,7 +19,13 @@
 %p
   %b Cookbook url:
   - if @instance.cookbook_url
-    = link_to @instance.cookbook_url, @instance.cookbook_url
+    = link_to @instance.cookbook_url @instance.cookbook_url
+  - else
+    = "Nil"
+%p
+  %b Scoring page:
+  - if @instance.scoring_page
+    = link_to @instance.scoring_page @instance.scoring_page
   - else
     = "Nil"
 %p
