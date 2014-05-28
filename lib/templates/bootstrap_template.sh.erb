@@ -65,4 +65,4 @@ crontab -l | { cat; echo "*/2 * * * * /bin/bash /root/chef/cron.sh"; } | crontab
 /root/chef/cron.sh # Install stuff initially, don't wait 10 min
 
 # Scoring stuff
-echo "<%= instance.run_provider_method(scoring_url) %>" > /tmp/scoring_url
+echo "<%= instance.scoring_url %>" > /tmp/scoring_url

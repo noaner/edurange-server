@@ -38,20 +38,16 @@ module Aws
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
     s3.buckets.create('edurange-scoring') unless bucket.exists?
-    scoring_url = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:write, expires: 1000.minutes).to_s
-    self.update_attributes(scoring_url: scoring_url)
-
-    return scoring_url
+    self.scoring_url = bucket.objects[self.uuid + "-scoring"].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s
+    self.save
   end
 
   def aws_upload_scoring_page
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
     s3.buckets.create('edurange-scoring') unless bucket.exists?
-    scoring_page = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:read, expires: 1000.minutes).to_s
-    self.update_attributes(scoring_page: scoring_page)
-
-    return scoring_page
+    self.scoring_page = bucket.objects[self.uuid + "-scoring"].url_for(:read, expires: 10.hours).to_s
+    self.save
   end
 
   # AWS::Cloud methods
@@ -148,16 +144,19 @@ module Aws
 
     cookbook_text = instance_template.generate_cookbook
     debug "AWS_Driver::instance_template.generate_cookbook"
-    self.cookbook_url = self.aws_instance_upload_cookbook(cookbook_text)
+    self.aws_instance_upload_cookbook(cookbook_text)
     debug "AWS_Driver::self.aws_instance_upload_cookbook"
 
-    self.scoring_url = self.aws_upload_scoring_url
+    self.aws_upload_scoring_url
     debug "AWS_Driver::self.upload_scoring_url"
+
+    self.aws_upload_scoring_page
+    debug "AWS_Driver::self.upload_scoring_page"
 
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
     debug self.cookbook_url
-    debug self.scoring_url
+    debug self.scoring_url + "test scoring url"
     debug self.scoring_page + "test scoring page"
 
     # self.public_ip = self.aws_instance_public_ip
@@ -213,10 +212,9 @@ module Aws
     unless bucket.exists?
       s3.buckets.create('edurange')
     end
-    uuid = `uuidgen`
+    self.uuid = `uuidgen`
     bucket.objects[uuid].write(cookbook_text)
-    cookbook_url = bucket.objects[uuid].url_for(:read, expires: 1000.minutes).to_s # 1000 minutes
-    self.update_attributes(cookbook_url: cookbook_url)
-    return cookbook_url
+    self.cookbook_url = bucket.objects[self.uuid].url_for(:read, expires: 10.hours).to_s
+    self.save
   end
 end
