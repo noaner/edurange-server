@@ -49,7 +49,7 @@ module Aws
     bucket = s3.buckets['edurange-scoring']
     s3.buckets.create('edurange-scoring') unless bucket.exists?
     scoring_page = bucket.objects[self.driver_id.to_s + "-scoring"].url_for(:read, expires: 1000.minutes).to_s
-    self.update_attributes(scoring_page: self.scoring_page)
+    self.update_attributes(scoring_page: scoring_page)
 
     return scoring_page
   end
