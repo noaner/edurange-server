@@ -22,13 +22,13 @@
 %p
   %b Cookbook url:
   - if @instance.cookbook_url
-    = link_to @instance.cookbook_url @instance.cookbook_url
+    = link_to @instance.cookbook_url, @instance.cookbook_url
   - else
     = "Nil"
 %p
   %b Scoring page:
   - if @instance.scoring_page
-    = link_to @instance.scoring_page @instance.scoring_page
+    = link_to @instance.scoring_page, @instance.scoring_page
   - else
     = "Nil"
 %p

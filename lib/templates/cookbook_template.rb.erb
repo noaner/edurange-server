@@ -131,16 +131,17 @@ end
 remote_file "scoreagent.rb" do
   source "https://github.com/milescrabill/scoring/raw/master/scoreagent.rb"
   path "/tmp/scoring/scoreagent.rb"
-  mode '0777'
 end
 remote_file "scoreplacer.rb" do
   source "https://github.com/milescrabill/scoring/raw/master/scoreplacer.rb"
   path "/tmp/scoring/scoreplacer.rb"
-  mode '0777'
 end
 file "/tmp/scoring/answers" do
-  :create_if_missing
+  mode "0777"
 end
+
+gem_package "daemons"
+
 script 'run scoreagent' do
   interpreter "bash"
   code <<-EOF

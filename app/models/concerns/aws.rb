@@ -183,6 +183,10 @@ module Aws
     if self.internet_accessible
       run_when_booted do
         eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
+        until eip.exists?
+          sleep 2
+        end
+
         debug "AWS_Driver:: Allocated EIP #{eip}"
         self.aws_instance_driver_object.associate_elastic_ip eip
         self.aws_instance_driver_object.network_interfaces.first.source_dest_check = false # Set first NIC (assumption) to not check source/dest. Required to accept other machines' packets
