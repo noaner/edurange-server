@@ -17,6 +17,9 @@
   %b Driver:
   = @instance.driver_id || "Nil"
 %p
+  %b UUID:
+  = @instance.uuid || "Nil"
+%p
   %b Cookbook url:
   - if @instance.cookbook_url
     = link_to @instance.cookbook_url @instance.cookbook_url
@@ -35,7 +38,7 @@
   - else
     = "Nil"
 %p
-  %b Os:
+  %b OS:
   = @instance.os
 %p
   %b Internet accessible:

@@ -123,31 +123,31 @@ ruby_block "Uncomment wheel in sudoers" do
     fe.write_file
   end
 end
-    <% elsif recipe == 'scoring' %>
-    gem_package "aws-s3" do
-      action :install
-    end
-    gem_package "aws-sdk" do
-      action :install
-    end
-    remote_file "scoreagent.rb" do
-      source "https://github.com/milescrabill/scoring/raw/master/scoreagent.rb"
-      path "/tmp/scoreagent.rb"
-      mode '0777'
-    end
-    remote_file "scoreplacer.rb" do
-      source "https://github.com/milescrabill/scoring/raw/master/scoreplacer.rb"
-      path "/tmp/scoreagent.rb"
-      mode '0777'
-    end
-    directory "/tmp/scoring" do
-      :create
-      mode 0777
-    end
-    file "/tmp/scoring/answers" do
-      :create_if_missing
-    end
-    <% end %>
+  <% elsif recipe == 'scoring' %>
+directory "/tmp/scoring" do
+  :create
+  mode 0777
+end
+remote_file "scoreagent.rb" do
+  source "https://github.com/milescrabill/scoring/raw/master/scoreagent.rb"
+  path "/tmp/scoring/scoreagent.rb"
+  mode '0777'
+end
+remote_file "scoreplacer.rb" do
+  source "https://github.com/milescrabill/scoring/raw/master/scoreplacer.rb"
+  path "/tmp/scoring/scoreplacer.rb"
+  mode '0777'
+end
+file "/tmp/scoring/answers" do
+  :create_if_missing
+end
+script 'run scoreagent' do
+  interpreter "bash"
+  code <<-EOF
+  ruby /tmp/scoring/scoreagent.rb start &
+  EOF
+end
+  <% end %>
   <% end %>
   # Packages
   <% role.packages.each do |package| %>
