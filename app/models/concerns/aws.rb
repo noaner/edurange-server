@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 # This file contains the implementation of the AWS API calls. They are implemented
 # as hooks, called dynamically by the {Provider} concern when {Scenario}, {Cloud}, {Subnet}, and {Instance} are booted.
 # @see Provider#boot
+||||||| merged common ancestors
+=======
+require 'active_support'
+>>>>>>> f1ee58310248c4c4c2584d6019e9d1134b25be75
 module Aws
   extend ActiveSupport::Concern
 
@@ -41,9 +46,33 @@ module Aws
     # TODO -- SECURITY -- delayed job in 20 min disable firewall.
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
+<<<<<<< HEAD
  
   # Fetches the {Cloud}'s AWS Internet Gateway object
   # @return [AWS::EC2::InternetGateway]
+||||||| merged common ancestors
+
+  # AWS::Cloud methods
+=======
+
+  def aws_upload_scoring_url
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange-scoring']
+    s3.buckets.create('edurange-scoring') unless bucket.exists?
+    self.scoring_url = bucket.objects[self.uuid + "-scoring"].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s
+    self.save
+  end
+
+  def aws_upload_scoring_page
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange-scoring']
+    s3.buckets.create('edurange-scoring') unless bucket.exists?
+    self.scoring_page = bucket.objects[self.uuid + "-scoring"].url_for(:read, expires: 10.hours).to_s
+    self.save
+  end
+
+  # AWS::Cloud methods
+>>>>>>> f1ee58310248c4c4c2584d6019e9d1134b25be75
   def aws_cloud_igw
     self.aws_cloud_driver_object.internet_gateway
   end
@@ -177,15 +206,30 @@ module Aws
     debug "AWS_Driver::provider_boot - instance"
     instance_template = InstanceTemplate.new(self)
     debug "AWS_Driver::InstanceTemplate.new"
+
     cookbook_text = instance_template.generate_cookbook
     debug "AWS_Driver::instance_template.generate_cookbook"
-    self.cookbook_url = self.aws_instance_upload_cookbook(cookbook_text)
+    self.aws_instance_upload_cookbook(cookbook_text)
     debug "AWS_Driver::self.aws_instance_upload_cookbook"
+
+    self.aws_upload_scoring_url
+    debug "AWS_Driver::self.upload_scoring_url"
+
+    self.aws_upload_scoring_page
+    debug "AWS_Driver::self.upload_scoring_page"
+
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
     debug self.cookbook_url
+    debug self.scoring_url + "test scoring url"
+    debug self.scoring_page + "test scoring page"
+
+    # self.public_ip = self.aws_instance_public_ip
+    debug "Setting public_ip" + "test public ip"
+
 
     sleep 2 until self.subnet.booted?
+    debug "subnet booted"
     self.driver_id = AWS::EC2::InstanceCollection.new.create(
                                                              image_id: self.aws_instance_ami_id, # ami_id string of os image
                                                              private_ip_address: self.ip_address, # ip string
@@ -204,6 +248,10 @@ module Aws
     if self.internet_accessible
       run_when_booted do
         eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
+        until eip.exists?
+          sleep 2
+        end
+
         debug "AWS_Driver:: Allocated EIP #{eip}"
         self.aws_instance_driver_object.associate_elastic_ip eip
         self.aws_instance_driver_object.network_interfaces.first.source_dest_check = false # Set first NIC (assumption) to not check source/dest. Required to accept other machines' packets
@@ -244,10 +292,9 @@ module Aws
     unless bucket.exists?
       s3.buckets.create('edurange')
     end
-    uuid = `uuidgen`
+    self.uuid = `uuidgen`
     bucket.objects[uuid].write(cookbook_text)
-    cookbook_url = bucket.objects[uuid].url_for(:read, expires: 1000.minutes).to_s # 1000 minutes
-    self.update_attributes(cookbook_url: cookbook_url)
-    return cookbook_url
+    self.cookbook_url = bucket.objects[self.uuid].url_for(:read, expires: 10.hours).to_s
+    self.save
   end
 end

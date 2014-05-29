@@ -8,10 +8,12 @@ Roles:
     Packages: 
       - build-essential
       - gdb
+      - scoring
     Recipes: 
       - elf
       - sshd_password_login
       - wheelie
+      - scoring
 
 
 Groups: 
