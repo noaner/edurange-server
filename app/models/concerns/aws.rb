@@ -34,6 +34,11 @@ module Aws
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
 
+  def aws_scenario_upload_answers
+    s3 = AWS::S3.new
+    s3.buckets["edurange-answers"].objects[self.name].write(self.answers)
+  end
+
   def aws_upload_scoring_url
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
@@ -156,11 +161,15 @@ module Aws
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
     debug self.cookbook_url
-    debug self.scoring_url + "test scoring url"
-    debug self.scoring_page + "test scoring page"
+    debug "scoring url: " + self.scoring_url
+    debug "scoring page: " + self.scoring_page
 
     # self.public_ip = self.aws_instance_public_ip
     debug "Setting public_ip" + "test public ip"
+
+    if self.scoring_instance?
+
+    end
 
 
     sleep 2 until self.subnet.booted?

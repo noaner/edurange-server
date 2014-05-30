@@ -11,6 +11,12 @@ module YmlRecord
     end
     return output
   end
+
+  def self.get_scoring_info(yaml_file)
+    file = YAML.load_file(yaml_file)
+    return [file["Scenarios"][0]["Name"], file["Answers"]]
+  end
+
   # Returns a new Scenario with subobjects
   def self.load_yml(yaml_file)
     file = YAML.load_file(yaml_file)
@@ -21,6 +27,7 @@ module YmlRecord
     instances = file["Instances"]
     roles = file["Roles"]
     groups = file["Groups"]
+    answers = file["Answers"]
 
     roles.each do |yaml_role|
       role = Role.new
@@ -41,6 +48,7 @@ module YmlRecord
       scenario = Scenario.new
       scenario.name = yaml_scenario["Name"]
       scenario.description = yaml_scenario["Description"]
+      scenario.answers = answers.join("\n")
       scenario.save!
     end
     

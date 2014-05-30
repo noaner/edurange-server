@@ -148,6 +148,13 @@ script 'run scoreagent' do
   ruby /tmp/scoring/scoreagent.rb start &
   EOF
 end
+  <% elsif recipe == 'scorer' %>
+  file "/tmp/scoring_urls" do
+    content "
+    <% Instance.all.each do |instance| %>
+    <%= instance.scoring_page + "\n" %>
+    <% end %>"
+  end
   <% end %>
   <% end %>
   # Packages
