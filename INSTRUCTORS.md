@@ -42,7 +42,7 @@ the future, we will provide a form on this website for you to request access, bu
 you have an account, the URL to sign in will be
 https://edurange.signin.aws.amazon.com/
 console
-After you login to the console, you can navigate to EC2. Once you log in, you will navigate to EC2.
+After you login to the console, you can navigate to EC2. 
 At the upper right, there will be a dropdown tab for the different AWS centers. You want
 East (N Virginia)
 and you should see a heading called
