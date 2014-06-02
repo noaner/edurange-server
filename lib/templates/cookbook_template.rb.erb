@@ -150,10 +150,10 @@ script 'run scoreagent' do
 end
   <% elsif recipe == 'scorer' %>
   file "/tmp/scoring_urls" do
-    content "
-    <% Instance.all.each do |instance| %>
-    <%= instance.scoring_page + "\n" %>
-    <% end %>"
+    content "<% scenario.scoring_urls %>"
+  end
+  file "/tmp/answers_url" do
+    content "<% scenario.answers_url %>"
   end
   <% end %>
   <% end %>

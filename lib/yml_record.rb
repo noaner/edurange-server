@@ -41,14 +41,13 @@ module YmlRecord
       role.save!
     end
     
-    
-
     scenario = nil # Set scope for scenario
     scenarios.each do |yaml_scenario|
       scenario = Scenario.new
       scenario.name = yaml_scenario["Name"]
       scenario.description = yaml_scenario["Description"]
       scenario.answers = answers.join("\n")
+      scenario.uuid = `uuidgen`
       scenario.save!
     end
     

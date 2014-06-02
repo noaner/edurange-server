@@ -34,9 +34,23 @@ module Aws
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
 
+  def aws_add_scoring_url_to_scoring_urls
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange-scoring']
+    bucket.objects[self.scenario.name + self.scenario.uuid + "-scoring-urls"].
+  end
+
+  def aws_scenario_upload_scoring_urls
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange-scoring']
+    self.scoring_urls = bucket.objects[self.name + self.uuid + "-scoring-urls"].url_for(:read, expires: 10.hours).to_s
+    self.save
+  end
+
   def aws_scenario_upload_answers
     s3 = AWS::S3.new
-    s3.buckets["edurange-answers"].objects[self.name].write(self.answers)
+    self.answers_url = s3.buckets["edurange-answers"].objects[self.name].write(self.answers)
+    self.save
   end
 
   def aws_upload_scoring_url
@@ -165,12 +179,7 @@ module Aws
     debug "scoring page: " + self.scoring_page
 
     # self.public_ip = self.aws_instance_public_ip
-    debug "Setting public_ip" + "test public ip"
-
-    if self.scoring_instance?
-
-    end
-
+    debug "Setting public_ip"
 
     sleep 2 until self.subnet.booted?
     debug "subnet booted"
