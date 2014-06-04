@@ -6,7 +6,7 @@ class InstanceTemplate
   def generate_cookbook
     template = File.read("lib/templates/cookbook_template.rb.erb")
     template = Erubis::Eruby.new(template)
-    template.result(scenario: instance.scenario, users: instance.users, administrators: instance.administrators, roles: instance.roles)
+    template.result(scenario: instance.subnet.cloud.scenario, users: instance.users, administrators: instance.administrators, roles: instance.roles)
   end
   def generate_cloud_init(cookbook_url)
     # Returns the bash code to initialize an instance with chef-solo

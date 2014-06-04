@@ -47,7 +47,7 @@ module YmlRecord
       scenario.name = yaml_scenario["Name"]
       scenario.description = yaml_scenario["Description"]
       scenario.answers = answers.join("\n")
-      scenario.uuid = `uuidgen`
+      scenario.uuid = `uuidgen`.chomp
       scenario.save!
     end
     
@@ -86,6 +86,7 @@ module YmlRecord
         role = Role.find_by_name instance_role
         instance.roles << role
       end
+      instance.uuid = `uuidgen`.chomp
       instance.save!
     end
     

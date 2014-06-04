@@ -17,6 +17,7 @@
           %td
             %div.btn-group
               = link_to 'Show', scenario, class: 'btn btn-default'
+              = link_to 'Scoring', scenario.scoring_pages, class: 'btn btn-default'
               = link_to 'Edit', edit_scenario_path(scenario), class: 'btn btn-default'
               = link_to 'Destroy', scenario, :method => :delete, :data => { :confirm => 'Are you sure?' }, class: 'btn btn-danger'
     
