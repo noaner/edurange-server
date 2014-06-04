@@ -4,7 +4,7 @@ module Aws
 
   # AWS::Scenario methods
   def aws_scenario_boot
-
+    aws_scenario_upload_scoring_urls
   end
   def aws_scenario_final_setup
     debug "=== Final setup."
@@ -37,7 +37,10 @@ module Aws
   def aws_add_scoring_url_to_scoring_urls
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
-    bucket.objects[self.scenario.name + self.scenario.uuid + "-scoring-urls"].
+    object = bucket.objects[self.scenario.name + self.scenario.uuid + "-scoring-urls"]
+    text = object.read
+    text += self.scoring_url + "\n"
+    object.write(text)
   end
 
   def aws_scenario_upload_scoring_urls
@@ -172,11 +175,15 @@ module Aws
     self.aws_upload_scoring_page
     debug "AWS_Driver::self.upload_scoring_page"
 
+    self.aws_add_scoring_url_to_scoring_urls
+    debug "AWS_Driver::aws_add_scoring_url_to_scoring_urls"
+
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
     debug self.cookbook_url
     debug "scoring url: " + self.scoring_url
     debug "scoring page: " + self.scoring_page
+    debug "scoring urls: " + self.scenario.scoring_urls
 
     # self.public_ip = self.aws_instance_public_ip
     debug "Setting public_ip"
