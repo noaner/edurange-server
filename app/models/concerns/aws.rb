@@ -34,26 +34,24 @@ module Aws
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
 
-  def aws_add_scoring_url_to_scoring_pages
+  def aws_add_scoring_page_to_scoring_pages
     s3 = AWS::S3.new
-    name = self.subnet.cloud.scenario.name + self.subnet.cloud.scenario.uuid.chomp + "-scoring-urls"
+    name = self.subnet.cloud.scenario.name + "-" + self.subnet.cloud.scenario.uuid + "-scoring-pages"
     bucket = s3.buckets['edurange-scoring']
-    @intialized ||= false
     object = bucket.objects[name]
-    if @initialized
+    begin
       text = object.read
-    else
+    rescue
       text = ""
     end
     text += self.scoring_page + "\n"
     object.write(text)
-    @initialized = true
   end
 
   def aws_scenario_upload_scoring_pages
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
-    self.scoring_pages = bucket.objects[self.name + self.uuid + "-scoring-pages"].url_for(:read, expires: 10.hours).to_s
+    self.scoring_pages = bucket.objects[self.name + "-" + self.uuid + "-scoring-pages"].url_for(:read, expires: 10.hours).to_s
     self.save
   end
 
@@ -182,8 +180,8 @@ module Aws
     self.aws_upload_scoring_page
     debug "AWS_Driver::self.upload_scoring_page"
 
-    self.aws_add_scoring_url_to_scoring_pages
-    debug "AWS_Driver::aws_add_scoring_url_to_scoring_pages"
+    self.aws_add_scoring_page_to_scoring_pages
+    debug "AWS_Driver::aws__scoring_page_to_scoring_pages"
 
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
