@@ -4,7 +4,7 @@ module YmlRecord
     output = []
     Dir.foreach("scenarios-yml/") do |filename|
       next if filename == '.' or filename == '..' or filename == 'ddos.yml'
-      scenario = YAML.load_file("scenarios/#{filename}")["Scenarios"][0]
+      scenario = YAML.load_file("scenarios-yml/#{filename}")["Scenarios"][0]
       name = scenario["Name"]
       description = scenario["Description"]
       output.push [filename, name, description]
