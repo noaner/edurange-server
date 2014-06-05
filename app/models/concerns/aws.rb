@@ -193,7 +193,7 @@ module Aws
     debug self.cookbook_url
     debug "scoring url: " + self.scoring_url
     debug "scoring page: " + self.scoring_page
-    debug "scoring urls: " + self.subnet.cloud.scenario.scoring_pages
+    debug "scoring pages: " + self.subnet.cloud.scenario.scoring_pages
 
     # self.public_ip = self.aws_instance_public_ip
     debug "Setting public_ip"
