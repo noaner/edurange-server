@@ -1,11 +1,7 @@
-<<<<<<< HEAD
 # This file contains the implementation of the AWS API calls. They are implemented
 # as hooks, called dynamically by the {Provider} concern when {Scenario}, {Cloud}, {Subnet}, and {Instance} are booted.
 # @see Provider#boot
-||||||| merged common ancestors
-=======
 require 'active_support'
->>>>>>> f1ee58310248c4c4c2584d6019e9d1134b25be75
 module Aws
   extend ActiveSupport::Concern
 
@@ -46,14 +42,11 @@ module Aws
     # TODO -- SECURITY -- delayed job in 20 min disable firewall.
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
-<<<<<<< HEAD
- 
+
   # Fetches the {Cloud}'s AWS Internet Gateway object
   # @return [AWS::EC2::InternetGateway]
-||||||| merged common ancestors
 
   # AWS::Cloud methods
-=======
 
   def aws_upload_scoring_url
     s3 = AWS::S3.new
@@ -72,7 +65,6 @@ module Aws
   end
 
   # AWS::Cloud methods
->>>>>>> f1ee58310248c4c4c2584d6019e9d1134b25be75
   def aws_cloud_igw
     self.aws_cloud_driver_object.internet_gateway
   end
