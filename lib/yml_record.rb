@@ -13,6 +13,11 @@ module YmlRecord
   end
   # Returns a new Scenario with subobjects
   def self.load_yml(yaml_file)
+    name_lookup_hash = Hash.new
+    # Because in the YML we establish relationships by name we need to keep track of
+    # what unique id corresponds to the current loading of the scenario. Whenever we
+    # create an object, we store it within the above hash so that we can look it up
+    # later in this function when we are creating objects referencing things in the database.
     file = YAML.load_file(yaml_file)
 
     scenarios = file["Scenarios"]
@@ -32,6 +37,7 @@ module YmlRecord
         yaml_role["Packages"].each { |package| role.packages << package }
       end
       role.save!
+      name_lookup_hash[role.name] = role.id
     end
     
     
@@ -42,19 +48,21 @@ module YmlRecord
       scenario.name = yaml_scenario["Name"]
       scenario.description = yaml_scenario["Description"]
       scenario.save!
+      name_lookup_hash[scenario.name] = scenario.id
     end
     
     cloud = nil
     clouds.each do |yaml_cloud|
-      scenario = Scenario.find_by_name yaml_cloud["Scenario"]
+      scenario = Scenario.find(name_lookup_hash[yaml_cloud["Scenario"]])
       cloud = scenario.clouds.new
       cloud.name = yaml_cloud["Name"]
       cloud.cidr_block = yaml_cloud["CIDR_Block"]
       cloud.save!
+      name_lookup_hash[cloud.name] = cloud.id
     end
 
     subnets.each do |yaml_subnet|
-      cloud = Cloud.find_by_name yaml_subnet["Cloud"]
+      cloud = Cloud.find(name_lookup_hash[yaml_subnet["Cloud"]])
       subnet = cloud.subnets.new
       subnet.name = yaml_subnet["Name"]
       subnet.cidr_block = yaml_subnet["CIDR_Block"]
@@ -62,13 +70,14 @@ module YmlRecord
         subnet.internet_accessible = true
       end
       subnet.save!
+      name_lookup_hash[subnet.name] = subnet.id
     end
 
     instance = nil
     instances.each do |yaml_instance|
       instance = Instance.new
       instance_roles = yaml_instance["Roles"]
-      instance.subnet = Subnet.find_by_name yaml_instance["Subnet"]
+      instance.subnet = Subnet.find(name_lookup_hash[yaml_instance["Subnet"]])
       instance.name = yaml_instance["Name"]
       instance.ip_address = yaml_instance["IP_Address"]
       if yaml_instance["Internet_Accessible"]
@@ -76,10 +85,11 @@ module YmlRecord
       end
       instance.os = yaml_instance["OS"]
       instance_roles.each do |instance_role|
-        role = Role.find_by_name instance_role
+        role = Role.find(name_lookup_hash[instance_role])
         instance.roles << role
       end
       instance.save!
+      name_lookup_hash[instance.name] = instance.id
     end
     
     
@@ -107,7 +117,7 @@ module YmlRecord
       # Give group admin on machines they own
       if admin
         admin.each do |admin_instance|
-          instance = Instance.find_by_name(admin_instance)
+          instance = Instance.find(name_lookup_hash[admin_instance])
           instance.add_administrator(group)
           instance.save!
         end
@@ -115,7 +125,7 @@ module YmlRecord
       
       if user
         user.each do |user_instance|
-          instance = Instance.find_by_name(user_instance)
+          instance = Instance.find(name_lookup_hash[user_instance])
           instance.add_user(group)
           instance.save!
         end
