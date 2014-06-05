@@ -58,7 +58,11 @@ module Aws
 
   def aws_scenario_upload_answers
     s3 = AWS::S3.new
-    self.answers_url = s3.buckets["edurange-answers"].objects[self.name].write(self.answers)
+    bucket = s3.buckets['edurange-answers']
+    s3.buckets.create('edurange-answers') unless bucket.exists?
+    object = bucket.objects[self.name]
+    object.write(self.answers)
+    self.answers_url = object.url_for(:read, expires: 10.hours).to_s
     self.save
   end
 
