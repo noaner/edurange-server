@@ -5,6 +5,7 @@ module Aws
   # AWS::Scenario methods
   def aws_scenario_boot
     aws_scenario_upload_scoring_pages
+    aws_scenario_upload_answers
   end
   def aws_scenario_final_setup
     debug "=== Final setup."
