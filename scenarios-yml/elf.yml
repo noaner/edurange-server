@@ -56,7 +56,7 @@ Subnets:
 Instances: 
   - Name: scorer
     Subnet: NAT_Subnet
-    OS: nat
+    OS: ubuntu
     IP_Address: 10.0.129.9
     Roles:
       - scorer
