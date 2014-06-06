@@ -11,6 +11,12 @@ module YmlRecord
     end
     return output
   end
+
+  def self.get_scoring_info(yaml_file)
+    file = YAML.load_file(yaml_file)
+    return [file["Scenarios"][0]["Name"], file["Answers"]]
+  end
+
   # Returns a new Scenario with subobjects
   def self.load_yml(yaml_file)
     name_lookup_hash = Hash.new
@@ -26,6 +32,7 @@ module YmlRecord
     instances = file["Instances"]
     roles = file["Roles"]
     groups = file["Groups"]
+    answers = file["Answers"]
 
     roles.each do |yaml_role|
       role = Role.new
@@ -40,13 +47,13 @@ module YmlRecord
       name_lookup_hash[role.name] = role.id
     end
     
-    
-
     scenario = nil # Set scope for scenario
     scenarios.each do |yaml_scenario|
       scenario = Scenario.new
       scenario.name = yaml_scenario["Name"]
       scenario.description = yaml_scenario["Description"]
+      scenario.answers = answers.join("\n")
+      scenario.uuid = `uuidgen`.chomp
       scenario.save!
       name_lookup_hash[scenario.name] = scenario.id
     end
@@ -88,6 +95,7 @@ module YmlRecord
         role = Role.find(name_lookup_hash[instance_role])
         instance.roles << role
       end
+      instance.uuid = `uuidgen`.chomp
       instance.save!
       name_lookup_hash[instance.name] = instance.id
     end

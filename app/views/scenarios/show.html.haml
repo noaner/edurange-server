@@ -57,5 +57,6 @@
 
   %div.btn-group#scenario-buttons
     = link_to 'Boot', boot_scenario_path(@scenario), class: 'btn btn-primary'
+    = link_to 'dev_boot', dev_boot_scenario_path(@scenario), class: 'btn btn-default'
     = link_to 'Edit', edit_scenario_path(@scenario), class: 'btn btn-default'
     = link_to 'Back', scenarios_path, class: 'btn btn-default'

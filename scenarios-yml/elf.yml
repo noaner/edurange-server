@@ -8,19 +8,22 @@ Roles:
     Packages: 
       - build-essential
       - gdb
-      - scoring
     Recipes: 
       - elf
       - sshd_password_login
       - wheelie
       - scoring
-
+  - Name: scorer
+    Recipes:
+      - scorer
+      - sshd_password_login
 
 Groups: 
   - Name: Team_1
     Access: 
       Administrator: 
         - Infected_Instance
+        - scorer
       User: 
         - NAT_Instance
     Users: 
@@ -50,7 +53,18 @@ Subnets:
     CIDR_Block: 10.0.129.0/24
     Internet_Accessible: true
 
+  - Name: Scorer_Subnet
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.127.0/24
+
 Instances: 
+  - Name: scorer
+    Subnet: Scorer_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.127.9
+    Roles:
+      - scorer
+
   - Name: NAT_Instance
     Subnet: NAT_Subnet
     OS: nat
@@ -65,3 +79,6 @@ Instances:
     IP_Address: 10.0.128.4
     Roles: 
       - infected_level_1
+
+Answers:
+  - "Nick is a dweeb"
