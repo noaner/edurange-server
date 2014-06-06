@@ -53,15 +53,11 @@ Subnets:
     CIDR_Block: 10.0.129.0/24
     Internet_Accessible: true
 
-  - Name: Scorer_Subnet
-    Cloud: Cloud_1
-    CIDR_Block: 10.0.130.0/24
-
 Instances: 
   - Name: scorer
-    Subnet: Scorer_Subnet
+    Subnet: NAT_Subnet
     OS: ubuntu
-    IP_Address: 10.0.130.3
+    IP_Address: 10.0.129.3
     Roles:
       - scorer
 
