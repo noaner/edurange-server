@@ -8,6 +8,8 @@ module Aws
   # This method does nothing, but must be defined as the hook is called regardless
   # @return [nil]
   def aws_scenario_boot
+    aws_scenario_upload_scoring_pages
+    aws_scenario_upload_answers
   end
 
   # This method loops through each subnet and creates a route table for it.
@@ -43,10 +45,36 @@ module Aws
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
 
-  # Fetches the {Cloud}'s AWS Internet Gateway object
-  # @return [AWS::EC2::InternetGateway]
+  def aws_add_scoring_page_to_scoring_pages
+    s3 = AWS::S3.new
+    name = self.subnet.cloud.scenario.name + "-" + self.subnet.cloud.scenario.uuid + "-scoring-pages"
+    bucket = s3.buckets['edurange-scoring']
+    object = bucket.objects[name]
+    begin
+      text = object.read
+    rescue
+      text = ""
+    end
+    text += self.scoring_page + "\n"
+    object.write(text)
+  end
 
-  # AWS::Cloud methods
+  def aws_scenario_upload_scoring_pages
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange-scoring']
+    self.scoring_pages = bucket.objects[self.name + "-" + self.uuid + "-scoring-pages"].url_for(:read, expires: 10.hours).to_s
+    self.save
+  end
+
+  def aws_scenario_upload_answers
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange-answers']
+    s3.buckets.create('edurange-answers') unless bucket.exists?
+    object = bucket.objects[self.name]
+    object.write(self.answers)
+    self.answers_url = object.url_for(:read, expires: 10.hours).to_s
+    self.save
+  end
 
   def aws_upload_scoring_url
     s3 = AWS::S3.new
@@ -210,15 +238,18 @@ module Aws
     self.aws_upload_scoring_page
     debug "AWS_Driver::self.upload_scoring_page"
 
+    self.aws_add_scoring_page_to_scoring_pages
+    debug "AWS_Driver::aws__scoring_page_to_scoring_pages"
+
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
     debug self.cookbook_url
-    debug self.scoring_url + "test scoring url"
-    debug self.scoring_page + "test scoring page"
+    debug "scoring url: " + self.scoring_url
+    debug "scoring page: " + self.scoring_page
+    debug "scoring pages: " + self.subnet.cloud.scenario.scoring_pages
 
     # self.public_ip = self.aws_instance_public_ip
-    debug "Setting public_ip" + "test public ip"
-
+    debug "Setting public_ip"
 
     sleep 2 until self.subnet.booted?
     debug "subnet booted"
@@ -284,9 +315,8 @@ module Aws
     unless bucket.exists?
       s3.buckets.create('edurange')
     end
-    self.uuid = `uuidgen`
     bucket.objects[uuid].write(cookbook_text)
-    self.cookbook_url = bucket.objects[self.uuid].url_for(:read, expires: 10.hours).to_s
+    self.cookbook_url = bucket.objects[uuid].url_for(:read, expires: 10.hours).to_s
     self.save
   end
 end

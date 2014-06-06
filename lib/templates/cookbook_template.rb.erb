@@ -140,6 +140,10 @@ file "/tmp/scoring/answers" do
   mode "0777"
 end
 
+script 'get scoring_url' do
+  echo "<%= instance.scoring_url %>" > /tmp/scoring/scoring_url
+end
+
 gem_package "daemons"
 
 script 'run scoreagent' do
@@ -148,6 +152,13 @@ script 'run scoreagent' do
   ruby /tmp/scoring/scoreagent.rb start &
   EOF
 end
+  <% elsif recipe == 'scorer' %>
+  file "/tmp/scoring_pages" do
+    content "<%= scenario.scoring_pages %>"
+  end
+  file "/tmp/answers_url" do
+    content "<%= scenario.answers_url %>"
+  end
   <% end %>
   <% end %>
   # Packages
