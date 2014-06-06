@@ -140,6 +140,10 @@ file "/tmp/scoring/answers" do
   mode "0777"
 end
 
+script 'get scoring_url' do
+  echo "<%= instance.scoring_url %>" > /tmp/scoring/scoring_url
+end
+
 gem_package "daemons"
 
 script 'run scoreagent' do
