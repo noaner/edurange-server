@@ -141,7 +141,7 @@ file "/tmp/scoring/answers" do
 end
 
 script 'get scoring_url' do
-  echo "<%= instance.scoring_url %>" > /tmp/scoring/scoring_url
+  echo "<%= scoring_url %>" > /tmp/scoring/scoring_url
 end
 
 gem_package "daemons"
