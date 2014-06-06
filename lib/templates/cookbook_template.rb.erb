@@ -153,6 +153,10 @@ script 'run scoreagent' do
   EOF
 end
   <% elsif recipe == 'scorer' %>
+directory "/tmp/scoring" do
+  :create
+  mode 0777
+end
 file "/tmp/scoring/scoring_pages" do
   content "<%= scenario.scoring_pages %>"
 end
