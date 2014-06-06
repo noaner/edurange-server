@@ -153,12 +153,23 @@ script 'run scoreagent' do
   EOF
 end
   <% elsif recipe == 'scorer' %>
-  file "/tmp/scoring_pages" do
-    content "<%= scenario.scoring_pages %>"
-  end
-  file "/tmp/answers_url" do
-    content "<%= scenario.answers_url %>"
-  end
+file "/tmp/scoring/scoring_pages" do
+  content "<%= scenario.scoring_pages %>"
+end
+file "/tmp/scoring/answers_url" do
+  content "<%= scenario.answers_url %>"
+end
+remote_file "scorer.rb" do
+  source "https://github.com/milescrabill/scoring/raw/master/scorer.rb"
+  path "/tmp/scoring/scorer.rb"
+end
+
+script 'run scorer' do
+  interpreter "bash"
+  code <<-EOF
+  ruby /tmp/scoring/scorer.rb start &
+  EOF
+end
   <% end %>
   <% end %>
   # Packages
