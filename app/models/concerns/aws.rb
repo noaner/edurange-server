@@ -232,14 +232,16 @@ module Aws
     self.aws_instance_upload_cookbook(cookbook_text)
     debug "AWS_Driver::self.aws_instance_upload_cookbook"
 
-    self.aws_upload_scoring_url
-    debug "AWS_Driver::self.upload_scoring_url"
+    if instance.roles.include?("scoring")
+      self.aws_upload_scoring_url
+      debug "AWS_Driver::self.upload_scoring_url"
 
-    self.aws_upload_scoring_page
-    debug "AWS_Driver::self.upload_scoring_page"
+      self.aws_upload_scoring_page
+      debug "AWS_Driver::self.upload_scoring_page"
 
-    self.aws_add_scoring_page_to_scoring_pages
-    debug "AWS_Driver::aws__scoring_page_to_scoring_pages"
+      self.aws_add_scoring_page_to_scoring_pages
+      debug "AWS_Driver::aws__scoring_page_to_scoring_pages"
+    end
 
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
