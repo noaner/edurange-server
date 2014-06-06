@@ -1,13 +1,65 @@
 -# navigation styled for Bootstrap 3.0
-%nav.navbar.navbar-default.navbar-fixed-top
+%nav.navbar
   .container
     .navbar-header
-      %button.navbar-toggle{"data-target" => ".navbar-collapse", "data-toggle" => "collapse", :type => "button"}
-        %span.sr-only Toggle navigation
-        %span.icon-bar
-        %span.icon-bar
-        %span.icon-bar
-      = link_to 'EDURange', root_path, class: 'navbar-brand'
+      %span.icon-bar
+      %span.icon-bar
+      %span.icon-bar
     .collapse.navbar-collapse
       %ul.nav.navbar-nav
         = render 'layouts/navigation_links'
+//-------------------------------------------------
+/ .navigation-wrapper
+/   %nav.site-nav.animated.drop{role: "navbar"}
+/     %ul
+/       {% for link in site.links %}
+/       %li
+/         {% if link.external %}
+/         %a{href: ""} 
+/         {% else %}
+/         %a{href: ""} 
+/         {% endif %}
+/       {% endfor %}
+/       %li
+/         %a{href: "/feed.xml", title: "Atom/RSS feed"}
+/           %i.icon-rss
+/           Feed
+/       {% if site.search %}
+/       %li.dosearch>
+/         %i.icon-search
+/         Search
+/       {% endif %}
+/ / /.navigation-wrapper
+/ {% include browser-upgrade.html %}
+
+/ {% if site.search %}
+/ .search-wrapper
+/   .search-form
+/     %input.search-field{placeholder: "Search...", type: "text"}/
+/     %i.icon-remove-sign.icon-2x
+/     %ul.search-results.post-list
+/     / /.search-results
+/   / /.search-form
+/ / ./search-wrapper
+/ {% endif %}
+
+/ {% if page.image.feature %}
+/ %header.masthead
+/   {% if site.logo != null %}
+/   .wrap
+/     %a.site-logo{href: "/", rel: "home", title: ""}
+/       %img.animated.bounceInDown{alt: " logo", height: "200", src: "/images/", width: "200"}/
+/   {% endif %}
+/ / /.masthead
+/ {% else %}
+/ %header.masthead
+/   .wrap
+/     {% if site.logo != null %}
+/     %a.site-logo{href: "/", rel: "home", title: ""}
+/       %img.animated.fadeInUp{alt: " logo", height: "200", src: "/images/", width: "200"}/
+/     {% endif %}
+/     %h1.site-title.animated.fadeIn
+/       %a{href: "/"} 
+/     %h2.site-description.animated.fadeIn{itemprop: "description"} 
+/ / /.masthead
+/ {% endif %}
