@@ -4,7 +4,6 @@ class InstanceTemplate
     self.instance = instance
   end
   def generate_cookbook
-    # sleep(0.5) while self.instance.nil?
     template = File.read("lib/templates/cookbook_template.rb.erb")
     template = Erubis::Eruby.new(template)
     template.result(scenario: instance.subnet.cloud.scenario, scoring_url: instance.scoring_url, users: instance.users, administrators: instance.administrators, roles: instance.roles)

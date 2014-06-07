@@ -232,7 +232,7 @@ module Aws
     self.aws_instance_upload_cookbook(cookbook_text)
     debug "AWS_Driver::self.aws_instance_upload_cookbook"
 
-    if self.roles.include?("scoring")
+    if self.roles[0]["recipes"].include?("scoring") || self.roles[0]["recipes"].include?("scorer")
       self.aws_upload_scoring_url
       debug "AWS_Driver::self.upload_scoring_url"
 

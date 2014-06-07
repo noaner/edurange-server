@@ -12,13 +12,11 @@ Roles:
       - elf
       - sshd_password_login
       - wheelie
+      - scoring
   - Name: scorer
     Recipes:
       - scorer
       - sshd_password_login
-  - Name: scoring
-    Recipes:
-      - scoring
 
 Groups: 
   - Name: Team_1
@@ -81,7 +79,6 @@ Instances:
     IP_Address: 10.0.128.4
     Roles: 
       - infected_level_1
-      - scoring
 
 Answers:
   - "Nick is a dweeb"
