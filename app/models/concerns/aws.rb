@@ -8,8 +8,6 @@ module Aws
   # This method does nothing, but must be defined as the hook is called regardless
   # @return [nil]
   def aws_scenario_boot
-    aws_scenario_upload_scoring_pages
-    aws_scenario_upload_answers
   end
 
   # This method loops through each subnet and creates a route table for it.
@@ -231,20 +229,6 @@ module Aws
     debug "AWS_Driver::instance_template.generate_cookbook"
     self.aws_instance_upload_cookbook(cookbook_text)
     debug "AWS_Driver::self.aws_instance_upload_cookbook"
-
-    if self.roles[0]["recipes"].include?("scoring") || self.roles[0]["recipes"].include?("scorer")
-      self.aws_upload_scoring_url
-      debug "AWS_Driver::self.upload_scoring_url"
-
-      self.aws_upload_scoring_page
-      debug "AWS_Driver::self.upload_scoring_page"
-
-      self.aws_add_scoring_page_to_scoring_pages
-      debug "AWS_Driver::aws__scoring_page_to_scoring_pages"
-
-      debug "scoring url: " + self.scoring_url
-      debug "scoring page: " + self.scoring_page
-    end
 
     cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
     debug "AWS_Driver::self.generate cloud init"
