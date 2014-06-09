@@ -43,25 +43,31 @@ module Aws
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
 
-  def aws_add_scoring_page_to_scoring_pages
-    s3 = AWS::S3.new
-    name = self.subnet.cloud.scenario.name + "-" + self.subnet.cloud.scenario.uuid + "-scoring-pages"
-    bucket = s3.buckets['edurange-scoring']
-    object = bucket.objects[name]
-    begin
-      text = object.read
-    rescue
-      text = ""
-    end
-    text += self.scoring_page + "\n"
-    object.write(text)
-  end
+  # def aws_add_scoring_page_to_scoring_pages
+  #   s3 = AWS::S3.new
+  #   name = self.subnet.cloud.scenario.name + "-" + self.subnet.cloud.scenario.uuid + "-scoring-pages"
+  #   bucket = s3.buckets['edurange-scoring']
+  #   object = bucket.objects[name]
+  #   begin
+  #     text = object.read
+  #   rescue
+  #     text = ""
+  #   end
+  #   text += self.scoring_page + "\n"
+  #   object.write(text)
+  # end
 
   def aws_scenario_upload_scoring_pages
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
-    self.scoring_pages = bucket.objects[self.name + "-" + self.uuid + "-scoring-pages"].url_for(:read, expires: 10.hours).to_s
+    name = self.name + "-" + self.uuid + "-scoring-pages"
+    self.scoring_pages = bucket.objects[name].url_for(:read, expires: 10.hours).to_s
     self.save
+  end
+
+  def aws_scenario_write_to_scoring_pages
+    AWS::S3.new.buckets['edurange-scoring'].objects[self.name + "-" + self.uuid + "-scoring-pages"].write(self.scoring_pages_content)
+    binding.pry
   end
 
   def aws_scenario_upload_answers
@@ -78,7 +84,9 @@ module Aws
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
     s3.buckets.create('edurange-scoring') unless bucket.exists?
-    self.scoring_url = bucket.objects[self.uuid + "-scoring"].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s
+    name = self.uuid + "-scoring"
+    bucket.objects[name].write("# put your answers here")
+    self.scoring_url = bucket.objects[name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s
     self.save
   end
 
@@ -86,8 +94,9 @@ module Aws
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
     s3.buckets.create('edurange-scoring') unless bucket.exists?
-    self.scoring_page = bucket.objects[self.uuid + "-scoring"].url_for(:read, expires: 10.hours).to_s
-    self.save
+    self.update_attributes(scoring_page: bucket.objects[self.uuid + "-scoring"].url_for(:read, expires: 10.hours).to_s)
+    self.subnet.cloud.scenario.update_attributes(scoring_pages_content: self.subnet.cloud.scenario.scoring_pages_content + self.scoring_page + "\n")
+    binding.pry
   end
 
   # AWS::Cloud methods

@@ -54,8 +54,6 @@ module YmlRecord
       scenario.description = yaml_scenario["Description"]
       scenario.answers = answers.join("\n")
       scenario.uuid = `uuidgen`.chomp
-      scenario.provider_scenario_upload_scoring_pages
-      scenario.provider_scenario_upload_answers
       scenario.save!
       name_lookup_hash[scenario.name] = scenario.id
     end
@@ -98,13 +96,6 @@ module YmlRecord
         instance.roles << role
       end
       instance.uuid = `uuidgen`.chomp
-
-      if instance.roles[0]["recipes"].include?("scoring")
-        instance.scoring_url = instance.provider_upload_scoring_url
-        instance.scoring_page = instance.provider_upload_scoring_page
-        instance.provider_add_scoring_page_to_scoring_pages
-      end
-
       instance.save!
       name_lookup_hash[instance.name] = instance.id
     end
