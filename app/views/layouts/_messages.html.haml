@@ -2,7 +2,7 @@
 - flash.each do |name, msg|
   - if msg.is_a?(String)
     %h5{:class => "alert alert-#{name.to_s == 'notice' ? 'success' : 'danger'}"}
-      %btn.btn-default{"aria-hidden" => "true", "data-dismiss" => "alert", :type => "button"} &times;
+      %btn.btn-default.close{"aria-hidden" => "true", "data-dismiss" => "alert", :type => "button"} &times;
       = content_tag :div, msg, :id => "flash_#{name}"
 
 /Using current css styling

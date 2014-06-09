@@ -88,7 +88,6 @@ input[type="submit"] {
   -webkit-appearance: button;
   cursor: pointer;
 }
-label,
 select,
 button,
 input[type="button"],
@@ -252,13 +251,15 @@ h6 {
 }
 a {
   text-decoration: none;
-  color: #222222;
+  color: #A81300;
 }
 a:visited {
+  font-weight: 400;
   color: #555555;
 }
 a:hover {
   color: #000000;
+  text-decoration: bold
 }
 a:focus {
   outline: thin dotted;
@@ -842,7 +843,10 @@ body {
   width: 1em;
   height: 1em;
   font-size: 150px;
-  position: relative
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 50px;
 }
 @media (max-width: 225px), (max-height: 225px) {
   .loader {
@@ -929,7 +933,6 @@ label {
   margin-bottom: 1.25px;
   font-weight: bold;
   color: #222222;
-  cursor: pointer;
 }
 label input,
 label textarea,
