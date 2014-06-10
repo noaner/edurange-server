@@ -337,13 +337,16 @@ pre {
   font-size: 0.75rem;
   line-height: 2;
   overflow-x: auto;
+  background-color: #f5f5f5;
+  border: 1px solid #000;
+  padding: 4px;
 }
 .highlight {
   margin-bottom: 1.5em;
   font-size: 12px;
   font-size: 0.75rem;
   line-height: 2;
-  border: 1px solid #dedede;
+  border: 1px solid #000;
 }
 .clearfix {
   *zoom: 1;
@@ -396,6 +399,10 @@ figure:after {
 }
 figure img {
   margin-bottom: 10px;
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse:collapse;
 }
 figure a img {
   -webkit-transform: translate(0, 0);
