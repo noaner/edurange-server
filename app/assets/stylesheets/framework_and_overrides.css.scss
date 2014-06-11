@@ -1392,7 +1392,8 @@ body {
   color: #ffffff;
 }
 .navbar li a:hover {
-  color: $light-red;
+  color: $black;
+  background-color: $white;
 }
 .navbar a {
   display: block;
