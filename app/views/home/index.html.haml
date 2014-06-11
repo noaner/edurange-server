@@ -3,6 +3,19 @@
 %h2.page-description.fadeIn
   The cybersecurity training ground.
 
+%form
+  %h1 Login
+  %label Username
+  .question
+    %input{required: "", type: "text"}/
+    %label Password
+  .question
+    %input{required: "", type: "text"}/
+    
+  %br
+    
+    = link_to 'Submit', root_path, class: 'btn btn-primary'
+
 / %h1.animated.fadeInDown
 /   .loader
 / //just for POC
