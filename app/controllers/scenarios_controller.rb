@@ -1,5 +1,5 @@
 class ScenariosController < ApplicationController
-  before_action :set_scenario, only: [:show, :edit, :update, :destroy]
+  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :boot, :dev_boot, :status]
 
   # GET /scenarios
   # GET /scenarios.json
@@ -7,6 +7,33 @@ class ScenariosController < ApplicationController
     @scenarios = Scenario.all
   end
 
+  def status
+    @total_booted = 0
+    @total_instances = 0
+
+    @scenario.clouds.each do |cloud|
+      cloud.subnets.each do |subnet|
+        subnet.instances.each do |instance|
+          if instance.scoring_page.blank?
+            next
+          end
+          @total_instances += 1
+          body = Net::HTTP.get(URI(instance.scoring_page))
+          puts "GET #{instance.scoring_page}"
+          begin
+            if Nokogiri.XML(body).children.first.name = 'Error'
+            end
+          rescue NoMethodError
+            @total_booted += 1
+          end
+        end
+      end
+    end
+    respond_to do |format|
+      format.html
+      format.json { render json: {total: @total_instances, booted: @total_booted} }
+    end
+  end
   # GET /scenarios/1
   # GET /scenarios/1.json
   def show
@@ -19,7 +46,6 @@ class ScenariosController < ApplicationController
   end
   
   def boot
-    @scenario = Scenario.find(params[:id])
     if @scenario.booted?
       notice = "Scenario is booted. Monitor output below."
     elsif @scenario.booting?
@@ -33,7 +59,6 @@ class ScenariosController < ApplicationController
   end
 
   def dev_boot
-    @scenario = Scenario.find(params[:id])
     if @scenario.booted?
       notice = "Scenario is booted. Monitor output below."
     elsif @scenario.booting?

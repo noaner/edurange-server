@@ -27,6 +27,7 @@ gem 'aws-sdk'
 gem 'erubis'
 gem 'unix-crypt'
 gem 'ipaddress'
+gem 'nokogiri'
 
 
 
