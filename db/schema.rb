@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140530200803) do
+ActiveRecord::Schema.define(version: 20140609191324) do
 
   create_table "clouds", force: true do |t|
     t.string   "name"
@@ -109,12 +109,13 @@ ActiveRecord::Schema.define(version: 20140530200803) do
     t.string   "description"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "status",       default: 0
-    t.text     "log",          default: ""
+    t.integer  "status",                default: 0
+    t.text     "log",                   default: ""
     t.text     "answers"
     t.string   "uuid"
-    t.string   "scoring_urls"
+    t.string   "scoring_pages"
     t.string   "answers_url"
+    t.text     "scoring_pages_content", default: ""
   end
 
   create_table "subnets", force: true do |t|

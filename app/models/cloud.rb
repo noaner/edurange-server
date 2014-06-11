@@ -1,6 +1,9 @@
 MAX_CLOUD_CIDR_BLOCK = 16 # AWS Max. 16 == a /16 subnet. See CIDR notation
 MIN_CLOUD_CIDR_BLOCK = 28 # AWS Min
 
+# This file has a few validations, described below. It maintains state and
+# attributes corresponding to an AWS Virtual Private Cloud object.
+
 class Cloud < ActiveRecord::Base
   include Provider
   include Aws
@@ -12,7 +15,8 @@ class Cloud < ActiveRecord::Base
 
   validates_presence_of :name, :cidr_block, :scenario
   validate :cidr_block_is_valid
-
+  # Validation function that ensures CIDR block provided is within min and max constants defined globally in this file.
+  # @return [nil]
   def cidr_block_is_within_limits
     our_cidr_block_nw = IPAddress(self.cidr_block).network
 
@@ -29,6 +33,8 @@ class Cloud < ActiveRecord::Base
       errors.add(:cidr_block, "must be larger than #{min_cloud_size_nw}!")
     end
   end
+  # Validation function that ensures the CIDR block provided is IPV4 and a network.
+  # @return [nil]
   def cidr_block_is_valid
     return unless self.cidr_block
     if IPAddress.valid_ipv4?(self.cidr_block.split('/')[0])
@@ -43,10 +49,13 @@ class Cloud < ActiveRecord::Base
       errors.add(:cidr_block, "is invalid!")
     end
   end
-  # logging functions
+  # Debug function that adds 1 to this scenario's "cloud_progress", increasing the progress bar on the boot view.
+  # @return [nil]
   def add_progress
     PrivatePub.publish_to "/scenarios/#{self.scenario.id}", cloud_progress: 1
   end
+  # @param message The message to print to the {Scenario}'s boot view
+  # @return [nil]
   def debug(message)
     log = self.scenario.log
     self.scenario.update_attributes(log: log + message + "\n")

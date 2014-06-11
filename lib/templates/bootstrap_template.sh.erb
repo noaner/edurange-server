@@ -61,9 +61,5 @@ EOF
 
 # Crontab entry - Run cron.sh every 2 minutes
 crontab -l | { cat; echo "*/2 * * * * /bin/bash /root/chef/cron.sh"; } | crontab -
-
+chmod +x /root/chef/cron.sh
 /root/chef/cron.sh # Install stuff initially, don't wait 10 min
-
-# Scoring stuff
-mkdir /tmp/scoring
-echo "<%= instance.scoring_url %>" > /tmp/scoring/scoring_url

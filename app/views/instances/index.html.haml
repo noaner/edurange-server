@@ -5,9 +5,9 @@
     %th Name
     %th Status
     %th Driver
-    %th IP_Address
-    %th Public_IP_Address
-    %th Os
+    %th IP Address
+    %th Public IP Address
+    %th OS
     %th Internet accessible
     %th Subnet
     %th
@@ -26,9 +26,10 @@
       %td= instance.internet_accessible || "false"
       %td= link_to instance.subnet.name, subnet_path(instance.subnet)
       %td= link_to 'Show', instance
-      %td= link_to 'Scoring', instance.scoring_page
       %td= link_to 'Edit', edit_instance_path(instance)
       %td= link_to 'Destroy', instance, :method => :delete, :data => { :confirm => 'Are you sure?' }
+      - if instance.roles[0]["recipes"].include?("scoring")
+        %td= link_to 'Scoring', instance.scoring_page
 
 %br
 

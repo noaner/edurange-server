@@ -61,7 +61,7 @@ class ScenariosController < ApplicationController
   # POST /scenarios.json
   def create
     if template = scenario_params["template"]
-      @scenario = YmlRecord.load_yml("scenarios/#{template}")
+      @scenario = YmlRecord.load_yml("scenarios-yml/#{template}")
     else
       @scenario = Scenario.new(scenario_params)
     end

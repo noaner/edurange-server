@@ -140,6 +140,11 @@ file "/tmp/scoring/answers" do
   mode "0777"
 end
 
+script 'get scoring_url' do
+  interpreter "bash"
+  code 'echo "<%= scoring_url %>" > /tmp/scoring/scoring_url'
+end
+
 gem_package "daemons"
 
 script 'run scoreagent' do
@@ -149,12 +154,28 @@ script 'run scoreagent' do
   EOF
 end
   <% elsif recipe == 'scorer' %>
-  file "/tmp/scoring_urls" do
-    content "<% scenario.scoring_urls %>"
-  end
-  file "/tmp/answers_url" do
-    content "<% scenario.answers_url %>"
-  end
+gem_package "daemons"
+directory "/tmp/scoring" do
+  :create
+  mode 0777
+end
+file "/tmp/scoring/scoring_pages" do
+  content "<%= scenario.scoring_pages %>"
+end
+file "/tmp/scoring/answers_url" do
+  content "<%= scenario.answers_url %>"
+end
+remote_file "scorer.rb" do
+  source "https://github.com/milescrabill/scoring/raw/master/scorer.rb"
+  path "/tmp/scoring/scorer.rb"
+end
+script 'run scorer and download answers' do
+  interpreter "bash"
+  code <<-EOF
+  wget -O /tmp/scoring/answers `cat /tmp/scoring/answers_url`
+  ruby /tmp/scoring/scorer.rb start &
+  EOF
+end
   <% end %>
   <% end %>
   # Packages
