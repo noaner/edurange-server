@@ -21,6 +21,10 @@ Roles:
       - sshd_password_login
       - wheelie
       - scoring
+  - Name: scorer
+    Recipes:
+      - scorer
+      - sshd_password_login
 
 
 Groups:
@@ -28,6 +32,7 @@ Groups:
     Access:
       Administrator:
         - Team_1_Instance
+        - scorer
       User:
         - NAT_Instance
     Users:
@@ -118,6 +123,12 @@ Subnets:
     Internet_Accessible: true
 
 Instances:
+  - Name: scorer
+    Subnet: Player_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.128.9
+    Roles:
+      - scorer
   - Name: NAT_Instance
     Subnet: NAT_Subnet
     OS: nat

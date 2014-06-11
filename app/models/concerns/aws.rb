@@ -43,31 +43,16 @@ module Aws
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
 
-  # def aws_add_scoring_page_to_scoring_pages
-  #   s3 = AWS::S3.new
-  #   name = self.subnet.cloud.scenario.name + "-" + self.subnet.cloud.scenario.uuid + "-scoring-pages"
-  #   bucket = s3.buckets['edurange-scoring']
-  #   object = bucket.objects[name]
-  #   begin
-  #     text = object.read
-  #   rescue
-  #     text = ""
-  #   end
-  #   text += self.scoring_page + "\n"
-  #   object.write(text)
-  # end
 
   def aws_scenario_upload_scoring_pages
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
     name = self.name + "-" + self.uuid + "-scoring-pages"
-    self.scoring_pages = bucket.objects[name].url_for(:read, expires: 10.hours).to_s
-    self.save
+    self.update(scoring_pages: bucket.objects[name].url_for(:read, expires: 10.hours).to_s)
   end
 
   def aws_scenario_write_to_scoring_pages
-    AWS::S3.new.buckets['edurange-scoring'].objects[self.name + "-" + self.uuid + "-scoring-pages"].write(self.scoring_pages_content)
-    binding.pry
+    AWS::S3.new.buckets['edurange-scoring'].objects[self.name + "-" + self.uuid + "-scoring-pages"].write(self[:scoring_pages_content])
   end
 
   def aws_scenario_upload_answers
@@ -76,8 +61,7 @@ module Aws
     s3.buckets.create('edurange-answers') unless bucket.exists?
     object = bucket.objects[self.name]
     object.write(self.answers)
-    self.answers_url = object.url_for(:read, expires: 10.hours).to_s
-    self.save
+    self.update(answers_url: object.url_for(:read, expires: 10.hours).to_s)
   end
 
   def aws_upload_scoring_url
@@ -86,17 +70,14 @@ module Aws
     s3.buckets.create('edurange-scoring') unless bucket.exists?
     name = self.uuid + "-scoring"
     bucket.objects[name].write("# put your answers here")
-    self.scoring_url = bucket.objects[name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s
-    self.save
+    self.update(scoring_url: bucket.objects[name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
   end
 
   def aws_upload_scoring_page
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
     s3.buckets.create('edurange-scoring') unless bucket.exists?
-    self.update_attributes(scoring_page: bucket.objects[self.uuid + "-scoring"].url_for(:read, expires: 10.hours).to_s)
-    self.subnet.cloud.scenario.update_attributes(scoring_pages_content: self.subnet.cloud.scenario.scoring_pages_content + self.scoring_page + "\n")
-    binding.pry
+    self.update(scoring_page: bucket.objects[self.uuid + "-scoring"].url_for(:read, expires: 10.hours).to_s)
   end
 
   # AWS::Cloud methods
@@ -115,8 +96,7 @@ module Aws
   # @return [Boolean] if {Cloud} is booted
   def aws_cloud_check_status
     if self.aws_cloud_driver_object.state == :available
-      self.status = "booted"
-      self.save!
+      self.update(status: "booted")
     end
   end
 
@@ -151,8 +131,7 @@ module Aws
   # @return [Boolean] Whether or not the {Subnet} is booted
   def aws_subnet_check_status
     if self.aws_subnet_driver_object.state == :available
-      self.status = "booted"
-      self.save!
+      self.update(status: "booted")
     end
   end
 
@@ -166,8 +145,7 @@ module Aws
     debug "[x] AWS_Driver::create_subnet #{self.driver_id}"
     sleep 5
     run_when_booted do
-      self.status = "booted"
-      self.save!
+      self.update(status: "booted")
     end
   end 
   
@@ -286,10 +264,7 @@ module Aws
 
   # @return [Boolean} Whether or not {Instance}'s AWS Instance Object's status is booted.
   def aws_instance_check_status
-    if self.aws_instance_driver_object.status == :running
-      self.status = "booted"
-      self.save!
-    end
+    self.update(status: "booted") if self.aws_instance_driver_object.status == :running
   end
 
   # @return [String] the string corresponding to an AMI image ID for the OS of the {Instance}
@@ -308,11 +283,8 @@ module Aws
   def aws_instance_upload_cookbook(cookbook_text)
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange']
-    unless bucket.exists?
-      s3.buckets.create('edurange')
-    end
+    s3.buckets.create('edurange') unless bucket.exists?
     bucket.objects[uuid].write(cookbook_text)
-    self.cookbook_url = bucket.objects[uuid].url_for(:read, expires: 10.hours).to_s
-    self.save
+    self.update(cookbook_url: bucket.objects[uuid].url_for(:read, expires: 10.hours).to_s)
   end
 end

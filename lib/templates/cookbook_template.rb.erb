@@ -154,6 +154,7 @@ script 'run scoreagent' do
   EOF
 end
   <% elsif recipe == 'scorer' %>
+gem_package "daemons"
 directory "/tmp/scoring" do
   :create
   mode 0777
@@ -168,9 +169,10 @@ remote_file "scorer.rb" do
   source "https://github.com/milescrabill/scoring/raw/master/scorer.rb"
   path "/tmp/scoring/scorer.rb"
 end
-script 'run scorer' do
+script 'run scorer and download answers' do
   interpreter "bash"
   code <<-EOF
+  wget -O /tmp/scoring/answers `cat /tmp/scoring/answers_url`
   ruby /tmp/scoring/scorer.rb start &
   EOF
 end

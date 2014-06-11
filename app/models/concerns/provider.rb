@@ -29,6 +29,7 @@ module Provider
       if self.class == Scenario
         Scoring.generate_scenario_urls(self)
         self.clouds.each { |cloud| cloud.boot }
+        self.reload
         self.provider_scenario_final_setup
         Scoring.scenario_scoring(self)
       elsif self.class == Cloud
