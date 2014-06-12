@@ -155,8 +155,9 @@ script 'run scoreagent' do
 end
   <% elsif recipe == 'scorer' %>
 gem_package "daemons"
-directory "/tmp/scoring" do
+directory "/tmp/scoring/points" do
   :create
+  recursive true
   mode 0777
 end
 file "/tmp/scoring/scoring_pages" do
