@@ -3,7 +3,6 @@ Roles:
     Recipes:
       - shellinabox
       - sshd_password_login
-      - scoring
   - Name: dns_server
     Packages:
       - bind9

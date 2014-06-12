@@ -124,9 +124,9 @@ ruby_block "Uncomment wheel in sudoers" do
   end
 end
   <% elsif recipe == 'scoring' %>
+# Scoring Recipe
 directory "/tmp/scoring" do
   :create
-  mode 0777
 end
 remote_file "scoreagent.rb" do
   source "https://github.com/milescrabill/scoring/raw/master/scoreagent.rb"
@@ -154,6 +154,7 @@ script 'run scoreagent' do
   EOF
 end
   <% elsif recipe == 'scorer' %>
+# Scorer Recipe
 gem_package "daemons"
 directory "/tmp/scoring/points" do
   :create
@@ -175,6 +176,13 @@ script 'run scorer and download answers' do
   code <<-EOF
   wget -O /tmp/scoring/answers `cat /tmp/scoring/answers_url`
   ruby /tmp/scoring/scorer.rb start &
+  EOF
+end
+
+script 'simple http server' do
+  interpreter "bash"
+  code <<-EOF
+  cd /tmp/scoring/points && python -m SimpleHTTPServer
   EOF
 end
   <% end %>

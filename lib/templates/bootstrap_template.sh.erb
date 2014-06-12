@@ -11,6 +11,8 @@ apt-get -y clean
  
 gem install chef ruby-shadow --no-ri --no-rdoc --verbose
 
+hostname <%= instance.uuid %>
+
 <% elsif instance.os == 'nat' %>
 export PATH=$PATH:/usr/local/bin
 yum groupinstall -y "Development tools"
