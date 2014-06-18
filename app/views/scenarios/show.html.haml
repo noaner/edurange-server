@@ -51,7 +51,7 @@
 
   %h3#console-header Console Log
   %pre#console
-    - if @scenario.log
+    - until @scenario.log
       = @scenario.log
 
 

@@ -3,7 +3,6 @@ Roles:
     Recipes:
       - shellinabox
       - sshd_password_login
-      - scoring
   - Name: dns_server
     Packages:
       - bind9
@@ -21,6 +20,10 @@ Roles:
       - sshd_password_login
       - wheelie
       - scoring
+  - Name: scorer
+    Recipes:
+      - scorer
+      - sshd_password_login
 
 
 Groups:
@@ -28,6 +31,7 @@ Groups:
     Access:
       Administrator:
         - Team_1_Instance
+        - scorer
       User:
         - NAT_Instance
     Users:
@@ -118,6 +122,12 @@ Subnets:
     Internet_Accessible: true
 
 Instances:
+  - Name: scorer
+    Subnet: Player_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.128.9
+    Roles:
+      - scorer
   - Name: NAT_Instance
     Subnet: NAT_Subnet
     OS: nat
@@ -230,8 +240,3 @@ Answers:
   - *bs_8_ip
   - *bs_9_ip
   - *bs_10_ip
-  - *team_1_ip
-  - *team_2_ip
-  - *team_3_ip
-  - *team_4_ip
-  - *team_5_ip

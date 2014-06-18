@@ -1,13 +1,12 @@
 -# navigation styled for Bootstrap 3.0
-%nav.navbar.navbar-default.navbar-fixed-top
+%nav.navbar
   .container
     .navbar-header
-      %button.navbar-toggle{"data-target" => ".navbar-collapse", "data-toggle" => "collapse", :type => "button"}
-        %span.sr-only Toggle navigation
-        %span.icon-bar
-        %span.icon-bar
-        %span.icon-bar
-      = link_to 'EDURange', root_path, class: 'navbar-brand'
+      %span.icon-bar
+      %span.icon-bar
+      %span.icon-bar
     .collapse.navbar-collapse
-      %ul.nav.navbar-nav
+      %ul.nav.navbar-nav.animated.drop
         = render 'layouts/navigation_links'
+
+//animation is animated.drop
