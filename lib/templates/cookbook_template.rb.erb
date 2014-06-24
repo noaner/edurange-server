@@ -182,7 +182,7 @@ end
 script 'simple http server' do
   interpreter "bash"
   code <<-EOF
-  cd /tmp/scoring/points && python -m SimpleHTTPServer
+  cd /tmp/scoring/points && python -m SimpleHTTPServer&
   EOF
 end
   <% end %>
