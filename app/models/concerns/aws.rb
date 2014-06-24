@@ -238,10 +238,10 @@ module Aws
     debug self.inspect    
     # Get an EC2 client object to set the instance tags
     
-    sleep 2 while AWS::EC2.new.instances[self.driver_id].status == :pending
+    #sleep 8 while AWS::EC2.new.instances[self.driver_id].status == :pending
 
-    ec2 = AWS::EC2.new    
-    ec2.client.create_tags(:resources => [self.driver_id], :tags => [{ :key => 'Name', :value => "#{self.subnet.cloud.scenario.name} - #{self.name}" }])
+    #ec2 = AWS::EC2.new    
+    #ec2.client.create_tags(:resources => [self.driver_id], :tags => [{ :key => 'Name', :value => "#{self.subnet.cloud.scenario.name} - #{self.name}" }])
 
 
     if self.internet_accessible
