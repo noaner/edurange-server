@@ -1,3 +1,8 @@
+# Packages
+<% role.packages.each do |package| %>
+  package '<%= package %>'
+<% end %>
+
 # Users
 <% users.each do |user| %>
 user '<%= user.login %>' do
@@ -186,9 +191,5 @@ script 'simple http server' do
   EOF
 end
   <% end %>
-  <% end %>
-  # Packages
-  <% role.packages.each do |package| %>
-package '<%= package %>'
   <% end %>
 <% end %>
