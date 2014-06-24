@@ -77,7 +77,7 @@ module Aws
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
     s3.buckets.create('edurange-scoring') unless bucket.exists?
-    self.update(scoring_page: bucket.objects[self.uuid + "-scoring"].url_for(:read, expires: 10.hours).to_s)
+    self.update(scoring_page: bucket.objects[self.uuid + "-scoring-" + self.name].url_for(:read, expires: 10.hours).to_s)
   end
 
   # AWS::Cloud methods
