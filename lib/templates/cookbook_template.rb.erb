@@ -1,6 +1,8 @@
 # Packages
-<% role.packages.each do |package| %>
-  package '<%= package %>'
+<% roles.each do |role| %>
+  <% role.packages.each do |package| %>
+    package '<%= package %>'
+  <% end %>
 <% end %>
 
 # Users
