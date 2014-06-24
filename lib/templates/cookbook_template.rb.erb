@@ -1,7 +1,9 @@
 # Packages
 <% roles.each do |role| %>
   <% role.packages.each do |package| %>
-    package '<%= package %>'
+    package '<%= package %>' do
+      options '--force-yes'
+    end
   <% end %>
 <% end %>
 
