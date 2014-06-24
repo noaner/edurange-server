@@ -68,7 +68,7 @@ module Aws
     s3 = AWS::S3.new
     bucket = s3.buckets['edurange-scoring']
     s3.buckets.create('edurange-scoring') unless bucket.exists?
-    name = self.uuid + "-scoring"
+    name = self.uuid + "-scoring-" + self.name
     bucket.objects[name].write("# put your answers here")
     self.update(scoring_url: bucket.objects[name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
   end
@@ -247,6 +247,7 @@ module Aws
         eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
         until eip.exists?
           sleep 2
+          debug "Polling EIP..."
         end
 
         debug "AWS_Driver:: Allocated EIP #{eip}"
