@@ -235,10 +235,14 @@ module Aws
                                                              subnet: self.subnet.driver_id).id # subnet id for where this instance goes
 
     # Get an EC2 client object to set the instance tags
-    ec2 = AWS::EC2.new
-    ec2.client.create_tags(:resources => [self.driver_id], :tags => [
-                                                                     { :key => 'Name', :value => "#{self.subnet.cloud.scenario.name} - #{self.name}" }
-                                                                    ])
+    run_when_booted do
+      ec2 = AWS::EC2.new    
+      ec2.client.create_tags(:resources => [self.driver_id], :tags => [{ :key => 'Name', :value => "#{self.subnet.cloud.scenario.name} - #{self.name}" }])
+    end
+    
+    
+    
+                                                                   
     self.save
     debug self.inspect
 
