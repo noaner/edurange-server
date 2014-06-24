@@ -234,17 +234,15 @@ module Aws
                                                              user_data: cloud_init, # startup data
                                                              subnet: self.subnet.driver_id).id # subnet id for where this instance goes
 
-    # Get an EC2 client object to set the instance tags
-    run_when_booted do
-      ec2 = AWS::EC2.new    
-      ec2.client.create_tags(:resources => [self.driver_id], :tags => [{ :key => 'Name', :value => "#{self.subnet.cloud.scenario.name} - #{self.name}" }])
-    end
-    
-    
-    
-                                                                   
     self.save
-    debug self.inspect
+    debug self.inspect    
+    # Get an EC2 client object to set the instance tags
+    
+    sleep 2 while AWS::EC2.new.instances[self.driver_id].status == :pending
+
+    ec2 = AWS::EC2.new    
+    ec2.client.create_tags(:resources => [self.driver_id], :tags => [{ :key => 'Name', :value => "#{self.subnet.cloud.scenario.name} - #{self.name}" }])
+
 
     if self.internet_accessible
       run_when_booted do
