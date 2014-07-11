@@ -34,6 +34,7 @@ module Aws
         @route_table.create_route("0.0.0.0/0", { instance: Instance.where(internet_accessible: true).first.driver_id } )
       end
     end
+
     # Hardcoded firewall rules - TODO
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)
     Cloud.first.aws_cloud_driver_object.security_groups.first.revoke_egress('0.0.0.0/0') # Disable all outbound
@@ -121,6 +122,8 @@ module Aws
     run_when_booted do
       self.aws_cloud_driver_object.internet_gateway = @igw
     end
+
+    self.add_progress
   end
 
   # @return [Boolean] Whether or not the {Subnet} is internet_accessible
@@ -147,6 +150,7 @@ module Aws
     run_when_booted do
       self.update(status: "booted")
     end
+    self.add_progress
   end 
   
   # Calls #aws_instance_allow_traffic on all of {Subnet}'s {Instance Instances}
@@ -233,7 +237,6 @@ module Aws
                                                              key_name: Settings.ec2_key, # keypair string
                                                              user_data: cloud_init, # startup data
                                                              subnet: self.subnet.driver_id).id # subnet id for where this instance goes
-
     self.save
     debug self.inspect    
     # Get an EC2 client object to set the instance tags
@@ -257,7 +260,7 @@ module Aws
         self.aws_instance_driver_object.network_interfaces.first.source_dest_check = false # Set first NIC (assumption) to not check source/dest. Required to accept other machines' packets
       end
     end
-    add_progress
+    self.add_progress
   end
   # Fetches the {Instance}'s AWS Instance Object
   # @return [AWS::EC2::InstanceCollection]
@@ -289,5 +292,145 @@ module Aws
     s3.buckets.create('edurange') unless bucket.exists?
     bucket.objects[uuid].write(cookbook_text)
     self.update(cookbook_url: bucket.objects[uuid].url_for(:read, expires: 10.hours).to_s)
+  end
+
+
+  def aws_scenario_unboot
+    debug "Deleting all AWS resources associated with Scenario"
+
+    ec2 = AWS::EC2.new
+    insts = []
+
+    # Do all instances First
+    self.clouds.each do |cloud|
+      cloud.subnets.each do |subnet|
+        subnet.instances.each do |inst|
+          ec2inst = ec2.instances[inst.driver_id]
+          if ec2inst.exists? and ec2inst.status_code == 16 then
+            insts.push inst
+            debug "Terminating instance #{inst.driver_id}"
+
+            debug "- Marking all instance volumes deleteOnTermination"
+            ec2inst.block_devices.each do |device|
+              ec2.client.modify_instance_attribute(
+                instance_id: ec2inst.id,
+                attribute: "blockDeviceMapping",
+                block_device_mappings: [device_name: "#{device[:device_name]}", ebs:{ delete_on_termination: true}]
+              )
+            end
+
+            # Disassociate and delete elastic ip's
+            debug "- Disassociating and deleting any elastic ip's associated with instance"
+            if elastic_ip = ec2inst.elastic_ip then
+              ec2inst.disassociate_elastic_ip
+              elastic_ip.delete
+            end
+
+            ec2inst.terminate
+            PrivatePub.publish_to "/scenarios/#{self.id}", instance_progress: -1
+          else
+            inst.update_attribute :status, "stopped"
+          end
+        end
+      end
+    end
+
+    # Wait for instances to terminate
+    if insts.size then
+      debug "Waiting for instances to terminate"
+      timeout_cnt = 0
+      while true do
+        debug "Polling instances status"
+        done_cnt = 0
+        insts.each do |inst|
+
+          ec2inst = ec2.instances[inst.driver_id]
+          if ec2inst.status_code == 48 then
+            done_cnt += 1
+            inst.update_attribute :status, "stopped"
+          end
+
+          debug "- #{ec2inst.id} #{ec2inst.status} #{ec2inst.status_code}"
+        end
+        break if done_cnt == insts.size
+
+        timeout_cnt += 1
+        if timeout_cnt == 40 then
+          debug "Instance deletion timed out - try unboot again or delete resources manually"
+          exit
+        end
+        sleep 3
+      end
+    end
+
+    # wait a little longer after intance termination
+    sleep 3
+
+    # For each cloud delete resources
+    self.clouds.select { |cloud| cloud.driver_id } .each do |cloud|
+      vpc = ec2.vpcs[cloud.driver_id]
+      if vpc.exists? 
+
+        debug "Deleting Subnets:"
+        cloud.subnets.select { |subnet| subnet.driver_id } .each do |subnet|
+          # Do each subnet
+          ec2subnet = ec2.subnets[subnet.driver_id]
+          unless ec2subnet.nil?
+            debug "- #{subnet.driver_id}"
+            ec2subnet.delete
+            subnet.driver_id = nil
+            subnet.update_attribute :status, "stopped"
+            PrivatePub.publish_to "/scenarios/#{self.id}", subnet_progress: -1
+          else
+            debug "Subnet #{subnet.driver_id} not found on AWS"
+          end
+        end
+
+        # Delete Network ACL's (not default)
+        debug "Deleting non-default Network ACL's:"
+        vpc.network_acls.each do |acl|
+          unless acl.default then
+            debug "- #{acl.network_acl_id}"
+            acl.delete
+          end
+        end
+
+        # Delete security groups (not default)
+        debug "Deleting non-default Security Groups:"
+        vpc.security_groups.each do |sg|
+          unless sg.name == "default" then
+            debug "- #{sg.security_group_id}"
+            sg.delete
+          end
+        end
+
+        # Delete route tables (not default)
+        debug "Deleting non-default Route Tables:"
+        vpc.route_tables.each do |rt|
+          unless rt.main? then
+            debug "- #{rt.route_table_id}"
+            rt.delete
+          end
+        end
+
+        # Delete Internet Gateway
+        debug "Deleting Internet Gateways:"
+        ig = vpc.internet_gateway
+        unless ig.nil? then
+          debug "- #{ig.internet_gateway_id}"
+          ig.detach vpc
+          ig.delete
+        end
+
+        # Delete VPC and remainig default resources
+        debug "Deleting #{vpc.vpc_id} and it's default resources."
+        vpc.delete
+        cloud.update_attribute :status, "stopped"
+        PrivatePub.publish_to "/scenarios/#{self.id}", cloud_progress: -1
+
+      end
+    end
+    debug "Unboot Finsihed"
+    return true
   end
 end

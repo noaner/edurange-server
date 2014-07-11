@@ -31,6 +31,7 @@ module Provider
         self.clouds.each { |cloud| cloud.boot }
         self.reload
         self.provider_scenario_final_setup
+        PrivatePub.publish_to "/scenarios/#{self.id}", scenario_status: "booted"
         Scoring.scenario_scoring(self)
       elsif self.class == Cloud
         self.subnets.each { |subnet| subnet.boot }
@@ -42,7 +43,18 @@ module Provider
           instance.boot
         end
       end
+    end
+  end
 
+  def unboot
+    debug "Unbooting - #{self.name}"
+    if self.class == Scenario
+      if self.aws_scenario_unboot
+        self.set_stopped
+        PrivatePub.publish_to "/scenarios/#{self.id}", scenario_status: "stopped"
+      else
+        debug "Scenario failed to unboot. try again or unboot manually"
+      end
     end
   end
 

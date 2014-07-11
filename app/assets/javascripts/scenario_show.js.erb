@@ -3,16 +3,26 @@ var ready = function() {
   var id = $('#scenario').data('id');
   if (id) {
     PrivatePub.subscribe("/scenarios/" + id, function(data, channel) {
-      if (data.instance_progress == 1) {
+      if (data.scenario_status != undefined) {
+        $('#scenario-status').text(data.scenario_status);
+      } else if (data.instance_progress == 1) {
         var count = $('#instance-count').text();
         $('#instance-count').text(parseInt(count) + 1);
+      } else if (data.instance_progress == -1) {
+        var count = $('#instance-count').text();
+        $('#instance-count').text(parseInt(count) - 1);
       } else if (data.subnet_progress == 1) {
         var count = $('#subnet-count').text();
         $('#subnet-count').text(parseInt(count) + 1);
-        
+      } else if (data.subnet_progress == -1) {
+        var count = $('#subnet-count').text();
+        $('#subnet-count').text(parseInt(count) - 1);
       } else if (data.cloud_progress == 1) {
         var count = $('#cloud-count').text();
         $('#cloud-count').text(parseInt(count) + 1);
+      } else if (data.cloud_progress == -1) {
+        var count = $('#cloud-count').text();
+        $('#cloud-count').text(parseInt(count) - 1);
       } else if (data.log_message != undefined) {
         $("#console").append(data.log_message + '<br>');
         $('#console').scrollTop($('#console').prop("scrollHeight"));
