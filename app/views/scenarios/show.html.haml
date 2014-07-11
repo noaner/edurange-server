@@ -7,7 +7,9 @@
   %div.panel-body
     %dl
       %dt Status:
-      %dd= @scenario.status
+      %dd
+        %span#scenario-status
+          = @scenario.status
       %dt Description:
       %dd= @scenario.description
 
@@ -15,7 +17,6 @@
       %h3 Clouds [ ]
 
     %dl
-      %br
       - @scenario.clouds.each do |cloud|
         %dt= link_to cloud.name, cloud_path(cloud)
 
@@ -58,5 +59,7 @@
   %div.btn-group#scenario-buttons
     = link_to 'Boot', boot_scenario_path(@scenario), class: 'btn btn-primary'
     = link_to 'dev_boot', dev_boot_scenario_path(@scenario), class: 'btn btn-default'
+    = link_to 'Unboot', unboot_scenario_path(@scenario), class: 'btn btn-default'
+    = link_to 'dev_unboot', dev_unboot_scenario_path(@scenario), class: 'btn btn-default'
     = link_to 'Edit', edit_scenario_path(@scenario), class: 'btn btn-default'
     = link_to 'Back', scenarios_path, class: 'btn btn-default'

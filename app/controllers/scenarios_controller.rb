@@ -1,5 +1,5 @@
 class ScenariosController < ApplicationController
-  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :boot, :dev_boot, :status]
+  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :boot, :dev_boot, :unboot, :dev_unboot, :status]
 
   # GET /scenarios
   # GET /scenarios.json
@@ -68,6 +68,22 @@ class ScenariosController < ApplicationController
       notice = "Scenario is booting. Monitor output below."
     end
 
+    redirect_to @scenario, notice: notice
+  end
+
+  def unboot
+    notice = "Scenario is unbooting. Monitor output below."
+    if @scenario.booted?
+      @scenario.delay.unboot
+    end
+    redirect_to @scenario, notice: notice
+  end
+
+  def dev_unboot
+    notice = "Scenario is unbooting. Monitor output below."
+    if @scenario.booted?
+      @scenario.unboot
+    end
     redirect_to @scenario, notice: notice
   end
 

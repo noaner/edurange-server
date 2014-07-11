@@ -123,6 +123,21 @@ bash "install_elf-inf" do
   not_if "test -x /tmp/done"
 end
 
+    <% elsif recipe == 'strace' %>
+
+script "install_strace" do
+
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  code <<-EOH
+  cd /tmp
+  touch test-file
+  EOH
+  not_if "test -e /tmp/test-file"
+end
+
+
     <% elsif recipe == 'wheelie' %>
 ruby_block "Uncomment wheel in sudoers" do
   block do
