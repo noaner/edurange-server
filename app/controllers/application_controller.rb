@@ -1,4 +1,7 @@
 class ApplicationController < ActionController::Base
+
+  before_filter :authenticate_user!
+
   AWS.config({
     :access_key_id => Settings.access_key_id,
     :secret_access_key => Settings.secret_access_key,
@@ -23,5 +26,6 @@ class ApplicationController < ActionController::Base
     flash[:alert] = "Access denied."
     redirect_to (request.referrer || root_path)
   end
+
 
 end
