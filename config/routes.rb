@@ -24,6 +24,8 @@ Edurange::Application.routes.draw do
       get 'status'
       get 'boot'
       get 'dev_boot'
+      get 'unboot'
+      get 'dev_unboot'
     end
   end
 
