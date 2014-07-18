@@ -8,3 +8,6 @@
 <li><%= link_to 'Players', players_path %></li>
 <li><%= link_to 'Roles', roles_path %></li>
 <li><%= link_to 'Cleanup Scenarios', management_status_path %></li>
+<% if current_user %>
+  <li><%= link_to 'Sign Out', destroy_user_session_path, method: :delete %></li>
+<% end %>
