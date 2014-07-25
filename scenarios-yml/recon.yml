@@ -22,7 +22,7 @@ Roles:
       - scoring
   - Name: scorer
     Recipes:
-      - scorer
+      - recon_scorer
       - sshd_password_login
 
 

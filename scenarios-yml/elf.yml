@@ -15,14 +15,14 @@ Roles:
       - scoring
   - Name: scorer
     Recipes:
-      - scorer
+      - elf_scorer
       - sshd_password_login
 
 Groups: 
   - Name: Team_1
     Access: 
       Administrator: 
-        - Infected_Instance
+        - Team_1_Instance
         - scorer
       User: 
         - NAT_Instance
@@ -35,7 +35,8 @@ Groups:
         Password: abcd
 
 Scenarios: 
-  - Description: "This game teaches the basics of elf infection. Students can use tools like readelf, objdump, strace, and gdb to determine what files are infected and with what."
+  - Description: "This game teaches the basics of elf infection. Students can use tools like readelf, objdump, strace, and gdb to determine what files are infected and with what.
+  Scoring is checked by running: 'curl http://10.0.127.9'. Answers are submitted like this, one address per line: echo '0xaabbccdd' >> /tmp/scoring/answers"
     Name: Elf
 
 Clouds: 
@@ -73,7 +74,7 @@ Instances:
     Roles: 
       - NAT
 
-  - Name: Infected_Instance
+  - Name: Team_1_Instance
     Subnet: Player_Subnet
     OS: ubuntu
     IP_Address: 10.0.128.4
@@ -81,4 +82,3 @@ Instances:
       - infected_level_1
 
 Answers:
-  - "Nick is a dweeb"

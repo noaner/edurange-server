@@ -52,6 +52,7 @@ module YmlRecord
       scenario = Scenario.new
       scenario.name = yaml_scenario["Name"]
       scenario.description = yaml_scenario["Description"]
+      answers ||= []
       scenario.answers = answers.join("\n")
       scenario.uuid = `uuidgen`.chomp
       scenario.save!

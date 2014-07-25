@@ -95,32 +95,9 @@ end
 # ELF Infection
 
     <% elsif recipe == 'elf' %>
-package "git"
-package "nasm"
-
-script "install_elfit" do
-  interpreter "bash"
-  user "root"
-  cwd "/tmp"
-  code <<-EOH
-  git clone https://github.com/NickStephens/elfit.git
-  cd elfit
-  make
-  make install
-  cd /tmp
-    
-  EOH
-  not_if "test -x /usr/bin/elfit"
-end
-
-remote_file "edurange-elf-inf.tgz" do
-  source "http://ada.evergreen.edu/~stenic05/edurange-elf-inf.tgz"
-  path "/tmp/edurange-elf-inf.tgz"
-end
-
-bash "install_elf-inf" do
-  code "cd /tmp/; tar zxvf edurange-elf-inf.tgz; cd bad-ls; make; touch /tmp/done; chmod +x /tmp/done"
-  not_if "test -x /tmp/done"
+bash "get file from remote" do
+  code "mkdir /tmp/bin; cd /tmp/bin; wget http://10.0.127.9/dist.tar; tar xvf dist.tar;"
+  not_if "test -f /tmp/bin/dist.tar"
 end
 
     <% elsif recipe == 'strace' %>
@@ -147,17 +124,20 @@ ruby_block "Uncomment wheel in sudoers" do
     fe.write_file
   end
 end
+
+
+
   <% elsif recipe == 'scoring' %>
 # Scoring Recipe
 directory "/tmp/scoring" do
   :create
 end
 remote_file "scoreagent.rb" do
-  source "https://github.com/milescrabill/scoring/raw/master/scoreagent.rb"
+  source "https://github.com/edurange/scoring/raw/master/scoreagent.rb"
   path "/tmp/scoring/scoreagent.rb"
 end
 remote_file "scoreplacer.rb" do
-  source "https://github.com/milescrabill/scoring/raw/master/scoreplacer.rb"
+  source "https://github.com/edurange/scoring/raw/master/scoreplacer.rb"
   path "/tmp/scoring/scoreplacer.rb"
 end
 file "/tmp/scoring/answers" do
@@ -177,9 +157,13 @@ script 'run scoreagent' do
   ruby /tmp/scoring/scoreagent.rb start &
   EOF
 end
-  <% elsif recipe == 'scorer' %>
-# Scorer Recipe
+
+
+
+  <% elsif recipe == 'recon_scorer' %>
+# Recon Scorer Recipe
 gem_package "daemons"
+gem_package "sinatra"
 directory "/tmp/scoring/points" do
   :create
   recursive true
@@ -192,9 +176,14 @@ file "/tmp/scoring/answers_url" do
   content "<%= scenario.answers_url %>"
 end
 remote_file "scorer.rb" do
-  source "https://github.com/milescrabill/scoring/raw/master/scorer.rb"
+  source "https://github.com/edurange/scoring/raw/master/scorer.rb"
   path "/tmp/scoring/scorer.rb"
 end
+remote_file "leaderboard.rb" do
+  source "https://github.com/edurange/scoring/raw/master/leaderboard.rb"
+  path "/tmp/scoring/points/leaderboard.rb"
+end
+
 script 'run scorer and download answers' do
   interpreter "bash"
   code <<-EOF
@@ -205,8 +194,96 @@ end
 
 script 'simple http server' do
   interpreter "bash"
+  cwd '/tmp/scoring/points'
   code <<-EOF
-  cd /tmp/scoring/points && python -m SimpleHTTPServer&
+  ruby leaderboard.rb -o 0.0.0.0 &
+  EOF
+end
+
+
+
+  <% elsif recipe == 'elf_scorer' %>
+  # Scorer Recipe
+package "git"
+package "nasm"
+package "apache2"
+gem_package "daemons"
+gem_package "sinatra"
+directory "/tmp/scoring/points" do
+  :create
+  recursive true
+  mode 0777
+end
+file "/tmp/scoring/scoring_pages" do
+  content "<%= scenario.scoring_pages %>"
+end
+file "/tmp/scoring/answers_url" do
+  content "<%= scenario.answers_url %>"
+end
+remote_file "scorer.rb" do
+  source "https://github.com/edurange/scoring/raw/master/scorer.rb"
+  path "/tmp/scoring/scorer.rb"
+end
+remote_file "leaderboard.rb" do
+  source "https://github.com/edurange/scoring/raw/master/leaderboard.rb"
+  path "/tmp/scoring/points/leaderboard.rb"
+end
+
+script "install_elfit" do
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  code <<-EOH
+  git clone https://github.com/NickStephens/elfit.git
+  cd elfit
+  make
+  make install
+  cd /tmp
+    
+  EOH
+  not_if "test -x /usr/bin/elfit"
+end
+
+remote_file "elf-v1.0.1.tar.gz" do
+  source "https://github.com/edurange/scoring/archive/elf-v1.0.1.tar.gz"
+  path "/tmp/elf-v1.0.1.tar.gz"
+end
+
+bash "install_elf-inf" do
+  # This code must create a answer file...
+  code <<-EOF
+  cd /tmp/
+  tar zxvf elf-v1.0.1.tar.gz
+  cd scoring-elf-v1.0.1/
+  mv bad-ls ..
+  cd /tmp/bad-ls
+  make
+  mkdir /tmp/dist
+  cp /tmp/bad-ls/bad-ls /tmp/dist
+  cd /tmp
+  tar -cvf dist.tar dist
+  mv /tmp/dist.tar /var/www
+  touch /tmp/done
+  chmod +x /tmp/done
+  EOF
+
+  not_if "test -x /tmp/done"
+end
+
+script 'copy answers and run scorer' do
+  interpreter "bash"
+  code <<-EOF
+  cd /tmp/
+  ruby -ne 'puts $_.match(/0x.*-0x.*$/).to_s.gsub("-","\n") if $_.include?("0x")' elfit-output 1>/tmp/scoring/answers
+  ruby /tmp/scoring/scorer.rb start
+  EOF
+end
+
+script 'simple http server' do
+  interpreter "bash"
+  cwd '/tmp/scoring/points'
+  code <<-EOF
+  ruby leaderboard.rb -o 0.0.0.0 &
   EOF
 end
   <% end %>
