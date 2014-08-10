@@ -24,13 +24,15 @@ already installed on the Instructor VM and it launches new VM instances and conf
 we have created one instructor machine that you can use or you can make a copy and customize it for your
 class. You can start and stop different exercises from the Instructor machine. The AWS console gives you
 a way to start and stop the instructor machine and to kill any Amazon Instances (AMIs) that were created
-by the instructor machine. For each scenario, there a YAML file in the edurange directory that specifies the
-exercise. It includes the number of students and what their passwords are. These can be changed in the
+by the instructor machine. For each scenario, there is a YAML file in the edurange directory that specifies the
+exercise. It includes the number of students and their temporary passwords. These can be changed in the
 YAML file subject to the resource limitations of the account. In general, students will each have their own
 EC2 instances to log into and work on the exercises (first they connect through an external IP address to a
 Gateway). The next section will lead you through starting an instructor machine and how to use it to create
 the scenarios. There are two modes for using EDURange. You may be using your own account or you may
-be using the EDURange group account. The use of those two modes will described separately.
+be using the EDURange group account. The use of those two modes will described separately.  We are in the process
+of developing a new interface that should eliminate the need to use the AWS console and simplify the process.
+You will simply login to the instructor machine, which will always be running.
 
 
 ### Starting the instructor machine from the EDURange account
@@ -70,9 +72,10 @@ After logging in to the instructor machine,
 > cd edurange
 ## Usage
     
-We now have two scenarios - 
+We now have three scenarios - 
 - recon.yml, a host discovery game with a scoring site (github.com/sboesen/edurange_scoring)
 - elf.yml, an scenario with an instances with where 'ls' has an elf infection. Scoring is being developed to support elf and other scenarios.
+- scapy.yml
 
 Browse to http://ip:3000/scenarios/new, and select from a template if you want to use one of them.
 
