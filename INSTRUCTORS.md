@@ -19,7 +19,7 @@ There are several more exercises planned, and they can be found in the Future Wo
 ## Setup
 
 As an instructor, you will use an Instructor VM that will allow you to run scenarios and observe the scoring
-events that you can use for assessment. The edurange code that runs the two scenarios that we have is
+events that you can use for assessment. The edurange code that runs the three scenarios that we have is
 already installed on the Instructor VM and it launches new VM instances and configures them. Currently,
 we have created one instructor machine that you can use or you can make a copy and customize it for your
 class. You can start and stop different exercises from the Instructor machine. The AWS console gives you
