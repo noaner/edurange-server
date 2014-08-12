@@ -28,6 +28,7 @@ gem 'erubis'
 gem 'unix-crypt'
 gem 'ipaddress'
 gem 'nokogiri'
+gem 'faye'
 
 
 
