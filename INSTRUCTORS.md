@@ -79,6 +79,11 @@ We now have three scenarios -
 
 Browse to http://ip:3000/scenarios/new, and select from a template if you want to use one of them.
 
+## Scapy Hunt
+This exercise simulates a network on a single VM.
+The game is scored based on finding a file on an FTP server on the simulated network which consists of multiple
+subnetworks.
+
 ## Contributing
 
 1. Fork it
