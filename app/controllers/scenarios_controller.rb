@@ -135,6 +135,20 @@ class ScenariosController < ApplicationController
   # DELETE /scenarios/1
   # DELETE /scenarios/1.json
   def destroy
+    @scenario.clouds.each do |cloud|
+      cloud.subnets.each do |subnet|
+        subnet.instances.each do |instance|
+          instance.instance_groups.each do |instance_group|
+            Group.where(:id => instance_group.group_id).destroy_all
+            InstanceGroup.find(instance_group.id).destroy
+          end
+          Instance.find(instance.id).destroy
+        end
+        Subnet.find(subnet.id).destroy
+      end
+      Cloud.find(cloud.id).destroy
+    end
+
     @scenario.destroy
     respond_to do |format|
       format.html { redirect_to scenarios_url, notice: 'Scenario was successfully destroyed.' }
