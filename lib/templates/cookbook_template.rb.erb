@@ -114,6 +114,79 @@ script "install_strace" do
   not_if "test -e /tmp/test-file"
 end
 
+# Fuzzing
+
+    <% elsif recipe == 'fuzz_attacking' %>
+
+remote_file "start_attack_server" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/start_attack_server"
+  path "/usr/bin/start_attack_server"
+  mode "0765"
+end
+
+remote_file "redserver" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/redserver"
+  path "/usr/bin/redserver"
+  mode "0765"
+end
+
+remote_file "attacker_motd" do
+  source "http://ada.evergreen.edu/~weidav02/attacker_motd.txt"
+  path "/etc/motd.tail"
+end
+
+script "start_attacking_env" do
+    interpreter "bash"
+    cwd "/etc/update-motd.d"
+    code <<-EOH
+    start_attack_server &
+    rm 10* 50* 51* 90* 91* 98*
+    touch /tmp/test-file
+    EOH
+    not_if "test -e /tmp/test-file"
+end
+
+    <% elsif recipe == 'fuzz_defending' %>
+
+remote_file "start_defense_server" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/start_defense_server"
+  path "/usr/bin/start_defense_server"
+  mode "0765"
+end
+
+remote_file "defender_motd" do
+  source "http://ada.evergreen.edu/~weidav02/defender_motd.txt"
+  path "/etc/motd.tail"
+end
+
+remote_file "blueserver" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/blueserver"
+  path "/usr/bin/blueserver"
+  mode "0765"
+end
+
+remote_file "get_attacker_input" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/get_attacker_input"
+  path "/usr/bin/get_attacker_input"
+  mode "0765"
+end
+
+remote_file "submit_calc" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/submit_calc"
+  path "/usr/bin/submit_calc"
+  mode "0765"
+end
+
+script "start_defending_env" do
+    interpreter "bash"
+    cwd "/etc/update-motd.d"
+    code <<-EOH
+    start_defense_server &
+    rm 10* 50* 51* 90* 91* 98*
+    touch /tmp/test-file
+    EOH
+    not_if "test -e /tmp/test-file"
+end
 
     <% elsif recipe == 'wheelie' %>
 ruby_block "Uncomment wheel in sudoers" do
@@ -286,6 +359,70 @@ script 'simple http server' do
   ruby leaderboard.rb -o 0.0.0.0 &
   EOF
 end
+
+  <% elsif recipe == 'fuzz_scorer' %>
+# Fuzzing Scorer Recipe
+package "zip"
+gem_package "daemons"
+gem_package "sinatra"
+#directory "/tmp/scoring/points" do
+#  :create
+#  recursive true
+#  mode 0777
+#end
+file "/tmp/scoring/scoring_pages" do
+  content "<%= scenario.scoring_pages %>"
+end
+file "/tmp/scoring/answers_url" do
+  content "<%= scenario.answers_url %>"
+end
+#remote_file "scorer.rb" do
+#  source "https://github.com/edurange/scoring/raw/master/scorer.rb"
+#  path "/tmp/scoring/scorer.rb"
+#end
+#remote_file "leaderboard.rb" do
+#  source "https://github.com/edurange/scoring/raw/master/leaderboard.rb"
+#  path "/tmp/scoring/points/leaderboard.rb"
+#end
+
+remote_file "start_scoring_server" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/start_scoring_server"
+  path "/usr/bin/start_scoring_server"
+  mode "0765"
+end
+
+remote_file "whiteserver" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/whiteserver"
+  path "/usr/bin/whiteserver"
+  mode "0765"
+end
+
+remote_file "refcalc" do
+  source "http://ada.evergreen.edu/~weidav02/refcalc.zip"
+  path "/usr/bin/refcalc.zip"
+end
+
+script 'start_scoring_server' do
+  interpreter "bash"
+  cwd '/usr/bin'
+  code <<-EOF
+  unzip refcalc.zip
+  cd refcalc; make
+  start_scoring_server &
+  touch /tmp/calc_in_out
+  touch /tmp/test-file
+  EOF
+  not_if "test -e /tmp/test-file"
+end
+
+#script 'simple http server' do
+#  interpreter "bash"
+#  cwd '/tmp/scoring/points'
+#  code <<-EOF
+#  ruby leaderboard.rb -o 0.0.0.0 &
+#  EOF
+#end
+
   <% end %>
   <% end %>
 <% end %>

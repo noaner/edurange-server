@@ -1,0 +1,114 @@
+Roles:
+  - Name: NAT
+    Packages:
+      - shellinabox
+      - sshd_password_login
+  - Name: attacking
+    Packages:
+      - build-essential
+      - python
+      - flex
+      - bison
+      - gdb
+    Recipes:
+      - sshd_password_login
+      - wheelie
+      - fuzz_attacking
+  - Name: defending
+    Packages:
+      - build-essential
+      - python
+      - flex
+      - bison
+      - gdb
+    Recipes:
+      - sshd_password_login
+      - wheelie
+      - fuzz_defending
+  - Name: scorer
+    Packages:
+      - build-essential
+      - flex
+      - bison
+      - gcc
+    Recipes:
+      - sshd_password_login
+      - scoring
+      - fuzz_scorer
+
+Groups:
+  - Name: White_Team
+    Access:
+      Administrator:
+        - Scorer_Instance
+    Users:
+      - Login: white_team
+        Password: ijkl
+  - Name: Attacking_Team
+    Access:
+      Administrator:
+        - Attacker_Instance
+      User:
+        - NAT_Instance
+    Users:
+      - Login: attacking_team
+        Password: abcd
+
+  - Name: Defending_Team
+    Access:
+      Administrator:
+        - Defender_Instance
+      User:
+        - NAT_Instance
+    Users:
+      - Login: defending_team
+        Password: efgh
+
+Scenarios:
+  - Description: "This game teaches the basics of Programming Language Design and Fuzzing"
+    Name: Fuzzing
+
+Clouds:
+  - Name: Fuzzing_Cloud
+    CIDR_Block: 10.0.0.0/16
+    Scenario: Fuzzing
+
+Subnets:
+  - Name: Fuzzing_Subnet
+    Cloud: Fuzzing_Cloud
+    CIDR_Block: 10.0.26.0/24
+
+  - Name: NAT_Subnet
+    Cloud: Fuzzing_Cloud
+    CIDR_Block: 10.0.21.0/24
+    Internet_Accessible: true
+
+Instances:
+  - Name: Scorer_Instance
+    Subnet: Fuzzing_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.26.128
+    Roles:
+      - scorer
+  - Name: NAT_Instance
+    Subnet: NAT_Subnet
+    OS: nat
+    IP_Address: 10.0.21.122
+    Internet_Accessible: true
+    Roles:
+      - NAT
+
+  - Name: Attacker_Instance
+    Subnet: Fuzzing_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.26.129
+    Roles:
+      - attacking
+  - Name: Defender_Instance
+    Subnet: Fuzzing_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.26.130
+    Roles:
+      - defending
+
+Answers:
