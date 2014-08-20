@@ -230,6 +230,7 @@ module Aws
     debug "Setting public_ip"
 
     sleep 2 until self.subnet.booted?
+    sleep 2
     debug "subnet booted"
     self.driver_id = AWS::EC2::InstanceCollection.new.create(
                                                              image_id: self.aws_instance_ami_id, # ami_id string of os image
