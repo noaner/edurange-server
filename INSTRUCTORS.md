@@ -79,10 +79,54 @@ We now have three scenarios -
 
 Browse to http://ip:3000/scenarios/new, and select from a template if you want to use one of them.
 
+
+
+# EDURange Scenarios
+
+
+Here is a description of how to play the various scenarios
+
+## Recon
+The objective of the Recon I exercise is to enumerate all of the hosts on a large network.  You will get
+one point for every host that you find (see scoring).  You identify a host by its IP address.
+The standard tool to use is nmap, which scans a network by sending multiple packets using a variety of network protocols
+and analyzing the responses.
+Some of the protocols include ICMP, TCP, and UDP.  You should be familiar at a general level with how these
+protocols work and how they can be used to get information about hosts that are alive on a network.
+You can start by using nmap without any options, but you will
+need the network address to be scanned.  The network address will be specified as a "10." address, and the instructor
+should have that information.  You should
+be familiar with how to specify an network address using CIDR notation or as a range of IP addresses.
+
+
+The VM that you will use to scan and the network 
+that you will be scanning are on AWS/EC2.  
+The first step  is to login to the gateway.  The instructor will have the IP address of the gateway.
+The main purpose of the gateway is to allow you to login to your player VM instance.  The gateway
+will have an external (routable) IP address, while your player VM will not.  The same credentials
+should be valid to login to both VMs.   Your instructor will give you the credentials.
+
+
 ## Scapy Hunt
 This exercise simulates a network on a single VM.
 The game is scored based on finding a file on an FTP server on the simulated network which consists of multiple
 subnetworks.
+
+
+### Scoring.
+The way that you submit your answers to be scored is with the following shell command:
+
+echo <answer IP> >> /tmp/scoring
+
+where <answer IP> is the IP address of a host that you found.  If you submit the same IP more than once,
+Scorebot will ignore the duplicates.  If you submit an incorrect IP, Scorebot will deduct points from your
+score.  You may view your score using the following shell command:
+
+curl http://<ip_of_Scorebot>
+This will allow you to view your score without having a browser running.
+
+
+
 
 ## Contributing
 
