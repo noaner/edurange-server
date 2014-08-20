@@ -140,14 +140,19 @@ class ScenariosController < ApplicationController
         subnet.instances.each do |instance|
           instance.instance_groups.each do |instance_group|
             Group.where(:id => instance_group.group_id).destroy_all
-            InstanceGroup.find(instance_group.id).destroy
+            Player.where(:group_id => instance_group.group_id).destroy_all
+            # InstanceGroup.find(instance_group.id).destroy
+            InstanceGroup.where(:id => instance_group.id).destroy_all
           end
-          Instance.find(instance.id).destroy
+          role_id = InstanceRole.where(:instance_id => instance.id).pluck(:role_id).first
+          Role.where(:id => role_id).destroy_all
+          Instance.where(:id => instance.id).destroy_all
         end
-        Subnet.find(subnet.id).destroy
+        Subnet.where(:id => subnet.id).destroy_all
       end
-      Cloud.find(cloud.id).destroy
+      Cloud.where(:id => cloud.id).destroy_all
     end
+    @scenario.destroy
 
     @scenario.destroy
     respond_to do |format|
