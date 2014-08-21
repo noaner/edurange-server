@@ -392,8 +392,6 @@ end
   <% elsif recipe == 'fuzz_scorer' %>
 # Fuzzing Scorer Recipe
 package "zip"
-gem_package "daemons"
-gem_package "sinatra"
 #directory "/tmp/scoring/points" do
 #  :create
 #  recursive true
@@ -418,17 +416,20 @@ remote_file "start_scoring_server" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/start_scoring_server"
   path "/usr/bin/start_scoring_server"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "whiteserver" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/whiteserver"
   path "/usr/bin/whiteserver"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "refcalc" do
   source "http://ada.evergreen.edu/~weidav02/refcalc.zip"
   path "/usr/bin/refcalc.zip"
+  not_if "test -e /tmp/test-file"
 end
 
 script 'start_scoring_server' do
