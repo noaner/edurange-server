@@ -1,0 +1,32 @@
+%h2 Student Home
+
+%h3 Running Scenarios:
+
+%div
+  - @scenarios.each do |scenario|
+    %dl
+      %dt 
+      %b Name:
+      = scenario.name
+      %dt
+      %b Instructor:
+      = User.find(scenario.user_id).name
+      %dt
+      %b Status:
+      = scenario.status
+      %dt
+      %b Instances:
+      %table
+        %tr
+          %th Name
+          %th Internal IP Address
+          %th Public IP Address
+          %th Login Name
+          %th Password
+        - @instances.each do |instance|
+          %tr
+            %td= instance.name
+            %td= instance.ip_address
+            %td= instance.provider_instance_public_ip || "Not Set"
+            %td= @login_info[:login]
+            %td= @login_info[:password]

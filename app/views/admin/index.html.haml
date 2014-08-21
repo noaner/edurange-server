@@ -1,0 +1,43 @@
+%h3 ADMIN Home
+%h3 Account Information: 
+%div
+  %dl
+    %dt
+      Name: 
+      =@user.name
+    %dt
+      Email:
+      =@user.email
+    %dt
+      Password: ********
+    %dt
+      = link_to 'edit', edit_user_registration_path, class: 'btn btn-primary'
+    %dt 
+      Last Sign In:
+      =@user.last_sign_in_at
+      From:
+      =@user.last_sign_in_ip 
+
+%h3 Instructors:
+%dl
+  %dt
+  = form_tag admin_instructor_add_path do
+    = label_tag 'Add Instructor:', nil, :style => "display:inline;"
+    = text_field :email, nil, :style => "width:300px;"
+    = submit_tag 'add'
+
+%div
+  %dl
+    - if @instructors.size > 0
+      %table
+        %tr
+          %th Name
+          %th Email
+          %th 
+        %tr
+        - @instructors.each do |instructor|
+          %td= instructor.name
+          %td= instructor.email
+          %td= link_to 'remove', admin_instructor_remove_path(:id =>  instructor['id'])
+    - else
+      none

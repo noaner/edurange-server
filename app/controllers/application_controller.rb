@@ -27,5 +27,44 @@ class ApplicationController < ActionController::Base
     redirect_to (request.referrer || root_path)
   end
 
+  def authenticate_admin
+    if user_signed_in?
+      @user = User.find(current_user.id)
+      if @user.is_admin?
+        return
+      end
+    end
+    redirect_to '/'
+  end
+
+  def authenticate_instructor
+    if user_signed_in?
+      @user = User.find(current_user.id)
+      if @user.is_instructor?
+        return
+      end
+    end
+    redirect_to '/'
+  end
+
+  def authenticate_admin_or_instructor
+    if user_signed_in?
+      @user = User.find(current_user.id)
+      if @user.is_admin? || @user.is_instructor?
+        return
+      end
+    end
+    redirect_to '/'
+  end
+
+  def authenticate_student
+    if user_signed_in?
+      @user = User.find(current_user.id)
+      if @user.is_student?
+        return
+      end
+    end
+    redirect_to '/'
+  end
 
 end

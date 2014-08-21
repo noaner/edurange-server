@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140609191324) do
+ActiveRecord::Schema.define(version: 20140821142008) do
 
   create_table "clouds", force: true do |t|
     t.string   "name"
@@ -45,6 +45,7 @@ ActiveRecord::Schema.define(version: 20140609191324) do
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "scenario_id"
   end
 
   create_table "instance_groups", force: true do |t|
@@ -92,6 +93,7 @@ ActiveRecord::Schema.define(version: 20140609191324) do
     t.integer  "group_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "user_id"
   end
 
   add_index "players", ["group_id"], name: "index_players_on_group_id"
@@ -116,6 +118,14 @@ ActiveRecord::Schema.define(version: 20140609191324) do
     t.string   "scoring_pages"
     t.string   "answers_url"
     t.text     "scoring_pages_content", default: ""
+    t.integer  "user_id"
+    t.string   "instructions"
+  end
+
+  create_table "student_groups", force: true do |t|
+    t.integer "instructor_id"
+    t.integer "student_id"
+    t.string  "name"
   end
 
   create_table "subnets", force: true do |t|
@@ -146,6 +156,7 @@ ActiveRecord::Schema.define(version: 20140609191324) do
     t.datetime "updated_at"
     t.string   "name"
     t.integer  "role"
+    t.string   "organization"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true
