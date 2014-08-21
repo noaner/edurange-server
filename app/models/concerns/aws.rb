@@ -46,39 +46,39 @@ module Aws
 
 
   def aws_scenario_upload_scoring_pages
-    # s3 = AWS::S3.new
-    # bucket = s3.buckets['edurange-scoring']
-    # name = self.name + "-" + self.uuid + "-scoring-pages"
-    # self.update(scoring_pages: bucket.objects[name].url_for(:read, expires: 10.hours).to_s)
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange-scoring']
+    name = self.name + "-" + self.uuid + "-scoring-pages"
+    self.update(scoring_pages: bucket.objects[name].url_for(:read, expires: 10.hours).to_s)
   end
 
   def aws_scenario_write_to_scoring_pages
-    # AWS::S3.new.buckets['edurange-scoring'].objects[self.name + "-" + self.uuid + "-scoring-pages"].write(self[:scoring_pages_content])
+    AWS::S3.new.buckets['edurange-scoring'].objects[self.name + "-" + self.uuid + "-scoring-pages"].write(self[:scoring_pages_content])
   end
 
   def aws_scenario_upload_answers
-    # s3 = AWS::S3.new
-    # bucket = s3.buckets['edurange-answers']
-    # s3.buckets.create('edurange-answers') unless bucket.exists?
-    # object = bucket.objects[self.name]
-    # object.write(self.answers)
-    # self.update(answers_url: object.url_for(:read, expires: 10.hours).to_s)
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange-answers']
+    s3.buckets.create('edurange-answers') unless bucket.exists?
+    object = bucket.objects[self.name]
+    object.write(self.answers)
+    self.update(answers_url: object.url_for(:read, expires: 10.hours).to_s)
   end
 
   def aws_upload_scoring_url
-    # s3 = AWS::S3.new
-    # bucket = s3.buckets['edurange-scoring']
-    # s3.buckets.create('edurange-scoring') unless bucket.exists?
-    # name = self.uuid + "-scoring-" + self.name
-    # bucket.objects[name].write("# put your answers here")
-    # self.update(scoring_url: bucket.objects[name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange-scoring']
+    s3.buckets.create('edurange-scoring') unless bucket.exists?
+    name = self.uuid + "-scoring-" + self.name
+    bucket.objects[name].write("# put your answers here")
+    self.update(scoring_url: bucket.objects[name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
   end
 
   def aws_upload_scoring_page
-    # s3 = AWS::S3.new
-    # bucket = s3.buckets['edurange-scoring']
-    # s3.buckets.create('edurange-scoring') unless bucket.exists?
-    # self.update(scoring_page: bucket.objects[self.uuid + "-scoring-" + self.name].url_for(:read, expires: 10.hours).to_s)
+    s3 = AWS::S3.new
+    bucket = s3.buckets['edurange-scoring']
+    s3.buckets.create('edurange-scoring') unless bucket.exists?
+    self.update(scoring_page: bucket.objects[self.uuid + "-scoring-" + self.name].url_for(:read, expires: 10.hours).to_s)
   end
 
   # AWS::Cloud methods
@@ -289,10 +289,9 @@ module Aws
   # @param cookbook_text The text to upload to S3  
   # @return [String] A URL generated from S3 pointing to our text
   def aws_instance_upload_cookbook(cookbook_text)
-    return
     s3 = AWS::S3.new
-    bucket = s3.buckets['edurange']
-    s3.buckets.create('edurange') unless bucket.exists?
+    bucket = s3.buckets[Settings.bucket_name]
+    s3.buckets.create(Settings.bucket_name) unless bucket.exists?
     bucket.objects[uuid].write(cookbook_text)
     self.update(cookbook_url: bucket.objects[uuid].url_for(:read, expires: 10.hours).to_s)
   end

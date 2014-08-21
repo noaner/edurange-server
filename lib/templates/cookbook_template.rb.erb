@@ -108,10 +108,14 @@ script "install_strace" do
   user "root"
   cwd "/tmp"
   code <<-EOH
+  
   cd /tmp
-  touch test-file
+  git clone https://github.com/kahea/edurange-strace
+  cp edurange-strace/* .
+  rm -rf edurange-strace
+
   EOH
-  not_if "test -e /tmp/test-file"
+  not_if "test -e /tmp/strace0"
 end
 
 
