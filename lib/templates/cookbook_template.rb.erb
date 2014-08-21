@@ -122,40 +122,45 @@ remote_file "start_attack_server" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/start_attack_server"
   path "/usr/bin/start_attack_server"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "send_fuzz_data" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/send_fuzz_data"
   path "/usr/bin/send_fuzz_data"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "redserver" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/redserver"
   path "/usr/bin/redserver"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "fuzzing_rules" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/cat_motd"
   path "/usr/bin/fuzzing_rules"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "attacker_motd" do
   source "http://ada.evergreen.edu/~weidav02/attacker_motd.txt"
   path "/etc/motd.tail"
+  not_if "test -e /tmp/test-file"
 end
 
 script "start_attacking_env" do
-    interpreter "bash"
-    cwd "/etc/update-motd.d"
-    code <<-EOH
-    start_attack_server &
-    rm 10* 50* 51* 90* 91* 98*
-    touch /tmp/test-file
-    EOH
-    not_if "test -e /tmp/test-file"
+  interpreter "bash"
+  cwd "/etc/update-motd.d"
+  code <<-EOH
+  start_attack_server &
+  rm 10* 50* 51* 90* 91* 98*
+  touch /tmp/test-file
+  EOH
+  not_if "test -e /tmp/test-file"
 end
 
     <% elsif recipe == 'fuzz_defending' %>
@@ -164,46 +169,52 @@ remote_file "start_defense_server" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/start_defense_server"
   path "/usr/bin/start_defense_server"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "fuzzing_rules" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/cat_motd"
   path "/usr/bin/fuzzing_rules"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "defender_motd" do
   source "http://ada.evergreen.edu/~weidav02/defender_motd.txt"
   path "/etc/motd.tail"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "blueserver" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/blueserver"
   path "/usr/bin/blueserver"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "get_attacker_input" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/get_attacker_input"
   path "/usr/bin/get_attacker_input"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 remote_file "submit_calc" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/submit_calc"
   path "/usr/bin/submit_calc"
   mode "0765"
+  not_if "test -e /tmp/test-file"
 end
 
 script "start_defending_env" do
-    interpreter "bash"
-    cwd "/etc/update-motd.d"
-    code <<-EOH
-    start_defense_server &
-    rm 10* 50* 51* 90* 91* 98*
-    touch /tmp/test-file
-    EOH
-    not_if "test -e /tmp/test-file"
+  interpreter "bash"
+  cwd "/etc/update-motd.d"
+  code <<-EOH
+  start_defense_server &
+  rm 10* 50* 51* 90* 91* 98*
+  touch /tmp/test-file
+  EOH
+  not_if "test -e /tmp/test-file"
 end
 
     <% elsif recipe == 'wheelie' %>
