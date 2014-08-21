@@ -27,18 +27,18 @@ module Provider
 
       # Boot child objects
       if self.class == Scenario
-        Scoring.generate_scenario_urls(self)
+        # Scoring.generate_scenario_urls(self)
         self.clouds.each { |cloud| cloud.boot }
         self.reload
         self.provider_scenario_final_setup
         PrivatePub.publish_to "/scenarios/#{self.id}", scenario_status: "booted"
-        Scoring.scenario_scoring(self)
+        # Scoring.scenario_scoring(self)
       elsif self.class == Cloud
         self.subnets.each { |subnet| subnet.boot }
       elsif self.class == Subnet
         self.instances.each do |instance|
           if instance.roles[0]["recipes"].include?("scoring")
-            Scoring.instance_scoring(instance)
+            # Scoring.instance_scoring(instance)
           end
           instance.boot
         end

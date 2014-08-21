@@ -1,0 +1,23 @@
+%h3 Scoring
+Correct scores will show in green, incorrect in red.
+
+%h3= @scenario.name
+
+- @scenario.questions.each_with_index do |question, index|
+  = (index + 1).to_s + "." + question.question_text
+  %dl
+    - correct = question.answers.where("student_id = #{current_user.id} AND correct = 't'")
+    - incorrect = question.answers.where("student_id = #{current_user.id} AND correct = 'f'")
+    - correct.each do |answer|
+      %dt
+        %span.correct
+          = answer.answer_text
+    %p
+    - incorrect.each do |answer|
+      %dt
+        %span.incorrect
+          = answer.answer_text
+  %p
+  = form_tag '/scoring/answer_question/' + @scenario.id.to_s + '/' + question.id.to_s do
+    = text_field_tag :answer_text
+    = submit_tag "submit"

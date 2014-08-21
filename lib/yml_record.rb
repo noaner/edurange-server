@@ -32,7 +32,7 @@ module YmlRecord
     instances = file["Instances"]
     roles = file["Roles"]
     groups = file["Groups"]
-    answers = file["Answers"]
+    questions = file["Questions"]
 
     roles.each do |yaml_role|
       role = Role.new
@@ -52,6 +52,7 @@ module YmlRecord
       scenario = Scenario.new
       scenario.name = yaml_scenario["Name"]
       scenario.description = yaml_scenario["Description"]
+      scenario.instructions = yaml_scenario["Instructions"]
       answers ||= []
       scenario.answers = answers.join("\n")
       scenario.uuid = `uuidgen`.chomp
@@ -121,6 +122,16 @@ module YmlRecord
         player.password = password
         player.group = group
         player.save!
+      end
+
+      # Do questions
+      if questions
+        questions.each do |yml_question|
+          question = scenario.questions.new
+          question.question_text = yml_question["Question"]
+          question.answer_text = yml_question["Answer"]
+          question.save!
+        end
       end
 
       # Give group admin on machines they own

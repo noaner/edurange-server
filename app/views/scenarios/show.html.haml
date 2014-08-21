@@ -14,13 +14,6 @@
       %dd= @scenario.description
 
     %div.page-header
-      %h3 Clouds [ ]
-
-    %dl
-      - @scenario.clouds.each do |cloud|
-        %dt= link_to cloud.name, cloud_path(cloud)
-
-    %div.page-header
       %h3 Boot Progress
 
     %dl
@@ -63,3 +56,61 @@
     = link_to 'dev_unboot', dev_unboot_scenario_path(@scenario), class: 'btn btn-default'
     = link_to 'Edit', edit_scenario_path(@scenario), class: 'btn btn-default'
     = link_to 'Back', scenarios_path, class: 'btn btn-default'
+    = link_to 'Destroy', @scenario, :method => :delete, class: 'btn btn-default'
+
+  %h3 Instructions
+  %dl
+    = @scenario.instructions
+
+  %h3 Scoring
+  %dl
+    = link_to 'Instructor View', '/scoring/instructor/' + @scenario.id.to_s
+    \- shows questions and answers
+    %p
+    = link_to 'Student View', '/scoring/student/' + @scenario.id.to_s
+    \- shows only questions, lets you answer them 
+
+  %h3 Resources
+  - @scenario.clouds.each do |cloud|
+    %dl
+      Cloud: 
+      %b= cloud.name
+      status:
+      = cloud.status
+      , driver:
+      = cloud.driver_id
+
+      - cloud.subnets.each do |subnet|
+        %dl
+          Subnet:
+          %b= subnet.name
+          status:
+          = subnet.status
+
+          - subnet.instances.each do |instance|
+            %dl
+              Instance:
+              %b=instance.name
+              IP Address:
+              =instance.ip_address
+              - if instance.internet_accessible
+                , Public IP:
+                - if instance.provider_instance_public_ip
+                  =instance.provider_instance_public_ip
+                - else
+                  Not Set
+
+              - instance.groups.each do |group|
+                %dl
+                  Group:
+                  %b=group.name
+
+                  - group.players.each do |player|
+                    %dl
+                      Player:
+                      login: 
+                      = "'" + player.login + "'"
+                      , password:
+                      = "'" + player.password + "'"
+
+

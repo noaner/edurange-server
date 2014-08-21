@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
 
-  before_filter :authenticate_user!
+# before_filter :authenticate_user!
 
   AWS.config({
     :access_key_id => Settings.access_key_id,

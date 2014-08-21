@@ -1,5 +1,5 @@
 class HomeController < ApplicationController
-  # layout 'home'
+  layout 'home'
   def index
     if user_signed_in?
       user = User.find(current_user.id)

@@ -1,4 +1,3 @@
-
 Roles: 
   - Name: NAT
     Recipes:
@@ -12,32 +11,22 @@ Roles:
       - elf
       - sshd_password_login
       - wheelie
-      - scoring
-  - Name: scorer
-    Recipes:
-      - elf_scorer
-      - sshd_password_login
 
 Groups: 
   - Name: Team_1
     Access: 
       Administrator: 
         - Team_1_Instance
-        - scorer
       User: 
         - NAT_Instance
     Users: 
-      - Login: edurange_1
-        Password: abcd
-      - Login: edurange_2
-        Password: abcd
-      - Login: edurange_3
-        Password: abcd
+      - Login: instructor
+        Password: vLCu3Crf
 
 Scenarios: 
-  - Description: "This game teaches the basics of elf infection. Students can use tools like readelf, objdump, strace, and gdb to determine what files are infected and with what.
-  Scoring is checked by running: 'curl http://10.0.127.9'. Answers are submitted like this, one address per line: echo '0xaabbccdd' >> /tmp/scoring/answers"
-    Name: Elf
+  - Name: Elf
+    Description: "This game teaches the basics of elf infection. Students can use tools like readelf, objdump, strace, and gdb to determine what files are infected and with what."
+    Instructions: Students need to first login to the NAT. Find the Public IP Address of the NAT_Instance listed below under Instances and ssh to that address using logins credentials listed under Players below. If you are an Instructor you can use the Player with the login name 'instructor'. After you have logged into the NAT ssh into the Instace named Team_1_Instance. Now you need to examin the file '/tmp/bin/dist/bad-ls' and find the starting address and ending address of the malicous code.
 
 Clouds: 
   - Name: Cloud_1
@@ -58,14 +47,7 @@ Subnets:
     Cloud: Cloud_1
     CIDR_Block: 10.0.127.0/24
 
-Instances: 
-  - Name: scorer
-    Subnet: Scorer_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.127.9
-    Roles:
-      - scorer
-
+Instances:
   - Name: NAT_Instance
     Subnet: NAT_Subnet
     OS: nat
@@ -81,4 +63,8 @@ Instances:
     Roles: 
       - infected_level_1
 
-Answers:
+Questions:
+  - Question: What is the starting addresses of the infected code in 'bad-ls'
+    Answer: '0x8060d24'
+  - Question: What is the ending addresses of the infected code in 'bad-ls'
+    Answer: '0x8060dc8'

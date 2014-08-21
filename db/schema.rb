@@ -11,7 +11,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140821142008) do
+ActiveRecord::Schema.define(version: 20140821162813) do
+
+  create_table "answers", force: true do |t|
+    t.integer  "student_id"
+    t.string   "answer_text"
+    t.boolean  "correct"
+    t.integer  "question_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "answers", ["question_id"], name: "index_answers_on_question_id"
 
   create_table "clouds", force: true do |t|
     t.string   "name"
@@ -97,6 +108,18 @@ ActiveRecord::Schema.define(version: 20140821142008) do
   end
 
   add_index "players", ["group_id"], name: "index_players_on_group_id"
+
+  create_table "questions", force: true do |t|
+    t.string   "answer_id"
+    t.string   "kind"
+    t.string   "question_text"
+    t.string   "answer_text"
+    t.integer  "scenario_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "questions", ["scenario_id"], name: "index_questions_on_scenario_id"
 
   create_table "roles", force: true do |t|
     t.string   "name"

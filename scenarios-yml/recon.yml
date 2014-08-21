@@ -10,7 +10,6 @@ Roles:
     Packages:
       - apache2
     Recipes:
-      - scoring
   - Name: attacker
     Packages:
       - nmap
@@ -19,88 +18,22 @@ Roles:
     Recipes:
       - sshd_password_login
       - wheelie
-      - scoring
-  - Name: scorer
-    Recipes:
-      - recon_scorer
-      - sshd_password_login
-
 
 Groups:
   - Name: Team_1
     Access:
       Administrator:
         - Team_1_Instance
-        - scorer
       User:
         - NAT_Instance
     Users:
-      - Login: edurange_1
-        Password: abcd
-      - Login: edurange_2
-        Password: abcd
-      - Login: edurange_3
-        Password: abcd
-
-  - Name: Team_2
-    Access:
-      Administrator:
-        - Team_2_Instance
-      User:
-        - NAT_Instance
-    Users:
-      - Login: edurange_4
-        Password: efgh
-      - Login: edurange_5
-        Password: efgh
-      - Login: edurange_6
-        Password: efgh
-
-  - Name: Team_3
-    Access:
-      Administrator:
-        - Team_3_Instance
-      User:
-        - NAT_Instance
-    Users:
-      - Login: edurange_7
-        Password: ijkl
-      - Login: edurange_8
-        Password: ijkl
-      - Login: edurange_9
-        Password: ijkl
-
-  - Name: Team_4
-    Access:
-      Administrator:
-        - Team_4_Instance
-      User:
-        - NAT_Instance
-    Users:
-      - Login: edurange_10
-        Password: mnop
-      - Login: edurange_11
-        Password: mnop
-      - Login: edurange_12
-        Password: mnop
-
-  - Name: Team_5
-    Access:
-      Administrator:
-        - Team_5_Instance
-      User:
-        - NAT_Instance
-    Users:
-      - Login: edurange_13
-        Password: qrst
-      - Login: edurange_14
-        Password: qrst
-      - Login: edurange_15
-        Password: qrst
+      - Login: instructor
+        Password: vLCu3Crf
 
 Scenarios:
   - Description: "This game is a basic nmap exercise that teaches students about TCP/IP."
     Name: Recon
+    Instructions: Players will first ssh into the NAT (listed under Instances below) using it's Public IP Address. You can view login credentials under Players. After logging into the NAT players need to ssh into the Player_Instance using it's IP Address. From there players can answer the questions listed here Scoring.
 
 Clouds:
   - Name: Cloud_1
@@ -122,12 +55,6 @@ Subnets:
     Internet_Accessible: true
 
 Instances:
-  - Name: scorer
-    Subnet: Player_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.128.9
-    Roles:
-      - scorer
   - Name: NAT_Instance
     Subnet: NAT_Subnet
     OS: nat
@@ -229,14 +156,7 @@ Instances:
     Roles:
       - web_server
 
-Answers:
-  - *bs_1_ip
-  - *bs_2_ip
-  - *bs_3_ip
-  - *bs_4_ip
-  - *bs_5_ip
-  - *bs_6_ip
-  - *bs_7_ip
-  - *bs_8_ip
-  - *bs_9_ip
-  - *bs_10_ip
+Questions:
+  - Question: Name the IP addresses that are reachable within the network. Enter them in one at a time for now. In the future this will accept a list of comma seperated values.
+    Answer: 10.0.0.9 && 10.0.1.93 && 10.0.3.77 && 10.0.7.2 && 10.0.7.90 && 10.0.120.128 && 10.0.121.122 && 10.0.123.2 && 10.0.123.8 && 10.0.127.127
+

@@ -1,0 +1,12 @@
+%h3 Scoring
+All answers are stirngs. '|' means an answer can be one or the other. '&&' means that there are multiple answers to one question. 
+
+%h3= @scenario.name
+%p
+- @scenario.questions.each_with_index do |question, index|
+    = (index += 1).to_s + "."
+    = question.question_text
+    %dl
+    %dd= question.answer_text
+    %br
+%p

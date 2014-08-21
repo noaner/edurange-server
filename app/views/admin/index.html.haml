@@ -1,4 +1,4 @@
-%h3 ADMIN Home
+%h3 Admin Home
 %h3 Account Information: 
 %div
   %dl
@@ -33,11 +33,11 @@
         %tr
           %th Name
           %th Email
-          %th 
-        %tr
+          %th
         - @instructors.each do |instructor|
-          %td= instructor.name
-          %td= instructor.email
-          %td= link_to 'remove', admin_instructor_remove_path(:id =>  instructor['id'])
+          %tr
+            %td= instructor.name
+            %td= instructor.email
+            %td= link_to 'remove', admin_instructor_remove_path(:id =>  instructor['id'])
     - else
       none

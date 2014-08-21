@@ -38,6 +38,10 @@ Edurange::Application.routes.draw do
   post 'admin/instructor_add'
   get 'admin/instructor_remove'
 
+  get 'scoring/instructor/:scenario', to: 'scoring#instructor'
+  get 'scoring/student/:scenario', to: 'scoring#student'
+  post 'scoring/answer_question/:scenario/:question', to: 'scoring#answer_question'
+
   root :to => "home#index"
   devise_for :users, :controllers => {:registrations => "registrations"}
   resources :users

@@ -29,6 +29,9 @@ class Instance < ActiveRecord::Base
     PrivatePub.publish_to "/scenarios/#{self.subnet.cloud.scenario.id}", instance_progress: 1
   end
   def debug(message)
+    if !message
+      return
+    end
     log = self.subnet.cloud.scenario.log
     self.subnet.cloud.scenario.update_attributes(log: log + message + "\n")
     PrivatePub.publish_to "/scenarios/#{self.subnet.cloud.scenario.id}", log_message: message

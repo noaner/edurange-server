@@ -4,7 +4,13 @@ class ScenariosController < ApplicationController
   # GET /scenarios
   # GET /scenarios.json
   def index
-    @scenarios = Scenario.all
+    user = User.find(current_user.id)
+    @scenarios = []
+    if user.is_admin?
+      @scenarios = Scenario.all
+    else
+      @scenarios = Scenario.where(:user_id => current_user.id)
+    end
   end
 
   def status
@@ -90,7 +96,7 @@ class ScenariosController < ApplicationController
   # GET /scenarios/new
   def new
     @scenario = Scenario.new
-    @templates = YmlRecord.yml_headers.map {|filename,name,desc| [name,filename]}
+    @templates = YmlRecord.yml_headers.map {|filename,name,desc| [name,filename,desc]}
   end
 
   # GET /scenarios/1/edit
@@ -106,6 +112,9 @@ class ScenariosController < ApplicationController
     else
       @scenario = Scenario.new(scenario_params)
     end
+
+    @scenario.user_id = current_user.id
+    @scenario.save!
 
     respond_to do |format|
       if @scenario.save
@@ -141,7 +150,6 @@ class ScenariosController < ApplicationController
           instance.instance_groups.each do |instance_group|
             Group.where(:id => instance_group.group_id).destroy_all
             Player.where(:group_id => instance_group.group_id).destroy_all
-            # InstanceGroup.find(instance_group.id).destroy
             InstanceGroup.where(:id => instance_group.id).destroy_all
           end
           role_id = InstanceRole.where(:instance_id => instance.id).pluck(:role_id).first
