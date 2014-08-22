@@ -24,7 +24,7 @@ module YmlRecord
     # what unique id corresponds to the current loading of the scenario. Whenever we
     # create an object, we store it within the above hash so that we can look it up
     # later in this function when we are creating objects referencing things in the database.
-    file = YAML.load_file(yaml_file)
+    file = YAML.load_file(Settings.app_path + yaml_file)
 
     scenarios = file["Scenarios"]
     clouds = file["Clouds"]
