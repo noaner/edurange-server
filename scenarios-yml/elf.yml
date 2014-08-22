@@ -43,10 +43,6 @@ Subnets:
     CIDR_Block: 10.0.129.0/24
     Internet_Accessible: true
 
-  - Name: Scorer_Subnet
-    Cloud: Cloud_1
-    CIDR_Block: 10.0.127.0/24
-
 Instances:
   - Name: NAT_Instance
     Subnet: NAT_Subnet

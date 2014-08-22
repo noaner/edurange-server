@@ -79,14 +79,14 @@
       = cloud.status
       , driver:
       = cloud.driver_id
-
+      %p
       - cloud.subnets.each do |subnet|
         %dl
           Subnet:
           %b= subnet.name
           status:
           = subnet.status
-
+          %p
           - subnet.instances.each do |instance|
             %dl
               Instance:
@@ -99,12 +99,12 @@
                   =instance.provider_instance_public_ip
                 - else
                   Not Set
-
+              %p
               - instance.groups.each do |group|
                 %dl
                   Group:
                   %b=group.name
-
+                  %p
                   - group.players.each do |player|
                     %dl
                       Player:
@@ -112,5 +112,6 @@
                       = "'" + player.login + "'"
                       , password:
                       = "'" + player.password + "'"
+                  %p
 
 

@@ -20,7 +20,7 @@ module Aws
     # Anything that needs to be performed when the environment is 100% up.
 
     # Currently assumes there is only one NAT. TODO
-    Subnet.all.each do |subnet|
+    self.get_subnets.each do |subnet| 
       @route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: subnet.cloud.driver_id)
       debug "[x] AWS_Driver::create_route_table #{@route_table}"
       subnet.aws_subnet_driver_object.route_table = @route_table
@@ -31,17 +31,18 @@ module Aws
       else
         debug "NOTE: Subnet.all.each. Subnet #{subnet} adding route to NAT"
         # Find the NAT instance
-        @route_table.create_route("0.0.0.0/0", { instance: Instance.where(internet_accessible: true).first.driver_id } )
+        @route_table.create_route("0.0.0.0/0", { instance: self.get_instances.select {|inst| inst.internet_accessible == true}.first.driver_id } )
       end
     end
 
+    cloud = self.clouds.first
     # Hardcoded firewall rules - TODO
-    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)
-    Cloud.first.aws_cloud_driver_object.security_groups.first.revoke_egress('0.0.0.0/0') # Disable all outbound
-    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 80)  # Enable port 80 outbound
-    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 443) # Enable port 443 outbound
+    cloud.aws_cloud_driver_object.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)
+    cloud.aws_cloud_driver_object.security_groups.first.revoke_egress('0.0.0.0/0') # Disable all outbound
+    cloud.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 80)  # Enable port 80 outbound
+    cloud.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 443) # Enable port 443 outbound
     # TODO -- SECURITY -- delayed job in 20 min disable firewall.
-    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
+    cloud.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
   end
 
 
@@ -167,7 +168,7 @@ module Aws
   # @return [String] The AWS Instance ID corresponding to the NAT Instance
   def aws_subnet_closest_nat_instance
     # Finds the NAT instance closest to us. TODO. Currently just assumes there's one
-    Instance.all.each do |instance|
+    self.get_instances.each do |instance|
       if instance.internet_accessible
         # Found our NAT
         if instance.booted?

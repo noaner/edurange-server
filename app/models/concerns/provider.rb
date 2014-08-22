@@ -85,7 +85,7 @@ module Provider
   def run_when_booted
     until self.booted?
       self.reload
-      sleep 2
+      sleep 5
       classname = self.class.to_s.downcase
       self.run_provider_method("#{classname}_check_status")
     end
