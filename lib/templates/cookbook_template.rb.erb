@@ -164,10 +164,6 @@ script "start_attacking_env" do
 end
 
     <% elsif recipe == 'fuzz_defending' %>
-directory "/var/log/fuzz_log" do
-  :create
-end
-
 remote_file "start_defense_server" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/start_defense_server"
   path "/usr/bin/start_defense_server"
