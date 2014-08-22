@@ -395,25 +395,12 @@ end
   <% elsif recipe == 'fuzz_scorer' %>
 # Fuzzing Scorer Recipe
 package "zip"
-#directory "/tmp/scoring/points" do
-#  :create
-#  recursive true
-#  mode 0777
-#end
 file "/tmp/scoring/scoring_pages" do
   content "<%= scenario.scoring_pages %>"
 end
 file "/tmp/scoring/answers_url" do
   content "<%= scenario.answers_url %>"
 end
-#remote_file "scorer.rb" do
-#  source "https://github.com/edurange/scoring/raw/master/scorer.rb"
-#  path "/tmp/scoring/scorer.rb"
-#end
-#remote_file "leaderboard.rb" do
-#  source "https://github.com/edurange/scoring/raw/master/leaderboard.rb"
-#  path "/tmp/scoring/points/leaderboard.rb"
-#end
 
 remote_file "start_scoring_server" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/start_scoring_server"
@@ -447,14 +434,6 @@ script 'start_scoring_server' do
   EOF
   not_if "test -e /tmp/test-file"
 end
-
-#script 'simple http server' do
-#  interpreter "bash"
-#  cwd '/tmp/scoring/points'
-#  code <<-EOF
-#  ruby leaderboard.rb -o 0.0.0.0 &
-#  EOF
-#end
 
   <% end %>
   <% end %>

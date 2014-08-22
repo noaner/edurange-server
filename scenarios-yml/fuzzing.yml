@@ -46,8 +46,6 @@ Groups:
         Password: ijkl
   - Name: Attacking_Team
     Access:
-      Administrator:
-        - Attacker_Instance
       User:
         - NAT_Instance
     Users:
@@ -65,7 +63,7 @@ Groups:
         Password: efgh
 
 Scenarios:
-  - Description: "This game teaches the basics of Programming Language Design and Fuzzing"
+  - Description: "This game is an exercise that teaches students about Fuzzing"
     Name: Fuzzing
 
 Clouds:
