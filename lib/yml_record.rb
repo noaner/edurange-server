@@ -2,9 +2,9 @@ module YmlRecord
   # Returns an array of [filename, scenario name, description]
   def self.yml_headers
     output = []
-    Dir.foreach("scenarios-yml/") do |filename|
+    Dir.foreach(Settings.app_path + "scenarios-yml/") do |filename|
       next if filename == '.' or filename == '..' or filename == 'ddos.yml'
-      scenario = YAML.load_file("scenarios-yml/#{filename}")["Scenarios"][0]
+      scenario = YAML.load_file(Settings.app_path + "scenarios-yml/#{filename}")["Scenarios"][0]
       name = scenario["Name"]
       description = scenario["Description"]
       output.push [filename, name, description]
