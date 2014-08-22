@@ -46,6 +46,8 @@ Groups:
         Password: ijkl
   - Name: Attacking_Team
     Access:
+      Administrator:
+        - Attacker_Instance
       User:
         - NAT_Instance
     Users:
