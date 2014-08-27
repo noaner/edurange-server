@@ -331,6 +331,7 @@ module Aws
             PrivatePub.publish_to "/scenarios/#{self.id}", instance_progress: -1
           else
             inst.update_attribute :status, "stopped"
+            inst.driver_id = nil
           end
         end
       end
