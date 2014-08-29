@@ -7,8 +7,6 @@ Roles:
     Packages:
       - build-essential
       - python
-      - flex
-      - bison
       - gdb
     Recipes:
       - sshd_password_login
@@ -18,8 +16,6 @@ Roles:
     Packages:
       - build-essential
       - python
-      - flex
-      - bison
       - gdb
     Recipes:
       - sshd_password_login
