@@ -132,13 +132,6 @@ remote_file "send_fuzz_data" do
   not_if "test -e /tmp/test-file"
 end
 
-remote_file "redserver" do
-  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/redserver"
-  path "/usr/bin/redserver"
-  mode "0765"
-  not_if "test -e /tmp/test-file"
-end
-
 remote_file "fuzzing_rules" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/cat_motd"
   path "/usr/bin/fuzzing_rules"
@@ -181,13 +174,6 @@ end
 remote_file "defender_motd" do
   source "http://ada.evergreen.edu/~weidav02/defender_motd.txt"
   path "/etc/motd.tail"
-  not_if "test -e /tmp/test-file"
-end
-
-remote_file "blueserver" do
-  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/blueserver"
-  path "/usr/bin/blueserver"
-  mode "0765"
   not_if "test -e /tmp/test-file"
 end
 
@@ -398,16 +384,16 @@ file "/tmp/scoring/answers_url" do
   content "<%= scenario.answers_url %>"
 end
 
-remote_file "start_scoring_server" do
-  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/start_scoring_server"
-  path "/usr/bin/start_scoring_server"
+remote_file "equal" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/equal.py"
+  path "/usr/bin/equal"
   mode "0765"
   not_if "test -e /tmp/test-file"
 end
 
-remote_file "whiteserver" do
-  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/whiteserver"
-  path "/usr/bin/whiteserver"
+remote_file "start_scoring_server" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/start_scoring_server"
+  path "/usr/bin/start_scoring_server"
   mode "0765"
   not_if "test -e /tmp/test-file"
 end
