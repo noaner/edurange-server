@@ -171,6 +171,13 @@ remote_file "fuzzing_rules" do
   not_if "test -e /tmp/test-file"
 end
 
+remote_file "update_calc" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/update_calc"
+  path "/usr/bin/update_calc"
+  mode "0765"
+  not_if "test -e /tmp/test-file"
+end
+
 remote_file "defender_motd" do
   source "http://ada.evergreen.edu/~weidav02/defender_motd.txt"
   path "/etc/motd.tail"
@@ -406,6 +413,7 @@ end
 
 script 'start_scoring_server' do
   interpreter "bash"
+  user "root"
   cwd '/usr/bin'
   code <<-EOF
   unzip refcalc.zip
