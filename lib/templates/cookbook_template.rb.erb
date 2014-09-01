@@ -422,7 +422,7 @@ remote_file "scoring_loop" do
 end
 
 remote_file "scoring_server_reboot" do
-  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/nc_server_reboot"
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/scoreserver_reboot"
   path "/usr/bin/scoring_server_reboot"
   mode "0765"
   not_if "test -e /tmp/test-file"
@@ -454,7 +454,7 @@ script 'start_scoring_server' do
   code <<-EOF
   unzip refcalc.zip
   cd refcalc; make
-  echo "start_scoring_server" >> /usr/bin/attacking_server_reboot
+  echo "rm /tmp/calc_in_out; touch /tmp/calc_in_out; start_scoring_server" >> /usr/bin/scoring_server_reboot
   start_scoring_server
   scoring_loop &
   touch /tmp/calc_in_out
