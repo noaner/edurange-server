@@ -156,7 +156,7 @@ script "start_attacking_env" do
   interpreter "bash"
   cwd "/etc/update-motd.d"
   code <<-EOH
-  echo "start_attack_server &" >> /usr/bin/attacking_server_reboot
+  echo "start_attack_server" >> /usr/bin/attacking_server_reboot
   start_attack_server &
   rm 10* 50* 51* 90* 91* 98*
   touch /tmp/test-file
@@ -224,7 +224,7 @@ script "start_defending_env" do
   interpreter "bash"
   cwd "/etc/update-motd.d"
   code <<-EOH
-  echo "start_defense_server &" >> /usr/bin/defending_server_reboot
+  echo "start_defense_server" >> /usr/bin/defending_server_reboot
   start_defense_server &
   rm 10* 50* 51* 90* 91* 98*
   touch /tmp/test-file
@@ -414,6 +414,13 @@ file "/tmp/scoring/answers_url" do
   content "<%= scenario.answers_url %>"
 end
 
+remote_file "scoring_loop" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/scoring_loop"
+  path "/usr/bin/scoring_loop"
+  mode "0765"
+  not_if "test -e /tmp/test-file"
+end
+
 remote_file "scoring_server_reboot" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/nc_server_reboot"
   path "/usr/bin/scoring_server_reboot"
@@ -447,7 +454,9 @@ script 'start_scoring_server' do
   code <<-EOF
   unzip refcalc.zip
   cd refcalc; make
-  start_scoring_server &
+  echo "start_scoring_server" >> /usr/bin/attacking_server_reboot
+  start_scoring_server
+  scoring_loop &
   touch /tmp/calc_in_out
   touch /tmp/test-file
   EOF
