@@ -421,6 +421,13 @@ remote_file "scoring_loop" do
   not_if "test -e /tmp/test-file"
 end
 
+remote_file "scoring_listener" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/scoring_listener"
+  path "/usr/bin/scoring_listener"
+  mode "0765"
+  not_if "test -e /tmp/test-file"
+end
+
 remote_file "scoring_server_reboot" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/scoreserver_reboot"
   path "/usr/bin/scoring_server_reboot"
