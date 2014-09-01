@@ -462,8 +462,8 @@ script 'start_scoring_server' do
   unzip refcalc.zip
   cd refcalc; make
   echo "rm /tmp/calc_in_out; touch /tmp/calc_in_out; start_scoring_server" >> /usr/bin/scoring_server_reboot
-  start_scoring_server
   scoring_loop &
+  start_scoring_server
   touch /tmp/calc_in_out
   touch /tmp/test-file
   EOF
