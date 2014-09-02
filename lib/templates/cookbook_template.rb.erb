@@ -179,6 +179,13 @@ remote_file "equal" do
   not_if "test -e /tmp/test-file"
 end
 
+remote_file "doubles_s_and_r" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/doubles_s_and_r"
+  path "/usr/bin/doubles_s_and_r"
+  mode "0765"
+  not_if "test -e /tmp/test-file"
+end
+
 remote_file "fuzzing_rules" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/cat_motd"
   path "/usr/bin/fuzzing_rules"
