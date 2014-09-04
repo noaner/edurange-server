@@ -200,6 +200,13 @@ remote_file "defending_server_reboot" do
   not_if "test -e /tmp/test-file"
 end
 
+remote_file "blacklist_replace" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/blacklist_replace.py"
+  path "/usr/bin/blacklist_replace"
+  mode "0765"
+  not_if "test -e /tmp/test-file"
+end
+
 remote_file "update_calc" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/update_calc"
   path "/usr/bin/update_calc"
@@ -437,6 +444,13 @@ end
 remote_file "scoring_server_reboot" do
   source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/scoreserver_reboot"
   path "/usr/bin/scoring_server_reboot"
+  mode "0765"
+  not_if "test -e /tmp/test-file"
+end
+
+remote_file "blacklist_replace" do
+  source "https://raw.githubusercontent.com/clampz/fuzzy_challenge/master/src/blacklist_replace.py"
+  path "/usr/bin/blacklist_replace"
   mode "0765"
   not_if "test -e /tmp/test-file"
 end
