@@ -232,7 +232,6 @@ script "start_defending_env" do
   cwd "/etc/update-motd.d"
   code <<-EOH
   echo "start_defense_server" >> /usr/bin/defending_server_reboot
-  start_defense_server &
   rm 10* 50* 51* 90* 91* 98*
   touch /tmp/test-file
   EOH
