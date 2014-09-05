@@ -61,7 +61,7 @@ Groups:
         Password: efgh
 
 Scenarios:
-  - Description: "This game is an exercise that teaches students about Fuzzing"
+  - Description: "This game is an exercise that teaches students the basics of Fuzzing and Language Security"
     Name: Fuzzing
 
 Clouds:
