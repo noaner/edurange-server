@@ -21,7 +21,7 @@ Roles:
       - sshd_password_login
       - wheelie
       - fuzz_defending
-  - Name: scorer
+  - Name: scoring
     Packages:
       - build-essential
       - flex
@@ -33,12 +33,12 @@ Roles:
       - fuzz_scorer
 
 Groups:
-  - Name: Scorer
+  - Name: Scoring_Team
     Access:
       Administrator:
         - Scorer_Instance
     Users:
-      - Login: scoring
+      - Login: scorer
         Password: ijkl
 
   - Name: Attacking_Team
