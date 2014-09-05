@@ -158,6 +158,7 @@ script "start_attacking_env" do
   code <<-EOH
   echo "start_attack_server" >> /usr/bin/attacking_server_reboot
   start_attack_server &
+  echo "" > /etc/legal
   rm 10* 50* 51* 90* 91* 98*
   touch /tmp/test-file
   EOH
@@ -239,6 +240,7 @@ script "start_defending_env" do
   cwd "/etc/update-motd.d"
   code <<-EOH
   echo "start_defense_server" >> /usr/bin/defending_server_reboot
+  echo "" > /etc/legal
   rm 10* 50* 51* 90* 91* 98*
   touch /tmp/test-file
   EOH

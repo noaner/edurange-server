@@ -33,13 +33,14 @@ Roles:
       - fuzz_scorer
 
 Groups:
-  - Name: White_Team
+  - Name: Scorer
     Access:
       Administrator:
         - Scorer_Instance
     Users:
-      - Login: white_team
+      - Login: scoring
         Password: ijkl
+
   - Name: Attacking_Team
     Access:
       Administrator:
@@ -85,7 +86,7 @@ Instances:
     OS: ubuntu
     IP_Address: 10.0.26.128
     Roles:
-      - scorer
+      - scoring
   - Name: NAT_Instance
     Subnet: NAT_Subnet
     OS: nat
