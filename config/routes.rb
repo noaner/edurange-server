@@ -15,12 +15,12 @@ Edurange::Application.routes.draw do
   resources :scenarios do
     member do
       get 'status'
-      get 'boot'
-      get 'dev_boot'
-      get 'unboot'
-      get 'dev_unboot'
+      get 'test_console'
+      get 'boot_toggle'
     end
   end
+
+  get 'scenarios/destroy/:id', to: 'scenarios#destroy'
 
   get 'instructor', to: 'instructor#index'
   get 'instructor/groups'

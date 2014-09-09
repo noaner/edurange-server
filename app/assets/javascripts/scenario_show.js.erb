@@ -5,6 +5,32 @@ var ready = function() {
     PrivatePub.subscribe("/scenarios/" + id, function(data, channel) {
       if (data.scenario_status != undefined) {
         $('#scenario-status').text(data.scenario_status);
+
+        if (data.scenario_status == "booted") {
+          $('#boot-button').html("Unboot");
+          $('#boot-message').html('Scenario has successfully Booted.');
+          $('#scenario-status-dot').show();
+          $('#scenario-status-dot').removeClass().addClass('booted');
+        }
+        else if (data.scenario_status == "stopped") {
+          $('#boot-button').html("Boot");
+          $('#boot-message').html('Scenario has successfully Unbooted.');
+          $('#scenario-status-dot').show();
+          $('#scenario-status-dot').removeClass().addClass('stopped');
+        }
+        else if (data.scenario_status == "boot_failed") {
+          $('#boot-message').html('Scenario has failed to boot.');
+          $('#boot-button').html("Unboot");
+          $('#scenario-status-dot').show();
+          $('#scenario-status-dot').removeClass().addClass('failed');
+        }
+        else if (data.scenario_status == "unboot_failed") {
+          $('#boot-message').html('Scenario has failed to unboot.');
+          $('#boot-button').html("Unboot");
+          $('#scenario-status-dot').show();
+          $('#scenario-status-dot').removeClass().addClass('failed');
+        }
+
       } else if (data.instance_progress == 1) {
         var count = $('#instance-count').text();
         $('#instance-count').text(parseInt(count) + 1);
@@ -27,6 +53,11 @@ var ready = function() {
         $("#console").append(data.log_message + '<br>');
         $('#console').scrollTop($('#console').prop("scrollHeight"));
       }
+
+      if (data.public_ip != undefined) {
+        $('#public-ip').text(data.public_ip);
+      }
+
     });
   }
   

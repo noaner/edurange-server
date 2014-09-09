@@ -9,75 +9,114 @@
 module Provider
   extend ActiveSupport::Concern
   included do
-    enum status: [:stopped, :booting, :booted]
+    enum status: [:stopped, :booting, :booted, :failed, :boot_failed, :unboot_failed, :unbooting, :stopping]
   end
-  # First it calls provider_boot on itself, then it calls "boot"
-  # on all of its child objects, if it has any. Additionally maintains the state
-  # property in the database.
-  # @return [nil]
-  def boot
-    classname = self.class.to_s.downcase
-    if self.stopped?
-      debug "Booting #{classname}..."
-      self.set_booting
-      
-      # Boot
-      self.send("provider_#{classname}_boot")
-      self.set_booted
+
+  def max_attempts; 0; end
+
+  # def boot_provider
+    # classname = self.class.to_s.downcase
+
+    # if self.stopped?
+      # self.send("provider_#{classname}_boot")
 
       # Boot child objects
-      if self.class == Scenario
+      # if self.class == Scenario
         # Scoring.generate_scenario_urls(self)
-        self.clouds.each { |cloud| cloud.boot }
-        self.reload
-        self.provider_scenario_final_setup
-        PrivatePub.publish_to "/scenarios/#{self.id}", scenario_status: "booted"
+        # self.clouds.each do |cloud|
+          # cloud.boot
+          # cloud.delay.boot
+        # end
+
+        # self.reload
+
+        # self.aws_scenario_final_setup
+
+        # PrivatePub.publish_to "/scenarios/#{self.id}", scenario_status: "booted"
+        #self.set_booted
         # Scoring.scenario_scoring(self)
-      elsif self.class == Cloud
-        self.subnets.each { |subnet| subnet.boot }
-      elsif self.class == Subnet
-        self.instances.each do |instance|
-          if instance.roles[0]["recipes"].include?("scoring")
+
+      # elsif self.class == Cloud
+        # self.subnets.each do |subnet|
+          # subnet.boot
+        # end
+
+      # elsif self.class == Subnet
+        # self.instances.each do |instance|
+          # instance.boot
+          # if instance.roles[0]["recipes"].include?("scoring")
             # Scoring.instance_scoring(instance)
-          end
-          instance.boot
-        end
-      end
-    end
+          # end
+        # end
+      # end
+    # end
+  # end
+
+  def boot
+    self.set_booting
+    delay.aws_scenario_boot_new
   end
 
   def unboot
-    debug "Unbooting - #{self.name}"
-    if self.class == Scenario
-      if self.aws_scenario_unboot
-        self.set_stopped
-        PrivatePub.publish_to "/scenarios/#{self.id}", scenario_status: "stopped"
-      else
-        debug "Scenario failed to unboot. try again or unboot manually"
-      end
-    end
+    self.set_unbooting
+    delay.aws_scenario_unboot_new
   end
 
-  # Sets the database state property to "stopped"
-  # @return [nil]
   def set_stopped
     self.status = "stopped"
     self.save!
   end
 
-  # Sets the database state property to "booting"
-  # @return [nil]
+  def set_stopping
+    self.status = "stopping"
+    self.save!
+  end
+
   def set_booting
     self.status = "booting"
     self.save!
   end
 
-  # Sets the database state property to "booted"
-  # @return [nil]
+  def set_boot_failed
+    self.status = "boot_failed"
+    self.save!
+  end
+
   def set_booted
     self.status = "booted"
     self.save!
   end
+
+  def set_unbooting
+    self.status = "unbooting"
+    self.save!
+  end
+
+  def set_unboot_failed
+    self.status = "unboot_failed"
+    self.save!
+  end
+
+  def is_stopped?
+    return self.status == "stopped"
+  end
+
+  def is_booted?
+    return self.status == "booted"
+  end
+
+  def is_failed?
+    return self.status == "unboot_failed" || self.status == "boot_failed"
+  end
+
+  def is_booting?
+    return self.status == "booting"
+  end
+
+  def is_unbooting?
+    return self.status == "unbooting"
+  end
+
   
   # Polls the state in database, waiting to yield to given block until self is booted?
   # If self is not booted?, calls provider_check_status for self.
@@ -85,12 +124,33 @@ module Provider
   def run_when_booted
     until self.booted?
       self.reload
-      sleep 5
+      sleep 1
       classname = self.class.to_s.downcase
       self.run_provider_method("#{classname}_check_status")
     end
     yield
   end
+
+  def wait_until_booted
+    until ['booted', 'boot_failed'].include? self.status
+      sleep 1
+    end
+    if self.status == "boot_failed"
+      return "error"
+    end
+    return nil
+  end
+
+  def wait_until_stopped
+    until ['stopped', 'unboot_failed'].include? self.status
+      sleep 1
+    end
+    if self.status == "unboot_failed"
+      return "error"
+    end
+    return nil
+  end
+
   # Dynamically calls the method provided, routing it through the provider concern specified at runtime by
   # Settings.driver.
   # @param meth The method to call

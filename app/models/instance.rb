@@ -24,9 +24,9 @@ class Instance < ActiveRecord::Base
     # TODO fix
     true
   end
-  def add_progress
-    debug "Adding progress to instance!"
-    PrivatePub.publish_to "/scenarios/#{self.subnet.cloud.scenario.id}", instance_progress: 1
+  def add_progress(val)
+    # debug "Adding progress to instance!"
+    PrivatePub.publish_to "/scenarios/#{self.subnet.cloud.scenario.id}", instance_progress: val
   end
   def debug(message)
     if !message

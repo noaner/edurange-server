@@ -1,7 +1,6 @@
 Roles: 
   - Name: NAT
     Recipes:
-      - sshd_password_login
       - strace
   - Name: players_role
     Packages:

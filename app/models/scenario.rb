@@ -10,6 +10,7 @@ class Scenario < ActiveRecord::Base
     log = self.log
     self.update_attributes(log: log + message + "\n")
     PrivatePub.publish_to "/scenarios/#{self.id}", log_message: message
+    puts "\nMESSAGE:#{self.id},#{message}\n"
   end
 
   def get_subnets

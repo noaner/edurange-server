@@ -51,8 +51,8 @@ class Cloud < ActiveRecord::Base
   end
   # Debug function that adds 1 to this scenario's "cloud_progress", increasing the progress bar on the boot view.
   # @return [nil]
-  def add_progress
-    PrivatePub.publish_to "/scenarios/#{self.scenario.id}", cloud_progress: 1
+  def add_progress(val)
+    PrivatePub.publish_to "/scenarios/#{self.scenario.id}", cloud_progress: val
   end
   # @param message The message to print to the {Scenario}'s boot view
   # @return [nil]

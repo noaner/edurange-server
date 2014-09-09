@@ -7,9 +7,9 @@ Roles:
     Packages: 
       - build-essential
       - gdb
-    Recipes: 
-      - elf
+    Recipes:
       - sshd_password_login
+      - elf
       - wheelie
 
 Groups: 

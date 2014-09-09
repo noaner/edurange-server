@@ -1,0 +1,12 @@
+
+$('#scenario-status').text('<%= @scenario.status %>');
+
+<% if @scenario.is_booting? %>
+  $('#boot-button').html("Booting...");
+  $('#scenario-status-dot').hide()
+  $('#boot-message').html('<%= @boot_message %>')
+<% elsif @scenario.is_unbooting? %>
+  $('#boot-button').html("Unbooting...");
+  $('#scenario-status-dot').hide()
+  $('#boot-message').html('<%= @boot_message %>')
+<% end %>

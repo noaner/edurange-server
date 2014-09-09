@@ -6,63 +6,80 @@
       =@scenario.name
   %div.panel-body
     %dl
-      %dt Status:
-      %dd
-        %span#scenario-status
-          = @scenario.status
-      %dt Description:
-      %dd= @scenario.description
+      %dt 
+        %h4 Description:
+        %dl
+          %dt= @scenario.description
 
     %div.page-header
-      %h3 Boot Progress
+      %h4 Boot Progress
+      %dl
+        %dt.inline Status:
+        %span#scenario-status
+          = @scenario.status
 
-    %dl
-      %dt
-        Clouds Booted:
-      %dd
+        - if @scenario.status == "booted"
+          %span.booted#scenario-status-dot
+            &#9679;
+        - elsif @scenario.status == "boot_failed" or @scenario.status == "unboot_failed"
+          %span.failed#scenario-status-dot
+            &#9679;
+        - else
+          %span.stopped#scenario-status-dot
+            &#9679;
+
+        %br
+        %dt.inline
+          Clouds Booted:
         %span#cloud-count
           = @cloud_booted
         of 
         %span#cloud-total
           = @cloud_count
-      %dt
-        Subnets Booted:
-      %dd
+        %br
+        %dt.inline
+          Subnets Booted:
         %span#subnet-count
           = @subnet_booted
         of
         %span#subnet-total
           = @subnet_count
-
-      %dt
-        Instances Booted:
-      %dd
+        %br
+        %dt.inline
+          Instances Booted:
         %span#instance-count
           = @instance_booted
         of
         %span#instance-total
           = @instance_count
 
-  %h3#console-header Console Log
+  %div.btn-group#scenario-buttons
+    - if @scenario.is_booted? or @scenario.is_failed?
+      - boot_button_text = "Unboot"
+    - elsif @scenario.is_stopped?
+      - boot_button_text = "Boot"
+    - elsif @scenario.is_booting?
+      - boot_button_text = "booting..."
+
+    = link_to boot_button_text, boot_toggle_scenario_path(@scenario), remote:true, class: 'btn btn-primary', id: "boot-button"
+
+    = link_to 'Back', scenarios_path, class: 'btn btn-default'
+    = link_to 'Destroy', @scenario, :method => :delete, class: 'btn btn-default'
+    = link_to 'Test Console', test_console_scenario_path(@scenario), remote:true, class: 'btn btn-default'
+
+    %p
+    %span#boot-message
+
+  %h4#console-header Console Log
   %pre#console
     - until @scenario.log
       = @scenario.log
 
-
-  %div.btn-group#scenario-buttons
-    = link_to 'Boot', boot_scenario_path(@scenario), class: 'btn btn-primary'
-    = link_to 'dev_boot', dev_boot_scenario_path(@scenario), class: 'btn btn-default'
-    = link_to 'Unboot', unboot_scenario_path(@scenario), class: 'btn btn-default'
-    = link_to 'dev_unboot', dev_unboot_scenario_path(@scenario), class: 'btn btn-default'
-    = link_to 'Edit', edit_scenario_path(@scenario), class: 'btn btn-default'
-    = link_to 'Back', scenarios_path, class: 'btn btn-default'
-    = link_to 'Destroy', @scenario, :method => :delete, class: 'btn btn-default'
-
-  %h3 Instructions
+  %h4 Instructions
   %dl
     = @scenario.instructions
 
-  %h3 Scoring
+  %h4 Scoring
   %dl
     = link_to 'Instructor View', '/scoring/instructor/' + @scenario.id.to_s
     \- shows questions and answers
@@ -70,7 +87,7 @@
     = link_to 'Student View', '/scoring/student/' + @scenario.id.to_s
     \- shows only questions, lets you answer them 
 
-  %h3 Resources
+  %h4 Resources
   - @scenario.clouds.each do |cloud|
     %dl
       Cloud: 
@@ -95,10 +112,11 @@
               =instance.ip_address
               - if instance.internet_accessible
                 , Public IP:
-                - if instance.provider_instance_public_ip
-                  =instance.provider_instance_public_ip
-                - else
-                  Not Set
+                %span#public-ip
+                  - if instance.provider_instance_public_ip
+                    =instance.provider_instance_public_ip
+                  - else
+                    Not Set
               %p
               - instance.groups.each do |group|
                 %dl

@@ -1,5 +1,5 @@
 class ScenariosController < ApplicationController
-  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :boot, :dev_boot, :unboot, :dev_unboot, :status]
+  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot_toggle, :test_console]
 
   # GET /scenarios
   # GET /scenarios.json
@@ -50,49 +50,24 @@ class ScenariosController < ApplicationController
     @instance_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.select { |instance| instance.booted? }.size
     @instance_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.size
   end
-  
-  def boot
-    if @scenario.booted?
-      notice = "Scenario is booted. Monitor output below."
-    elsif @scenario.booting?
-      notice = "Scenario is booting. Monitor output below."
-    else
-      @scenario.delay.boot
-      notice = "Scenario is booting. Monitor output below."
-    end
 
-    redirect_to @scenario, notice: notice
-  end
-
-  def dev_boot
-    if @scenario.booted?
-      notice = "Scenario is booted. Monitor output below."
-    elsif @scenario.booting?
-      notice = "Scenario is booting. Monitor output below."
-    else
+  def boot_toggle
+    if @scenario.status == "stopped"
       @scenario.boot
-      notice = "Scenario is booting. Monitor output below."
-    end
-
-    redirect_to @scenario, notice: notice
-  end
-
-  def unboot
-    notice = "Scenario is unbooting. Monitor output below."
-    if @scenario.booted?
-      @scenario.delay.unboot
-    end
-    redirect_to @scenario, notice: notice
-  end
-
-  def dev_unboot
-    notice = "Scenario is unbooting. Monitor output below."
-    if @scenario.booted?
+      # @booting = true
+      @boot_message = "Scenario is booting. Monitor output below."
+    elsif @scenario.status == "booted" or @scenario.status == "unboot_failed" or @scenario.status == "boot_failed"
       @scenario.unboot
+      # @unbooting = true
+      @boot_message = "Scenario is unbooting. Monitor output below."
     end
-    redirect_to @scenario, notice: notice
-  end
 
+    respond_to do |format|
+      format.js { render 'scenarios/boot.js.erb', :layout => false }
+      format.html { redirect_to @scenario, notice: notice }
+    end
+  end
+  
   # GET /scenarios/new
   def new
     @scenario = Scenario.new
@@ -162,10 +137,19 @@ class ScenariosController < ApplicationController
     end
     @scenario.destroy
 
-    @scenario.destroy
     respond_to do |format|
       format.html { redirect_to scenarios_url, notice: 'Scenario was successfully destroyed.' }
       format.json { head :no_content }
+    end
+  end
+
+  def test_console
+    @scenario = Scenario.find(params[:id])
+    @scenario.delay.debug "-- Test Console Print --"
+    redirect_to @scenario, notice: "Testing Console. Output should appear in Console Log. If no output withing a few seconds Console Log is broken."
+    
+    respond_to do |format|
+      format.json {  }
     end
   end
 

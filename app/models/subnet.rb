@@ -13,9 +13,9 @@ class Subnet < ActiveRecord::Base
     true
   end
 
-  def add_progress
-    debug "Adding progress to subnet"
-    PrivatePub.publish_to "/scenarios/#{self.cloud.scenario.id}", subnet_progress: 1
+  def add_progress(val)
+    # debug "Adding progress to subnet"
+    PrivatePub.publish_to "/scenarios/#{self.cloud.scenario.id}", subnet_progress: val
   end
   def debug(message)
     log = self.cloud.scenario.log
