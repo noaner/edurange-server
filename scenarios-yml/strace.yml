@@ -2,6 +2,7 @@ Roles:
   - Name: NAT
     Recipes:
       - strace
+      - sshd_password_login
   - Name: players_role
     Packages:
       - build-essential
