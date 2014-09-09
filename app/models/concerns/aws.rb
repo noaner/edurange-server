@@ -212,6 +212,7 @@ module Aws
 
 
     # wait for Instance to become available
+    tries = 0
     begin
       cnt = 0
       until ec2instance.status == :running
@@ -225,6 +226,13 @@ module Aws
           return
         end
       end
+    rescue AWS::EC2::Errors::InvalidInstanceID
+      if tries > 3
+        raise
+        return
+      end
+      tries += 1
+      retry
     rescue
       raise
       return
