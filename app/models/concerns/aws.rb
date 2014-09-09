@@ -232,6 +232,7 @@ module Aws
         return
       end
       tries += 1
+      sleep 2
       retry
     rescue
       raise
