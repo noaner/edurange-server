@@ -137,7 +137,7 @@ module Aws
     scenario.status = "boot_failed"
     scenario.save
 
-    PrivatePub.publish_to "/scenarios/#{scenario.id}", scenario_status: "unboot_failed"
+    PrivatePub.publish_to "/scenarios/#{scenario.id}", scenario_status: "boot_failed"
 
     debug '\n---- Boot ERROR ---' + error.class.to_s + ' - ' + error.message.to_s + error.backtrace.join("\n")
     time = Time.new
@@ -169,6 +169,7 @@ module Aws
     end
 
     # create EC2 Instance
+    tries = 0
     debug "    creating - EC2 Instance"
     begin
       ec2instance = AWS::EC2::InstanceCollection.new.create(
@@ -183,6 +184,14 @@ module Aws
       # wrong instance type
       raise
       return
+    rescue AWS::EC2::Errors::InvalidSubnetID::NotFound => e
+      tries += 1
+      if tries > 3
+        raise
+        return
+      end
+      sleep 2
+      retry
     rescue => e
       raise
       return
