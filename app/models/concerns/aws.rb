@@ -227,12 +227,12 @@ module Aws
         end
       end
     rescue AWS::EC2::Errors::InvalidInstanceID
-      if tries > 3
+      if tries > 5
         raise
         return
       end
       tries += 1
-      sleep 2
+      sleep 3
       retry
     rescue
       raise
