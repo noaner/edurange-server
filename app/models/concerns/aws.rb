@@ -192,7 +192,7 @@ module Aws
       end
       sleep 2
       retry
-    rescue => e
+    rescue
       raise
       return
     end
@@ -278,9 +278,10 @@ module Aws
       debug "    [x] associated - EC2 Elastip IP with EC2 Instance #{ec2instance.id}"
 
       # accept packets coming in
-      debug "    accepting - EC2 Instance NIC packets"
+      debug "    accepting - EC2 Instance NIC packets, disabe source dest checks"
       begin
         ec2instance.associate_elastic_ip(ec2eip)
+        ec2instance.network_interfaces.first.source_dest_check = false
       rescue
         raise
         return
@@ -458,8 +459,8 @@ module Aws
       # create Route table
       debug "creating - EC2 RouteTable for #{subnet.driver_id}"
       begin
-        ec2route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: self.clouds.first.driver_id)
-      rescue => e
+        ec2route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: subnet.cloud.driver_id)
+      rescue
         raise
         return
       end
@@ -468,7 +469,7 @@ module Aws
       debug "assigning - EC2 Route Table #{ec2route_table.id} to EC2 Subnet #{subnet.driver_id}"
       begin
         AWS::EC2.new.subnets[subnet.driver_id].route_table = ec2route_table
-      rescue => e
+      rescue
         raise
         return
       end
@@ -478,16 +479,17 @@ module Aws
         debug "creating - Internet Accessible RouteTable for EC2 Subnet #{subnet.driver_id}"
         begin
           ec2route_table.create_route("0.0.0.0/0", { internet_gateway: ec2cloud.internet_gateway} )
-        rescue => e
+        rescue
           raise
           return
         end
         debug "[x] created - Internet Accessible Route for EC2 Subnet #{subnet.driver_id}"
       else
-        debug "creating - Route for EC2 Subnet #{subnet.driver_id}"
+        debug "creating - Route for EC2 Subnet #{subnet.driver_id} to NAT"
         begin
-          ec2route_table.create_route("0.0.0.0/0", { instance: self.get_instances.select {|inst| inst.internet_accessible == true}.first.driver_id } )
-        rescue => e
+          puts "\nNAT:#{subnet.cloud.scenario.get_instances.select{|i| i.internet_accessible}.first.driver_id}"
+          ec2route_table.create_route("0.0.0.0/0", { instance: subnet.cloud.scenario.get_instances.select{|i| i.internet_accessible}.first.driver_id } )
+        rescue
           raise
           return
         end
