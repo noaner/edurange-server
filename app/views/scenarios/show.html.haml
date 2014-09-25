@@ -145,18 +145,3 @@
                   - else
                     Not Set
               %p
-              - instance.groups.each do |group|
-                %dl
-                  Group:
-                  %b=group.name
-                  %p
-                  - group.players.each do |player|
-                    %dl
-                      Player:
-                      login: 
-                      = "'" + player.login + "'"
-                      , password:
-                      = "'" + player.password + "'"
-                  %p
-
-
