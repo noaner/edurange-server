@@ -113,15 +113,17 @@ module YmlRecord
       group.name = yaml_group["Name"]
       group.save!
 
-      users.each do |user|
-        login = user["Login"]
-        password = user["Password"]
+      if users
+        users.each do |user|
+          login = user["Login"]
+          password = user["Password"]
 
-        player = group.players.new
-        player.login = login
-        player.password = password
-        player.group = group
-        player.save!
+          player = group.players.new
+          player.login = login
+          player.password = password
+          player.group = group
+          player.save!
+        end
       end
 
       # Do questions

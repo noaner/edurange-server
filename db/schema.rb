@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140821162813) do
+ActiveRecord::Schema.define(version: 20140925022955) do
 
   create_table "answers", force: true do |t|
     t.integer  "student_id"
@@ -105,6 +105,7 @@ ActiveRecord::Schema.define(version: 20140821162813) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "user_id"
+    t.integer  "student_group_id"
   end
 
   add_index "players", ["group_id"], name: "index_players_on_group_id"

@@ -1,5 +1,5 @@
 class ScenariosController < ApplicationController
-  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot_toggle, :test_console]
+  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot_toggle, :test_console, :modify_players]
 
   # GET /scenarios
   # GET /scenarios.json
@@ -49,6 +49,10 @@ class ScenariosController < ApplicationController
     @subnet_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.size
     @instance_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.select { |instance| instance.booted? }.size
     @instance_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.size
+  
+    # get studentGroups
+    @student_groups = StudentGroup.where("instructor_id = #{current_user.id} AND student_id = #{current_user.id}")
+
   end
 
   def boot_toggle
@@ -151,6 +155,29 @@ class ScenariosController < ApplicationController
     respond_to do |format|
       format.json {  }
     end
+  end
+
+  def modify_players
+    if @scenario.status == "booted"
+      redirect_to @scenario, notice: "Can not modify players while scenario is booted"
+      return
+    end
+    group = Group.find(params[:group])
+    StudentGroup.where(name: params[:studentGroupName]).each do |sg|
+      if params[:add]
+        password = SecureRandom.base64 8
+        group.players.new(
+          login: sg.user.name, 
+          password: password, 
+          user_id: sg.user.id, 
+          student_group_id: sg.id).save
+      elsif params[:remove]
+        if player = group.players.find_by(user_id: sg.user.id)
+          player.destroy
+        end
+      end
+    end
+    redirect_to @scenario
   end
 
   private

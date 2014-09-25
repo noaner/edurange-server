@@ -17,6 +17,7 @@ Edurange::Application.routes.draw do
       get 'status'
       get 'test_console'
       get 'boot_toggle'
+      post 'modify_players'
     end
   end
 
@@ -41,6 +42,11 @@ Edurange::Application.routes.draw do
   get 'scoring/instructor/:scenario', to: 'scoring#instructor'
   get 'scoring/student/:scenario', to: 'scoring#student'
   post 'scoring/answer_question/:scenario/:question', to: 'scoring#answer_question'
+
+  get 'documentation', to: 'documentation#index'
+  namespace :documentation do
+    get 'strace'
+  end
 
   root :to => "home#index"
   devise_for :users, :controllers => {:registrations => "registrations"}
