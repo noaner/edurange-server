@@ -159,7 +159,7 @@ class ScenariosController < ApplicationController
   end
 
   def modify_players
-    if @scenario.status == "booted"
+    if @scenario.status != "stopped"
       redirect_to @scenario, notice: "Can not modify players while scenario is booted"
       return
     end
