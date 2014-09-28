@@ -164,7 +164,8 @@ class ScenariosController < ApplicationController
       return
     end
     group = Group.find(params[:group])
-    student_group = StudentGroup.find_by_name(params[:studentGroupName])
+    # student_group = StudentGroup.find_by_name(params[:studentGroupName])
+    student_group = StudentGroup.where("name = '#{params[:studentGroupName]}' AND user_id = #{current_user.id}").first
     student_group.student_group_users.each do |student_group_user|
       if params[:add]
         if !group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
