@@ -27,7 +27,7 @@ Edurange::Application.routes.draw do
   post 'instructor/student_group_new'
   post 'instructor/student_group_assign'
   get 'instructor/student_group_delete'
-  get 'instructor/student_group_remove'
+  get 'instructor/student_group_delete'
 
   get 'student_groups', to: 'student_groups#index'
   post 'student_groups/new'
