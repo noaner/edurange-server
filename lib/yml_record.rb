@@ -111,6 +111,7 @@ module YmlRecord
 
       group = Group.new
       group.name = yaml_group["Name"]
+      group.scenario_id = scenario.id
       group.save!
 
       if users

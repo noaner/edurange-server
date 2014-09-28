@@ -3,6 +3,10 @@ class StudentController < ApplicationController
   before_action :authenticate_student
 
   def index
+    @players = Player.where(user_id: current_user.id)
+  end
+
+  def index2
     @scenarios = []
     @instances = []
     @login_info = {}

@@ -43,6 +43,7 @@ class ScenariosController < ApplicationController
   # GET /scenarios/1
   # GET /scenarios/1.json
   def show
+    @user = User.find(current_user.id)
     @cloud_booted = @scenario.clouds.select { |cloud| cloud.booted? }.size
     @cloud_count = @scenario.clouds.size
     @subnet_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.select { |subnet| subnet.booted? }.size
@@ -163,16 +164,20 @@ class ScenariosController < ApplicationController
       return
     end
     group = Group.find(params[:group])
-    StudentGroup.where(name: params[:studentGroupName]).each do |sg|
+    student_group = StudentGroup.find_by_name(params[:studentGroupName])
+    student_group.student_group_users.each do |student_group_user|
       if params[:add]
-        password = SecureRandom.base64 8
-        group.players.new(
-          login: sg.user.name, 
-          password: password, 
-          user_id: sg.user.id, 
-          student_group_id: sg.id).save
+        if !group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
+        # if !group.players.find_by_user_id(student_group_user.user_id)
+          group.players.new(
+            login: "student_#{student_group_user.user.id}",
+            password: SecureRandom.base64(7),
+            user_id: student_group_user.user.id,
+            student_group_id: student_group_user.student_group.id
+          ).save
+        end
       elsif params[:remove]
-        if player = group.players.find_by(user_id: sg.user.id)
+        if player = group.players.find_by_user_id(student_group_user.user.id)
           player.destroy
         end
       end

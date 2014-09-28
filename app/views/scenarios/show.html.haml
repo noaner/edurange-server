@@ -19,23 +19,31 @@
             = "Team: " + group.name
             &nbsp&nbsp&nbsp
           = form_tag modify_players_scenario_path(group: group), class: "inline" do
-            = select_tag "studentGroupName", options_for_select(@student_groups.pluck(:name))
+            = select_tag "studentGroupName", options_for_select(@user.student_groups.pluck(:name))
             = submit_tag "add", name: "add"
             = submit_tag "remove", name: "remove"
           %dl
             %table
               %tr
+                %th Name
                 %th Login
                 %th Password
                 %th Student Group
+                %th Answers
               - group.players.each do |player|
                 %tr
                   - if player.login != User.find(current_user.id).name
+                    - if player.user_id
+                      %td= User.find(player.user_id).name
+                    - else
+                      %td
                     %td= player.login
                     %td= player.password
                     - if player.student_group
                       %td= player.student_group.name
+                      %td= link_to 'answers', "/scoring/instructor_student/#{@scenario.id}/#{player.user_id}"
                     - else
+                      %td
                       %td
 
     %div.page-header
@@ -145,3 +153,6 @@
                   - else
                     Not Set
               %p
+  / %h4 Documentation
+  / %dl
+  /   = link_to 'here', "/documentation/scenarios/#{@scenario.name}"

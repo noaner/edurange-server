@@ -10,19 +10,65 @@
   %br
   Click on the 'SCENARIOS' button on the top of the page to create a new Scenario.
 %p
-%div
-  %h3 Student Groups:
-  %dl
-    - if @student_groups.size == 0
-      = "none"
-    - @student_groups.each do |student_group|
-      %dt
-      %b Name:
-      = student_group.name
-      %b Size:
-      = @student_groups_size[student_group.name]
+%h3 Registration Code:
+%dl
+  = @user.registration_code
+
+%h3 Student Groups:
+%dl
+  = form_tag '/instructor/student_group_new' do
+    %b.inline New Student Group:
+    = text_field '', :name, :style => "width:200px;"
+    = submit_tag "create"
+
+  - @user.student_groups.each do |student_group|
+    - if student_group.name == "All"
+      = form_tag 'instructor/student_group_assign' do
+        %b= student_group.name
+        %table
+          %tr
+            %th Name
+            %th Email
+            %th Add
+          - student_group.student_group_users.each do |student_group_user|
+            %tr
+              %td= student_group_user.user.name
+              %td= student_group_user.user.email
+              %td
+                = select_tag 'selects[' + student_group_user.user.id.to_s + ']', options_for_select(@user.student_groups.pluck(:name).select{|a| a != "All"}.append(""), "")
+          %tr
+            %td
+            %td
+            %td= submit_tag 'Add All'
+        %p
+        
+    - else
+      %b= student_group.name
+      = link_to 'delete', instructor_student_group_delete_path(student_group_id: student_group.id)
+
+      %table
+        %tr
+          %th Name
+          %th Email
+          %th
+        - student_group.student_group_users.each do |student_group_user|
+          %tr
+            %td= student_group_user.user.name
+            %td= student_group_user.user.email
+            %td= link_to 'remove', instructor_student_group_remove_path(student_group_user: student_group_user)
     %p
-    = link_to 'edit', student_groups_path, class: 'btn btn-primary'
+
+  / %dl
+  /   - if @student_groups.size == 0
+  /     = "none"
+  /   - @student_groups.each do |student_group|
+  /     %dt
+  /     %b Name:
+  /     = student_group.name
+  /     %b Size:
+  /     = @student_groups_size[student_group.name]
+  /   %p
+  /   = link_to 'edit', student_groups_path, class: 'btn btn-primary'
 
 %div
   %h3 Account Information: 

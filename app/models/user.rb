@@ -4,7 +4,10 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
   enum role: [:user, :vip, :admin, :instructor, :student]
+  # attr_accessor :registration_code
   after_initialize :set_default_role, :if => :new_record?
+
+  has_many :student_groups
 
   def set_default_role
     self.role ||= :student

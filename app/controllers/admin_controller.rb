@@ -12,6 +12,9 @@ class AdminController < ApplicationController
         @error_message = "User is already an instructor"
       else
         user.set_instructor_role
+        user.update_attribute :registration_code, SecureRandom.base64(6)
+        user.student_groups.new(name: "default")
+        user.save
       end
     else
       flash[:notice] = "No user found with that email"

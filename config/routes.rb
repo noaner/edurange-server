@@ -24,7 +24,10 @@ Edurange::Application.routes.draw do
   get 'scenarios/destroy/:id', to: 'scenarios#destroy'
 
   get 'instructor', to: 'instructor#index'
-  get 'instructor/groups'
+  post 'instructor/student_group_new'
+  post 'instructor/student_group_assign'
+  get 'instructor/student_group_delete'
+  get 'instructor/student_group_remove'
 
   get 'student_groups', to: 'student_groups#index'
   post 'student_groups/new'
@@ -42,11 +45,10 @@ Edurange::Application.routes.draw do
   get 'scoring/instructor/:scenario', to: 'scoring#instructor'
   get 'scoring/student/:scenario', to: 'scoring#student'
   post 'scoring/answer_question/:scenario/:question', to: 'scoring#answer_question'
+  get 'scoring/instructor_student/:scenario/:user', to: 'scoring#instructor_student'
 
   get 'documentation', to: 'documentation#index'
-  namespace :documentation do
-    get 'strace'
-  end
+  get 'documentation/scenarios/:id', to: 'documentation#show'
 
   root :to => "home#index"
   devise_for :users, :controllers => {:registrations => "registrations"}
