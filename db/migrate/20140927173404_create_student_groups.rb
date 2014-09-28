@@ -5,6 +5,5 @@ class CreateStudentGroups < ActiveRecord::Migration
       t.string      :name, null: false, default: ""
       t.timestamps
     end
-    add_index :student_groups, :name, unique: true
   end
 end
