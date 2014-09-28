@@ -34,4 +34,9 @@ class InstructorController < ApplicationController
     redirect_to '/instructor', notice: "Student Removed from Student Group"
   end
 
+  def student_group_delete
+    StudentGroup.find(params[:student_group_id]).delete
+    redirect_to '/instructor', notice: "Student Group deleted."
+  end
+
 end
