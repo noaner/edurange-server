@@ -30,6 +30,8 @@
                 %th Password
                 %th Student Group
                 %th Answers
+                %th Answered
+                %th Score
               - group.players.each do |player|
                 %tr
                   - if player.login != User.find(current_user.id).name
@@ -42,6 +44,21 @@
                     - if player.student_group
                       %td= player.student_group.name
                       %td= link_to 'answers', "/scoring/instructor_student/#{@scenario.id}/#{player.user_id}"
+                      %td
+                        - cnt = 0
+                        - total = 0
+                        - correct = 0
+                        - @scenario.questions.each do |question|
+                          - answers = question.answers.where("student_id = #{player.user_id}")
+                          - if answers.size > 0
+                            - cnt += 1
+                          - answers.each do |answer|
+                            - if answer.correct
+                              - correct += 1
+                          - total += 1
+                        = "#{cnt}/#{total}"
+                      %td
+                        = "#{correct}/#{total}"
                     - else
                       %td
                       %td
