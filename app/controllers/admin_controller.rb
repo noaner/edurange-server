@@ -13,7 +13,7 @@ class AdminController < ApplicationController
       else
         user.set_instructor_role
         user.update_attribute :registration_code, SecureRandom.base64(6)
-        user.student_groups.new(name: "default")
+        user.student_groups.new(name: "All")
         user.save
       end
     else
