@@ -171,13 +171,15 @@ module Aws
     # create EC2 Instance
     tries = 0
     debug "    creating - EC2 Instance"
+    instance_type_tries = 0
+    instance_type = "t2.micro"
     begin
       ec2instance = AWS::EC2::InstanceCollection.new.create(
         image_id: aws_instance_ami, # ami_id string of os image
         private_ip_address: instance.ip_address, # ip string
         key_name: Settings.ec2_key, # keypair string
         user_data: cloud_init, # startup data
-        instance_type: "t1.micro",
+        instance_type: instance_type,
         subnet: instance.subnet.driver_id
       )
     rescue AWS::EC2::Errors::InvalidParameterCombination => e 
@@ -192,6 +194,15 @@ module Aws
       end
       sleep 2
       retry
+    rescue AWS::EC2::Errors::InsufficientInstanceCapacity => e
+      if instance_type_tries < 1
+        instance_type = "t1.micro"
+        instance_type_tries += 1
+        retry
+      else
+        raise
+        return
+      end
     rescue
       raise
       return
