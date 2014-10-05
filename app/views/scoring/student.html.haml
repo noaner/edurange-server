@@ -1,23 +1,34 @@
-%h3 Scoring
-Correct scores will show in green, incorrect in red.
-
-%h3= @scenario.name
+%h3= "#{@scenario.name} - Questions"
 
 - @scenario.questions.each_with_index do |question, index|
   = (index + 1).to_s + "." + question.question_text
   %dl
-    - correct = question.answers.where("student_id = #{current_user.id} AND correct = 't'")
-    - incorrect = question.answers.where("student_id = #{current_user.id} AND correct = 'f'")
-    - correct.each do |answer|
-      %dt
-        %span.correct
+    - if question.kind == "StringMatch"
+      - correct = question.answers.where("student_id = #{current_user.id} AND correct = 't'")
+      - incorrect = question.answers.where("student_id = #{current_user.id} AND correct = 'f'")
+      - correct.each do |answer|
+        %dt
+          %span.correct
+            = answer.answer_text
+      %p
+      - incorrect.each do |answer|
+        %dt
+          %span.incorrect
+            = answer.answer_text
+      %p
+      = form_tag '/scoring/answer_question/' + @scenario.id.to_s + '/' + question.id.to_s do
+        = text_field_tag :answer_text
+        = submit_tag "submit"
+
+    - elsif question.kind == "Essay"
+      %div{ id: "question-#{question.id}-answer"}
+        - if answer = question.answers.first
           = answer.answer_text
-    %p
-    - incorrect.each do |answer|
-      %dt
-        %span.incorrect
-          = answer.answer_text
-  %p
-  = form_tag '/scoring/answer_question/' + @scenario.id.to_s + '/' + question.id.to_s do
-    = text_field_tag :answer_text
-    = submit_tag "submit"
+      %p
+      
+      = form_tag '/scoring/answer_open_question', id: "question-#{question.id}-edit-form", class: "hidden", remote:true do
+        = hidden_field_tag :question, question.id
+        = text_area_tag :answer_area, nil, rows: 6
+        = submit_tag "save"
+
+      %input{ id: "question-#{question.id}-edit-button", type: "submit", value: "edit", onclick: "question_edit(#{question.id})"}

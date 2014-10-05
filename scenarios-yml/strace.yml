@@ -97,29 +97,5 @@ Examples:
     Answer:
 
 Questions:
-  - Question: What is the second directory your shell looks in for executables?
-    Answer: /usr/local/bin | /usr/local/bin/
-
-  - Question: Where are executalbes which are needed in single user mode and to bring the system up or repair it located?
-    Answer: /bin | /bin/
-
-  - Question: Where is the strace program located?
-    Answer: /usr/bin | /usr/bin/ | /usr/bin/strace | /usr/bin/strace
-
-  - Question: What option in strace counts the number of syscalls?
-    Answer: -c
-
-  - Question: How many calls to 'open' does '/tmp/strace0' make?
-    Answer: 158
-
-  - Question: The file "/tmp/strace1" contains output from strace. What is the name of the executable used in the trace.
-    Answer: cat | /bin/cat | /bin/cat/
-
-  - Question: "The file '/tmp/strace2' contains output from strace. This time the 'execv' system call information has been removed. What is the name of the executable used in the trace. Hint: look for unique system calls. Also 'open' and 'write'system calls often provide valuable information for identifying an executable. Use grep too filter the strace file."
-    Answer: chmod | /bin/chmod | /bin/chmod
-
-  - Question: Same question as above for "/tmp/strace3".
-    Answer: telnet | /bin/telnet | /bin/telnet/
-
-  - Question: The file "/tmp/strace_mixed" contains non-sequential interleaved output from two different strace outputs. What are the two executables traced?
-    Answer: ls | /bin/ls | /bin/ls/ && passwd | /bin/passwd | /bin/passwd/
+  - Question: Why is strace important?
+    Type: Essay

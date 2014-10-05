@@ -1,0 +1,4 @@
+$("<%= "#question-#{@question.id}-answer" %>").removeClass("hidden");
+$("<%= "#question-#{@question.id}-answer" %>").text("<%= @answer.answer_text %>");
+$("<%= "#question-#{@question.id}-edit-form" %>").addClass("hidden");
+$("<%= "#question-#{@question.id}-edit-button" %>").removeClass("hidden");

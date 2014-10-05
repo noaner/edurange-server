@@ -132,7 +132,10 @@ module YmlRecord
         questions.each do |yml_question|
           question = scenario.questions.new
           question.question_text = yml_question["Question"]
-          question.answer_text = yml_question["Answer"]
+          question.kind = yml_question["Type"]
+          if question.kind == "StringMatch"
+            question.answer_text = yml_question["Answer"]
+          end
           question.save!
         end
       end
