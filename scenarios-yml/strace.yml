@@ -3,6 +3,7 @@ Roles:
     Recipes:
       - strace
       - sshd_password_login
+
   - Name: players_role
     Packages:
       - build-essential
@@ -18,7 +19,7 @@ Groups:
   - Name: Player
     Access: 
       Administrator: 
-        - Player_Instance
+        - NAT_Instance
       User: 
         - NAT_Instance
     Users:
@@ -37,10 +38,6 @@ Clouds:
     Scenario: Strace
 
 Subnets: 
-  - Name: Player_Subnet
-    Cloud: Cloud_1
-    CIDR_Block: 10.0.128.0/24
-
   - Name: NAT_Subnet
     Cloud: Cloud_1
     CIDR_Block: 10.0.129.0/24
@@ -54,47 +51,7 @@ Instances:
     Internet_Accessible: true
     Roles: 
       - NAT
-
-  - Name: Player_Instance
-    Subnet: Player_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.128.4
-    Roles: 
       - players_role
-
-Examples:
-  - Example: View man page for strace.
-    Answer: man strace
-
-  - Example:
-    Answer:
-
-  - Example:
-    Answer:
-
-  - Example:
-    Answer:
-
-  - Example:
-    Answer:
-
-  - Example:
-    Answer:
-
-  - Example:
-    Answer:
-
-  - Example:
-    Answer:
-
-  - Example:
-    Answer:
-
-  - Example:
-    Answer:
-
-  - Example:
-    Answer:
 
 Questions:
   - Question: Why is strace important?

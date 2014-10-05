@@ -11,6 +11,12 @@
         %dl
           %dt= @scenario.description
 
+    %dl
+      %dt
+        %h4 Questions:
+        %dl
+          %dt= link_to 'questions', '/scoring/instructor/' + @scenario.id.to_s
+
     %div.page-header
       %h4 Players
       %dl
@@ -130,13 +136,13 @@
   %dl
     = @scenario.instructions
 
-  %h4 Scoring
-  %dl
-    = link_to 'Instructor View', '/scoring/instructor/' + @scenario.id.to_s
-    \- shows questions and answers
-    %p
-    = link_to 'Student View', '/scoring/student/' + @scenario.id.to_s
-    \- shows only questions, lets you answer them 
+  / %h4 Scoring
+  / %dl
+  /   = link_to 'Instructor View', '/scoring/instructor/' + @scenario.id.to_s
+  /   \- shows questions and answers
+  /   %p
+  /   = link_to 'Student View', '/scoring/student/' + @scenario.id.to_s
+  /   \- shows only questions, lets you answer them 
 
   %h4 Resources
   - @scenario.clouds.each do |cloud|

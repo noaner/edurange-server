@@ -1,8 +1,4 @@
-%h3= @student.name
-%h3 Scoring
-Correct scores will show in green, incorrect in red.
-
-%h3= @scenario.name
+%h3= "#{@scenario.name} - #{@student.name}"
 
 - @scenario.questions.each_with_index do |question, index|
   = (index + 1).to_s + "." + question.question_text
