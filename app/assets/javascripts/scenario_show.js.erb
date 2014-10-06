@@ -52,6 +52,8 @@ var ready = function() {
       } else if (data.log_message != undefined) {
         $("#console").append(data.log_message + '<br>');
         $('#console').scrollTop($('#console').prop("scrollHeight"));
+      } else if (data.answered != undefined) {
+        $('#answered-student-' + data.answered[0]).text(data.answered[1]);
       }
 
       if (data.public_ip != undefined) {

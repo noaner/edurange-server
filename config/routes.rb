@@ -47,6 +47,7 @@ Edurange::Application.routes.draw do
   post 'scoring/answer_question/:scenario/:question', to: 'scoring#answer_question'
   get 'scoring/instructor_student/:scenario/:user', to: 'scoring#instructor_student'
   post 'scoring/answer_open_question'
+  get 'scoring/answer_dump'
 
   get 'documentation', to: 'documentation#index'
   get 'documentation/scenarios/:id', to: 'documentation#show'

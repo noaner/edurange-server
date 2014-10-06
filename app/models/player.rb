@@ -3,6 +3,7 @@ class Player < ActiveRecord::Base
   belongs_to :group
   validates_presence_of :group
   belongs_to :student_group
+  belongs_to :user
 
    def password_hash
      UnixCrypt::SHA512.build(self.password)

@@ -14,5 +14,6 @@
     /   %dt
     /     %span.incorrect
     /       = answer.answer_text
-    = question.answers.first.answer_text.gsub("\n", "<br>").remove("\r").html_safe
+    - if question.answers.where("student_id = #{@student.id}").first
+      = question.answers.where("student_id = #{@student.id}").first.answer_text.gsub("\n", "<br>").remove("\r").html_safe
   %p

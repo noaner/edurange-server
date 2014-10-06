@@ -5,6 +5,7 @@ class Scenario < ActiveRecord::Base
   has_many :clouds, dependent: :delete_all
   has_many :questions, dependent: :destroy
   validates_presence_of :name, :description
+  belongs_to :user
 
   def debug(message)
     log = self.log

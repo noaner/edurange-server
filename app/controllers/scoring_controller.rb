@@ -5,12 +5,12 @@ class ScoringController < ApplicationController
     if !user.is_instructor?
       return
     end
-    
     @scenario = Scenario.find(params[:scenario])
   end
 
   def student
     @scenario = Scenario.find(params[:scenario])
+    @user = User.find(current_user.id)
   end
 
   def instructor_student
@@ -40,18 +40,48 @@ class ScoringController < ApplicationController
   def answer_open_question
 
     @question = Question.find(params[:question])
-    if @question.answers.first
-      @answer = @question.answers.first
+    if params[:answer_area] == ''
+      @question.answers.where("student_id = #{current_user.id}").destroy_all
+      cnt = 0
     else
-      @answer = @question.answers.new
+      if @question.answers.where("student_id = #{current_user.id}").first
+        @answer = @question.answers.where("student_id = #{current_user.id}").first
+      else
+        @answer = @question.answers.new
+      end
+      @answer.answer_text = params[:answer_area]
+      @answer.student_id = current_user.id
+      @answer.save
+      cnt = @question.scenario.questions.select{ |q| q.answers && q.answers.where("student_id = #{current_user.id}") }.size
     end
 
-    @answer.answer_text = params[:answer_area]
-    @answer.save
+    total = @question.scenario.questions.select{ |q| q.answers }.size
+    PrivatePub.publish_to "/scenarios/#{@question.scenario.id}", answered: [current_user.id, "#{cnt}/#{total}"]
 
     respond_to do |format|
       format.js { render template: 'scoring/answer_open_question.js.erb', layout: false}
     end
+  end
+
+  def answer_dump
+    @scenario = Scenario.find(params[:scenario])
+
+    File.open("data/scenario-#{@scenario.id}-#{@scenario.user.id}-answers.txt", 'w') do |f|
+      f.write("Scenario: #{@scenario.name}\nInstructor: #{@scenario.user.name}\nDate: #{@scenario.created_at}\n\n")
+      @scenario.get_players.each do |player|
+        if player.user_id
+          f.write(player.user.name + "\n\n")
+          @scenario.questions.each do |question|
+            f.write("  " + question.question_text + "\n\n")
+            if answer = question.answers.where("student_id = #{player.user.id}").first
+              f.write("    " + answer.answer_text + "\n\n")
+            end
+          end
+        end
+      end
+    end
+
+    send_file "data/scenario-#{@scenario.id}-#{@scenario.user.id}-answers.txt"
   end
 
 end
