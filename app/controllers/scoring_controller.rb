@@ -66,7 +66,7 @@ class ScoringController < ApplicationController
   def answer_dump
     @scenario = Scenario.find(params[:scenario])
 
-    File.open("data/scenario-#{@scenario.id}-#{@scenario.user.id}-answers.txt", 'w') do |f|
+    File.open(Settings.app_path + "data/scenario-#{@scenario.id}-#{@scenario.user.id}-answers.txt", 'w') do |f|
       f.write("Scenario: #{@scenario.name}\nInstructor: #{@scenario.user.name}\nDate: #{@scenario.created_at}\n\n")
       @scenario.get_players.each do |player|
         if player.user_id
@@ -81,7 +81,7 @@ class ScoringController < ApplicationController
       end
     end
 
-    send_file "data/scenario-#{@scenario.id}-#{@scenario.user.id}-answers.txt"
+    send_file Settings.app_path + "data/scenario-#{@scenario.id}-#{@scenario.user.id}-answers.txt"
   end
 
 end
