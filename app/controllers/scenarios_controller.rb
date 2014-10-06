@@ -1,5 +1,6 @@
 class ScenariosController < ApplicationController
   before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot_toggle, :test_console, :modify_players]
+  before_action :authenticate_instructor
 
   # GET /scenarios
   # GET /scenarios.json
