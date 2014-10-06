@@ -1,25 +1,15 @@
 Roles: 
   - Name: NAT
-    Recipes:
-      - strace
-      - sshd_password_login
-
-  - Name: players_role
     Packages:
-      - build-essential
-      - gdb
-      - strace
       - git
-    Recipes: 
+      - gdb
+    Recipes:
       - sshd_password_login
       - strace
-      - wheelie
 
 Groups: 
   - Name: Player
-    Access: 
-      Administrator: 
-        - NAT_Instance
+    Access:
       User: 
         - NAT_Instance
     Users:
@@ -30,7 +20,7 @@ Groups:
 Scenarios: 
   - Description: "This game uses strace to examine executable files."
     Name: Strace
-    Instructions: Players will first ssh into the NAT (listed under Instances below) using it's Public IP Address. You can view login credentials under Players. After logging into the NAT players need to ssh into the Player_Instance using it's IP Address. From there players can answer the questions under Scoring.
+    Instructions: Players will first ssh into the NAT using it's Public IP Address. From there players can answer the questions under Questions.
 
 Clouds: 
   - Name: Cloud_1
@@ -51,7 +41,6 @@ Instances:
     Internet_Accessible: true
     Roles: 
       - NAT
-      - players_role
 
 Questions:
   - Question: Why is strace important?

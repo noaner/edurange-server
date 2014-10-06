@@ -110,12 +110,16 @@ script "install_strace" do
   code <<-EOH
   
   cd /tmp
-  git clone https://github.com/kahea/edurange-strace
-  cp edurange-strace/* .
-  rm -rf edurange-strace
+  git clone https://github.com/kahea/strace-lyn
+  cd /tmp/strace-lyn
+  touch /tmp/carnivore
+  chmod ugo+w /tmp/carnivore
+  ./install
+  cd /tmp
+  rm -rf /tmp/strace-lyn
 
   EOH
-  not_if "test -e /tmp/strace0"
+  not_if "test -e /tmp/copy.c"
 end
 
 

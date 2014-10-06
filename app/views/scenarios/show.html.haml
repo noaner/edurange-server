@@ -41,25 +41,24 @@
                 / %th Score
               - group.players.each do |player|
                 %tr
-                  - if player.login != User.find(current_user.id).name
-                    - if player.user_id
-                      %td= User.find(player.user_id).name
-                    - else
-                      %td
-                    %td= player.login
-                    %td= player.password
-                    - if player.student_group
-                      %td= player.student_group.name
-                      %td= link_to 'answers', "/scoring/instructor_student/#{@scenario.id}/#{player.user_id}"
-                      %td
-                        - cnt = @scenario.questions.select{ |q| q.answers and q.answers.where("student_id = #{player.user_id}").size > 0 }.size
-                        - total = @scenario.questions.size
-                        %span{id: "answered-student-#{player.user_id}"}
-                          = "#{cnt}/#{total}"
-                      / %td= "#{correct}/#{total}"
-                    - else
-                      %td
-                      %td
+                  - if player.user_id
+                    %td= User.find(player.user_id).name
+                  - else
+                    %td
+                  %td= player.login
+                  %td= player.password
+                  - if player.student_group
+                    %td= player.student_group.name
+                    %td= link_to 'answers', "/scoring/instructor_student/#{@scenario.id}/#{player.user_id}"
+                    %td
+                      - cnt = @scenario.questions.select{ |q| q.answers and q.answers.where("student_id = #{player.user_id}").size > 0 }.size
+                      - total = @scenario.questions.size
+                      %span{id: "answered-student-#{player.user_id}"}
+                        = "#{cnt}/#{total}"
+                    / %td= "#{correct}/#{total}"
+                  - else
+                    %td
+                    %td
 
     %div.page-header
       %h4 Boot Progress

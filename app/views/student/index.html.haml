@@ -13,8 +13,17 @@
       %b.inline password:
       = player.password
       %br
+      - scenario.get_instances.each do |instance|
+        - if instance.name == "NAT_Instance"
+          - if instance.provider_instance_public_ip
+            %b nat address:
+            = " #{instance.provider_instance_public_ip}"
+          - else
+            Not Set
+      %br
+
       %b.iniline instructions:
-      Get instructions from Instructor
+      = scenario.instructions
       %br
       / %b.inline instances:
       / %dl
