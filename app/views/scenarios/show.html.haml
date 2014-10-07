@@ -33,6 +33,7 @@
             %table
               %tr
                 %th Name
+                %th Email
                 %th Login
                 %th Password
                 %th Student Group
@@ -42,8 +43,11 @@
               - group.players.each do |player|
                 %tr
                   - if player.user_id
-                    %td= User.find(player.user_id).name
+                    - user = User.find(player.user_id)
+                    %td= user.name
+                    %td= user.email
                   - else
+                    %td
                     %td
                   %td= player.login
                   %td= player.password
