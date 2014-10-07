@@ -70,7 +70,7 @@ class ScoringController < ApplicationController
       f.write("Scenario: #{@scenario.name}\nInstructor: #{@scenario.user.name}\nDate: #{@scenario.created_at}\n\n")
       @scenario.get_players.each do |player|
         if player.user_id
-          f.write(player.user.name + "\n\n")
+          f.write(player.user.email + "\n\n")
           @scenario.questions.each do |question|
             f.write("  " + question.question_text + "\n\n")
             if answer = question.answers.where("student_id = #{player.user.id}").first
