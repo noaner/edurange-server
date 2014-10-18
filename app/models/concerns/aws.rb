@@ -2,6 +2,7 @@
 # as hooks, called dynamically by the {Provider} concern when {Scenario}, {Cloud}, {Subnet}, and {Instance} are booted.
 # @see Provider#boot
 require 'active_support'
+require 'pry'
 module Aws
   extend ActiveSupport::Concern
 
@@ -42,8 +43,18 @@ module Aws
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 443) # Enable port 443 outbound
     # TODO -- SECURITY -- delayed job in 20 min disable firewall.
     Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
+
+#    binding.pry
+    # isolate subnets (w. outbound rules) and allow whitelist of ips
+    #aws_isolate_blacklist
+
   end
 
+  #
+  # @return [nil]
+  def aws_isolate_blacklist
+
+  end
 
   def aws_scenario_upload_scoring_pages
     s3 = AWS::S3.new
@@ -436,3 +447,4 @@ module Aws
     return true
   end
 end
+

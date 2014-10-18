@@ -16,6 +16,9 @@ class Cloud < ActiveRecord::Base
   validates_presence_of :name, :cidr_block, :scenario
   validate :cidr_block_is_valid
   # Validation function that ensures CIDR block provided is within min and max constants defined globally in this file.
+  #
+  serialize :ingress_rules, Array
+  serialize :egress_rules, Array
   # @return [nil]
   def cidr_block_is_within_limits
     our_cidr_block_nw = IPAddress(self.cidr_block).network

@@ -106,6 +106,16 @@ Clouds:
   - Name: Cloud_1
     CIDR_Block: 10.0.0.0/16
     Scenario: Recon
+    Security_Groups_Allow_Egress:
+      - CIDR: 10.0.129.0/24
+      - CIDR: 10.0.0.0/17
+    Security_Groups_Allow_Ingress:
+      - CIDR: 10.0.129.0/24
+        Protocol: tcp
+        Ports: 20..8080
+      - CIDR: 10.0.0.0/17
+        Protocol: tcp
+        Ports: 20..8080
 
 Subnets:
   - Name: Battlespace_Subnet
