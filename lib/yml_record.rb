@@ -65,6 +65,19 @@ module YmlRecord
       cloud = scenario.clouds.new
       cloud.name = yaml_cloud["Name"]
       cloud.cidr_block = yaml_cloud["CIDR_Block"]
+      binding.pry
+      if yaml_cloud["Security_Groups_Allow_Egress"]
+        yaml_cloud["Security_Groups_Allow_Egress"].each do |rule|
+          binding.pry
+          cloud.egress_rules << rule
+        end
+      end
+      if yaml_cloud["Security_Groups_Allow_Ingress"]
+        yaml_cloud["Security_Groups_Allow_Ingress"].each do |rule|
+          binding.pry
+          cloud.ingress_rules << rule
+        end
+      end
       cloud.save!
       name_lookup_hash[cloud.name] = cloud.id
     end
