@@ -36,23 +36,22 @@ module Aws
       end
     end
 
+    Cloud.ingress_rules.each do |rulehash|
+      Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_ingress(rulehash["Protocol"], rulehash["Ports"], rulehash["CIDR"])
+    end
+    Cloud.egress_rules.each do |rulehash|
+      Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress(rulehash["CIDR"])
+    end
     # Hardcoded firewall rules - TODO
-    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)
-    Cloud.first.aws_cloud_driver_object.security_groups.first.revoke_egress('0.0.0.0/0') # Disable all outbound
-    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 80)  # Enable port 80 outbound
-    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 443) # Enable port 443 outbound
+    #Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)
+    #Cloud.first.aws_cloud_driver_object.security_groups.first.revoke_egress('0.0.0.0/0') # Disable all outbound
+    #Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 80)  # Enable port 80 outbound
+    #Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 443) # Enable port 443 outbound
     # TODO -- SECURITY -- delayed job in 20 min disable firewall.
-    Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
+    #Cloud.first.aws_cloud_driver_object.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
 
-#    binding.pry
+    #binding.pry
     # isolate subnets (w. outbound rules) and allow whitelist of ips
-    #aws_isolate_blacklist
-
-  end
-
-  #
-  # @return [nil]
-  def aws_isolate_blacklist
 
   end
 

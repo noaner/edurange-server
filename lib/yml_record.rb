@@ -65,16 +65,13 @@ module YmlRecord
       cloud = scenario.clouds.new
       cloud.name = yaml_cloud["Name"]
       cloud.cidr_block = yaml_cloud["CIDR_Block"]
-      binding.pry
       if yaml_cloud["Security_Groups_Allow_Egress"]
         yaml_cloud["Security_Groups_Allow_Egress"].each do |rule|
-          binding.pry
           cloud.egress_rules << rule
         end
       end
       if yaml_cloud["Security_Groups_Allow_Ingress"]
         yaml_cloud["Security_Groups_Allow_Ingress"].each do |rule|
-          binding.pry
           cloud.ingress_rules << rule
         end
       end
@@ -85,6 +82,7 @@ module YmlRecord
     subnets.each do |yaml_subnet|
       cloud = Cloud.find(name_lookup_hash[yaml_subnet["Cloud"]])
       subnet = cloud.subnets.new
+      subnet.cloud = cloud
       subnet.name = yaml_subnet["Name"]
       subnet.cidr_block = yaml_subnet["CIDR_Block"]
       if yaml_subnet["Internet_Accessible"]

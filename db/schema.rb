@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140609191324) do
+ActiveRecord::Schema.define(version: 20141019232606) do
 
   create_table "clouds", force: true do |t|
     t.string   "name"
@@ -20,7 +20,9 @@ ActiveRecord::Schema.define(version: 20140609191324) do
     t.integer  "scenario_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "status",      default: 0
+    t.integer  "status",        default: 0
+    t.string   "ingress_rules"
+    t.string   "egress_rules"
   end
 
   add_index "clouds", ["scenario_id"], name: "index_clouds_on_scenario_id"
