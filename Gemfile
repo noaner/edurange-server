@@ -29,7 +29,7 @@ gem 'unix-crypt'
 gem 'ipaddress'
 gem 'nokogiri'
 gem 'faye'
-
+gem 'puma'
 
 
 group :development do
