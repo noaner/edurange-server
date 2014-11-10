@@ -160,8 +160,6 @@ ActiveRecord::Schema.define(version: 20140927173414) do
     t.datetime "updated_at"
   end
 
-  add_index "student_groups", ["name"], name: "index_student_groups_on_name", unique: true
-
   create_table "subnets", force: true do |t|
     t.string   "name"
     t.string   "cidr_block"
