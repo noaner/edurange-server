@@ -16,5 +16,6 @@
 //= require bootstrap
 //= require private_pub
 //= require underscore
+//= require bootstrap
 //= require_tree .
 // require turbolinks
