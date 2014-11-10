@@ -2,11 +2,11 @@
 %div.panel.panel-default#scenario{data: {id: @scenario.id}}
   %div.panel-heading
     %b
-      Scenario - 
+      Scenario -
       =@scenario.name
   %div.panel-body
     %dl
-      %dt 
+      %dt
         %h4 Description:
         %dl
           %dt= @scenario.description
@@ -86,7 +86,7 @@
           Clouds Booted:
         %span#cloud-count
           = @cloud_booted
-        of 
+        of
         %span#cloud-total
           = @cloud_count
         %br
@@ -138,12 +138,12 @@
   /   \- shows questions and answers
   /   %p
   /   = link_to 'Student View', '/scoring/student/' + @scenario.id.to_s
-  /   \- shows only questions, lets you answer them 
+  /   \- shows only questions, lets you answer them
 
   %h4 Resources
   - @scenario.clouds.each do |cloud|
     %dl
-      Cloud: 
+      Cloud:
       %b= cloud.name
       status:
       = cloud.status
