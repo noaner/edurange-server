@@ -16,7 +16,7 @@ gem 'figaro', :github=>"laserlemon/figaro"
 gem 'haml-rails'
 gem 'pundit'
 gem 'simple_form'
-gem 'private_pub'
+# gem 'private_pub'
 gem 'underscore-rails'
 gem 'thin'
 gem 'delayed_job_active_record'
@@ -28,8 +28,8 @@ gem 'erubis'
 gem 'unix-crypt'
 gem 'ipaddress'
 gem 'nokogiri'
-gem 'faye'
-gem 'puma'
+# gem 'faye'
+# gem 'puma'
 
 
 group :development do
@@ -48,19 +48,20 @@ group :development do
   gem 'rb-inotify', :require=>false
 end
 group :development, :test do
-  gem 'pry-stack_explorer'
+  # gem 'pry-stack_explorer'
   gem 'awesome_print'
-  gem 'factory_girl_rails'
-  gem 'pry-rails'
-  gem 'pry-rescue'
-  gem 'rspec-rails', '>= 3.0.0.beta2'
+  # gem 'factory_girl_rails'
+  # gem 'pry-rails'
+  # gem 'pry-rescue'
+  # gem 'rspec-rails', '>= 3.0.0.beta2'
+  gem 'daemons'
 end
 group :test do
-  gem 'capybara'
-  gem 'database_cleaner'
-  gem 'faker'
-  gem 'launchy'
-  gem 'selenium-webdriver'
-  gem 'plymouth'
-  gem 'pry'
+  # gem 'capybara'
+  # gem 'database_cleaner'
+  # gem 'faker'
+  # gem 'launchy'
+  # gem 'selenium-webdriver'
+  # gem 'plymouth'
+  # gem 'pry'
 end

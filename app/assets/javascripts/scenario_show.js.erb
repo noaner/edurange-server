@@ -1,68 +1,68 @@
-var ready = function() {
-  console.log("In ready!")
-  var id = $('#scenario').data('id');
-  if (id) {
-    PrivatePub.subscribe("/scenarios/" + id, function(data, channel) {
-      if (data.scenario_status != undefined) {
-        $('#scenario-status').text(data.scenario_status);
+// var ready = function() {
+//   console.log("In ready!")
+//   var id = $('#scenario').data('id');
+//   if (id) {
+//     PrivatePub.subscribe("/scenarios/" + id, function(data, channel) {
+//       if (data.scenario_status != undefined) {
+//         $('#scenario-status').text(data.scenario_status);
 
-        if (data.scenario_status == "booted") {
-          $('#boot-button').html("Unboot");
-          $('#boot-message').html('Scenario has successfully Booted.');
-          $('#scenario-status-dot').show();
-          $('#scenario-status-dot').removeClass().addClass('booted');
-        }
-        else if (data.scenario_status == "stopped") {
-          $('#boot-button').html("Boot");
-          $('#boot-message').html('Scenario has successfully Unbooted.');
-          $('#scenario-status-dot').show();
-          $('#scenario-status-dot').removeClass().addClass('stopped');
-        }
-        else if (data.scenario_status == "boot_failed") {
-          $('#boot-message').html('Scenario has failed to boot.');
-          $('#boot-button').html("Unboot");
-          $('#scenario-status-dot').show();
-          $('#scenario-status-dot').removeClass().addClass('failed');
-        }
-        else if (data.scenario_status == "unboot_failed") {
-          $('#boot-message').html('Scenario has failed to unboot.');
-          $('#boot-button').html("Unboot");
-          $('#scenario-status-dot').show();
-          $('#scenario-status-dot').removeClass().addClass('failed');
-        }
+//         if (data.scenario_status == "booted") {
+//           $('#boot-button').html("Unboot");
+//           $('#boot-message').html('Scenario has successfully Booted.');
+//           $('#scenario-status-dot').show();
+//           $('#scenario-status-dot').removeClass().addClass('booted');
+//         }
+//         else if (data.scenario_status == "stopped") {
+//           $('#boot-button').html("Boot");
+//           $('#boot-message').html('Scenario has successfully Unbooted.');
+//           $('#scenario-status-dot').show();
+//           $('#scenario-status-dot').removeClass().addClass('stopped');
+//         }
+//         else if (data.scenario_status == "boot_failed") {
+//           $('#boot-message').html('Scenario has failed to boot.');
+//           $('#boot-button').html("Unboot");
+//           $('#scenario-status-dot').show();
+//           $('#scenario-status-dot').removeClass().addClass('failed');
+//         }
+//         else if (data.scenario_status == "unboot_failed") {
+//           $('#boot-message').html('Scenario has failed to unboot.');
+//           $('#boot-button').html("Unboot");
+//           $('#scenario-status-dot').show();
+//           $('#scenario-status-dot').removeClass().addClass('failed');
+//         }
 
-      } else if (data.instance_progress == 1) {
-        var count = $('#instance-count').text();
-        $('#instance-count').text(parseInt(count) + 1);
-      } else if (data.instance_progress == -1) {
-        var count = $('#instance-count').text();
-        $('#instance-count').text(parseInt(count) - 1);
-      } else if (data.subnet_progress == 1) {
-        var count = $('#subnet-count').text();
-        $('#subnet-count').text(parseInt(count) + 1);
-      } else if (data.subnet_progress == -1) {
-        var count = $('#subnet-count').text();
-        $('#subnet-count').text(parseInt(count) - 1);
-      } else if (data.cloud_progress == 1) {
-        var count = $('#cloud-count').text();
-        $('#cloud-count').text(parseInt(count) + 1);
-      } else if (data.cloud_progress == -1) {
-        var count = $('#cloud-count').text();
-        $('#cloud-count').text(parseInt(count) - 1);
-      } else if (data.log_message != undefined) {
-        $("#console").append(data.log_message + '<br>');
-        $('#console').scrollTop($('#console').prop("scrollHeight"));
-      } else if (data.answered != undefined) {
-        $('#answered-student-' + data.answered[0]).text(data.answered[1]);
-      }
+//       } else if (data.instance_progress == 1) {
+//         var count = $('#instance-count').text();
+//         $('#instance-count').text(parseInt(count) + 1);
+//       } else if (data.instance_progress == -1) {
+//         var count = $('#instance-count').text();
+//         $('#instance-count').text(parseInt(count) - 1);
+//       } else if (data.subnet_progress == 1) {
+//         var count = $('#subnet-count').text();
+//         $('#subnet-count').text(parseInt(count) + 1);
+//       } else if (data.subnet_progress == -1) {
+//         var count = $('#subnet-count').text();
+//         $('#subnet-count').text(parseInt(count) - 1);
+//       } else if (data.cloud_progress == 1) {
+//         var count = $('#cloud-count').text();
+//         $('#cloud-count').text(parseInt(count) + 1);
+//       } else if (data.cloud_progress == -1) {
+//         var count = $('#cloud-count').text();
+//         $('#cloud-count').text(parseInt(count) - 1);
+//       } else if (data.log_message != undefined) {
+//         $("#console").append(data.log_message + '<br>');
+//         $('#console').scrollTop($('#console').prop("scrollHeight"));
+//       } else if (data.answered != undefined) {
+//         $('#answered-student-' + data.answered[0]).text(data.answered[1]);
+//       }
 
-      if (data.public_ip != undefined) {
-        $('#public-ip').text(data.public_ip);
-      }
+//       if (data.public_ip != undefined) {
+//         $('#public-ip').text(data.public_ip);
+//       }
 
-    });
-  }
-  
-};
+//     });
+//   }
 
-$(document).ready(ready);
+// };
+
+// $(document).ready(ready);

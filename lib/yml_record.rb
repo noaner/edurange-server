@@ -1,10 +1,23 @@
 module YmlRecord
   # Returns an array of [filename, scenario name, description]
-  def self.yml_headers
+  def self.yml_headers_old
     output = []
     Dir.foreach(Settings.app_path + "scenarios-yml/") do |filename|
       next if filename == '.' or filename == '..' or filename == 'ddos.yml'
       scenario = YAML.load_file(Settings.app_path + "scenarios-yml/#{filename}")["Scenarios"][0]
+      name = scenario["Name"]
+      description = scenario["Description"]
+      output.push [filename, name, description]
+    end
+    return output
+  end
+
+  def self.yml_headers
+    output = []
+    Dir.foreach(Settings.app_path + "scenarios/default") do |filename|
+      next if filename == '.' or filename == '..' or filename == 'ddos.yml'
+      puts filename
+      scenario = YAML.load_file(Settings.app_path + "scenarios/default/#{filename}/#{filename}.yml")["Scenarios"][0]
       name = scenario["Name"]
       description = scenario["Description"]
       output.push [filename, name, description]
@@ -24,6 +37,7 @@ module YmlRecord
     # what unique id corresponds to the current loading of the scenario. Whenever we
     # create an object, we store it within the above hash so that we can look it up
     # later in this function when we are creating objects referencing things in the database.
+    puts yaml_file
     file = YAML.load_file(Settings.app_path + yaml_file)
 
     scenarios = file["Scenarios"]
@@ -46,7 +60,7 @@ module YmlRecord
       role.save!
       name_lookup_hash[role.name] = role.id
     end
-    
+
     scenario = nil # Set scope for scenario
     scenarios.each do |yaml_scenario|
       scenario = Scenario.new
@@ -59,7 +73,7 @@ module YmlRecord
       scenario.save!
       name_lookup_hash[scenario.name] = scenario.id
     end
-    
+
     cloud = nil
     clouds.each do |yaml_cloud|
       scenario = Scenario.find(name_lookup_hash[yaml_cloud["Scenario"]])
@@ -101,8 +115,8 @@ module YmlRecord
       instance.save!
       name_lookup_hash[instance.name] = instance.id
     end
-    
-    
+
+
     groups.each do |yaml_group|
       users = yaml_group["Users"]
       access = yaml_group["Access"]
@@ -148,7 +162,7 @@ module YmlRecord
           instance.save!
         end
       end
-      
+
       if user
         user.each do |user_instance|
           instance = Instance.find(name_lookup_hash[user_instance])

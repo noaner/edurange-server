@@ -56,7 +56,7 @@ class ScoringController < ApplicationController
     end
 
     total = @question.scenario.questions.select{ |q| q.answers }.size
-    PrivatePub.publish_to "/scenarios/#{@question.scenario.id}", answered: [current_user.id, "#{cnt}/#{total}"]
+    # PrivatePub.publish_to "/scenarios/#{@question.scenario.id}", answered: [current_user.id, "#{cnt}/#{total}"]
 
     respond_to do |format|
       format.js { render template: 'scoring/answer_open_question.js.erb', layout: false}
@@ -68,7 +68,7 @@ class ScoringController < ApplicationController
 
     File.open(Settings.app_path + "data/scenario-#{@scenario.id}-#{@scenario.user.id}-answers.txt", 'w') do |f|
       f.write("Scenario: #{@scenario.name}\nInstructor: #{@scenario.user.name}\nDate: #{@scenario.created_at}\n\n")
-      @scenario.get_players.each do |player|
+      @scenario.players.each do |player|
         if player.user_id
           f.write(player.user.email + "\n\n")
           @scenario.questions.each do |question|

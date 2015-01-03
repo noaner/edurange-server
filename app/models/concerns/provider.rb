@@ -1,66 +1,62 @@
-# This file is included in {Scenario}, {Cloud}, {Subnet} and {Instance}. Essentialy it has glue code for 
-# both defining methods dynamically (within concerns such as Aws that handle provider specific API calls) as well as 
-# routing those methods (within {#method_missing})    
+# This file is included in {Scenario}, {Cloud}, {Subnet} and {Instance}. Essentialy it has glue code for
+# both defining methods dynamically (within concerns such as Aws that handle provider specific API calls) as well as
+# routing those methods (within {#method_missing})
 # Apart from defining these methods, the only other role this file has is to declare the "status" column, an integer corresponding to
 # three states stored in the local database. They can be :stopped, :booting, or :booted. All files which include {Provider} receive this,
-# and helper methods to retrieve the database state. Check out enum in Rails.    
+# and helper methods to retrieve the database state. Check out enum in Rails.
 # When reading through this file (and other Concerns), think of the file including them as their "self". When a {Cloud} includes this file,
 # any of these methods "self" will refer to that {Cloud cloud}.
 module Provider
   extend ActiveSupport::Concern
   included do
-    enum status: [:stopped, :booting, :booted, :failed, :boot_failed, :unboot_failed, :unbooting, :stopping]
+    enum status: [:stopped, :booting, :booted, :failed, :boot_failed, :unboot_failed, :unbooting, :stopping, :broken, :fixing]
   end
 
   def max_attempts; 0; end
 
-  # def boot_provider
-    # classname = self.class.to_s.downcase
+  def foome
+    File.open("findme", "a").write("foome")
+  end
 
-    # if self.stopped?
-      # self.send("provider_#{classname}_boot")
+  def boot_error(error)
 
-      # Boot child objects
-      # if self.class == Scenario
-        # Scoring.generate_scenario_urls(self)
-        # self.clouds.each do |cloud|
-          # cloud.boot
-          # cloud.delay.boot
-        # end
+    self.set_boot_failed
+    debug(error.class.to_s + ' - ' + error.message.to_s + error.backtrace.join("\n"));
+    self.save
+    self.reload
 
-        # self.reload
-
-        # self.aws_scenario_final_setup
-
-        # PrivatePub.publish_to "/scenarios/#{self.id}", scenario_status: "booted"
-        #self.set_booted
-        # Scoring.scenario_scoring(self)
-
-      # elsif self.class == Cloud
-        # self.subnets.each do |subnet|
-          # subnet.boot
-        # end
-
-      # elsif self.class == Subnet
-        # self.instances.each do |instance|
-          # instance.boot
-          # if instance.roles[0]["recipes"].include?("scoring")
-            # Scoring.instance_scoring(instance)
-          # end
-        # end
-      # end
+    # time = Time.new
+    # File.open("#{Rails.root}/log/boot.#{scenario.id}-#{scenario.name}.log", 'a') do |f|
+      # f.puts "\n"
+      # f.puts error.class.to_s + ' - ' + error.message.to_s + error.backtrace.join("\n")
+      # f.puts "\n"
     # end
-  # end
+  end
 
   def boot
+    classname = self.class.to_s.downcase
+    puts classname
+
     self.set_booting
-    delay.aws_scenario_boot_new
+    self.send("provider_boot_#{classname}")
+    # self.delay.send("provider_boot_#{classname}")
+
+  end
+
+  def unboot_error(error)
+    self.set_boot_failed
+    self.save
+    debug(error.class.to_s + ' - ' + error.message.to_s);
   end
 
   def unboot
-    self.set_unbooting
-    delay.aws_scenario_unboot_new
+    classname = self.class.to_s.downcase
+    puts classname
+    self.send("provider_unboot_#{classname}")
   end
+
+  ## Status set and get
+  # set status
 
   def set_stopped
     self.status = "stopped"
@@ -78,7 +74,7 @@ module Provider
   end
 
   def set_boot_failed
-    self.status = "boot_failed"
+    self.status = :boot_failed
     self.save!
   end
 
@@ -92,32 +88,51 @@ module Provider
     self.save!
   end
 
+  def set_failed
+    self.status = "failed"
+    self.save!
+  end
+
   def set_unboot_failed
     self.status = "unboot_failed"
     self.save!
   end
 
-  def is_stopped?
-    return self.status == "stopped"
+  # get status
+
+  def stopped?
+    return self.status == :stopped
   end
 
-  def is_booted?
-    return self.status == "booted"
+  def booted?
+    return self.status == :booted
+  end
+
+  def boot_failed?
+    return self.status == :boot_failed
   end
 
   def is_failed?
     return self.status == "unboot_failed" || self.status == "boot_failed"
   end
 
-  def is_booting?
+  def booting?
     return self.status == "booting"
   end
 
-  def is_unbooting?
+  def unbooting?
     return self.status == "unbooting"
   end
 
-  
+  def boot_failed?
+    return self.status == "boot_failed"
+  end
+
+  def unboot_failed?
+    return self.status == "boot_failed"
+  end
+
+
   # Polls the state in database, waiting to yield to given block until self is booted?
   # If self is not booted?, calls provider_check_status for self.
   # @param block The block to execute when self.booted?
@@ -165,7 +180,7 @@ module Provider
       super
     end
   end
-  
+
   # Calls the method provided in the EDURange config, defined in the concerns for each Driver at runtime.
   # Currently does not pass arguments.
   # @return [nil]

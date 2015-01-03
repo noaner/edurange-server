@@ -1,0 +1,127 @@
+# Packages
+<% instance.roles.each do |role| %>
+  <% role.packages.each do |package| %>
+    package '<%= package %>' do
+      options '--force-yes'
+    end
+  <% end %>
+<% end %>
+
+# Users
+<% instance.users.each do |user| %>
+user '<%= user.login %>' do
+  supports :manage_home => true
+  password '<%= user.password_hash %>'
+  home '/home/<%= user.login %>'
+  shell '/bin/bash'
+  action :create
+end
+<% end %>
+# Administrators
+<% instance.administrators.each do |administrator| %>
+user '<%= administrator.login %>' do
+  supports :manage_home => true
+  home '/home/<%= administrator.login %>'
+  shell '/bin/bash'
+  password '<%= administrator.password_hash %>'
+  group 'sudo'
+  action :create
+end
+<% end %>
+
+# Recipes
+<% instance.roles.each do |role| %>
+  <% role.recipes.each do |recipe| %>
+
+    <% if recipe == 'sshd_password_login' %>
+
+# sshd_password_login
+ruby_block "Ensure password login" do
+  block do
+    fe = Chef::Util::FileEdit.new("/etc/ssh/sshd_config")
+    fe.search_file_replace(/PasswordAuthentication\s+no/,
+                               "PasswordAuthentication yes")
+    fe.write_file
+  end
+end
+script "restart_sshd" do
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  code <<-EOH
+if [ -f /etc/init.d/ssh ]
+then
+  service ssh reload
+fi
+if [ ! -f /etc/init.d/ssh ]
+then
+  service sshd reload
+fi
+  EOH
+end
+    <% elsif recipe == 'shellinabox' %>
+remote_file "/tmp/shellinabox-2.14.tar.gz" do
+  source "https://shellinabox.googlecode.com/files/shellinabox-2.14.tar.gz"
+  action :create_if_missing
+end
+script "install_shellinabox" do
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  code <<-EOH
+  tar -zxf shellinabox-2.14.tar.gz
+  cd shellinabox-2.14
+  ./configure
+  make
+  make install
+  /usr/local/bin/shellinaboxd -s /:LOGIN&
+  crontab -l | { cat; echo "@reboot /usr/local/bin/shellinaboxd -s /:LOGIN&"; } | crontab -
+
+  EOH
+  not_if "test -x /usr/local/bin/shellinaboxd"
+end
+
+    <% elsif recipe == 'wheelie' %>
+ruby_block "Uncomment wheel in sudoers" do
+  block do
+    fe = Chef::Util::FileEdit.new("/etc/sudoers")
+    fe.insert_line_if_no_match(/%wheel\s+ALL=\(ALL\)\s+ALL/,
+                               "%wheel ALL=(ALL) ALL")
+    fe.write_file
+  end
+end
+
+  <% elsif recipe == 'scoring' %>
+# Scoring Recipe
+directory "/tmp/scoring" do
+  :create
+end
+remote_file "scoreagent.rb" do
+  source "https://github.com/edurange/scoring/raw/master/scoreagent.rb"
+  path "/tmp/scoring/scoreagent.rb"
+end
+remote_file "scoreplacer.rb" do
+  source "https://github.com/edurange/scoring/raw/master/scoreplacer.rb"
+  path "/tmp/scoring/scoreplacer.rb"
+end
+file "/tmp/scoring/answers" do
+  mode "0777"
+end
+
+script 'get scoring_url' do
+  interpreter "bash"
+  code 'echo "<%= scoring_url %>" > /tmp/scoring/scoring_url'
+end
+
+gem_package "daemons"
+
+script 'run scoreagent' do
+  interpreter "bash"
+  code <<-EOF
+  ruby /tmp/scoring/scoreagent.rb start &
+  EOF
+end
+
+    <% end %>
+  <% end %>
+<% end %>

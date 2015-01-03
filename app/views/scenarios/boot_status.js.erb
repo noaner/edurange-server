@@ -1,0 +1,71 @@
+
+$('#scenario-status').text("<%= @scenario.status %>");
+
+<% @scenario.clouds.each do |cloud| %>
+  $('<%= "#cloud-status-" + cloud.id.to_s %>').text('<%= cloud.status %>');
+  $('<%= "#cloud-status-dot-" + cloud.id.to_s %>').attr('class', '<%= "inline-block " + cloud.status %>');
+
+  <% if cloud.booting? or cloud.unbooting? %>
+    $('<%= "#cloud-status-dot-" + cloud.id.to_s %>').hide();
+    $('<%= "#cloud-spinner-" + cloud.id.to_s %>').attr('class', '<%= "inline-block spin" %>');
+  <% else %>
+    $('<%= "#cloud-spinner-" + cloud.id.to_s %>').attr('class', '<%= "inline-block" %>');
+    $('<%= "#cloud-status-dot-" + cloud.id.to_s %>').show();
+  <% end %>
+
+  <% driver = "not set" %>
+  <% if cloud.driver_id %>
+    <% driver = cloud.driver_id %>
+  <% end %>
+  $('<%= "#cloud-driver-" + cloud.id.to_s %>').text('<%= driver %>');
+
+  <% cloud.subnets.each do |subnet| %>
+    $('<%= "#subnet-status-" + subnet.id.to_s %>').text('<%= subnet.status %>');
+    $('<%= "#subnet-status-dot-" + subnet.id.to_s %>').attr('class', '<%= "inline-block " + subnet.status %>');
+
+    <% if subnet.booting? or subnet.unbooting? %>
+      $('<%= "#subnet-status-dot-" + subnet.id.to_s %>').hide();
+      $('<%= "#subnet-spinner-" + subnet.id.to_s %>').attr('class', '<%= "inline-block spin" %>');
+    <% else %>
+      $('<%= "#subnet-spinner-" + subnet.id.to_s %>').attr('class', '<%= "inline-block" %>');
+      $('<%= "#subnet-status-dot-" + subnet.id.to_s %>').show();
+    <% end %>
+
+    <% driver = "not set" %>
+    <% if subnet.driver_id %>
+      <% driver = subnet.driver_id %>
+    <% end %>
+    $('<%= "#subnet-driver-" + subnet.id.to_s %>').text('<%= driver %>');
+
+    <% subnet.instances.each do |instance| %>
+      <% instance.status_check %>
+      $('<%= "#instance-status-" + instance.id.to_s %>').text('<%= instance.status %>');
+      $('<%= "#instance-status-dot-" + instance.id.to_s %>').attr('class', '<%= "inline-block " + instance.status %>');
+
+      <% if instance.booting? or instance.unbooting? %>
+        $('<%= "#instance-status-dot-" + instance.id.to_s %>').hide();
+        $('<%= "#instance-spinner-" + instance.id.to_s %>').attr('class', '<%= "inline-block spin" %>');
+      <% else %>
+        $('<%= "#instance-spinner-" + instance.id.to_s %>').attr('class', '<%= "inline-block" %>');
+        $('<%= "#instance-status-dot-" + instance.id.to_s %>').show();
+      <% end %>
+
+      <% if instance.internet_accessible %>
+        <% ip = 'not set' %>
+        <% if public_ip = instance.provider_instance_public_ip %>
+          <% ip = public_ip %>
+        <% end %>
+        $('<%= "#instance-public-ip-" + instance.id.to_s %>').text('<%= ip %>');
+      <% end %>
+
+      <% driver = "not set" %>
+      <% if instance.driver_id %>
+        <% driver = instance.driver_id %>
+      <% end %>
+      $('<%= "#instance-driver-" + instance.id.to_s %>').text('<%= driver %>');
+
+    <% end %>
+  <% end %>
+<% end %>
+
+setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 5000);

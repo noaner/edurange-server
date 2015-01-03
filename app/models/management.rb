@@ -1,6 +1,6 @@
 class Management
   def debug(message)
-    PrivatePub.publish_to "/cleanup", log_message: message
+    # PrivatePub.publish_to "/cleanup", log_message: message
   end
   def purge
     Scenario.delete_all
@@ -15,6 +15,19 @@ class Management
     debug "Finished purging local DB!"
   end
   handle_asynchronously :purge
+
+  def showresources
+    puts Scenario.all
+    puts Cloud.all
+    puts Subnet.all
+    puts Instance.all
+    puts Player.all
+    puts Group.all
+    puts Role.all
+    puts InstanceGroup.all
+    puts InstanceRole.all
+  end
+
   def cleanup
     ec2 = AWS::EC2.new
     vpc_collect = ec2.vpcs
@@ -68,7 +81,7 @@ class Management
 
       if vpc.subnets
         vpc.subnets.each do |subnet|
-          debug "Deleting subnet #{subnet}" 
+          debug "Deleting subnet #{subnet}"
           begin
             # this causes a lot of dependancy violation errors
             subnet.delete
@@ -81,7 +94,7 @@ class Management
             debug e.message
             if subnet.instances
               subnet.instances.each { |inst|
-                debug "#{inst} on subnet #{subnet}'s status is #{inst.status}" 
+                debug "#{inst} on subnet #{subnet}'s status is #{inst.status}"
               }
             end
             debug "EDURange cleanup will keep going anyway."
@@ -94,7 +107,7 @@ class Management
         unless route_table.main?
           debug "Deleting route table #{route_table.id}"
 
-          if route_table.subnets 
+          if route_table.subnets
             route_table.subnets.each do |subnet|
               subnet.set_route_table(ec2.route_tables.main_route_table)
             end

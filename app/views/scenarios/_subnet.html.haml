@@ -1,0 +1,46 @@
+%li
+  %input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
+    %label{ for: 'item-0'}
+      = subnet.name
+      %div{ class: 'inline-block ' + subnet.status, id: 'subnet-status-dot-'+subnet.id.to_s}
+        &#9679;
+
+      - if subnet.booting?
+        %div.spin.inline-block{ id: 'subnet-spinner-' + subnet.id.to_s}
+      - else
+        %div.inline-block{ id: 'subnet-spinner-' + subnet.id.to_s}
+
+    %div.inline-block
+      %div.dropdown
+        %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-subnet-'+subnet.id.to_s, "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+          / %span.glyphicon.glyphicon-pencil{"aria-hidden" => "true"}
+          %span.caret
+        %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-subnet'+subnet.id.to_s}
+          %li{role: 'presentation'}
+            = link_to 'Show log', getlog_scenario_path(subnet, kind: 'subnet'), remote: true
+            = link_to 'Show routing rules'
+
+
+    %ul{style: "padding-left: 20px;"}
+      %li
+        Status:
+        %span{id: 'subnet-status-' + subnet.id.to_s}
+          = subnet.status
+      %li
+        Driver:
+        %span{id: 'subnet-driver-' + subnet.id.to_s}
+          = subnet.driver_id == nil ? "not set" : subnet.driver_id
+      %li
+        CIDR:
+        = subnet.cidr_block
+      %li
+        Internet Accessible:
+        = subnet.internet_accessible
+      %p
+      %li
+        %input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
+          %label{ for: 'item-0'}
+            Instances:
+          %ul
+            - subnet.instances.each do |instance|
+              = render '/scenarios/instance', instance: instance

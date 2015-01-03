@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140927173414) do
+ActiveRecord::Schema.define(version: 20141231005050) do
 
   create_table "answers", force: true do |t|
     t.integer  "student_id"
@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20140927173414) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "status",      default: 0
+    t.string   "log",         default: ""
   end
 
   add_index "clouds", ["scenario_id"], name: "index_clouds_on_scenario_id"
@@ -94,6 +95,8 @@ ActiveRecord::Schema.define(version: 20140927173414) do
     t.string   "scoring_url"
     t.string   "scoring_page"
     t.string   "uuid"
+    t.string   "com_page"
+    t.string   "log",                 default: ""
   end
 
   add_index "instances", ["subnet_id"], name: "index_instances_on_subnet_id"
@@ -144,6 +147,7 @@ ActiveRecord::Schema.define(version: 20140927173414) do
     t.text     "scoring_pages_content", default: ""
     t.integer  "user_id"
     t.string   "instructions"
+    t.string   "com_page"
   end
 
   create_table "student_group_users", force: true do |t|
@@ -169,6 +173,7 @@ ActiveRecord::Schema.define(version: 20140927173414) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "status",              default: 0
+    t.string   "log",                 default: ""
   end
 
   add_index "subnets", ["cloud_id"], name: "index_subnets_on_cloud_id"

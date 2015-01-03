@@ -1,13 +1,13 @@
 class ScenariosController < ApplicationController
-  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot_toggle, :test_console, :modify_players]
+  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot_toggle, :boot_status, :test_console, :modify_players]
   before_action :authenticate_instructor
 
   # GET /scenarios
   # GET /scenarios.json
   def index
-    user = User.find(current_user.id)
+    @user = User.find(current_user.id)
     @scenarios = []
-    if user.is_admin?
+    if @user.is_admin?
       @scenarios = Scenario.all
     else
       @scenarios = Scenario.where(:user_id => current_user.id)
@@ -51,7 +51,7 @@ class ScenariosController < ApplicationController
     @subnet_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.size
     @instance_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.select { |instance| instance.booted? }.size
     @instance_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.size
-  
+
     # get studentGroups
     @student_groups = StudentGroup.where("instructor_id = #{current_user.id} AND student_id = #{current_user.id}")
 
@@ -60,20 +60,23 @@ class ScenariosController < ApplicationController
   def boot_toggle
     if @scenario.status == "stopped"
       @scenario.boot
-      # @booting = true
-      @boot_message = "Scenario is booting. Monitor output below."
+      # @boot_message = "Scenario is booting. Monitor output below."
     elsif @scenario.status == "booted" or @scenario.status == "unboot_failed" or @scenario.status == "boot_failed"
       @scenario.unboot
-      # @unbooting = true
-      @boot_message = "Scenario is unbooting. Monitor output below."
+      # @boot_message = "Scenario is unbooting. Monitor output below."
     end
-
+    # @scenario.set_booting
     respond_to do |format|
-      format.js { render 'scenarios/boot.js.erb', :layout => false }
-      format.html { redirect_to @scenario, notice: notice }
+      format.js { render 'scenarios/boot_status.js.erb', :layout => false }
     end
   end
-  
+
+  def boot_status
+    respond_to do |format|
+      format.js { render 'scenarios/boot_status.js.erb', :layout => false }
+    end
+  end
+
   # GET /scenarios/new
   def new
     @scenario = Scenario.new
@@ -89,7 +92,7 @@ class ScenariosController < ApplicationController
   # POST /scenarios.json
   def create
     if template = scenario_params["template"]
-      @scenario = YmlRecord.load_yml("scenarios-yml/#{template}")
+      @scenario = YmlRecord.load_yml("scenarios/default/#{template}/#{template}.yml")
     else
       @scenario = Scenario.new(scenario_params)
     end
@@ -125,22 +128,6 @@ class ScenariosController < ApplicationController
   # DELETE /scenarios/1
   # DELETE /scenarios/1.json
   def destroy
-    @scenario.clouds.each do |cloud|
-      cloud.subnets.each do |subnet|
-        subnet.instances.each do |instance|
-          instance.instance_groups.each do |instance_group|
-            Group.where(:id => instance_group.group_id).destroy_all
-            Player.where(:group_id => instance_group.group_id).destroy_all
-            InstanceGroup.where(:id => instance_group.id).destroy_all
-          end
-          role_id = InstanceRole.where(:instance_id => instance.id).pluck(:role_id).first
-          Role.where(:id => role_id).destroy_all
-          Instance.where(:id => instance.id).destroy_all
-        end
-        Subnet.where(:id => subnet.id).destroy_all
-      end
-      Cloud.where(:id => cloud.id).destroy_all
-    end
     @scenario.destroy
 
     respond_to do |format|
@@ -153,7 +140,7 @@ class ScenariosController < ApplicationController
     @scenario = Scenario.find(params[:id])
     @scenario.delay.debug "-- Test Console Print --"
     redirect_to @scenario, notice: "Testing Console. Output should appear in Console Log. If no output withing a few seconds Console Log is broken."
-    
+
     respond_to do |format|
       format.json {  }
     end
@@ -185,6 +172,32 @@ class ScenariosController < ApplicationController
       end
     end
     redirect_to @scenario
+  end
+
+  def getlog
+    if params[:kind] == 'scenario'
+      s = Scenario.find(params[:id])
+      log = s.log
+      name = s.name
+    elsif params[:kind] == 'cloud'
+      c = Cloud.find(params[:id])
+      log = c.log
+      name = c.name
+    elsif params[:kind] == 'subnet'
+      s = Subnet.find(params[:id])
+      log = s.log
+      name = s.name
+    elsif params[:kind] == 'instance'
+      i = Instance.find(params[:id])
+      log = i.log
+      name = i.name
+    end
+
+    @htmllog = log.gsub("\n", "<br>").html_safe;
+    @name = name
+    respond_to do |format|
+      format.js { render template: 'scenarios/log.js.erb', layout: false }
+    end
   end
 
   private

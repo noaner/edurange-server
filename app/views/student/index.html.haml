@@ -4,31 +4,31 @@
 
 - @players.each do |player|
   %dl
-    - scenario = Scenario.find(player.group.scenario_id)
-    %h4= scenario.name
-    %dl
-      %b.inline login:
-      = player.login
-      %br
-      %b.inline password:
-      = player.password
-      %br
-      - scenario.get_instances.each do |instance|
-        - if instance.name == "NAT_Instance"
-          - if instance.provider_instance_public_ip
-            %b nat address:
-            = " #{instance.provider_instance_public_ip}"
-          - else
-            Not Set
-      %br
+    - if scenario = Scenario.find(player.group.scenario_id)
+      %h4= scenario.name
+      %dl
+        %b.inline login:
+        = player.login
+        %br
+        %b.inline password:
+        = player.password
+        %br
+        - scenario.instances.each do |instance|
+          - if instance.name == "NAT_Instance"
+            - if instance.provider_instance_public_ip
+              %b nat address:
+              = " #{instance.provider_instance_public_ip}"
+            - else
+              Not Set
+        %br
 
-      %b.iniline instructions:
-      = scenario.instructions
-      %br
-      / %b.inline instances:
-      / %dl
-      /   - scenario.get_instances.each do |instance|
-      /     = instance.name
-      /     %b
-      %b.inline Questions:
-      = link_to 'here', "/scoring/student/#{scenario.id}"
+        %b.iniline instructions:
+        = scenario.instructions
+        %br
+        / %b.inline instances:
+        / %dl
+        /   - scenario.instances.each do |instance|
+        /     = instance.name
+        /     %b
+        %b.inline Questions:
+        = link_to 'here', "/scoring/student/#{scenario.id}"

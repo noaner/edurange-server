@@ -18,6 +18,8 @@ Edurange::Application.routes.draw do
       get 'test_console'
       get 'boot_toggle'
       post 'modify_players'
+      get 'getlog'
+      get 'boot_status'
     end
   end
 

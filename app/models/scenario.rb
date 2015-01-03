@@ -2,19 +2,38 @@ class Scenario < ActiveRecord::Base
   include Aws
   include Provider
   attr_accessor :template # For picking a template when creating a new scenario
-  has_many :clouds, dependent: :delete_all
+  has_many :clouds, dependent: :destroy
   has_many :questions, dependent: :destroy
   validates_presence_of :name, :description
   belongs_to :user
 
   def debug(message)
-    log = self.log
+    log = self.log ? self.log : ''
+    message = '' if !message
     self.update_attributes(log: log + message + "\n")
-    PrivatePub.publish_to "/scenarios/#{self.id}", log_message: message
-    puts "\nMESSAGE:#{self.id},#{message}\n"
   end
 
-  def get_subnets
+  def log_clear
+    update_attributes(log: nil)
+  end
+
+  def purge
+    self.clouds.each do |cloud|
+      cloud.subnets.each do |subnet|
+        subnet.instances.each do |instance|
+          instance.instance_groups.each do |instance_group|
+            Group.where(:id => instance_group.group_id).destroy_all
+            Player.where(:group_id => instance_group.group_id).destroy_all
+            InstanceGroup.where(:id => instance_group.id).destroy_all
+          end
+          role_id = InstanceRole.where(:instance_id => instance.id).pluck(:role_id).first
+          Role.where(:id => role_id).destroy_all
+        end
+      end
+    end
+  end
+
+  def subnets
     subnets = []
     self.clouds.each do |cloud|
       cloud.subnets.each do |subnet|
@@ -24,7 +43,7 @@ class Scenario < ActiveRecord::Base
     return subnets
   end
 
-  def get_instances
+  def instances
     instances = []
     self.clouds.each do |cloud|
       cloud.subnets.each do |subnet|
@@ -38,7 +57,7 @@ class Scenario < ActiveRecord::Base
     return instances
   end
 
-  def get_groups
+  def groups
     groups = []
     self.clouds.each do |cloud|
       cloud.subnets.each do |subnet|
@@ -60,7 +79,7 @@ class Scenario < ActiveRecord::Base
     return groups
   end
 
-  def get_players
+  def players
     players = []
     self.clouds.each do |cloud|
       cloud.subnets.each do |subnet|
@@ -84,7 +103,7 @@ class Scenario < ActiveRecord::Base
     return players
   end
 
-  def get_roles
+  def roles
     roles = []
     self.clouds.each do |cloud|
       cloud.subnets.each do |subnet|
@@ -99,5 +118,31 @@ class Scenario < ActiveRecord::Base
     end
     return roles
   end
+
+  def public_instances_reachable?
+    reachable
+    return self.instances.select{ |i| not i.port_open?(22) }.any?
+  end
+
+  def instances_initialized?
+    return self.instances.select{ |i| not i.initialized? }.any?
+  end
+
+  def clouds_booting?
+    return self.clouds.select{ |c| c.booting? }.any?
+  end
+
+  def clouds_boot_failed?
+    return self.clouds.select{ |c| c.boot_failed? }.any?
+  end
+
+  def clouds_unbooting?
+    return self.clouds.select{ |c| c.unbooting? }.any?
+  end
+
+  def clouds_unboot_failed?
+    return self.clouds.select{ |c| c.unboot_failed? }.any?
+  end
+
 
 end

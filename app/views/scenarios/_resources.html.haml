@@ -1,0 +1,30 @@
+%input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
+%label{ for: 'item-0'}
+  = "Scenario: " + @scenario.name
+%div.inline-block
+  %div.dropdown
+    %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-scenario-'+@scenario.id.to_s, "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+      / %span.glyphicon.glyphicon-pencil{"aria-hidden" => "true"}
+      %span.caret
+    %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-scenario'+@scenario.id.to_s}
+      %li{role: 'presentation'}
+        = link_to 'Show log', getlog_scenario_path(@scenario, kind: 'scenario'), remote: true
+%ul{style: "padding-left: 20px;"}
+  %li
+    Scenario name:
+    = @scenario.name
+  %li
+    Status:
+    %span#scenario-status
+      = @scenario.status
+  %li
+    Created at:
+    = @scenario.created_at
+  %p
+  %li
+    %input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
+      %label{ for: 'item-0'}
+        Clouds:
+      %ul
+        - @scenario.clouds.each do |cloud|
+          = render '/scenarios/clouds', cloud: cloud

@@ -1,20 +1,23 @@
-%h1 New scenario
 
-/= render 'form'
+%div.panel.panel-default
+  %div.panel-heading
+    %h2 New scenario
 
+  %div.panel-body
+    - @templates.each do |template|
+      %b Name:
+      = template[0]
+      %br
+      / %span.label Description:
+      %b Description:
+      = template[2]
+      %p
+      = simple_form_for(@scenario) do |f|
+        = f.hidden_field :template, :value => template[1]
+        = f.button :submit, 'Create ' + template[0], class: 'btn btn-primary'
+      %p
+      %br
 
-- @templates.each do |template|
-  %b Name:
-  = template[0]
-  %br
-  %span.label Description:
-  = template[2]
-  %br
-  = simple_form_for(@scenario) do |f|
-    = f.hidden_field :template, :value => template[1]
-    = f.button :submit, 'Create ' + template[0], class: 'btn btn-primary'
-  %p
-
-= link_to 'Back', scenarios_path
+    = link_to 'Back', scenarios_path
 
 
