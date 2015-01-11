@@ -13,10 +13,6 @@ class Scenario < ActiveRecord::Base
     self.update_attributes(log: log + message + "\n")
   end
 
-  def log_clear
-    update_attributes(log: nil)
-  end
-
   def purge
     self.clouds.each do |cloud|
       cloud.subnets.each do |subnet|
@@ -144,5 +140,93 @@ class Scenario < ActiveRecord::Base
     return self.clouds.select{ |c| c.unboot_failed? }.any?
   end
 
+  def get_status
+
+    all_stopped = true
+    all_booted = true
+
+    boot_failed = nil
+    unboot_failed = nil
+
+    booting = nil
+    unbooting = nil
+
+    self.clouds.each do |cloud|
+
+      if cloud.boot_failed?
+        self.set_boot_failed
+        return
+      elsif cloud.unboot_failed?
+        self.set_unboot_failed
+        return
+      end
+      
+      if cloud.booted?
+        all_stopped = false
+      elsif cloud.stopped?
+        all_booted = false
+      elsif cloud.booting?
+        booting = true
+      elsif cloud.unbooting?
+        unbooting = true
+      end
+
+      cloud.subnets.each do |subnet|
+
+        if subnet.boot_failed?
+          self.set_boot_failed
+          return
+        elsif subnet.unboot_failed?
+          self.set_unboot_failed
+          return
+        end
+        
+        if subnet.booted?
+          all_stopped = false
+        elsif subnet.stopped?
+          all_booted = false
+        elsif subnet.booting?
+          booting = true
+        elsif subnet.unbooting?
+          unbooting = true
+        end
+
+        subnet.instances.each do |instance|
+
+          if instance.boot_failed?
+            self.set_boot_failed
+            return
+          elsif instance.unboot_failed?
+            self.set_unboot_failed
+            return
+          end
+          
+          if instance.booted?
+            all_stopped = false
+          elsif instance.stopped?
+            all_booted = false
+          elsif instance.booting?
+            booting = true
+          elsif instance.unbooting?
+            unbooting = true
+          end
+
+        end
+      end
+    end
+
+    if all_stopped and not self.booting?
+      self.set_stopped
+    elsif all_booted
+      self.set_booted
+    end
+
+    if booting
+      self.set_booting
+    elsif unbooting
+      self.set_unbooting
+    end
+
+  end
 
 end

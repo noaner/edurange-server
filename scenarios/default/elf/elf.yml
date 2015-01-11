@@ -10,7 +10,7 @@ Roles:
       - elf
 
 Groups:
-  - Name: Team_1
+  - Name: Instructor
     Access:
       Administrator:
         - NAT_Instance
@@ -19,6 +19,15 @@ Groups:
     Users:
       - Login: instructor
         Password: vLCu3Crf
+
+  - Name: Students
+    Access:
+      User: 
+        - NAT_Instance
+    Users:
+      - Login: student
+        Password: sWfwkNGblfv
+    Description: Describe this Player
 
 Scenarios:
   - Name: Elf

@@ -1,6 +1,6 @@
 %li
-  %input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
-    %label{ for: 'item-0'}
+  %input{ type: 'checkbox', id: 'item-subnet-' + subnet.id.to_s, checked: 'checked'}
+    %label{ for: 'item-subnet-' + subnet.id.to_s}
       = subnet.name
       %div{ class: 'inline-block ' + subnet.status, id: 'subnet-status-dot-'+subnet.id.to_s}
         &#9679;
@@ -18,7 +18,7 @@
         %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-subnet'+subnet.id.to_s}
           %li{role: 'presentation'}
             = link_to 'Show log', getlog_scenario_path(subnet, kind: 'subnet'), remote: true
-            = link_to 'Show routing rules'
+            /= link_to 'Show routing rules'
 
 
     %ul{style: "padding-left: 20px;"}
@@ -38,8 +38,8 @@
         = subnet.internet_accessible
       %p
       %li
-        %input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
-          %label{ for: 'item-0'}
+        %input{ type: 'checkbox', id: 'item-instance-label-' + subnet.id.to_s, checked: 'checked'}
+          %label{ for: 'item-instance-label-' + subnet.id.to_s}
             Instances:
           %ul
             - subnet.instances.each do |instance|

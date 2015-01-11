@@ -1,0 +1,236 @@
+h1. !http://railsapps.github.io/images/rails-36x36.jpg(RailsApps Testing Gem)! RailsApps Testing Gem
+
+See a blog post about "Why I wrote this gem":http://blog.railsapps.org/post/84339605200/railsapps-testing-gem. I primarily use RSpec and Capybara for testing, but in principle, the gem could also set up Test::Unit or Cucumber frameworks. Also, you may want other configurations for RSpec, so let me know and we can extend the gem.
+
+If you're new to testing, I've written a tutorial on Rails testing with RSPec:
+
+* "RSpec Tutorial":http://railsapps.github.io/rspec.html
+
+h2. About
+
+Use this gem to set up a testing framework. The gem modifies a Rails application and configures:
+
+* "RSpec Rails":https://github.com/rspec/rspec-rails – installs RSpec gems with support for Rails
+* "Capybara":https://github.com/jnicklas/capybara – tests web pages
+* "Database Cleaner":https://github.com/bmabey/database_cleaner – a clean slate for databases
+* "FactoryGirl Rails":https://github.com/thoughtbot/factory_girl_rails – creates test data
+* "Launchy":https://github.com/copiousfreetime/launchy – view errors in your web browser
+* "Selenium Webdriver":http://docs.seleniumhq.org/projects/webdriver/ – for tests that require JavaScript
+
+This suite of gems is popular for testing Rails applications. Typically, a developer makes several small configuration changes when setting up a test framework with these gems. The configuration changes are easy to make manually, but this gem provides a generator to make the changes, for ease of use with an automated process such as an application template.
+
+The gem also offers options to install test suites for Devise or OmniAuth.
+
+RailsApps Testing is a utility gem to use during development. You can remove it after setting up your test framework. It was originally written for use by the "Rails Composer":http://railsapps.github.io/rails-composer/ tool. Use Rails Composer to build any of the "RailApps example applications":http://railsapps.github.io/ for use as starter apps.
+
+If you like the RailsApps Testing gem, you might be interested in the "RailsLayout gem":https://github.com/RailsApps/rails_layout which generates Rails application layout files for various front-end frameworks such as Bootstrap and Foundation.
+
+h4. !http://railsapps.github.io/images/join/join-railsapps.png(Join RailsApps)!:http://railsapps.github.io/
+
+h4. Support the RailsApps Project
+
+If the RailsApps Testing gem is useful to you, please accept our invitation to "join the RailsApps project":http://railsapps.github.io/. The RailsApps project provides example applications, tutorials, and starter tools, including the RailsApps Testing gem.
+
+h2. Install a Testing Framework
+
+The RailsApps project offers a tutorial on Rails testing with RSPec:
+
+* "RSpec Tutorial":http://railsapps.github.io/rspec.html
+
+To install a testing framework, add the gems you need. Then use the RailsApps Testing gem. It will set up and configure your testing framework.
+
+Add the gems you need to your Rails application Gemfile:
+
+<pre>
+group :development do
+  gem 'rails_apps_testing'
+end
+group :development, :test do
+  gem 'rspec-rails'
+  gem 'factory_girl_rails'
+end
+group :test do
+  gem 'capybara'
+  gem 'database_cleaner'
+  gem 'launchy'
+  gem 'selenium-webdriver'
+end
+</pre>
+
+You don't need the RailsApps Testing gem deployed to production, so put it in the @development@ group.
+
+If you want to use a newer unreleased version from GitHub:
+
+<pre>
+group :development do
+  gem 'rails_apps_testing', github: 'RailsApps/rails_apps_testing'
+end
+</pre>
+
+h4. Use Bundler
+
+Use Bundler to install the gems:
+
+<pre>
+$ bundle install
+</pre>
+
+h2. Configure RSpec and Friends
+
+To run the generator and configure the testing framework:
+
+<pre>
+$ rails generate testing:configure rspec
+</pre>
+
+Use @--force@ if you want to overwrite existing files:
+
+<pre>
+$ rails generate testing:configure rspec --force
+</pre>
+
+h3. RSpec Configuration
+
+The RailsApps Testing generator will remove the legacy *test/* folder if it exists (it is not needed for RSpec).
+
+The RailsApps Testing generator will run @rails generate rspec:install@ to create three files and a folder:
+
+* *.rspec*
+* *spec/*
+* *spec/spec_helper.rb*
+* *spec/rails_helper.rb*
+
+Then the RailsApps Testing generator will configure RSpec.
+
+It will modify the file *.rspec* to add:
+
+<pre>
+--format documentation
+--require rails_helper
+</pre>
+
+and will remove:
+
+<pre>
+--warnings
+</pre>
+
+Prior to RSpec 3.0, every RSpec test file had to include @require 'spec_helper'@. With RSpec 3.0 and later versions, an additional @require 'rails_helper'@ became necessary. Fortunately, starting with RSpec 3.0, to eliminate clutter and duplication, these requirements can be specified in the project setting *.rspec* file.
+
+It will modify the file *config/application.rb* to suppress creation of stub files that many developers don't use:
+
+<pre>
+config.generators do |g|
+  g.test_framework :rspec,
+    fixtures: true,
+    view_specs: false,
+    helper_specs: false,
+    routing_specs: false,
+    controller_specs: false,
+    request_specs: false
+  g.fixture_replacement :factory_girl, dir: "spec/factories"
+end
+</pre>
+
+h3. Capybara and Launchy Configuration
+
+The generator will set up Capybara and Launchy to display CSS and JavaScript with a file *spec/support/capybara.rb*:
+
+<pre>
+Capybara.asset_host = 'http://localhost:3000'
+</pre>
+
+h3. Database Cleaner Configuration
+
+The generator will set up Database Cleaner to test JavaScript with a file *spec/support/database_cleaner.rb*:
+
+<pre>
+RSpec.configure do |config|
+  config.before(:suite) do
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  config.before(:each) do
+    DatabaseCleaner.strategy = :transaction
+  end
+
+  config.before(:each, :js => true) do
+    DatabaseCleaner.strategy = :truncation
+  end
+
+  config.before(:each) do
+    DatabaseCleaner.start
+  end
+
+  config.append_after(:each) do
+    DatabaseCleaner.clean
+  end
+end
+</pre>
+
+It will also modify *spec/rails_helper.rb*:
+
+<pre>
+config.use_transactional_fixtures = false
+</pre>
+
+h3. FactoryGirl Configuration
+
+The generator will set up FactoryGirl shortcuts with a file *spec/support/factory_girl.rb*:
+
+<pre>
+RSpec.configure do |config|
+  config.include FactoryGirl::Syntax::Methods
+end
+</pre>
+
+h3. Install Devise Tests
+
+If you want to install tests for Devise, you can run:
+
+<pre>
+$ rails generate testing:configure devise
+</pre>
+
+h3. Install OmniAuth Tests
+
+If you want to install tests for OmniAuth, you can run:
+
+<pre>
+$ rails generate testing:configure omniauth
+</pre>
+
+h2. Issues
+
+Any issues? Please create an "issue":http://github.com/RailsApps/rails_apps_testing/issues on GitHub. Reporting issues (and patching!) helps everyone.
+
+h2. Credits
+
+Daniel Kehoe maintains this gem as part of the "RailsApps project":http://railsapps.github.io/.
+
+Please see the "CHANGELOG":https://github.com/RailsApps/rails_apps_testing/blob/master/CHANGELOG.textile for a list of contributors.
+
+Is the gem useful to you? Follow the project on Twitter: "@rails_apps":http://twitter.com/rails_apps. I'd love to know you were helped out by the gem.
+
+h2. MIT License
+
+"MIT License":http://www.opensource.org/licenses/mit-license
+
+Copyright © 2014 Daniel Kehoe
+
+h2. Useful Links
+
+|_. Getting Started |_. Articles |_. Tutorials |
+| "Ruby on Rails":http://railsapps.github.io/ruby-and-rails.html |                                     "Analytics for Rails":http://railsapps.github.io/rails-google-analytics.html |                 "Rails Bootstrap":http://railsapps.github.io/twitter-bootstrap-rails.html |
+| "What is Ruby on Rails?":http://railsapps.github.io/what-is-ruby-rails.html |                        "Heroku and Rails":http://railsapps.github.io/rails-heroku-tutorial.html |                     "Rails Foundation":http://railsapps.github.io/rails-foundation.html |
+| "Learn Ruby on Rails":http://learn-rails.com/learn-ruby-on-rails.html |                              "JavaScript and Rails":http://railsapps.github.io/rails-javascript-include-external.html |     "RSpec Tutorial":http://railsapps.github.io/rspec.html |
+| "Rails Tutorial":https://tutorials.railsapps.org/rails-tutorial |                                    "Rails Environment Variables":http://railsapps.github.io/rails-environment-variables.html |    "Rails Devise Tutorial":http://railsapps.github.io/tutorial-rails-devise.html |
+| "Ruby on Rails Tutorial for Beginners":http://learn-rails.com/ruby-on-rails-tutorial-for-beginners | "Git and GitHub with Rails":http://railsapps.github.io/rails-git.html |                        "Devise RSpec":http://railsapps.github.io/tutorial-rails-devise-rspec-cucumber.html |
+| "Install Ruby on Rails":http://railsapps.github.io/installing-rails.html |                           "Send Email with Rails":http://railsapps.github.io/rails-send-email.html |                     "Devise Bootstrap":http://railsapps.github.io/tutorial-rails-bootstrap-devise-cancan.html |
+| "Install Ruby on Rails - Mac OS X":http://railsapps.github.io/installrubyonrails-mac.html |          "Haml and Rails":http://railsapps.github.io/rails-haml.html |                                  "Rails Membership Site with Stripe":https://tutorials.railsapps.org/rails-stripe-membership-saas |
+| "Install Ruby on Rails - Ubuntu":http://railsapps.github.io/installrubyonrails-ubuntu.html |         "Rails Application Layout":http://railsapps.github.io/rails-default-application-layout.html |  "Rails Subscription Site with Recurly":https://tutorials.railsapps.org/rails-recurly-subscription-saas |
+| "Ruby on Rails - Nitrous.io":http://railsapps.github.io/rubyonrails-nitrous-io.html |                "HTML5 Boilerplate for Rails":http://railsapps.github.io/rails-html5-boilerplate.html |        "Startup Prelaunch Signup Application":https://tutorials.railsapps.org/rails-prelaunch-signup |
+| "Update Rails":http://railsapps.github.io/updating-rails.html |                                      "Example Gemfiles for Rails":http://railsapps.github.io/rails-3-2-example-gemfile.html |
+| "Rails Composer":http://railsapps.github.io/rails-composer/ |                                        "Rails Application Templates":http://railsapps.github.io/rails-application-templates.html |
+| "Rails Examples":http://railsapps.github.io/ |                                                       "Rails Product Planning":http://railsapps.github.io/rails-product-planning.html |
+| "Rails Starter Apps":http://railsapps.github.io/rails-examples-tutorials.html |                      "Rails Project Management":http://railsapps.github.io/rails-project-management.html |

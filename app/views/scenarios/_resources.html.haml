@@ -1,6 +1,14 @@
-%input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
-%label{ for: 'item-0'}
+%input{ type: 'checkbox', id: 'item-scenario', checked: 'checked'}
+%label{ for: 'item-scenario'}
   = "Scenario: " + @scenario.name
+  %div{ class: 'inline-block ' + @scenario.status, id: 'scenario-status-dot' }
+    &#9679;
+
+  - if @scenario.booting?
+    %div.spin.inline-block{ id: 'scenario-spinner' }
+  - else
+    %div.inline-block{ id: 'scenario-spinner' }
+
 %div.inline-block
   %div.dropdown
     %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-scenario-'+@scenario.id.to_s, "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -22,8 +30,8 @@
     = @scenario.created_at
   %p
   %li
-    %input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
-      %label{ for: 'item-0'}
+    %input{ type: 'checkbox', id: 'item-cloud-label-' + @scenario.id.to_s, checked: 'checked'}
+      %label{ for: 'item-cloud-label-' + @scenario.id.to_s}
         Clouds:
       %ul
         - @scenario.clouds.each do |cloud|

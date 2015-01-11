@@ -45,33 +45,41 @@ class ScenariosController < ApplicationController
   # GET /scenarios/1.json
   def show
     @user = User.find(current_user.id)
-    @cloud_booted = @scenario.clouds.select { |cloud| cloud.booted? }.size
-    @cloud_count = @scenario.clouds.size
-    @subnet_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.select { |subnet| subnet.booted? }.size
-    @subnet_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.size
-    @instance_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.select { |instance| instance.booted? }.size
-    @instance_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.size
+    # @cloud_booted = @scenario.clouds.select { |cloud| cloud.booted? }.size
+    # @cloud_count = @scenario.clouds.size
+    # @subnet_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.select { |subnet| subnet.booted? }.size
+    # @subnet_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.size
+    # @instance_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.select { |instance| instance.booted? }.size
+    # @instance_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.size
 
     # get studentGroups
-    @student_groups = StudentGroup.where("instructor_id = #{current_user.id} AND student_id = #{current_user.id}")
-
+    # @student_groups = StudentGroup.where("instructor_id = #{current_user.id} AND student_id = #{current_user.id}")
   end
 
   def boot_toggle
-    if @scenario.status == "stopped"
-      @scenario.boot
+    if @scenario.stopped?
+      @scenario.set_booting
+      @scenario.delay.boot
       # @boot_message = "Scenario is booting. Monitor output below."
-    elsif @scenario.status == "booted" or @scenario.status == "unboot_failed" or @scenario.status == "boot_failed"
-      @scenario.unboot
+    elsif @scenario.booted? or @scenario.boot_failed? or @scenario.unboot_failed?
+      @scenario.set_unbooting
+      @scenario.delay.unboot
       # @boot_message = "Scenario is unbooting. Monitor output below."
     end
-    # @scenario.set_booting
+
+    @hide_dropdown = true
+
+    @boot_message = "Scenario is unbooting. Monitor output below."
     respond_to do |format|
       format.js { render 'scenarios/boot_status.js.erb', :layout => false }
     end
   end
 
   def boot_status
+
+
+    @scenario.get_status
+
     respond_to do |format|
       format.js { render 'scenarios/boot_status.js.erb', :layout => false }
     end
@@ -128,6 +136,7 @@ class ScenariosController < ApplicationController
   # DELETE /scenarios/1
   # DELETE /scenarios/1.json
   def destroy
+    @scenario.purge
     @scenario.destroy
 
     respond_to do |format|

@@ -1,0 +1,17 @@
+/usr/bin/ruby -r ./siteconf20150110-25623-1s664e1.rb extconf.rb 
+checking for main() in -lc... yes
+creating Makefile
+
+make "DESTDIR=" clean
+
+make "DESTDIR="
+compiling hpricot_css.c
+hpricot_css.c: In function ‘hpricot_css’:
+hpricot_css.c:3407:9: warning: comparison between pointer and integer
+  if ( p == eof )
+         ^
+compiling hpricot_scan.c
+linking shared-object hpricot_scan.so
+
+make "DESTDIR=" install
+/usr/bin/install -c -m 0755 hpricot_scan.so ./.gem.20150110-25623-ib4yqt

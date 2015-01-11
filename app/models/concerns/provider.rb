@@ -12,10 +12,10 @@ module Provider
     enum status: [:stopped, :booting, :booted, :failed, :boot_failed, :unboot_failed, :unbooting, :stopping, :broken, :fixing]
   end
 
-  def max_attempts; 0; end
+  # def max_attempts; 0; end
 
-  def foome
-    File.open("findme", "a").write("foome")
+  def clear_log
+    update_attributes(log: '')
   end
 
   def boot_error(error)
@@ -38,10 +38,12 @@ module Provider
     puts classname
 
     self.set_booting
+    self.clear_log
     self.send("provider_boot_#{classname}")
     # self.delay.send("provider_boot_#{classname}")
 
   end
+  # handle_asynchronously :boot, priority: 20
 
   def unboot_error(error)
     self.set_boot_failed
@@ -52,8 +54,10 @@ module Provider
   def unboot
     classname = self.class.to_s.downcase
     puts classname
+    self.set_unbooting
     self.send("provider_unboot_#{classname}")
   end
+  # handle_asynchronously :boot, priority: 20
 
   ## Status set and get
   # set status

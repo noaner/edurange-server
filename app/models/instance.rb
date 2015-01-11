@@ -36,28 +36,34 @@ class Instance < ActiveRecord::Base
     s3 = AWS::S3.new
     bucket_name = Settings.bucket_name
     bucket = s3.buckets[bucket_name]
-    name = scenario.user.name + scenario.name + scenario.id.to_s + scenario.uuid
+    name = self.name + '-' + self.uuid + '-com'
     if bucket.objects[name].exists?
       return true if bucket.objects[name].read() == 'finished'
     end
     false
   end
 
-  def port_open?(port)
-    if ip = self.provider_instance_public_ip
-      begin
-        s = TCPSocket.open(ip, port)
-      rescue
-        return false
+  def port_open?(ip, port)
+    begin
+      Timeout::timeout(1) do 
+        begin
+          s = TCPSocket.open(ip, port)
+          s.close
+          return true
+        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+          return false
+        end
       end
-    else
-      return false
+    rescue Timeout::Error
     end
-    true
+    return false
   end
 
   def ssh_ready?
-    return self.port_open?(22)
+    if ip = self.aws_instance_public_ip
+      return (self.port_open?(ip, 22) and self.initialized?)
+    end
+    return false
   end
 
   def ensure_has_ip

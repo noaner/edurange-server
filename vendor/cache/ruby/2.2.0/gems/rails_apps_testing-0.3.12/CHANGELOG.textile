@@ -1,0 +1,79 @@
+h1. CHANGELOG
+
+h3. 0.3.12 October 5, 2014
+
+* update for Devise 3.4 changed error messages
+
+h3. 0.3.11 September 12, 2014
+
+* accommodate RSpec 3.1 change to rails_helper.rb file (https://github.com/rspec/rspec-rails/issues/1106)
+* accommodate Devise Confirmable module (contributed by Walther Diechmann)
+
+h3. 0.3.10 August 20, 2014
+
+* fix match against error messages in the Devise locale file
+
+h3. 0.3.9 August 20, 2014
+
+* match against error messages in the Devise locale file
+
+h3. 0.3.8 August 14, 2014
+
+* remove superfluous line from OmniAuth test
+
+h3. 0.3.7 August 14, 2014
+
+* update for Devise 3.3 changed error messages
+
+h3. 0.3.6 July 7, 2014
+
+* accommodate undefined file load order on Linux for Devise session helpers
+
+h3. 0.3.5 June 26, 2014
+
+* remove 'capture email' feature from 'rails-omniauth' example application
+
+h3. 0.3.4 June 14, 2014
+
+* add a suite of tests for Pundit
+
+h3. 0.3.3 June 7, 2014
+
+* eliminate deprecated 'should' syntax for OmniAuth tests
+
+h3. 0.3.2 June 6, 2014
+
+* add a User model test for OmniAuth
+
+h3. 0.3.1 June 6, 2014
+
+* add a User model test for Devise
+
+h3. 0.3.0 June 6, 2014
+
+* add a suite of tests for OmniAuth
+* add a suite of tests for Devise
+
+h3. 0.2.4 June 4, 2014
+
+* for RSpec 3.0., modify '.rspec' file to include '--require rails_helper'
+
+h3. 0.2.3 June 2, 2014
+
+* eliminate a blank line in the .rspec file
+
+h3. 0.2.2 June 2, 2014
+
+* update for RSpec 3.0
+
+h3. 0.2.1 April 26, 2014
+
+* tiny fix (missing newline in a file)
+
+h3. 0.2.0 April 26, 2014
+
+* add option to install support for Devise
+
+h3. 0.1.0 April 26, 2014
+
+* set up RSpec and friends in a Rails application

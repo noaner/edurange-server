@@ -14,7 +14,7 @@ class Management
     InstanceRole.delete_all
     debug "Finished purging local DB!"
   end
-  handle_asynchronously :purge
+  # handle_asynchronously :purge
 
   def showresources
     puts Scenario.all

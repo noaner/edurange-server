@@ -15,13 +15,12 @@
 
 / = link_to 'modal', "#modal1", :data => {:toggle=>"modal"}
 
-= subscribe_to "/scenarios/#{@scenario.id}"
 %div.panel.panel-default#scenario{data: {id: @scenario.id}}
   %div.panel-heading.nav.nav-pills
     %li
       %h4
         =@scenario.name + ":"
-    %li.dropdown
+    %li.dropdown#action-dropdown
       %a.dropdown-toggle{ "data-toggle" => "dropdown", href: "#", role: "button", "aria-expanded" => "false"}
         Actions
         %span.caret
@@ -31,7 +30,7 @@
             = link_to 'Boot', boot_toggle_scenario_path(@scenario), remote:true, id: 'boot-button'
           - elsif @scenario.booting?
             = link_to 'Boot', '#', id: 'boot-button'
-          - elsif @scenario.booted?
+          - elsif (@scenario.booted? or @scenario.boot_failed?)
             = link_to 'Unboot', boot_toggle_scenario_path(@scenario), remote:true, id: 'boot-button'
           - elsif @scenario.is_failed?
             = link_to 'Unboot', boot_toggle_scenario_path(@scenario), remote:true, id: 'boot-button'
@@ -52,6 +51,8 @@
         %p
         %li
           = render '/scenarios/resources'
+        %li
+          = render '/scenarios/players'
 
 = link_to 'Back', scenarios_path, class: 'btn btn-default'
 

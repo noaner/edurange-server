@@ -1,0 +1,49 @@
+%li
+  %input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
+    %label{ for: 'item-0' }
+      Players
+
+    %ul
+      - @scenario.groups.each do |group|
+        %span.inline
+          = "Team: " + group.name
+          &nbsp&nbsp&nbsp
+        = form_tag modify_players_scenario_path(group: group), class: "inline" do
+          = select_tag "studentGroupName", options_for_select(@user.student_groups.pluck(:name))
+          = submit_tag "add", name: "add", class: 'btn btn-default'
+          = submit_tag "remove", name: "remove", class: 'btn btn-default'
+        %p
+        / %dl
+        %table.table
+          %tr
+            %th Name
+            %th Email
+            %th Login
+            %th Password
+            %th Student Group
+            %th Answers
+            %th Answered
+            / %th Score
+          - group.players.each do |player|
+            %tr
+              - if player.user_id
+                - user = User.find(player.user_id)
+                %td= user.name
+                %td= user.email
+              - else
+                %td
+                %td
+              %td= player.login
+              %td= player.password
+              - if player.student_group
+                %td= player.student_group.name
+                %td= link_to 'answers', "/scoring/instructor_student/#{@scenario.id}/#{player.user_id}"
+                %td
+                  - cnt = @scenario.questions.select{ |q| q.answers and q.answers.where("student_id = #{player.user_id}").size > 0 }.size
+                  - total = @scenario.questions.size
+                  %span{id: "answered-student-#{player.user_id}"}
+                    = "#{cnt}/#{total}"
+                / %td= "#{correct}/#{total}"
+              - else
+                %td
+                %td

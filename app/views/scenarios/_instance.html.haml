@@ -1,6 +1,6 @@
 %li
-  %input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
-    %label{ for: 'item-0' }
+  %input{ type: 'checkbox', id: 'item-instance' + instance.id.to_s, checked: 'checked'}
+    %label{ for: 'item-instance' + instance.id.to_s }
       = instance.name
       %div{ class: 'inline-block ' + instance.status, id: 'instance-status-dot-'+instance.id.to_s}
         &#9679;
@@ -41,6 +41,9 @@
           %span{id: 'instance-public-ip-' + instance.id.to_s}
             = ip
           %br
-          Reachable:
+          SSH Ready:
           %span{id: 'instance-ssh-ready-' + instance.id.to_s}
             = instance.ssh_ready?
+          %br
+          OS:
+          = instance.os
