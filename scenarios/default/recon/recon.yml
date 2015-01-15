@@ -34,6 +34,16 @@ Groups:
     Access:
       Administrator:
         - Team_1_Instance
+        - Battlespace_1_Instance
+        - Battlespace_2_Instance
+        - Battlespace_3_Instance
+        - Battlespace_4_Instance
+        - Battlespace_5_Instance
+        - Battlespace_6_Instance
+        - Battlespace_7_Instance
+        - Battlespace_8_Instance
+        - Battlespace_9_Instance
+        - Battlespace_10_Instance
       User:
         - NAT_Instance
     Users:

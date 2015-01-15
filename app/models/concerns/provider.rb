@@ -178,6 +178,7 @@ module Provider
   # @see #run_provider_method
   # @return [nil]
   def method_missing(meth, *args, &block)
+    puts "\nMethod Miss\n"
     if meth.to_s =~ /^provider_(.+)$/
       run_provider_method($1, *args, &block)
     else

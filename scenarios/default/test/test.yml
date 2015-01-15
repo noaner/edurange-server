@@ -2,6 +2,7 @@ Roles:
   - Name: Role_1
     Packages:
     Recipes:
+      - sshd_password_login
 
 Groups:
   - Name: Team_1
@@ -33,7 +34,7 @@ Subnets:
 Instances:
   - Name: Instance_1
     Subnet: Subnet_1
-    OS: nat
+    OS: ubuntu
     IP_Address: 10.0.129.5
     Internet_Accessible: true
     Roles:

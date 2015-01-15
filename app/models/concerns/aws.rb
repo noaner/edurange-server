@@ -174,7 +174,11 @@ module Aws
 
     # get ami based on OS
     if self.os == 'ubuntu'
-      aws_instance_ami = 'ami-31727d58' # Private ubuntu image with chef and deps, updates etc.
+      # aws_instance_ami = 'ami-31727d58' # Private ubuntu image with chef and deps, updates etc.
+      # aws_instance_ami = 'ami-1ea3d176'
+      # aws_instance_ami = 'ami-56e7953e'
+      # aws_instance_ami = 'ami-d2ec9eba'
+      aws_instance_ami = 'ami-b80b76d0'
     elsif self.os == 'nat'
       aws_instance_ami = 'ami-51727d38' # Private NAT image with chef and deps, updates etc.
     end
@@ -188,7 +192,8 @@ module Aws
     instance_type_num = 0
     tries = 0
     # instance_types = ["t1.micro", "m3.micro", "t1.small", "m3.small"]
-    instance_types = ["t1.micro"]
+    # instance_types = ["t1.micro"]
+    instance_types = ["t2.micro"]
     begin
       debug "tyring Instance Type #{instance_types[instance_type_num]}"
       ec2instance = AWS::EC2::InstanceCollection.new.create(
