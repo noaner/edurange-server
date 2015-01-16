@@ -1,7 +1,8 @@
 %li
   %input{ type: 'checkbox', id: 'item-subnet-' + subnet.id.to_s, checked: 'checked'}
     %label{ for: 'item-subnet-' + subnet.id.to_s}
-      = subnet.name
+      %span{ id: 'subnet-name-' + subnet.id.to_s}
+        = subnet.name
       %div{ class: 'inline-block ' + subnet.status, id: 'subnet-status-dot-'+subnet.id.to_s}
         &#9679;
 
@@ -19,7 +20,7 @@
           %li{role: 'presentation'}
             = link_to 'Show log', getlog_scenario_path(subnet, kind: 'subnet'), remote: true
             /= link_to 'Show routing rules'
-
+            = link_to 'Modify', "#modal-modify-subnet", :data => {:toggle=>"modal"}, :onclick => "$('#modal-modify-subnet').find('#modal-title').text('#subnet.name');  $('#modal-modify-subnet').find('#subnet_id').val('#{subnet.id}'); $('#modal-modify-subnet').find('#name').val( $('#subnet-name-#{subnet.id}').text().trim() ); $('#modal-modify-subnet').find('#CIDR').val( $('#subnet-cidr-#{subnet.id}').text().trim() ); $('#modal-modify-subnet').find('#internet_accessible').val( $('#subnet-internet-accessible-#{subnet.id}').text().trim() );"
 
     %ul{style: "padding-left: 20px;"}
       %li
@@ -32,10 +33,12 @@
           = subnet.driver_id == nil ? "not set" : subnet.driver_id
       %li
         CIDR:
-        = subnet.cidr_block
+        %span{ { id: 'subnet-cidr-' + subnet.id.to_s}}
+          = subnet.cidr_block
       %li
         Internet Accessible:
-        = subnet.internet_accessible
+        %span{ { id: 'subnet-internet-accessible-' + subnet.id.to_s}}
+          = subnet.internet_accessible
       %p
       %li
         %input{ type: 'checkbox', id: 'item-instance-label-' + subnet.id.to_s, checked: 'checked'}

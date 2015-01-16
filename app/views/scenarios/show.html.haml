@@ -13,12 +13,110 @@
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
+%div.modal#modal-modify{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title= "Modifypath: #{@scenario.name}"
+      %div.modal-body#modalbody
+        = form_tag modify_scenario_path(@scenario), remote:true do 
+          = label_tag "Name:", nil, class: 'control-label'
+          = text_field_tag "name", nil, class: 'form-control'
+          %p
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-modify-cloud{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Modify:
+          %span#modal-title
+      %div.modal-body#modalbody
+        = form_tag modify_cloud_scenario_path(@scenario), remote:true do 
+          = hidden_field_tag 'cloud_id'
+          = label_tag "Name:", nil, class: 'control-label'
+          = text_field_tag "name", nil, class: 'form-control'
+          %p
+          %div#cidr-div
+            = label_tag nil, "CIDR:", class: 'control-label'
+            = text_field_tag "CIDR", nil, class: 'form-control'
+            %span.help-block.inline#cidr-help
+          %p
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-modify-subnet{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Modify:
+          %span#modal-title
+      %div.modal-body#modalbody
+        = form_tag modify_subnet_scenario_path(@scenario), remote:true do 
+          = hidden_field_tag 'subnet_id'
+          = label_tag "Name:", nil, class: 'control-label'
+          = text_field_tag "name", nil, class: 'form-control'
+          %p
+          %div#cidr-div
+            = label_tag nil, "CIDR:", class: 'control-label'
+            = text_field_tag "CIDR", nil, class: 'form-control'
+            %span.help-block.inline#cidr-help
+          %p
+          %div#internet-accessible-div
+            = label_tag nil, "Internet Accessible:", class: 'control-label'
+            = text_field_tag "internet_accessible", nil, class: 'form-control'
+          %p
+
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-add-cloud{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          = "#{@scenario.name} - Add Cloud"
+          %span#modal-title
+      %div.modal-body#modalbody
+        = form_tag add_cloud_scenario_path(@scenario), remote:true do 
+          %div#cidr-div
+            = label_tag "Name:", nil, class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block.inline#name-help
+          %p
+          %div#cidr-div
+            = label_tag nil, "CIDR:", class: 'control-label'
+            = text_field_tag "CIDR", nil, class: 'form-control'
+            %span.help-block.inline#cidr-help
+          %p
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
 / = link_to 'modal', "#modal1", :data => {:toggle=>"modal"}
 
 %div.panel.panel-default#scenario{data: {id: @scenario.id}}
   %div.panel-heading.nav.nav-pills
     %li
-      %h4
+      %h4#scenario-main-title
         =@scenario.name + ":"
     %li.dropdown#action-dropdown
       %a.dropdown-toggle{ "data-toggle" => "dropdown", href: "#", role: "button", "aria-expanded" => "false"}
@@ -37,6 +135,7 @@
           = link_to 'Pause'
           = link_to 'Destroy', @scenario, :method => :delete
           = link_to 'Show Boot Log', getlog_scenario_path(@scenario, kind: 'scenario'), remote: true
+          = link_to 'Save Changes', save_changes_scenario_path(@scenario), remote: true
 
   %div.panel-body
 

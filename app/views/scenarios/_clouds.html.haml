@@ -1,7 +1,8 @@
 %li
   %input{ type: 'checkbox', id: 'item-cloud-' + cloud.id.to_s , checked: 'checked'}
     %label{ for: 'item-cloud-' + cloud.id.to_s}
-      = cloud.name
+      %span{ id: 'cloud-name-' + cloud.id.to_s}
+        = cloud.name
       %div{ class: 'inline-block ' + cloud.status, id: 'cloud-status-dot-'+cloud.id.to_s}
         &#9679;
 
@@ -18,6 +19,8 @@
         %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-cloud'+cloud.id.to_s}
           %li{role: 'presentation'}
             = link_to 'Show log', getlog_scenario_path(cloud, kind: 'cloud'), remote: true
+            /= link_to 'Modify', "#modal-modify-cloud", :data => {:toggle=>"modal"}, :onclick => "alert('hi'); $('#modal-modify-cloud').find('#modal-title').text('#{cloud.name}'); alert('hi');'"
+            = link_to 'Modify', "#modal-modify-cloud", :data => {:toggle=>"modal"}, :onclick => "$('#modal-modify-cloud').find('#modal-title').text('hi'); $('#modal-modify-cloud').find('#cloud_id').val('#{cloud.id}'); $('#modal-modify-cloud').find('#name').val('#{cloud.name}'); $('#modal-modify-cloud').find('#CIDR').val('#{cloud.cidr_block}');"
 
     %ul{style: "padding-left: 20px;"}
       %li
@@ -30,7 +33,8 @@
           = cloud.driver_id == nil ? "not set" : cloud.driver_id
       %li
         CIDR:
-        = cloud.cidr_block
+        %span{ { id: 'cloud-cidr-' + cloud.id.to_s}}
+          = cloud.cidr_block
       %p
       %li
         %input{ type: 'checkbox', id: 'item-subnet-label-' + cloud.id.to_s, checked: 'checked'}

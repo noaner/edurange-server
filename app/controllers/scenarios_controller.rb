@@ -1,5 +1,5 @@
 class ScenariosController < ApplicationController
-  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot_toggle, :boot_status, :test_console, :modify_players]
+  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot_toggle, :boot_status, :test_console, :modify_players, :modify, :add_cloud]
   before_action :authenticate_instructor
 
   # GET /scenarios
@@ -206,6 +206,61 @@ class ScenariosController < ApplicationController
     @name = name
     respond_to do |format|
       format.js { render template: 'scenarios/log.js.erb', layout: false }
+    end
+  end
+
+  def make_scenario
+
+  end
+
+  def modify
+
+    @scenario.name = params[:name]
+    @scenario.save
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/modify.js.erb', layout: false }
+    end
+  end
+
+  def modify_cloud
+    @cloud = Cloud.find(params[:cloud_id])
+    @cloud.name = params[:name]
+    @cloud.cidr_block = params[:CIDR]
+    @cloud.save
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/modify_cloud.js.erb', layout: false }
+    end
+  end
+
+  def add_cloud
+
+    @cloud = @scenario.clouds.new
+    @cloud.name = params[:name]
+    @cloud.cidr_block = params[:CIDR]
+    @cloud.save
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/add_cloud.js.erb', layout: false }
+    end
+  end
+
+  def modify_subnet
+    @subnet = Subnet.find(params[:subnet_id])
+    @subnet.name = params[:name]
+    @subnet.cidr_block = params[:CIDR]
+
+    if params[:internet_accessible] == "true"
+      @subnet.internet_accessible = true
+    else
+      @subnet.internet_accessible = false
+    end
+
+    @subnet.save
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/modify_subnet.js.erb', layout: false }
     end
   end
 

@@ -5,7 +5,10 @@
       %h4
         Scenarios
     %li
-      = link_to 'New Scenario', new_scenario_path, class: 'btn'
+      = link_to 'Load Scenario', new_scenario_path
+    %li
+      = link_to 'Create Scenario', 'scenarios/make_scenario'
+      / = link_to 'Create Scenario', create_scenario_scenario_path(id:1)
     / %li.dropdown
     /   %a.dropdown-toggle{ "data-toggle" => "dropdown", href: "#", role: "button", "aria-expanded" => "false"}
     /     Actions

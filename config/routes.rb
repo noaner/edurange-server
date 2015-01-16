@@ -12,6 +12,9 @@ Edurange::Application.routes.draw do
   resources :subnets
   resources :clouds
 
+  get 'scenarios/make_scenario'
+  get 'scenarios/make_scenario_add_cloud'
+
   resources :scenarios do
     member do
       get 'status'
@@ -20,9 +23,17 @@ Edurange::Application.routes.draw do
       post 'modify_players'
       get 'getlog'
       get 'boot_status'
+      post 'add_cloud'
+      post 'add_subnet'
+      post 'add_instance'
+      post 'modify'
+      post 'modify_cloud'
+      post 'modify_subnet'
+      post 'modify_instance'
+      get 'save_changes'
     end
   end
-
+  
   get 'scenarios/destroy/:id', to: 'scenarios#destroy'
 
   get 'instructor', to: 'instructor#index'

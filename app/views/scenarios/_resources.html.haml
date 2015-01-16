@@ -1,6 +1,7 @@
 %input{ type: 'checkbox', id: 'item-scenario', checked: 'checked'}
 %label{ for: 'item-scenario'}
-  = "Scenario: " + @scenario.name
+  / = "Scenario: " + @scenario.name
+  Scenario:
   %div{ class: 'inline-block ' + @scenario.status, id: 'scenario-status-dot' }
     &#9679;
 
@@ -17,10 +18,17 @@
     %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-scenario'+@scenario.id.to_s}
       %li{role: 'presentation'}
         = link_to 'Show log', getlog_scenario_path(@scenario, kind: 'scenario'), remote: true
+      %li{role: 'presentation'}
+        = link_to 'Modify', "#modal-modify", :data => {:toggle=>"modal"}
+      //:onclick => "$('#modal-modify').find('#modal-title').html(\"Modify: #{@scenario.name}\");"
+      %li{role: 'presentation'}
+        = link_to 'Add Cloud', "#modal-add-cloud", :data => {:toggle=>"modal"}
+
 %ul{style: "padding-left: 20px;"}
   %li
     Scenario name:
-    = @scenario.name
+    %span#scenario-name
+      = @scenario.name
   %li
     Status:
     %span#scenario-status

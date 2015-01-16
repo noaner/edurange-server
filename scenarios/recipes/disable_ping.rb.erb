@@ -1,0 +1,8 @@
+script "disable_ping" do
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  code <<-EOH
+  echo 1 >/proc/sys/net/ipv4/icmp_echo_ignore_all
+  EOH
+end

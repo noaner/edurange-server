@@ -13,6 +13,24 @@ class Instance < ActiveRecord::Base
   before_create :ensure_has_ip
   validate :ip_address_must_be_within_subnet
 
+  def generate_cookbooker
+
+    # template = File.read(Settings.app_path + "lib/templates/cookbook_template_new.rb.erb")
+    # template = Erubis::Eruby.new(template)
+    cookbook = "# Instance cookbook\n"
+
+    self.roles.each do |role|
+        role.recipes.each do |recipe|
+          fname = Settings.app_path + "scenarios/recipes/" + recipe + ".rb.erb"
+          if File.file?(fname)
+            cookbook += Erubis::Eruby.new(File.read(fname)).result + "\n"
+          end
+        end
+      end
+
+      cookbook
+  end
+
   def scenario
     return self.subnet.cloud.scenario
   end
