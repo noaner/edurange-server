@@ -10,8 +10,8 @@
           &nbsp&nbsp&nbsp
         = form_tag modify_players_scenario_path(group: group), class: "inline" do
           = select_tag "studentGroupName", options_for_select(@user.student_groups.pluck(:name))
-          = submit_tag "add", name: "add", class: 'btn btn-default'
-          = submit_tag "remove", name: "remove", class: 'btn btn-default'
+          = button_tag "add", name: "add", class: 'btn btn-default'
+          = button_tag "remove", name: "remove", class: 'btn btn-default'
         %p
         / %dl
         %table.table

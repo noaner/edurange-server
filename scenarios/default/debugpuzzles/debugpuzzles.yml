@@ -1,0 +1,57 @@
+Roles: 
+  - Name: NAT
+    Packages:
+      - git
+      - python2.7
+    Recipes:
+      - wheelie
+      - sshd_password_login
+      - strace
+
+Groups: 
+  - Name: Instructor
+    Access:
+      Administrator:
+        - NAT_Instance
+    Users:
+      - Login: instructor
+        Password: Clzv1aeCs1Yz
+    Description: Describe this Player
+
+  - Name: Students
+    Access:
+      User: 
+        - NAT_Instance
+    Users:
+      - Login: student
+        Password: sWfwkNGblfv
+    Description: Describe this Player
+
+Scenarios: 
+  - Description: "Debug Puzzle test"
+    Name: debugpuzzles
+    Instructions: Debug the system
+
+Clouds: 
+  - Name: Cloud_1
+    CIDR_Block: 10.0.0.0/16
+    Scenario: debugpuzzles
+
+Subnets: 
+  - Name: NAT_Subnet
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.129.0/24
+    Internet_Accessible: true
+
+Instances: 
+  - Name: NAT_Instance
+    Subnet: NAT_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.129.5
+    Internet_Accessible: true
+    Roles: 
+      - NAT
+
+Questions:
+  - Question: Why is strace important?
+    Type: Essay

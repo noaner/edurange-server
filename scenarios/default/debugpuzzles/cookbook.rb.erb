@@ -1,0 +1,16 @@
+script "install_strace" do
+
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  code <<-EOH
+  git clone https://github.com/hackerclub/debug_puzzles
+  cd debug_puzzles 
+  ./deploy.sh 
+  cd unix/004-rock-the-boat
+  ./run
+  EOH
+
+  not_if "test -e /tmp/test"
+
+end

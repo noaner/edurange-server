@@ -180,7 +180,8 @@ module Aws
       # aws_instance_ami = 'ami-d2ec9eba'
       aws_instance_ami = 'ami-b80b76d0'
     elsif self.os == 'nat'
-      aws_instance_ami = 'ami-51727d38' # Private NAT image with chef and deps, updates etc.
+      aws_instance_ami = 'ami-b80b76d0'
+      #aws_instance_ami = 'ami-51727d38' # Private NAT image with chef and deps, updates etc.
     end
 
 
@@ -323,6 +324,14 @@ module Aws
       end
     end
 
+    debug "creating tag"
+    begin
+      AWS::EC2.new.tags.create(ec2instance, "host", value: "cloud")
+    rescue => e
+      self.boot_error(e)
+      return
+    end
+
     self.set_booted
     self.save
     debug "[x] booted - Instance #{self.name}"
@@ -401,6 +410,15 @@ module Aws
       self.boot_error(e)
       return
     end
+
+    debug "creating tag"
+    begin
+      AWS::EC2.new.tags.create(ec2subnet, "host", value: "cloud")
+    rescue => e
+      self.boot_error(e)
+      return
+    end
+
 
     self.set_booted
   end
@@ -483,6 +501,15 @@ module Aws
       self.boot_error(e)
       return
     end
+
+    debug "creating tag"
+    begin
+      AWS::EC2.new.tags.create(ec2vpc, "host", value: "cloud")
+    rescue => e
+      self.boot_error(e)
+      return
+    end
+
 
     self.set_booted
     debug "cloud finished"

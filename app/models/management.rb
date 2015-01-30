@@ -181,5 +181,5 @@ class Management
       elastic_ip.delete
     end
   end
-  handle_asynchronously :cleanup
+  #handle_asynchronously :cleanup
 end
