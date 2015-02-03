@@ -46,7 +46,7 @@ Subnets:
 Instances: 
   - Name: NAT_Instance
     Subnet: NAT_Subnet
-    OS: ubuntu
+    OS: nat
     IP_Address: 10.0.129.5
     Internet_Accessible: true
     Roles: 

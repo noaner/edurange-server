@@ -180,7 +180,7 @@ module Aws
       # aws_instance_ami = 'ami-d2ec9eba'
       aws_instance_ami = 'ami-b80b76d0'
     elsif self.os == 'nat'
-      aws_instance_ami = 'ami-b80b76d0'
+      aws_instance_ami = 'ami-7092d118'
       #aws_instance_ami = 'ami-51727d38' # Private NAT image with chef and deps, updates etc.
     end
 
