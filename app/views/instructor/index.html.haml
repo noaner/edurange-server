@@ -1,3 +1,28 @@
+%div.modal#modal-add-cloud{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          = "Add Student"
+          %span#modal-title
+      %div.modal-body#modalbody
+        = form_tag student_groups_add_to_path(@scenario), remote:true do 
+          %div#cidr-div
+            = label_tag "Name:", nil, class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block.inline#name-help
+          %p
+          %div#cidr-div
+            = label_tag nil, "CIDR:", class: 'control-label'
+            = text_field_tag "CIDR", nil, class: 'form-control'
+            %span.help-block.inline#cidr-help
+          %p
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
 
 %div.panel.panel-default
   %div.panel-heading
@@ -23,6 +48,7 @@
         %b.inline New Student Group:
         = text_field '', :name, :style => "width:200px;"
         = submit_tag "create"
+      %p
 
       - @user.student_groups.each do |student_group|
         - if student_group.name == "All"
@@ -32,17 +58,15 @@
               %tr
                 %th Name
                 %th Email
-                %th Add
               - student_group.student_group_users.each do |student_group_user|
                 %tr
                   %td= student_group_user.user.name
                   %td= student_group_user.user.email
                   %td
-                    = select_tag 'selects[' + student_group_user.user.id.to_s + ']', options_for_select(@user.student_groups.pluck(:name).select{|a| a != "All"}.append(""), "")
+                    = select_tag 'selects[' + student_group_user.user.id.to_s + ']', options_for_select(@user.student_groups.pluck(:name).select{|a| a != "All"}.append(""), "") 
               %tr
                 %td
                 %td
-                %td= submit_tag 'Add All'
             %p
 
         - else

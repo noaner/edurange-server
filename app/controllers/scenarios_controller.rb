@@ -1,5 +1,5 @@
 class ScenariosController < ApplicationController
-  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot_toggle, :boot_status, :test_console, :modify_players, :modify, :add_cloud]
+  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot, :unboot, :boot_status, :test_console, :modify_players, :modify, :add_cloud, :add_student_group_to_players]
   before_action :authenticate_instructor
 
   # GET /scenarios
@@ -71,17 +71,15 @@ class ScenariosController < ApplicationController
 
     @boot_message = "Scenario is unbooting. Monitor output below."
     respond_to do |format|
-      format.js { render 'scenarios/boot_status.js.erb', :layout => false }
+      format.js { render 'scenarios/js/boot_status.js.erb', :layout => false }
     end
   end
 
   def boot_status
-
-
     @scenario.get_status
 
     respond_to do |format|
-      format.js { render 'scenarios/boot_status.js.erb', :layout => false }
+      format.js { render 'scenarios/js/boot_status.js.erb', :layout => false }
     end
   end
 
@@ -145,42 +143,248 @@ class ScenariosController < ApplicationController
     end
   end
 
-  def test_console
-    @scenario = Scenario.find(params[:id])
-    @scenario.delay.debug "-- Test Console Print --"
-    redirect_to @scenario, notice: "Testing Console. Output should appear in Console Log. If no output withing a few seconds Console Log is broken."
+  ## Booting
+  #
 
+  def boot
+    if @scenario.stopped?
+      @scenario.set_booting
+      # @scenario.delay(queue: 'scenarios').boot(true, true)
+      # @scenario.delay(queue: 'scenarios').boot(boot_dependents: true, run_asynchronously: false)
+      @scenario.delay(queue: 'scenarios').boot(boot_dependents: true, run_asynchronously: true)
+    end
+
+    @hide_dropdown = true
     respond_to do |format|
-      format.json {  }
+      format.js { render 'scenarios/js/boot_status.js.erb', :layout => false }
     end
   end
 
-  def modify_players
+  def unboot
+    if @scenario.booted?
+      @scenario.set_unbooting
+      @scenario.delay(queue: 'scenarios').unboot(unboot_dependents: true, run_asynchronously: true)
+    end
+
+    @hide_dropdown = true
+    respond_to do |format|
+      format.js { render 'scenarios/js/boot_status.js.erb', :layout => false }
+    end
+  end
+
+  def boot_cloud
+    @cloud = Cloud.find(params[:id])
+    @cloud.set_booting
+    @cloud.delay(queue: 'clouds').boot
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/boot_cloud.js.erb', layout: false }
+    end
+  end
+
+  def unboot_cloud
+    @cloud = Cloud.find(params[:id])
+    @cloud.set_unbooting
+    @cloud.delay(queue: 'clouds').unboot
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/unboot_cloud.js.erb',  layout: false }
+    end
+  end
+
+  def boot_subnet
+    @subnet = Subnet.find(params[:id])
+    if not @subnet.cloud.booted?
+      @subnet.errors.add(:cloudnotbooted, "Instances Subnet must be booted first")
+    else
+      @subnet.set_booting
+      @subnet.delay(queue: 'subnets').boot
+    end
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/boot_subnet.js.erb', layout: false }
+    end
+  end
+
+  def unboot_subnet
+    @subnet = Subnet.find(params[:id])
+    @subnet.set_unbooting
+    @subnet.delay(queue: 'subnets').unboot
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/unboot_subnet.js.erb', layout: false }
+    end
+  end
+
+  def boot_instance
+    @instance = Instance.find(params[:id])
+    if not @instance.subnet.booted?
+      @instance.errors.add(:subnetnotbooted, "Instances Subnet must be booted first")
+    else
+      @instance.set_booting
+      @instance.delay(queue: 'instances').boot
+    end
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/boot_instance.js.erb', layout: false }
+    end
+  end
+
+  def unboot_instance
+    @instance = Instance.find(params[:id])
+    @instance.set_unbooting
+    @instance.delay(queue: 'instances').unboot
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/unboot_instance.js.erb', layout: false }
+    end
+  end
+
+  ## Resources
+  #
+
+  def add_cloud
+
+    @cloud = @scenario.clouds.new
+    @cloud.name = params[:name]
+    @cloud.cidr_block = params[:CIDR]
+    @cloud.save
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/add_cloud.js.erb', layout: false }
+    end
+  end
+
+  def destroy_cloud
+    # destroy all it's parts
+
+  end
+
+  def add_student_group_to_players
     if @scenario.status != "stopped"
       redirect_to @scenario, notice: "Can not modify players while scenario is booted"
       return
     end
-    group = Group.find(params[:group])
-    # student_group = StudentGroup.find_by_name(params[:studentGroupName])
-    student_group = StudentGroup.where("name = '#{params[:studentGroupName]}' AND user_id = #{current_user.id}").first
+    # group = Group.find(params[:group])
+    # # student_group = StudentGroup.find_by_name(params[:studentGroupName])
+    # student_group = StudentGroup.where("name = '#{params[:studentGroupName]}' AND user_id = #{current_user.id}").first
+    # student_group.student_group_users.each do |student_group_user|
+    #   if params[:add]
+    #     if !group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
+    #     # if !group.players.find_by_user_id(student_group_user.user_id)
+    #       group.players.new(
+    #         login: "student_#{student_group_user.user.id}",
+    #         password: SecureRandom.base64(7),
+    #         user_id: student_group_user.user.id,
+    #         student_group_id: student_group_user.student_group.id
+    #       ).save
+    #     end
+    #   elsif params[:remove]
+    #     if player = group.players.find_by_user_id(student_group_user.user.id)
+    #       player.destroy
+    #     end
+    #   end
+    # end
+    # redirect_to @scenario
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/add_student_group_to_players.js.erb', layout: false }
+    end
+  end
+
+  ## Helpers
+
+  # Players
+  def add_player
+    @group = Group.find(params[:group_id])
+    @player = @group.players.new(login: params[:login], password: params[:password])
+    @player.save
+
+    # make login unique for player
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/add_player.js.erb', layout: false }
+    end
+  end
+
+  def delete_player
+    @player = Player.find(params[:id]).delete
+    @player.delete
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/delete_player.js.erb', layout: false }
+    end
+  end
+
+  def add_student_group
+    # if @scenario.stopped?
+      # redirect_to @scenario, notice: "Can not modify players while scenario is booted"
+      # return
+    # end
+    @players = []
+    @group = Group.find(params[:group_id])
+    student_group = StudentGroup.where("name = ? AND user_id = #{current_user.id}", params[:student_group]).first
     student_group.student_group_users.each do |student_group_user|
-      if params[:add]
-        if !group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
+      # if params[:add]
+        if !@group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
         # if !group.players.find_by_user_id(student_group_user.user_id)
-          group.players.new(
+          
+          player = @group.players.new(
             login: "student_#{student_group_user.user.id}",
             password: SecureRandom.base64(7),
             user_id: student_group_user.user.id,
             student_group_id: student_group_user.student_group.id
-          ).save
+          )
+          player.save
+          @players.push(player)
+
         end
-      elsif params[:remove]
-        if player = group.players.find_by_user_id(student_group_user.user.id)
-          player.destroy
-        end
-      end
+
+
+      # elsif params[:remove]
+        # if player = group.players.find_by_user_id(student_group_user.user.id)
+        #   player.destroy
+        # end
+      # end
     end
-    redirect_to @scenario
+    
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/add_student_group.js.erb', layout: false }
+    end
+  end
+
+  def remove_student_group
+    @players = []
+    @group = Group.find(params[:group_id])
+    student_group = StudentGroup.where("name = ? AND user_id = #{current_user.id}", params[:student_group]).first
+    student_group.student_group_users.each do |student_group_user|
+      # if params[:add]
+        # if !@group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
+        # # if !group.players.find_by_user_id(student_group_user.user_id)
+          
+        #   player = @group.players.new(
+        #     login: "student_#{student_group_user.user.id}",
+        #     password: SecureRandom.base64(7),
+        #     user_id: student_group_user.user.id,
+        #     student_group_id: student_group_user.student_group.id
+        #   )
+        #   player.save
+        #   @players.push(player)
+
+        # end
+
+
+      # elsif params[:remove]
+
+        if player = @group.players.find_by_user_id(student_group_user.user.id)
+          @players.push(player)
+          player.delete
+        end
+      # end
+    end
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/remove_student_group.js.erb', layout: false }
+    end
   end
 
   def getlog
@@ -205,12 +409,8 @@ class ScenariosController < ApplicationController
     @htmllog = log.gsub("\n", "<br>").html_safe;
     @name = name
     respond_to do |format|
-      format.js { render template: 'scenarios/log.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/log.js.erb', layout: false }
     end
-  end
-
-  def make_scenario
-
   end
 
   def modify
@@ -219,7 +419,7 @@ class ScenariosController < ApplicationController
     @scenario.save
 
     respond_to do |format|
-      format.js { render template: 'scenarios/modify.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/modify.js.erb', layout: false }
     end
   end
 
@@ -230,19 +430,16 @@ class ScenariosController < ApplicationController
     @cloud.save
 
     respond_to do |format|
-      format.js { render template: 'scenarios/modify_cloud.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/modify_cloud.js.erb', layout: false }
     end
   end
 
-  def add_cloud
 
-    @cloud = @scenario.clouds.new
-    @cloud.name = params[:name]
-    @cloud.cidr_block = params[:CIDR]
-    @cloud.save
+
+  def add_subnet
 
     respond_to do |format|
-      format.js { render template: 'scenarios/add_cloud.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/add_subnet.js.erb', layout: false }
     end
   end
 
@@ -260,7 +457,31 @@ class ScenariosController < ApplicationController
     @subnet.save
 
     respond_to do |format|
-      format.js { render template: 'scenarios/modify_subnet.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/modify_subnet.js.erb', layout: false }
+    end
+  end
+
+  def add_instance
+    @instance = Subnet.find(params[:subnet]).instances.new(
+      name: params[:name],
+      ip_address: params[:ip],
+      os: params[:os],
+      internet_accessible: params[:internet_accessible],
+      uuid: `uuidgen`.chomp
+    )
+    @instance.save
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/add_instance.js.erb', layout: false }
+    end
+  end
+
+  def delete_instance
+    @instance = Instance.find(params[:id])
+    @instance.destroy
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/delete_instance.js.erb', layout: false }
     end
   end
 

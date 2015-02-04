@@ -9,7 +9,7 @@
 module Provider
   extend ActiveSupport::Concern
   included do
-    enum status: [:stopped, :booting, :booted, :failed, :boot_failed, :unboot_failed, :unbooting, :stopping, :broken, :fixing]
+    enum status: [:stopped, :booting, :booted, :failed, :boot_failed, :unboot_failed, :unbooting, :stopping]
   end
 
   # def max_attempts; 0; end
@@ -33,31 +33,24 @@ module Provider
     # end
   end
 
-  def boot
+  def boot(options = {})
     classname = self.class.to_s.downcase
     puts classname
-
-    self.set_booting
-    self.clear_log
-    self.send("provider_boot_#{classname}")
-    # self.delay.send("provider_boot_#{classname}")
-
+    self.send("provider_boot_#{classname}", options)
   end
-  # handle_asynchronously :boot, priority: 20
+
+  def unboot(options = {})
+    classname = self.class.to_s.downcase
+    puts classname
+    self.send("provider_unboot_#{classname}", options)
+  end
 
   def unboot_error(error)
-    self.set_boot_failed
+    self.set_unboot_failed
     self.save
-    debug(error.class.to_s + ' - ' + error.message.to_s);
+    debug(error.class.to_s + ' - ' + error.message.to_s + error.backtrace.join("\n"));
   end
 
-  def unboot
-    classname = self.class.to_s.downcase
-    puts classname
-    self.set_unbooting
-    self.send("provider_unboot_#{classname}")
-  end
-  # handle_asynchronously :boot, priority: 20
 
   ## Status set and get
   # set status
@@ -104,38 +97,42 @@ module Provider
 
   # get status
 
-  def stopped?
-    return self.status == :stopped
-  end
+  # def booted?
+  #   return self.status == :booted
+  # end
 
-  def booted?
-    return self.status == :booted
-  end
-
-  def boot_failed?
-    return self.status == :boot_failed
-  end
+  # def boot_failed?
+  #   return self.status == :boot_failed
+  # end
 
   def is_failed?
     return self.status == "unboot_failed" || self.status == "boot_failed"
   end
 
-  def booting?
-    return self.status == "booting"
+  def fooerr
+    begin
+      raise "fooggg"
+    rescue => e
+      puts e.message
+      return
+    end
   end
 
-  def unbooting?
-    return self.status == "unbooting"
-  end
+  # def booting?
+  #   return self.status == "booting"
+  # end
 
-  def boot_failed?
-    return self.status == "boot_failed"
-  end
+  # def unbooting?
+  #   return self.status == "unbooting"
+  # end
 
-  def unboot_failed?
-    return self.status == "boot_failed"
-  end
+  # def boot_failed?
+  #   return self.status == "boot_failed"
+  # end
 
+  # def unboot_failed?
+  #   return self.status == "boot_failed"
+  # end
 
   # Polls the state in database, waiting to yield to given block until self is booted?
   # If self is not booted?, calls provider_check_status for self.
@@ -178,7 +175,7 @@ module Provider
   # @see #run_provider_method
   # @return [nil]
   def method_missing(meth, *args, &block)
-    puts "\nMethod Miss\n"
+    puts "method missing"
     if meth.to_s =~ /^provider_(.+)$/
       run_provider_method($1, *args, &block)
     else
@@ -190,6 +187,6 @@ module Provider
   # Currently does not pass arguments.
   # @return [nil]
   def run_provider_method(provider_method, *args, &block)
-    self.send("#{Settings.driver}_#{provider_method}".to_sym)
+    self.send("#{Settings.driver}_#{provider_method}".to_sym, *args)
   end
 end

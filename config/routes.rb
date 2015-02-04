@@ -17,26 +17,52 @@ Edurange::Application.routes.draw do
 
   resources :scenarios do
     member do
-      get 'status'
-      get 'test_console'
-      get 'boot_toggle'
+      get 'boot'
+      get 'unboot'
+
+      get 'boot_scenario'
+      get 'boot_cloud'
+      get 'boot_subnet'
+      get 'boot_instance'
+      get 'unboot_scenario'
+      get 'unboot_cloud'
+      get 'unboot_subnet'
+      get 'unboot_instance'
+
+      get 'destroy_scenario'
+      get 'destroy_cloud'
+      get 'destroy_subnet'
+      get 'destroy_instance'
+
+      post 'add_player'
+      get 'delete_player'
       post 'modify_players'
+
+      post 'add_student_group'
+      post 'remove_student_group'
+
       get 'getlog'
       get 'boot_status'
+
       post 'add_cloud'
+      get 'destroy_cloud'
+
       post 'add_subnet'
       post 'add_instance'
       post 'modify'
       post 'modify_cloud'
       post 'modify_subnet'
       post 'modify_instance'
+      get 'delete_instance'
       get 'save_changes'
+
     end
   end
   
   get 'scenarios/destroy/:id', to: 'scenarios#destroy'
 
   get 'instructor', to: 'instructor#index'
+
   post 'instructor/student_group_new'
   post 'instructor/student_group_assign'
   get 'instructor/student_group_delete'

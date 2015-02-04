@@ -1,0 +1,21 @@
+<% if @instance.errors.any? %>
+	<% if @instance.errors[:name].any? %>
+		$('#modal-add-instance').find('#name-div').addClass('has-error');
+    		$('#modal-add-instance').find('#name-help').text('<%= @instance.errors[:name][0] %>');
+	<% end %>
+	<% if @instance.errors[:ip_address].any? %>
+		$('#modal-add-instance').find('#ip-div').addClass('has-error');
+    		$('#modal-add-instance').find('#ip-help').text('<%= @instance.errors[:ip_address][0] %>');
+	<% end %>
+	<% if @instance.errors[:internet_accessible].any? %>
+		$('#modal-add-instance').find('#name-div').addClass('has-error');
+    		$('#modal-add-instance').find('#name-help').text('<%= @instance.errors[:internet_accessible][0] %>');
+	<% end %>
+	<% if @instance.errors[:os].any? %>
+		$('#modal-add-instance').find('#os-div').addClass('has-error');
+    		$('#modal-add-instance').find('#os-help').text('<%= @instance.errors[:os][0] %>');
+	<% end %>
+<% else %>
+           $('#instances-ul-<%= @instance.subnet.id.to_s %>').append("<%= escape_javascript( render('/scenarios/show/instance', instance: @instance).delete("\n") ).html_safe %>");
+	$('#modal-add-instance').modal('toggle');
+<% end %>

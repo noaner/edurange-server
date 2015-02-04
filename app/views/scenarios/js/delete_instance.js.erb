@@ -1,0 +1,6 @@
+
+<% if @instance.errors.any? %>
+
+<% else %>
+	$('#<%= "instance-li-#{@instance.id.to_s}" %>').remove();
+<% end %>

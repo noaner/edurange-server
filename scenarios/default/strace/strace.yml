@@ -4,14 +4,13 @@ Roles:
       - git
       - gdb
     Recipes:
-      - wheelie
       - sshd_password_login
       - strace
 
 Groups: 
   - Name: Instructor
     Access:
-      Administrator:
+      User:
         - NAT_Instance
     Users:
       - Login: instructor
@@ -30,7 +29,7 @@ Groups:
 Scenarios: 
   - Description: "This game uses strace to examine executable files."
     Name: Strace
-    Instructions: Players will first ssh into the NAT using it's Public IP Address. From there players can answer the questions under Questions.
+    Instructions: Players will first ssh into the NAT using it's Public IP Address.
 
 Clouds: 
   - Name: Cloud_1
@@ -38,15 +37,26 @@ Clouds:
     Scenario: Strace
 
 Subnets: 
+  - Name: FOO_Subnet
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.130.0/24
+
   - Name: NAT_Subnet
     Cloud: Cloud_1
     CIDR_Block: 10.0.129.0/24
     Internet_Accessible: true
 
 Instances: 
+  - Name: FOO_Instance
+    Subnet: FOO_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.130.5
+    Roles: 
+      - NAT
+
   - Name: NAT_Instance
     Subnet: NAT_Subnet
-    OS: ubuntu
+    OS: nat
     IP_Address: 10.0.129.5
     Internet_Accessible: true
     Roles: 

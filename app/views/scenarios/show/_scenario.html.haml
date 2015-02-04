@@ -20,9 +20,6 @@
         = link_to 'Show log', getlog_scenario_path(@scenario, kind: 'scenario'), remote: true
       %li{role: 'presentation'}
         = link_to 'Modify', "#modal-modify", :data => {:toggle=>"modal"}
-      //:onclick => "$('#modal-modify').find('#modal-title').html(\"Modify: #{@scenario.name}\");"
-      %li{role: 'presentation'}
-        = link_to 'Add Cloud', "#modal-add-cloud", :data => {:toggle=>"modal"}
 
 %ul{style: "padding-left: 20px;"}
   %li
@@ -41,6 +38,14 @@
     %input{ type: 'checkbox', id: 'item-cloud-label-' + @scenario.id.to_s, checked: 'checked'}
       %label{ for: 'item-cloud-label-' + @scenario.id.to_s}
         Clouds:
-      %ul
+      %div.inline-block
+        %div.dropdown
+          %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-clouds', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+            %span.caret
+          %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-clouds'}
+            %li{role: 'presentation'}
+              = link_to 'Add Cloud', "#modal-add-cloud", :data => {:toggle=>"modal"}
+
+      %ul#clouds-ul{style: "padding-left: 20px;"}
         - @scenario.clouds.each do |cloud|
-          = render '/scenarios/clouds', cloud: cloud
+          = render '/scenarios/show/clouds', cloud: cloud

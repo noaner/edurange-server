@@ -40,4 +40,8 @@ class Subnet < ActiveRecord::Base
     return self.instances.select{ |i| i.unboot_failed? }.any?
   end
 
+  def instances_booted?
+    return self.instances.select{ |i| i.booted? }.any?
+  end
+
 end

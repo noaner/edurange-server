@@ -31,9 +31,9 @@
 .css-treeview
 {
     /*font: normal 12px "Segoe UI", Arial, Sans-serif;*/
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 .css-treeview a

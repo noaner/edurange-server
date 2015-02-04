@@ -1,0 +1,17 @@
+<% if @group.errors.any? %>
+	<% if @group.errors[:group].any? %>
+		$('#modal-add-player').find('#group-div').addClass('has-error');
+    		$('#modal-add-player').find('#group-help').text('<%= @group.errors[:group][0] %>');
+	<% end %>
+	<% if @group.errors[:login].any? %>
+		$('#modal-add-player').find('#login-div').addClass('has-error');
+    		$('#modal-add-player').find('#login-help').text('<%= @group.errors[:login][0] %>');
+	<% end %>
+	<% if @group.errors[:password].any? %>
+		$('#modal-add-player').find('#password-div').addClass('has-error');
+    		$('#modal-add-player').find('#password-help').text('<%= @group.errors[:password][0] %>');
+	<% end %>
+<% else %>
+	$('#modal-add-player').modal('toggle');
+	$('#players-table-group-<%= @group.id.to_s %>').append("<tr id='group-table-player-<%= @player.id.to_s %>'><td></td>-<td></td>-<td>-</td><td><%= @player.login %></td><td><%= @player.password %></td><td><a href='/scenarios/<%= @player.id %>/delete_player' data-remote='true'>delete</a></td>");
+<% end %>

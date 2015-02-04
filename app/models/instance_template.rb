@@ -9,9 +9,6 @@ class InstanceTemplate
       template = File.read(Settings.app_path + "lib/templates/cookbook_template_new.rb.erb")
       template = Erubis::Eruby.new(template)
 
-      # loop through recipe
-
-
       template2 = File.read(Settings.app_path + "scenarios/default/#{instance.subnet.cloud.scenario.name.downcase}/cookbook.rb.erb")
       template2 = Erubis::Eruby.new(template2)
 

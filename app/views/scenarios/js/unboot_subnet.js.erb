@@ -1,0 +1,7 @@
+$('#dropdown-subnet-<%= @subnet.id.to_s %>').removeClass("open");
+
+$('<%= "#subnet-status-" + @subnet.id.to_s %>').text('<%= @subnet.status %>');
+$('<%= "#subnet-status-dot-" + @subnet.id.to_s %>').hide();
+$('<%= "#subnet-spinner-" + @subnet.id.to_s %>').attr('class', '<%= "inline-block spin" %>');
+$('#boot-button-subnet-<%= @subnet.id.to_s %>').attr('class', "hidden");
+$('#unboot-button-subnet-<%= @subnet.id.to_s %>').attr('class', "hidden");

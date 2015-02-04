@@ -140,6 +140,10 @@ class Scenario < ActiveRecord::Base
     return self.clouds.select{ |c| c.unboot_failed? }.any?
   end
 
+  def clouds_booted?
+    return self.clouds.select{ |c| c.booted? }.any?
+  end
+
   def get_status
 
     all_stopped = true

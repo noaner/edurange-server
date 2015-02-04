@@ -12,12 +12,26 @@
         %div.inline-block{ id: 'subnet-spinner-' + subnet.id.to_s}
 
     %div.inline-block
-      %div.dropdown
-        %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-subnet-'+subnet.id.to_s, "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+      %div.dropdown{id:'dropdown-subnet-'+subnet.id.to_s}
+        %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-subnet-'+subnet.id.to_s, "data-toggle" => 'dropdown', "aria-expanded" => "true"}
           / %span.glyphicon.glyphicon-pencil{"aria-hidden" => "true"}
           %span.caret
-        %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-subnet'+subnet.id.to_s}
+        %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-subnet'+subnet.id.to_s}
           %li{role: 'presentation'}
+
+            - if subnet.stopped?
+              - boot_button_class = ""
+              - unboot_button_class = "hidden"
+            - elsif subnet.booted? or subnet.boot_failed?
+              - boot_button_class = "hidden"
+              - unboot_button_class = ""
+            - elsif subnet.booting?
+              - boot_button_class = "hidden"
+              - unboot_button_class = "hidden"
+
+            = link_to 'Boot', boot_subnet_scenario_path(subnet), remote: true, id: "boot-button-subnet-#{subnet.id.to_s}", class: boot_button_class
+            = link_to 'Unboot', unboot_subnet_scenario_path(subnet), remote: true, id: "unboot-button-subnet-#{subnet.id.to_s}", class: unboot_button_class
+
             = link_to 'Show log', getlog_scenario_path(subnet, kind: 'subnet'), remote: true
             /= link_to 'Show routing rules'
             = link_to 'Modify', "#modal-modify-subnet", :data => {:toggle=>"modal"}, :onclick => "$('#modal-modify-subnet').find('#modal-title').text('#subnet.name');  $('#modal-modify-subnet').find('#subnet_id').val('#{subnet.id}'); $('#modal-modify-subnet').find('#name').val( $('#subnet-name-#{subnet.id}').text().trim() ); $('#modal-modify-subnet').find('#CIDR').val( $('#subnet-cidr-#{subnet.id}').text().trim() ); $('#modal-modify-subnet').find('#internet_accessible').val( $('#subnet-internet-accessible-#{subnet.id}').text().trim() );"
@@ -44,6 +58,14 @@
         %input{ type: 'checkbox', id: 'item-instance-label-' + subnet.id.to_s, checked: 'checked'}
           %label{ for: 'item-instance-label-' + subnet.id.to_s}
             Instances:
-          %ul
+          %div.inline-block
+            %div.dropdown
+              %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-instances', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+                %span.caret
+              %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-clouds'}
+                %li{role: 'presentation'}
+                  = link_to 'Add Instance', "#modal-add-instance", :data => {:toggle=>"modal"}, onclick: "$('#modal-add-instance').find('#subnet').val('#{subnet.id}');"
+
+          %ul{id: "instances-ul-" + subnet.id.to_s, style: "padding-left: 20px;"}
             - subnet.instances.each do |instance|
-              = render '/scenarios/instance', instance: instance
+              = render '/scenarios/show/instance', instance: instance

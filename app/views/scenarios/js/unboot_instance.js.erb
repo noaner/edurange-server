@@ -1,0 +1,7 @@
+$('#dropdown-instance-<%= @instance.id.to_s %>').removeClass("open");
+
+$('<%= "#instance-status-" + @instance.id.to_s %>').text('<%= @instance.status %>');
+$('<%= "#instance-status-dot-" + @instance.id.to_s %>').hide();
+$('<%= "#instance-spinner-" + @instance.id.to_s %>').attr('class', '<%= "inline-block spin" %>');
+$('#boot-button-instance-<%= @instance.id.to_s %>').attr('class', "hidden");
+$('#unboot-button-instance-<%= @instance.id.to_s %>').attr('class', "hidden");

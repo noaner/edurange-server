@@ -78,4 +78,8 @@ class Cloud < ActiveRecord::Base
     return self.subnets.select{ |s| s.unboot_failed? }.any?
   end
 
+  def subnets_booted?
+    return self.subnets.select{ |s| s.booted? }.any?
+  end
+
 end

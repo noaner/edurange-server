@@ -1,0 +1,92 @@
+%li
+  %input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
+    %label{ for: 'item-0' }
+      Players
+
+    %ul
+      - @scenario.groups.each do |group|
+        %span.inline
+          = "Group: " + group.name
+          &nbsp&nbsp&nbsp
+        %div.inline-block
+          %div.dropdown{ id: "dropdown-group-" + group.id.to_s }
+            %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-group-' + group.id.to_s, "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+              %span.caret
+            %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-group-' + group.id.to_s}
+              %li{role: 'presentation'}
+                = link_to 'Add Player', "#modal-add-player", :data => {:toggle=>"modal"}, onclick: "$('#modal-add-player').find('#group_id').val('#{group.id}'); $('#modal-add-player').find('#group').val('#{group.name}'); set_players_modal();"
+              %li{role: 'presentation'}
+                = link_to 'Add Student Group', "#modal-add-student-group", :data => {:toggle=>"modal"}, onclick: "$('#modal-add-student-group').find('#group_id').val('#{group.id}'); $('#modal-add-student-group').find('#group').text('#{group.name}');"
+
+              %li{role: 'presentation'}
+                = link_to 'Remove Student Group', "#modal-remove-student-group", :data => {:toggle=>"modal"}, onclick: "$('#modal-remove-student-group').find('#group_id').val('#{group.id}'); $('#modal-remove-student-group').find('#group').text('#{group.name}');"
+
+        %p
+
+        %table.table{id: "players-table-group-" + group.id.to_s}
+          %tr
+            %th Name
+            %th Email
+            %th Student Group
+            %th Login
+            %th Password
+            %th
+          - group.players.each do |player|
+            %tr{id: 'group-table-player-' + player.id.to_s}
+              - if player.user_id
+                - user = User.find(player.user_id)
+                %td= user.name
+                %td= user.email
+              - else
+                %td= "-"
+                %td= "-"
+              - if player.student_group_id
+                %td= player.student_group.name
+              - else
+                %td= '-'
+
+              %td= player.login
+              %td= player.password
+              %td= link_to 'delete', delete_player_scenario_path(player), remote: true
+
+
+        / = form_tag modify_players_scenario_path(group: group) do
+        /   = select_tag "studentGroupName", options_for_select(@user.student_groups.pluck(:name))
+        /   = button_tag "add", name: "add", class: 'btn btn-default'
+        /   = button_tag "remove", name: "remove", class: 'btn btn-default'
+
+/ %p
+/ / %dl
+/ %table.table
+/   %tr
+/     %th Name
+/     %th Email
+/     %th Login
+/     %th Password
+/     %th Student Group
+/     %th Answers
+/     %th Answered
+/     / %th Score
+/   - group.players.each do |player|
+/     %tr
+/       - if player.user_id
+/         - user = User.find(player.user_id)
+/         %td= user.name
+/         %td= user.email
+/       - else
+/         %td
+/         %td
+/       %td= player.login
+/       %td= player.password
+/       - if player.student_group
+/         %td= player.student_group.name
+/         %td= link_to 'answers', "/scoring/instructor_student/#{@scenario.id}/#{player.user_id}"
+/         %td
+/           - cnt = @scenario.questions.select{ |q| q.answers and q.answers.where("student_id = #{player.user_id}").size > 0 }.size
+/           - total = @scenario.questions.size
+/           %span{id: "answered-student-#{player.user_id}"}
+/             = "#{cnt}/#{total}"
+/         / %td= "#{correct}/#{total}"
+/       - else
+/         %td
+/         %td
