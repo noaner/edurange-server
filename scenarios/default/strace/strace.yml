@@ -11,7 +11,7 @@ Roles:
 Groups: 
   - Name: Instructor
     Access:
-      Administrator:
+      User:
         - NAT_Instance
     Users:
       - Login: instructor
@@ -50,6 +50,13 @@ Instances:
     IP_Address: 10.0.129.5
     Internet_Accessible: true
     Roles: 
+      - NAT
+
+  - Name: FOO
+    Subnet: NAT_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.129.6
+    Roles:
       - NAT
 
 Questions:
