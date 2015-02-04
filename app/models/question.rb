@@ -3,10 +3,10 @@ class Question < ActiveRecord::Base
   belongs_to :scenario
   has_many :answers, dependent: :destroy
 
-  def grade(student_answer, student_id)
-
   # Need to rewrite this securely, use find_by
 
+
+  # def grade(student_answer, student_id)
   #   if self.answers.where("answer_text = '#{student_answer}'").first
   #     return
   #   end
