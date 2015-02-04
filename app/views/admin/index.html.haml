@@ -38,6 +38,6 @@
           %tr
             %td= instructor.name
             %td= instructor.email
-            %td= link_to 'remove', admin_instructor_remove_path(:id =>  instructor['id'])
+            %td= link_to 'remove', admin_instructor_remove_path(:id =>  instructor['id']), method: :post
     - else
       none

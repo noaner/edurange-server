@@ -3,7 +3,7 @@
 function get_boot_status (id) {
   var resource = '/scenarios/' + id + '/boot_status';
   // alert(resource);
-  $.get(resource, function(data) {
+  $.post(resource, function(data) {
     // alert('done');
   });
 }

@@ -24,13 +24,13 @@
             - boot_class = "hidden"
             - unboot_class = ""
 
-          = link_to 'Boot', boot_scenario_path(@scenario), remote:true, id: 'boot-button', class: boot_class
-          = link_to 'Unboot', unboot_scenario_path(@scenario), remote:true, id: 'unboot-button', class: unboot_class
+          = link_to 'Boot', boot_scenario_path(@scenario), method: :post, remote:true, id: 'boot-button', class: boot_class
+          = link_to 'Unboot', unboot_scenario_path(@scenario), method: :post, remote:true, id: 'unboot-button', class: unboot_class
 
-          = link_to 'Pause'
+          / = link_to 'Pause'
           = link_to 'Destroy', @scenario, :method => :delete
-          = link_to 'Show Boot Log', getlog_scenario_path(@scenario, kind: 'scenario'), remote: true
-          = link_to 'Save Changes', save_changes_scenario_path(@scenario), remote: true
+          = link_to 'Show Boot Log', getlog_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true
+          = link_to 'Save Changes', save_changes_scenario_path(@scenario), method: :post, remote: true
 
   %div.panel-body
 

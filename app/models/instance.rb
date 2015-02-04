@@ -35,6 +35,10 @@ class Instance < ActiveRecord::Base
     return self.subnet.cloud.scenario
   end
 
+  def owner?(id)
+    return self.subnet.cloud.scenario.user_id == id
+  end
+
   def status_check
     puts "\nstatus check\n"
     if self.driver_id

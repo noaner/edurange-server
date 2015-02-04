@@ -124,7 +124,7 @@ $('#scenario-status-dot').attr('class', '<%= "inline-block " + @scenario.status 
 <% end %>
 
 <% if @scenario.booting? or @scenario.unbooting? %>
-  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 2000);
+  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 20000);
 <% else %>
   setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 15000);
 <% end %>

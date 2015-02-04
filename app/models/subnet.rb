@@ -18,6 +18,10 @@ class Subnet < ActiveRecord::Base
     # PrivatePub.publish_to "/scenarios/#{self.cloud.scenario.id}", subnet_progress: val
   end
 
+  def owner?(id)
+    return self.cloud.scenario.user_id == id
+  end
+
   def debug(message)
     log = self.log ? self.log : ''
     message = '' if !message

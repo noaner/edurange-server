@@ -7,6 +7,10 @@ class Scenario < ActiveRecord::Base
   validates_presence_of :name, :description
   belongs_to :user
 
+  def owner?(id)
+    return self.user_id == id
+  end
+
   def debug(message)
     log = self.log ? self.log : ''
     message = '' if !message

@@ -28,12 +28,12 @@
               - boot_button_class = "hidden"
               - unboot_button_class = "hidden"
 
-            = link_to 'Boot', boot_instance_scenario_path(instance), remote: true, id: "boot-button-instance-#{instance.id.to_s}", class: boot_button_class
-            = link_to 'Unboot', unboot_instance_scenario_path(instance), remote: true, id: "unboot-button-instance-#{instance.id.to_s}", class: unboot_button_class
+            = link_to 'Boot', boot_instance_scenario_path(instance), method: :post, remote: true, id: "boot-button-instance-#{instance.id.to_s}", class: boot_button_class
+            = link_to 'Unboot', unboot_instance_scenario_path(instance), method: :post, remote: true, id: "unboot-button-instance-#{instance.id.to_s}", class: unboot_button_class
 
-            = link_to 'Show log', getlog_scenario_path(instance, kind: 'instance'), remote: true
-            = link_to 'Modify', modify_instance_scenario_path(instance), remote: true
-            = link_to 'Delete', delete_instance_scenario_path(instance), remote: true
+            = link_to 'Show log', getlog_scenario_path(instance, kind: 'instance'), method: :post, remote: true
+            = link_to 'Modify', modify_instance_scenario_path(instance), method: :post, remote: true
+            = link_to 'Delete', delete_instance_scenario_path(instance), method: :post, remote: true
 
     %ul{style: "padding-left: 20px;"}
       %li
@@ -49,7 +49,10 @@
         = instance.ip_address
       %li
         Internet Accessible:
-        = instance.internet_accessible
+        - if instance.internet_accessible
+          true
+        - else
+          false
       - if instance.internet_accessible
         %li
           Public IP:

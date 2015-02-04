@@ -17,9 +17,9 @@
       %span.caret
     %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-scenario'+@scenario.id.to_s}
       %li{role: 'presentation'}
-        = link_to 'Show log', getlog_scenario_path(@scenario, kind: 'scenario'), remote: true
+        = link_to 'Show log', getlog_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true
       %li{role: 'presentation'}
-        = link_to 'Modify', "#modal-modify", :data => {:toggle=>"modal"}
+        = link_to 'Modify', "#modal-modify", method: :post,  :data => {:toggle=>"modal"}
 
 %ul{style: "padding-left: 20px;"}
   %li
@@ -44,7 +44,7 @@
             %span.caret
           %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-clouds'}
             %li{role: 'presentation'}
-              = link_to 'Add Cloud', "#modal-add-cloud", :data => {:toggle=>"modal"}
+              = link_to 'Add Cloud', "#modal-add-cloud", method: :post, :data => {:toggle=>"modal"}
 
       %ul#clouds-ul{style: "padding-left: 20px;"}
         - @scenario.clouds.each do |cloud|

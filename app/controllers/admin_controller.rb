@@ -22,9 +22,11 @@ class AdminController < ApplicationController
     redirect_to '/admin'
   end
 
+  # need to error messaging for this function
   def instructor_remove
+    puts "\nInstructor Remove\n"
     if user = User.find(params[:id])
-      user.set_student_role
+      user.set_student_role if user.is_instructor
     end
     redirect_to '/admin'
   end

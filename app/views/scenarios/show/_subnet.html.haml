@@ -29,12 +29,12 @@
               - boot_button_class = "hidden"
               - unboot_button_class = "hidden"
 
-            = link_to 'Boot', boot_subnet_scenario_path(subnet), remote: true, id: "boot-button-subnet-#{subnet.id.to_s}", class: boot_button_class
-            = link_to 'Unboot', unboot_subnet_scenario_path(subnet), remote: true, id: "unboot-button-subnet-#{subnet.id.to_s}", class: unboot_button_class
+            = link_to 'Boot', boot_subnet_scenario_path(subnet), method: :post, remote: true, id: "boot-button-subnet-#{subnet.id.to_s}", class: boot_button_class
+            = link_to 'Unboot', unboot_subnet_scenario_path(subnet), method: :post, remote: true, id: "unboot-button-subnet-#{subnet.id.to_s}", class: unboot_button_class
 
-            = link_to 'Show log', getlog_scenario_path(subnet, kind: 'subnet'), remote: true
+            = link_to 'Show log', getlog_scenario_path(subnet, kind: 'subnet'), method: :post, remote: true
             /= link_to 'Show routing rules'
-            = link_to 'Modify', "#modal-modify-subnet", :data => {:toggle=>"modal"}, :onclick => "$('#modal-modify-subnet').find('#modal-title').text('#subnet.name');  $('#modal-modify-subnet').find('#subnet_id').val('#{subnet.id}'); $('#modal-modify-subnet').find('#name').val( $('#subnet-name-#{subnet.id}').text().trim() ); $('#modal-modify-subnet').find('#CIDR').val( $('#subnet-cidr-#{subnet.id}').text().trim() ); $('#modal-modify-subnet').find('#internet_accessible').val( $('#subnet-internet-accessible-#{subnet.id}').text().trim() );"
+            = link_to 'Modify', "#modal-modify-subnet", method: :post, :data => {:toggle=>"modal"}, :onclick => "$('#modal-modify-subnet').find('#modal-title').text('#subnet.name');  $('#modal-modify-subnet').find('#subnet_id').val('#{subnet.id}'); $('#modal-modify-subnet').find('#name').val( $('#subnet-name-#{subnet.id}').text().trim() ); $('#modal-modify-subnet').find('#CIDR').val( $('#subnet-cidr-#{subnet.id}').text().trim() ); $('#modal-modify-subnet').find('#internet_accessible').val( $('#subnet-internet-accessible-#{subnet.id}').text().trim() );"
 
     %ul{style: "padding-left: 20px;"}
       %li
@@ -64,7 +64,7 @@
                 %span.caret
               %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-clouds'}
                 %li{role: 'presentation'}
-                  = link_to 'Add Instance', "#modal-add-instance", :data => {:toggle=>"modal"}, onclick: "$('#modal-add-instance').find('#subnet').val('#{subnet.id}');"
+                  = link_to 'Add Instance', "#modal-add-instance", method: :post, :data => {:toggle=>"modal"}, onclick: "$('#modal-add-instance').find('#subnet').val('#{subnet.id}');"
 
           %ul{id: "instances-ul-" + subnet.id.to_s, style: "padding-left: 20px;"}
             - subnet.instances.each do |instance|

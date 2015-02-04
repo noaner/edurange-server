@@ -62,6 +62,10 @@ class Cloud < ActiveRecord::Base
     self.update_attributes(log: log + message + "\n")
   end
 
+  def owner?(id)
+    return self.scenario.user_id == id
+  end
+
   def subnets_booting?
     return self.subnets.select{ |s| s.booting? }.any?
   end
