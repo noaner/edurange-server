@@ -124,7 +124,7 @@ class ScenariosController < ApplicationController
       @scenario.set_booting
       # @scenario.delay(queue: 'scenarios').boot(true, true)
       # @scenario.delay(queue: 'scenarios').boot(boot_dependents: true, run_asynchronously: false)
-      @scenario.delay(queue: 'scenarios').boot(boot_dependents: true, run_asynchronously: true)
+      @scenario.delay(queue: 'scenarios').boot(boot_dependents: true, run_asynchronously: Settings.boot_asynchronously)
     end
 
     @hide_dropdown = true
@@ -136,7 +136,7 @@ class ScenariosController < ApplicationController
   def unboot
     if @scenario.booted?
       @scenario.set_unbooting
-      @scenario.delay(queue: 'scenarios').unboot(unboot_dependents: true, run_asynchronously: true)
+      @scenario.delay(queue: 'scenarios').unboot(unboot_dependents: true, run_asynchronously: Settings.boot_asynchronously)
     end
 
     @hide_dropdown = true
