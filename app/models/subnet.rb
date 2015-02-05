@@ -28,6 +28,10 @@ class Subnet < ActiveRecord::Base
     self.update_attributes(log: log + message + "\n")
   end
 
+  def scenario
+    return self.cloud.scenario
+  end
+
   def instances_booting?
     return self.instances.select{ |i| i.booting? }.any?
   end

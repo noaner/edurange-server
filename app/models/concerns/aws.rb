@@ -199,9 +199,33 @@ module Aws
       return
     end
 
-    debug "creating tag"
+    debug "creating tags"
     begin
-      AWS::EC2.new.tags.create(ec2vpc, "host", value: "higgz")
+      AWS::EC2.new.tags.create(ec2vpc, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+      AWS::EC2.new.tags.create(ec2vpc, "host", value: Settings.host)
+      AWS::EC2.new.tags.create(ec2vpc, "instructor", value: self.scenario.user.name)
+      AWS::EC2.new.tags.create(ec2vpc, "scenario", value: self.scenario.id)
+
+      AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+      AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "host", value: Settings.host)
+      AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "instructor", value: self.scenario.user.name)
+      AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "scenario", value: self.scenario.id)
+
+      AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+      AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "host", value: Settings.host)
+      AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "instructor", value: self.scenario.user.name)
+      AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "scenario", value: self.scenario.id)
+
+      AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+      AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "host", value: Settings.host)
+      AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "instructor", value: self.scenario.user.name)
+      AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "scenario", value: self.scenario.id)
+
+      AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+      AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "host", value: Settings.host)
+      AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "instructor", value: self.scenario.user.name)
+      AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "scenario", value: self.scenario.id)
+
     rescue => e
       self.boot_error(e)
       return
@@ -491,7 +515,15 @@ module Aws
 
     debug "creating tag"
     begin
-      AWS::EC2.new.tags.create(ec2subnet, "host", value: "higgz")
+      AWS::EC2.new.tags.create(ec2subnet, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+      AWS::EC2.new.tags.create(ec2subnet, "host", value: Settings.host)
+      AWS::EC2.new.tags.create(ec2subnet, "instructor", value: self.scenario.user.name)
+      AWS::EC2.new.tags.create(ec2subnet, "scenario", value: self.scenario.id)
+
+      AWS::EC2.new.tags.create(ec2route_table, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+      AWS::EC2.new.tags.create(ec2route_table, "host", value: Settings.host)
+      AWS::EC2.new.tags.create(ec2route_table, "instructor", value: self.scenario.user.name)
+      AWS::EC2.new.tags.create(ec2route_table, "scenario", value: self.scenario.id)
     rescue => e
       self.boot_error(e)
       return
@@ -794,7 +826,10 @@ module Aws
     # create tags
     debug "creating tag"
     begin
-      AWS::EC2.new.tags.create(ec2instance, "host", value: "higgz")
+      AWS::EC2.new.tags.create(ec2instance, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+      AWS::EC2.new.tags.create(ec2instance, "host", value: Settings.host)
+      AWS::EC2.new.tags.create(ec2instance, "instructor", value: self.scenario.user.name)
+      AWS::EC2.new.tags.create(ec2instance, "scenario", value: self.scenario.id)
     rescue => e
       self.boot_error(e)
       return

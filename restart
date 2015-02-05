@@ -1,0 +1,4 @@
+#!/bin/bash
+bin/delayed_job stop
+bin/delayed_job --pool=scenarios,tasks:1 --pool=clouds,tasks:1 --pool=subnets,tasks:2 --pool=instances,tasks:3 start
+rails s
