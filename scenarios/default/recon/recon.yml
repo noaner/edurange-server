@@ -23,7 +23,6 @@ Roles:
   - Name: attacker
     Packages:
       - nmap
-      - wireshark
       - tshark
     Recipes:
       - sshd_password_login
@@ -60,18 +59,18 @@ Clouds:
     Scenario: Recon
 
 Subnets:
-  - Name: Battlespace_Subnet
+  - Name: NAT_Subnet
     Cloud: Cloud_1
-    CIDR_Block: 10.0.0.0/17
+    CIDR_Block: 10.0.129.0/24
+    Internet_Accessible: true
 
   - Name: Player_Subnet
     Cloud: Cloud_1
     CIDR_Block: 10.0.128.0/24
 
-  - Name: NAT_Subnet
+  - Name: Battlespace_Subnet
     Cloud: Cloud_1
-    CIDR_Block: 10.0.129.0/24
-    Internet_Accessible: true
+    CIDR_Block: 10.0.0.0/17
 
 Instances:
   - Name: NAT_Instance

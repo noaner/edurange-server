@@ -37,23 +37,12 @@ Clouds:
     Scenario: Strace
 
 Subnets: 
-  - Name: FOO_Subnet
-    Cloud: Cloud_1
-    CIDR_Block: 10.0.130.0/24
-
   - Name: NAT_Subnet
     Cloud: Cloud_1
     CIDR_Block: 10.0.129.0/24
     Internet_Accessible: true
 
 Instances: 
-  - Name: FOO_Instance
-    Subnet: FOO_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.130.5
-    Roles: 
-      - NAT
-
   - Name: NAT_Instance
     Subnet: NAT_Subnet
     OS: nat
