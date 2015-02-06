@@ -5,3 +5,5 @@ access_key_id: CHANGE_ME
 secret_access_key: CHANGE_ME
 bucket_name:
 app_path:
+host:
+boot_asynchronously:
