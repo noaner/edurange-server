@@ -66,6 +66,10 @@ class Cloud < ActiveRecord::Base
     return self.scenario.user_id == id
   end
 
+  def ip_taken?(ip)
+    return self.subnets.select{ |subnet| subnet.instances.select{ |instance| instance.ip_address == ip }.size > 0 }.size > 0
+  end
+
   def subnets_booting?
     return self.subnets.select{ |s| s.booting? }.any?
   end

@@ -1,7 +1,16 @@
 
 %div.panel.panel-default
-  %div.panel-heading
-    %h2 New scenario
+  %div.panel-heading.nav.nav-pills
+    %li
+      %h4#scenario-new-title
+        New Scenario:
+    / %li
+    /   = link_to 'Default Scenarios', new_scenario_path(@scenario)
+    %li
+      / # = link_to 'Upload Scenario'
+      / = form_tag upload_scenario_path(@scenario) do
+      /   = file_field_tag :yml
+      /   = submit_tag "Upload Scenario", class: 'btn'
 
   %div.panel-body
     - @templates.each do |template|

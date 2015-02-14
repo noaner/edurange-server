@@ -93,6 +93,14 @@ $('#scenario-status-dot').attr('class', '<%= "inline-block " + @scenario.status 
         $('<%= "#instance-status-dot-" + instance.id.to_s %>').show();
       <% end %>
 
+      <% if instance.booted? %>
+        $('#boot-button-instance-<%= instance.id.to_s %>').attr('class', "hidden");
+        $('#unboot-button-instance-<%= instance.id.to_s %>').attr('class', "");
+      <% elsif instance.stopped? %>
+        $('#boot-button-instance-<%= instance.id.to_s %>').attr('class', "");
+        $('#unboot-button-instance-<%= instance.id.to_s %>').attr('class', "hidden");
+      <% end %>
+
       <% if instance.internet_accessible %>
         <% ip = 'not set' %>
         <% if public_ip = instance.provider_instance_public_ip %>

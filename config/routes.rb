@@ -55,6 +55,7 @@ Edurange::Application.routes.draw do
       post 'getlog'
       post 'boot_status'
 
+      post 'upload'
       post 'save_changes'
 
     end
@@ -72,7 +73,7 @@ Edurange::Application.routes.draw do
   # get 'student_groups', to: 'student_groups#index'
   # post 'student_groups/new'
   # get 'student_groups/destroy'
-  get 'student_groups/add_to'
+  post 'student_groups/add_to'
   # get 'student_groups/remove_from'
   # post 'student_groups/add_to'
 
@@ -89,7 +90,6 @@ Edurange::Application.routes.draw do
   # get 'scoring/instructor_student/:scenario/:user', to: 'scoring#instructor_student'
   # post 'scoring/answer_open_question'
   # get 'scoring/answer_dump'
-
   # get 'documentation', to: 'documentation#index'
   # get 'documentation/scenarios/:id', to: 'documentation#show'
 

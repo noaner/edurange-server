@@ -1,0 +1,21 @@
+<% if @subnet.errors.any? %>
+    <% if @subnet.errors[:name].any? %>
+        $('#modal-add-subnet').find('#name-div').addClass('has-error');
+        $('#modal-add-subnet').find('#name-help').text('<%= @subnet.errors[:name][0] %>');
+    <% end %>
+    <% if @subnet.errors[:cidr_block].any? %>
+        $('#modal-add-subnet').find('#cidr-div').addClass('has-error');
+        $('#modal-add-subnet').find('#cidr-help').text('<%= @subnet.errors[:cidr_block][0] %>');
+    <% end %>
+    <% if @subnet.errors[:internet_accessible].any? %>
+        // $('#modal-add-subnet').find('#name-div').addClass('has-error');
+        // $('#modal-add-subnet').find('#name-help').text('<%= @subnet.errors[:internet_accessible][0] %>');
+    <% end %>
+    <% if @subnet.errors[:os].any? %>
+        // $('#modal-add-subnet').find('#os-div').addClass('has-error');
+        // $('#modal-add-subnet').find('#os-help').text('<%= @subnet.errors[:os][0] %>');
+    <% end %>
+<% else %>
+    //  $('#subnets-ul-<%= @subnet.subnet.id.to_s %>').append("<%= escape_javascript( render('/scenarios/show/subnet', subnet: @subnet).delete("\n") ).html_safe %>");
+    // $('#modal-add-subnet').modal('toggle');
+<% end %>

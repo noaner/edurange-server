@@ -60,7 +60,7 @@
                 %span.caret
               %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-clouds'}
                 %li{role: 'presentation'}
-                  = link_to 'Add Subnet', "#modal-add-subnet", method: :post, :data => {:toggle=>"modal"}
+                  = link_to 'Add Subnet', "#modal-add-subnet", :data => {:toggle=>"modal"}, onclick: "$('#modal-add-subnet').find('#cloud_id').val('#{cloud.id}')"
                 %li{role: 'presentation'}
                   = link_to 'Destroy', "#modal-delete-subnet", method: :post, :data => {:toggle=>"modal"}
 

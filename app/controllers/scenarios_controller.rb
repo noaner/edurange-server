@@ -1,6 +1,9 @@
 class ScenariosController < ApplicationController
-  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot, :unboot, :boot_status, :modify_players, :modify, :add_cloud, :add_student_group_to_players]
   before_action :authenticate_instructor
+  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot, :unboot, :boot_status, :modify_players, :modify, :add_cloud, :add_student_group_to_players]
+  before_action :set_cloud, only: [:add_subnet]
+  before_action :set_subnet, only: [:add_instance]
+  before_action :set_instance, only: []
 
   # GET /scenarios
   # GET /scenarios.json
@@ -70,6 +73,7 @@ class ScenariosController < ApplicationController
   # POST /scenarios
   # POST /scenarios.json
   def create
+    # scrub this template input
     if template = scenario_params["template"]
       @scenario = YmlRecord.load_yml("scenarios/default/#{template}/#{template}.yml")
     else
@@ -257,7 +261,7 @@ class ScenariosController < ApplicationController
     end
   end
 
-  def destroy_cloud
+  def delete_cloud
     # destroy all it's parts
 
   end
@@ -284,6 +288,10 @@ class ScenariosController < ApplicationController
   end
 
   def add_subnet
+    # @subnet = Subnet.find(params[:id])
+    @subnet = Subnet.new
+    @subnet.errors.add(:name, "FOO")
+    @subnet.errors.add(:cidr_block, "FOO")
 
     respond_to do |format|
       format.js { render template: 'scenarios/js/add_subnet.js.erb', layout: false }
@@ -308,8 +316,22 @@ class ScenariosController < ApplicationController
     end
   end
 
+  def delete_subnet
+    @subnet = Subnet.find(params[:id])
+    if @subnet.instances.size > 0
+      @subnet.errors.add(:has_dependents, "Cannot delete subnet because it has dependents")
+    else
+     # @subnet.destroy
+    end
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/delete_subnet.js.erb', layout: false }
+    end
+  end
+
   def add_instance
-    @instance = Subnet.find(params[:subnet]).instances.new(
+
+    @instance = @subnet.instances.new(
       name: params[:name],
       ip_address: params[:ip],
       os: params[:os],
@@ -425,25 +447,18 @@ class ScenariosController < ApplicationController
 
   def getlog
     if params[:kind] == 'scenario'
-      s = Scenario.find(params[:id])
-      log = s.log
-      name = s.name
+      resource = Scenario.find(params[:id])
     elsif params[:kind] == 'cloud'
-      c = Cloud.find(params[:id])
-      log = c.log
-      name = c.name
+      resource = Cloud.find(params[:id])
     elsif params[:kind] == 'subnet'
-      s = Subnet.find(params[:id])
-      log = s.log
-      name = s.name
+      resource = Subnet.find(params[:id])
     elsif params[:kind] == 'instance'
-      i = Instance.find(params[:id])
-      log = i.log
-      name = i.name
+      resource = Instance.find(params[:id])
     end
 
-    @htmllog = log.gsub("\n", "<br>").html_safe;
-    @name = name
+    @htmllog = resource.log.gsub("\n", "<br>").html_safe;
+    @name = resource.name
+
     respond_to do |format|
       format.js { render template: 'scenarios/js/log.js.erb', layout: false }
     end
@@ -451,7 +466,6 @@ class ScenariosController < ApplicationController
 
   def boot_status
     @scenario.get_status
-
     respond_to do |format|
       format.js { render 'scenarios/js/boot_status.js.erb', :layout => false }
     end
@@ -461,7 +475,31 @@ class ScenariosController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_scenario
       @scenario = Scenario.find(params[:id])
-      if not @scenario.owner?(current_user.id)
+      if (not @scenario.owner?(current_user.id)) and (not User.find(current_user.id).is_admin?)
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_cloud
+      @cloud = Cloud.find(params[:cloud_id])
+      if (not @cloud.owner?(current_user.id)) and (not User.find(current_user.id).is_admin?)
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_subnet
+      @subnet = Subnet.find(params[:subnet_id])
+      if (not @subnet.owner?(current_user.id)) and (not User.find(current_user.id).is_admin?)
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_instance
+      @instance = Instance.find(params[:instance_id])
+      if (not @instance.owner?(current_user.id)) and (not User.find(current_user.id).is_admin?)
         head :ok, content_type: "text/html"
         return
       end
@@ -469,6 +507,6 @@ class ScenariosController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def scenario_params
-      params.require(:scenario).permit(:game_type, :name, :template, :log)
+      params.require(:scenario).permit(:game_type, :name, :template)
     end
 end
