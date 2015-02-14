@@ -1,0 +1,10 @@
+
+
+<% if @scenario.errors.any? %>
+
+<% else %>
+	$('#modal-modify').modal('toggle');
+	$('#scenario-main-title').text("<%= @scenario.name %>");
+	$('#scenario-name').text("<%= @scenario.name %>");
+	// three places to change name
+<% end %>

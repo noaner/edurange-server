@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 
+echo "starting - CLOUD INIT"
+
 # Install stuff for chef solo
 <% if instance.os == 'ubuntu' %>
-apt-get -y update
+#apt-get -y update
 #apt-get -y upgrade TODO reenable apt-get upgrade. We don't want security problems
-apt-get -y install build-essential
-apt-get -y install ruby1.9.1 ruby1.9.1-dev
-apt-get -y autoremove
-apt-get -y clean
+#apt-get -y install build-essential
+#apt-get -y install ruby1.9.1 ruby1.9.1-dev
+#apt-get -y autoremove
+#apt-get -y clean
  
-gem install chef ruby-shadow --no-ri --no-rdoc --verbose
+#gem install chef ruby-shadow --no-ri --no-rdoc --verbose
 
 hostname <%= instance.uuid %>
 
@@ -58,10 +60,13 @@ cat << EOF > cron.sh
 cd /root/chef/cookbooks/op/recipes/
 wget -O default.rb '<%= cookbook_url %>'
 cd /root/chef
-/usr/local/bin/chef-solo -c solo.rb -j solo.json
+#/usr/local/bin/chef-solo -c solo.rb -j solo.json
+chef-solo -c solo.rb -j solo.json
 EOF
 
 # Crontab entry - Run cron.sh every 2 minutes
 crontab -l | { cat; echo "*/2 * * * * /bin/bash /root/chef/cron.sh"; } | crontab -
 chmod +x /root/chef/cron.sh
 /root/chef/cron.sh # Install stuff initially, don't wait 10 min
+
+echo "finished - CLOUD INIT"

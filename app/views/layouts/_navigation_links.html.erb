@@ -1,13 +1,10 @@
 <%# add navigation links to this file %>
-<li><%= link_to 'EDURange', root_path %></li>
-<li><%= link_to 'Scenarios', scenarios_path %></li>
-<li><%= link_to 'Clouds', clouds_path %></li>
-<li><%= link_to 'Subnets', subnets_path %></li>
-<li><%= link_to 'Instances', instances_path %></li>
-<li><%= link_to 'Groups', groups_path %></li>
-<li><%= link_to 'Players', players_path %></li>
-<li><%= link_to 'Roles', roles_path %></li>
-<li><%= link_to 'Cleanup Scenarios', management_status_path %></li>
-<% if current_user %>
-  <li><%= link_to 'Sign Out', destroy_user_session_path, method: :delete %></li>
+
+<!-- <li><%= link_to 'Documentation', documentation_path %></li> -->
+<% if user_signed_in? %>
+  <li><%= link_to 'Home', root_path %></li>
+  <% if User.find(current_user.id).is_instructor? %>
+    <li><%= link_to 'Scenarios', scenarios_path %></li>
+  <% end %>
+  <li><%= link_to 'Sign Out', destroy_user_session_path, :method => :delete %></li>
 <% end %>

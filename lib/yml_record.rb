@@ -1,10 +1,23 @@
 module YmlRecord
   # Returns an array of [filename, scenario name, description]
+  def self.yml_headers_old
+    output = []
+    Dir.foreach(Settings.app_path + "scenarios-yml/") do |filename|
+      next if filename == '.' or filename == '..' or filename == 'ddos.yml'
+      scenario = YAML.load_file(Settings.app_path + "scenarios-yml/#{filename}")["Scenarios"][0]
+      name = scenario["Name"]
+      description = scenario["Description"]
+      output.push [filename, name, description]
+    end
+    return output
+  end
+
   def self.yml_headers
     output = []
-    Dir.foreach("scenarios-yml/") do |filename|
+    Dir.foreach(Settings.app_path + "scenarios/default") do |filename|
       next if filename == '.' or filename == '..' or filename == 'ddos.yml'
-      scenario = YAML.load_file("scenarios-yml/#{filename}")["Scenarios"][0]
+      puts filename
+      scenario = YAML.load_file(Settings.app_path + "scenarios/default/#{filename}/#{filename}.yml")["Scenarios"][0]
       name = scenario["Name"]
       description = scenario["Description"]
       output.push [filename, name, description]
@@ -24,7 +37,8 @@ module YmlRecord
     # what unique id corresponds to the current loading of the scenario. Whenever we
     # create an object, we store it within the above hash so that we can look it up
     # later in this function when we are creating objects referencing things in the database.
-    file = YAML.load_file(yaml_file)
+    puts yaml_file
+    file = YAML.load_file(Settings.app_path + yaml_file)
 
     scenarios = file["Scenarios"]
     clouds = file["Clouds"]
@@ -32,7 +46,7 @@ module YmlRecord
     instances = file["Instances"]
     roles = file["Roles"]
     groups = file["Groups"]
-    answers = file["Answers"]
+    questions = file["Questions"]
 
     roles.each do |yaml_role|
       role = Role.new
@@ -46,19 +60,20 @@ module YmlRecord
       role.save!
       name_lookup_hash[role.name] = role.id
     end
-    
+
     scenario = nil # Set scope for scenario
     scenarios.each do |yaml_scenario|
       scenario = Scenario.new
       scenario.name = yaml_scenario["Name"]
       scenario.description = yaml_scenario["Description"]
+      scenario.instructions = yaml_scenario["Instructions"]
       answers ||= []
       scenario.answers = answers.join("\n")
       scenario.uuid = `uuidgen`.chomp
       scenario.save!
       name_lookup_hash[scenario.name] = scenario.id
     end
-    
+
     cloud = nil
     clouds.each do |yaml_cloud|
       scenario = Scenario.find(name_lookup_hash[yaml_cloud["Scenario"]])
@@ -100,8 +115,8 @@ module YmlRecord
       instance.save!
       name_lookup_hash[instance.name] = instance.id
     end
-    
-    
+
+
     groups.each do |yaml_group|
       users = yaml_group["Users"]
       access = yaml_group["Access"]
@@ -110,17 +125,33 @@ module YmlRecord
 
       group = Group.new
       group.name = yaml_group["Name"]
+      group.scenario_id = scenario.id
       group.save!
 
-      users.each do |user|
-        login = user["Login"]
-        password = user["Password"]
+      if users
+        users.each do |user|
+          login = user["Login"]
+          password = user["Password"]
 
-        player = group.players.new
-        player.login = login
-        player.password = password
-        player.group = group
-        player.save!
+          player = group.players.new
+          player.login = login
+          player.password = password
+          player.group = group
+          player.save!
+        end
+      end
+
+      # Do questions
+      if questions
+        questions.each do |yml_question|
+          question = scenario.questions.new
+          question.question_text = yml_question["Question"]
+          question.kind = yml_question["Type"]
+          if question.kind == "StringMatch"
+            question.answer_text = yml_question["Answer"]
+          end
+          question.save!
+        end
       end
 
       # Give group admin on machines they own
@@ -131,7 +162,7 @@ module YmlRecord
           instance.save!
         end
       end
-      
+
       if user
         user.each do |user_instance|
           instance = Instance.find(name_lookup_hash[user_instance])

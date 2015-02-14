@@ -1,1 +1,24 @@
-Welcome! Create a scenario from the "Scenarios" menu above, then boot it!
+
+
+%div.panel.panel-default
+  %div.panel-heading
+    %h1
+      EDURange
+
+  %div.panel-body
+
+
+    %h2.page-description.fadeIn
+      The cybersecurity training ground.
+
+    = form_tag session_path(:user) do
+      = text_field_tag 'user[email]'
+      = password_field_tag 'user[password]'
+      = check_box_tag 'user[remember_me]'
+      = label_tag 'user[remember_me]', 'Remember me'
+      = button_tag "Sign In", class: 'btn btn-primary'
+
+    %p
+    or
+    %p
+    = link_to 'Sign Up', 'users/sign_up', class: 'btn btn-primary'

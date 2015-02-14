@@ -1,0 +1,47 @@
+%h3 Student Groups
+
+%dl
+  %dt Enter group name below and press 'create' to create a new Student Group. Students must already have an account for them to be added to a Student Group. In the future we will make some sort of email invitation system. Enter the email of a signed up student below to add them to the group.
+
+%p
+%div
+  = form_tag '/student_groups/new' do
+    = label_tag 'New Group:', nil, :style => "display:inline;"
+    = text_field '', :name, :style => "width:200px;"
+    = submit_tag "create"
+%p
+
+%span.incorrect= @message
+%div
+  %dl
+  - if @named_array.size > 0
+    - @named_array.each do |group_name, users|
+      %label
+      = form_tag '/student_groups/add_to' do
+        = label_tag group_name, nil
+        = label_tag 'email:', nil, :style => "display:inline;"
+        = text_field '', :email, :style => "width:300px"
+        = hidden_field_tag 'group_name', group_name
+        = submit_tag "add"
+        = link_to 'delete', student_groups_destroy_path(:group_name => group_name)
+      %table
+        %tr
+          %td{:width => "150px;"}
+            Name:
+          %td{:width => "250px;"}
+            Email:
+          %td{:width => "60px"}
+        - users.each do |user|
+          %tr
+            %td
+              = user.name
+            %td
+              = user.email
+            %td
+              = link_to 'delete', student_groups_remove_from_path(:group_name => group_name, :email => user.email)
+      %p
+
+
+// name: organization: status: member, waiting for activation    -remove
+
+

@@ -9,7 +9,7 @@ class Cloud < ActiveRecord::Base
   include Aws
 
   belongs_to :scenario
-  has_many :subnets, dependent: :delete_all
+  has_many :subnets, dependent: :destroy
 
   # validations
 
@@ -51,14 +51,43 @@ class Cloud < ActiveRecord::Base
   end
   # Debug function that adds 1 to this scenario's "cloud_progress", increasing the progress bar on the boot view.
   # @return [nil]
-  def add_progress
-    PrivatePub.publish_to "/scenarios/#{self.scenario.id}", cloud_progress: 1
+  def add_progress(val)
+    # PrivatePub.publish_to "/scenarios/#{self.scenario.id}", cloud_progress: val
   end
   # @param message The message to print to the {Scenario}'s boot view
   # @return [nil]
   def debug(message)
-    log = self.scenario.log
-    self.scenario.update_attributes(log: log + message + "\n")
-    PrivatePub.publish_to "/scenarios/#{self.id}", log_message: message
+    log = self.log ? self.log : ''
+    message = '' if !message
+    self.update_attributes(log: log + message + "\n")
   end
+
+  def owner?(id)
+    return self.scenario.user_id == id
+  end
+
+  def ip_taken?(ip)
+    return self.subnets.select{ |subnet| subnet.instances.select{ |instance| instance.ip_address == ip }.size > 0 }.size > 0
+  end
+
+  def subnets_booting?
+    return self.subnets.select{ |s| s.booting? }.any?
+  end
+
+  def subnets_boot_failed?
+    return self.subnets.select{ |s| s.boot_failed? }.any?
+  end
+
+  def subnets_unbooting?
+    return self.subnets.select{ |s| s.unbooting? }.any?
+  end
+
+  def subnets_unboot_failed?
+    return self.subnets.select{ |s| s.unboot_failed? }.any?
+  end
+
+  def subnets_booted?
+    return self.subnets.select{ |s| s.booted? }.any?
+  end
+
 end

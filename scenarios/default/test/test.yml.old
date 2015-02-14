@@ -1,0 +1,73 @@
+Roles:
+  - Name: Role_1
+    Packages:
+    Recipes:
+
+Groups:
+  - Name: Team_1
+    Access:
+      Administrator:
+        - Instance_1
+      User:
+        - Instance_1
+    Users:
+      - Login: instructor
+        Password: vLCu3Crf
+
+Scenarios:
+  - Name: Test
+    Description: none
+    Instructions: none
+
+Clouds:
+  - Name: Cloud_1
+    CIDR_Block: 10.0.0.0/16
+    Scenario: Test
+
+Subnets:
+  - Name: Subnet_1
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.129.0/24
+    Internet_Accessible: true
+
+  - Name: Subnet_2
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.129.0/24
+    Internet_Accessible: true
+
+Instances:
+  - Name: Instance_1
+    Subnet: Subnet_1
+    OS: nat
+    IP_Address: 10.0.129.5
+    Internet_Accessible: true
+    Roles:
+      - Role_1
+
+  - Name: Instance_2
+    Subnet: Subnet_1
+    OS: ubuntu
+    IP_Address: 10.0.129.6
+    Roles:
+      - Role_1
+
+  - Name: Instance_3
+    Subnet: Subnet_1
+    OS: ubuntu
+    IP_Address: 10.0.129.7
+    Roles:
+      - Role_1
+
+  - Name: Instance_4
+    Subnet: Subnet_2
+    OS: ubuntu
+    IP_Address: 10.0.129.8
+    Roles:
+      - Role_1
+
+  - Name: Instance_5
+    Subnet: Subnet_2
+    OS: ubuntu
+    IP_Address: 10.0.129.9
+    Roles:
+      - Role_1

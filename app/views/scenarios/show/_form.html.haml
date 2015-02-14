@@ -1,0 +1,10 @@
+%div.panel.panel-default
+  %div.panel-body
+    = simple_form_for(@scenario) do |f|
+      = f.label "Select Scenario", nil, :style => "display:inline;"
+      = f.error_notification
+      = f.select :template, options_for_select(@templates)
+
+      .form-actions
+        = f.button :submit, class: 'btn btn-primary'
+

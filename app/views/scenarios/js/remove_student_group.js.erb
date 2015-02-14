@@ -1,0 +1,6 @@
+$('#modal-remove-student-group').modal('toggle');
+
+<% @players.each do |player| %>
+	<% user = User.find(player.user_id) %>
+	$('#group-table-player-<%= player.id.to_s %>').remove();
+<% end %>

@@ -1,0 +1,47 @@
+Roles:
+  - Name: NAT
+    Packages:
+      - tshark
+      - nmap
+      - python
+    Recipes:
+      - sshd_password_login
+
+Groups:
+  - Name: Player
+    Access:
+      User:
+        - NAT_Instance
+    Users:
+      - Login: instructor
+        Password: Clzv1aeCs1Yz
+    Description: Describe this Player
+
+Scenarios:
+  - Description: A series of Network Security puzzles and challenges designed to educate users on packet manipulation and common network attacks."
+    Name: ScapyHunt
+    Instructions: todo.
+
+Clouds:
+  - Name: Cloud_1
+    CIDR_Block: 10.0.0.0/16
+    Scenario: ScapyHunt
+
+Subnets:
+  - Name: NAT_Subnet
+    Cloud: Cloud_1
+    CIDR_Block: 10.0.129.0/24
+    Internet_Accessible: true
+
+Instances:
+  - Name: NAT_Instance
+    Subnet: NAT_Subnet
+    OS: ubuntu
+    IP_Address: 10.0.129.5
+    Internet_Accessible: true
+    Roles:
+      - NAT
+
+Questions:
+  - Question: What did you lean?
+    Type: Essay

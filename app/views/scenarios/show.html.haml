@@ -1,65 +1,54 @@
-= subscribe_to "/scenarios/#{@scenario.id}"
+= render '/scenarios/show/modals'
+
 %div.panel.panel-default#scenario{data: {id: @scenario.id}}
-  %div.panel-heading
-    %b
-      Scenario - 
-      =@scenario.name
+  %div.panel-heading.nav.nav-pills
+    %li
+      %h4#scenario-main-title
+        =@scenario.name + ":"
+    %li.dropdown#action-dropdown
+      %a.dropdown-toggle{ "data-toggle" => "dropdown", href: "#", role: "button", "aria-expanded" => "false"}
+        Actions
+        %span.caret
+      %ul.dropdown-menu{role: "menu"}
+        %li
+          - if @scenario.stopped?
+            - boot_class = ""
+            - unboot_class = "hidden"
+          - elsif @scenario.booting?
+            - boot_class = ""
+            - unboot_class = "hidden"
+          - elsif (@scenario.booted? or @scenario.boot_failed?)
+            - boot_class = "hidden"
+            - unboot_class = ""
+          - elsif @scenario.is_failed?
+            - boot_class = "hidden"
+            - unboot_class = ""
+
+          = link_to 'Boot', boot_scenario_path(@scenario), method: :post, remote:true, id: 'boot-button', class: boot_class
+          = link_to 'Unboot', unboot_scenario_path(@scenario), method: :post, remote:true, id: 'unboot-button', class: unboot_class
+
+          / = link_to 'Pause'
+          = link_to 'Destroy', @scenario, :method => :delete
+          = link_to 'Show Boot Log', getlog_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true
+          = link_to 'Save Changes', save_changes_scenario_path(@scenario), method: :post, remote: true
+
   %div.panel-body
-    %dl
-      %dt Status:
-      %dd
-        %span#scenario-status
-          = @scenario.status
-      %dt Description:
-      %dd= @scenario.description
 
-    %div.page-header
-      %h3 Clouds [ ]
+    %div.css-treeview
+      %ul
+        %li
+          %input{ type: 'checkbox', id: 'item-instructions', checked: 'checked'}
+          %label{ for: 'item-instructions'}
+            Instructions
+          %ul
+            = @scenario.instructions
+        %p
+        %li
+          = render '/scenarios/show/scenario'
+        %li
+          = render '/scenarios/show/players'
 
-    %dl
-      - @scenario.clouds.each do |cloud|
-        %dt= link_to cloud.name, cloud_path(cloud)
+= link_to 'Back', scenarios_path, class: 'btn btn-default'
 
-    %div.page-header
-      %h3 Boot Progress
-
-    %dl
-      %dt
-        Clouds Booted:
-      %dd
-        %span#cloud-count
-          = @cloud_booted
-        of 
-        %span#cloud-total
-          = @cloud_count
-      %dt
-        Subnets Booted:
-      %dd
-        %span#subnet-count
-          = @subnet_booted
-        of
-        %span#subnet-total
-          = @subnet_count
-
-      %dt
-        Instances Booted:
-      %dd
-        %span#instance-count
-          = @instance_booted
-        of
-        %span#instance-total
-          = @instance_count
-
-  %h3#console-header Console Log
-  %pre#console
-    - until @scenario.log
-      = @scenario.log
-
-
-  %div.btn-group#scenario-buttons
-    = link_to 'Boot', boot_scenario_path(@scenario), class: 'btn btn-primary'
-    = link_to 'dev_boot', dev_boot_scenario_path(@scenario), class: 'btn btn-default'
-    = link_to 'Unboot', unboot_scenario_path(@scenario), class: 'btn btn-default'
-    = link_to 'dev_unboot', dev_unboot_scenario_path(@scenario), class: 'btn btn-default'
-    = link_to 'Edit', edit_scenario_path(@scenario), class: 'btn btn-default'
-    = link_to 'Back', scenarios_path, class: 'btn btn-default'
+%script
+  = "get_boot_status('#{@scenario.id}');"

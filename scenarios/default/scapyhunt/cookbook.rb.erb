@@ -1,0 +1,8 @@
+script "install_strace" do
+
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  not_if "test -e /tmp/test"
+
+end
