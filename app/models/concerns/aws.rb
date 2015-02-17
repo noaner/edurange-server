@@ -11,35 +11,7 @@ module Aws
   def aws_boot_scenario(options = {})
     debug "booting Scenario #{self.name}"
     self.set_booting
-
-    # boot each Cloud
-    if options[:boot_dependents]
-      self.clouds.select{|c| !c.driver_id}.each do |cloud|
-        begin
-          cloud.set_booting
-          if options[:run_asynchronously]
-            cloud.delay(queue: 'clouds').boot(options)
-            # cloud.delay(queue: 'clouds').boot(options[:boot_dependents], options[:run_asynchronously])
-          else
-            cloud.boot(options)
-          end
-        rescue => e
-          self.boot_error(e)
-          return
-        end
-      end
-
-       # add a timeout here
-      debug "scenario #{self.name} waiting for clouds"
-      until not self.clouds_booting?
-        sleep 2
-        self.reload
-      end
-
-    end
-
-    puts 'boot scenario'
-    self.set_booting
+    
     debug "------------------------------------------"
     debug "booting Scenario #{self.name}"
 
