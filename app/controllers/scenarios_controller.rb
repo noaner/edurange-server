@@ -126,8 +126,6 @@ class ScenariosController < ApplicationController
   def boot
     if @scenario.stopped?
       @scenario.set_booting
-      # @scenario.delay(queue: 'scenarios').boot(true, true)
-      # @scenario.delay(queue: 'scenarios').boot(boot_dependents: true, run_asynchronously: false)
       @scenario.delay(queue: 'scenarios').boot(boot_dependents: true, run_asynchronously: Settings.boot_asynchronously)
     end
 

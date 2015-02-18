@@ -51,6 +51,6 @@ Instances:
     Roles: 
       - NAT
 
-Questions:
-  - Question: Why is strace important?
-    Type: Essay
+Answers:
+  - foo
+  - bar

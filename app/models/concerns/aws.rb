@@ -9,16 +9,25 @@ module Aws
   # #  Boot and Unboot
 
   def aws_boot_scenario(options = {})
-    debug "booting Scenario #{self.name}"
     self.set_booting
-    
     debug "------------------------------------------"
     debug "booting Scenario #{self.name}"
+
+
+    # do initial scoring setup
+    begin
+      self.aws_scenario_create_scoring_pages
+      self.aws_scenario_create_answers_page
+    rescue => e
+      self.boot_error(e)
+      return
+    end
 
     # boot each Cloud
     if options[:boot_dependents]
       self.clouds.select{|c| !c.driver_id}.each do |cloud|
         begin
+          cloud.set_booting
           if options[:run_asynchronously]
             cloud.delay(queue: 'clouds').boot(options)
           else
@@ -43,6 +52,18 @@ module Aws
       rescue => e
         self.boot_error(e)
         return
+      end
+
+      debug "waiting for instances to finish booting"
+      sleep 2 until self.instances.select{ |i| i.booted? }.size == self.instances.size
+      self.reload
+
+      # final scoring setup
+      debug "writing to scoring pages #{self.scoring_pages_content}"
+      begin
+        self.aws_scenario_write_to_scoring_pages
+      rescue => e
+        self.boot_error(e)
       end
 
     end
@@ -97,6 +118,15 @@ module Aws
           return
         end
       end
+    end
+
+    # delete scoring pages
+    begin
+      self.aws_scenario_delete_scoring_pages
+      self.aws_scenario_delete_answers_page
+    rescue => e
+      self.unboot_error(e)
+      return
     end
 
     self.set_stopped
@@ -609,11 +639,24 @@ module Aws
     self.set_booting
     debug "booting - Instance #{self.name}"
 
+    # scoring
+    if self.roles.select { |r| r.recipes.include?('scoring') }.size > 0
+      begin
+        self.aws_instance_create_scoring_page
+        self.aws_instance_create_scoring_url
+        self.reload
+        self.scenario.update(scoring_pages_content: self.scenario.read_attribute(:scoring_pages_content) + self.scoring_page + "\n")
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+    end
+
     # create intitiation scripts
     debug "creating - Instance init"
     begin
       debug "generating - instance cookbook"
-      self.aws_upload_com_page
+      self.aws_instance_create_com_page
       instance_template = InstanceTemplate.new(self)
       cookbook_text = instance_template.generate_cookbook_new
 
@@ -880,8 +923,9 @@ module Aws
 
     # remove s3 files
     begin
-      aws_S3_delete_page(uuid)
-      aws_S3_delete_page(self.name + '-' + self.uuid + '-com')
+      self.aws_instance_delete_cookbook
+      self.aws_instance_delete_com_page
+      self.aws_instance_delete_scoring_page
     rescue => e
       self.unboot_error(e)
       return
@@ -1076,6 +1120,11 @@ module Aws
   ##############################################################
   # S3 page (SCORING, COOKBOOKS, COM)
 
+  # This uploads our chef cookbook into S3, and gets us a url. This is given to the shell script
+  # which sets a cron job to download and run the chef recipe.
+  # @param cookbook_text The text to upload to S3
+  # @return [String] A URL generated from S3 pointing to our text
+
   def aws_S3_create_page(name, permissions, content)
     begin
       s3 = AWS::S3.new
@@ -1101,99 +1150,164 @@ module Aws
     end
   end
 
-  def aws_upload_com_page
-    begin
-      s3 = AWS::S3.new
-      bucket = s3.buckets[Settings.bucket_name]
-      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      name = self.name + '-' + self.uuid + '-com'
-      bucket.objects[name].write("waiting")
-      self.update(com_page: bucket.objects[name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
-    rescue
-      raise
-      return
-    end
+  def aws_S3_name_prefix
+    return "#{Settings.host}_#{self.scenario.user.name}_#{self.scenario.name}_#{self.scenario.id.to_s}"
   end
 
-  def aws_scenario_upload_com_page
-    begin
-      s3 = AWS::S3.new
-      bucket = s3.buckets[Settings.bucket_name]
-      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      name = self.uuid + '-com'
-      bucket.objects[name].write("ready")
-      # bucket.objects[name].acl = :public_read
-      # puts bucket.objects[name].url_for(:read, expires: 10.hours, :content_type => 'text/plain')
-      # self.update(com_page: bucket.objects[name].url_for(:read, expires: 10.hours, content_type: 'text/plain').to_s)
-      self.update(com_page: bucket.objects[name].url_for(:write, expires: 10.hours, content_type: 'text/plain').to_s)
-    rescue
-      raise
-      return
-    end
+  # Cookbooks
+
+  def aws_instance_cookbook_name
+    return "#{aws_S3_name_prefix}_cookbook_#{self.name}_#{self.id.to_s}_#{self.uuid}"
   end
 
-  # This uploads our chef cookbook into S3, and gets us a url. This is given to the shell script
-  # which sets a cron job to download and run the chef recipe.
-  # @param cookbook_text The text to upload to S3
-  # @return [String] A URL generated from S3 pointing to our text
   def aws_instance_upload_cookbook(cookbook_text)
     begin 
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      bucket.objects[uuid].write(cookbook_text)
-      self.update(cookbook_url: bucket.objects[uuid].url_for(:read, expires: 10.hours).to_s)
+      bucket.objects[self.aws_instance_cookbook_name].write(cookbook_text)
+      self.update(cookbook_url: bucket.objects[self.aws_instance_cookbook_name].url_for(:read, expires: 10.hours).to_s)
     rescue
       raise
       return
     end
   end
 
-  def aws_scenario_upload_scoring_pages
-    s3 = AWS::S3.new
-    bucket = s3.buckets[Settings.bucket_name + '-edurange-scoring']
-    s3.buckets.create(Settings.bucket_name + '-edurange-scoring') unless bucket.exists?
-    name = self.name + "-" + self.uuid + "-scoring-pages"
-    self.update(scoring_pages: bucket.objects[name].url_for(:read, expires: 10.hours).to_s)
+  def aws_instance_delete_cookbook
+    aws_S3_delete_page(self.aws_instance_cookbook_name)
+  end
+
+  # Communication
+
+  def aws_instance_com_page_name
+    return "#{aws_S3_name_prefix}_compage_#{self.name}_#{self.id.to_s}_#{self.uuid}"
+  end
+
+  def aws_instance_create_com_page
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets[Settings.bucket_name]
+      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
+      bucket.objects[aws_instance_com_page_name].write("waiting")
+      self.update(com_page: bucket.objects[aws_instance_com_page_name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
+    rescue
+      raise
+      return
+    end
+  end
+
+  def aws_instance_delete_com_page
+    begin
+      aws_S3_delete_page(self.aws_instance_com_page_name)
+    rescue
+      raise
+      return
+    end
+  end
+
+  # Scoring
+
+  def aws_scenario_scoring_name
+     return "#{aws_S3_name_prefix}_scoring_#{self.name}_#{self.id.to_s}_#{self.uuid}"
+  end
+
+  def aws_scenario_scoring_pages_name
+    self.name + "-" + self.uuid + "-scoring-pages"
+  end
+
+  def aws_scenario_create_scoring_pages
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets['higgz-edurange-scoring']
+      s3.buckets.create('higgz-edurange-scoring') unless bucket.exists?
+      self.update(scoring_pages: bucket.objects[aws_scenario_scoring_pages_name].url_for(:read, expires: 10.hours).to_s)
+    rescue
+      raise
+      return
+    end
   end
 
   def aws_scenario_write_to_scoring_pages
-    AWS::S3.new.buckets[Settings.bucket_name + '-edurange-scoring'].objects[self.name + "-" + self.uuid + "-scoring-pages"].write(self[:scoring_pages_content])
+    begin 
+      AWS::S3.new.buckets['higgz-edurange-scoring'].objects[aws_scenario_scoring_pages_name].write(self[:scoring_pages_content])
+    rescue
+      raise
+      return
+    end
   end
 
-  def aws_scenario_upload_answers
-    s3 = AWS::S3.new
-    bucket = s3.buckets[Settings.bucket_name + '-edurange-answers']
-    s3.buckets.create(Settings.bucket_name + '-edurange-answers') unless bucket.exists?
-    object = bucket.objects[self.name]
-    object.write(self.answers)
-    self.update(answers_url: object.url_for(:read, expires: 10.hours).to_s)
+  def aws_scenario_delete_scoring_pages
+    begin 
+      AWS::S3.new.buckets['higgz-edurange-scoring'].objects[aws_scenario_scoring_pages_name].delete
+    rescue
+      raise
+      return
+    end
   end
 
-  def aws_upload_scoring_url
-    s3 = AWS::S3.new
-    bucket = s3.buckets[Settings.bucket_name + '-edurange-scoring']
-    s3.buckets.create(Settings.bucket_name + '-edurange-scoring') unless bucket.exists?
-    name = self.uuid + "-scoring-" + self.name
-    bucket.objects[name].write("# put your answers here")
-    self.update(scoring_url: bucket.objects[name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
+  def aws_scenario_answers_name
+    self.name + "-" + self.uuid + "-answers"
   end
 
-  def aws_delete_scoring_url
-    name = self.uuid + "-scoring-" + self.name
-    AWS::S3.new.buckets[Settings.bucket_name + '-edurange-scoring'].objects[name].delete
+  def aws_scenario_create_answers_page
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets['higgz-edurange-scoring']
+      s3.buckets.create('higgz-edurange-scoring') unless bucket.exists?
+      object = bucket.objects[aws_scenario_answers_name]
+      object.write(self.answers)
+      self.update(answers_url: object.url_for(:read, expires: 10.hours).to_s)
+    rescue
+      raise
+      return
+    end
   end
 
-  def aws_upload_scoring_page
-    s3 = AWS::S3.new
-    bucket = s3.buckets[Settings.bucket_name + '-edurange-scoring']
-    s3.buckets.create(Settings.bucket_name + '-edurange-scoring') unless bucket.exists?
-    self.update(scoring_page: bucket.objects[self.uuid + "-scoring-" + self.name].url_for(:read, expires: 10.hours).to_s)
+  def aws_scenario_delete_answers_page
+    begin 
+      AWS::S3.new.buckets['higgz-edurange-scoring'].objects[aws_scenario_answers_name].delete
+    rescue
+      raise
+      return
+    end
   end
 
-  def aws_delete_scoring_page
-    name = self.uuid + "-scoring-" + self.name
-    AWS::S3.new.buckets[Settings.bucket_name + '-edurange-scoring'].objects[name].delete
+  def aws_instance_scoring_name
+    self.name + '-' + self.uuid + "-scoring"
+  end
+
+  def aws_instance_create_scoring_page
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets['higgz-edurange-scoring']
+      s3.buckets.create('higgz-edurange-scoring') unless bucket.exists?
+      self.update(scoring_page: bucket.objects[aws_instance_scoring_name].url_for(:read, expires: 10.hours).to_s)
+    rescue
+      raise
+      return
+    end
+  end
+
+  def aws_instance_create_scoring_url
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets['higgz-edurange-scoring']
+      s3.buckets.create('higgz-edurange-scoring') unless bucket.exists?
+      bucket.objects[aws_instance_scoring_name].write("# put your answers here")
+      self.update(scoring_url: bucket.objects[aws_instance_scoring_name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
+    rescue
+      raise
+      return
+    end
+  end
+
+  def aws_instance_delete_scoring_page
+    begin 
+      AWS::S3.new.buckets['higgz-edurange-scoring'].objects[aws_instance_scoring_name].delete
+    rescue
+      raise
+      return
+    end
   end
 
 end

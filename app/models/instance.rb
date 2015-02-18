@@ -56,11 +56,9 @@ class Instance < ActiveRecord::Base
     return false if !self.com_page
 
     s3 = AWS::S3.new
-    bucket_name = Settings.bucket_name
-    bucket = s3.buckets[bucket_name]
-    name = self.name + '-' + self.uuid + '-com'
-    if bucket.objects[name].exists?
-      return true if bucket.objects[name].read() == 'finished'
+    bucket = s3.buckets[Settings.bucket_name]
+    if bucket.objects[self.aws_instance_com_page_name].exists?
+      return true if bucket.objects[self.aws_instance_com_page_name].read() == 'finished'
     end
     false
   end

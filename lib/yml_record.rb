@@ -47,6 +47,7 @@ module YmlRecord
     roles = file["Roles"]
     groups = file["Groups"]
     questions = file["Questions"]
+    answers = file["Answers"]
 
     roles.each do |yaml_role|
       role = Role.new

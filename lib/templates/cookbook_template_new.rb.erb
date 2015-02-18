@@ -138,9 +138,14 @@ file "/tmp/scoring/answers" do
   mode "0777"
 end
 
+script 'updateagent' do
+  interpreter "bash"
+  code 'sed -i "s/edurange-scoring/higgz-edurange-scoring/g" /tmp/scoring/scoreagent.rb'
+end
+
 script 'get scoring_url' do
   interpreter "bash"
-  code 'echo "<%= scoring_url %>" > /tmp/scoring/scoring_url'
+  code 'echo "<%= instance.scoring_url %>" > /tmp/scoring/scoring_url'
 end
 
 gem_package "daemons"
@@ -151,6 +156,47 @@ script 'run scoreagent' do
   ruby /tmp/scoring/scoreagent.rb start &
   EOF
 end
+
+  <% elsif recipe == 'recon_scorer' %>
+# Recon Scorer Recipe
+gem_package "daemons"
+gem_package "sinatra"
+directory "/tmp/scoring/points" do
+  :create
+  recursive true
+  mode 0777
+end
+file "/tmp/scoring/scoring_pages" do
+  content "<%= instance.scenario.scoring_pages %>"
+end
+file "/tmp/scoring/answers_url" do
+  content "<%= instance.scenario.answers_url %>"
+end
+remote_file "scorer.rb" do
+  source "https://github.com/edurange/scoring/raw/master/scorer.rb"
+  path "/tmp/scoring/scorer.rb"
+end
+remote_file "leaderboard.rb" do
+  source "https://github.com/edurange/scoring/raw/master/leaderboard.rb"
+  path "/tmp/scoring/points/leaderboard.rb"
+end
+
+script 'run scorer and download answers' do
+  interpreter "bash"
+  code <<-EOF
+  wget -O /tmp/scoring/answers `cat /tmp/scoring/answers_url`
+  ruby /tmp/scoring/scorer.rb start &
+  EOF
+end
+
+script 'simple http server' do
+  interpreter "bash"
+  cwd '/tmp/scoring/points'
+  code <<-EOF
+  ruby leaderboard.rb -o 0.0.0.0 &
+  EOF
+end
+
 
     <% end %>
   <% end %>

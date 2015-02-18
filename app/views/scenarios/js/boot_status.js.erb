@@ -41,10 +41,10 @@ $('#scenario-status-dot').attr('class', '<%= "inline-block " + @scenario.status 
     $('<%= "#cloud-status-dot-" + cloud.id.to_s %>').show();
   <% end %>
 
-  <% if cloud.booted? %>
+  <% if cloud.booted? or cloud.boot_failed? %>
     $('#boot-button-cloud-<%= cloud.id.to_s %>').attr('class', "hidden");
     $('#unboot-button-cloud-<%= cloud.id.to_s %>').attr('class', "");
-  <% elsif cloud.stopped? or cloud.boot_failed? %>
+  <% elsif cloud.stopped?  %>
     $('#boot-button-cloud-<%= cloud.id.to_s %>').attr('class', "");
     $('#unboot-button-cloud-<%= cloud.id.to_s %>').attr('class', "hidden");
   <% end %>
@@ -101,6 +101,7 @@ $('#scenario-status-dot').attr('class', '<%= "inline-block " + @scenario.status 
         $('#unboot-button-instance-<%= instance.id.to_s %>').attr('class', "hidden");
       <% end %>
 
+
       <% if instance.internet_accessible %>
         <% ip = 'not set' %>
         <% if public_ip = instance.provider_instance_public_ip %>
@@ -123,9 +124,10 @@ $('#scenario-status-dot').attr('class', '<%= "inline-block " + @scenario.status 
 
       <% initialized = "false" %>
       <% if instance.initialized? %>
-        <% sshready = "true" %>
+        <% initialized = "true" %>
       <% end %>
-       $('<%= "#instance-initialized-" + instance.id.to_s %>').text('<%= sshready %>');
+       $('<%= "#instance-initialized-" + instance.id.to_s %>').text('<%= initialized %>');
+       console.log('<%= initialized %>'); 
 
     <% end %>
   <% end %>
@@ -134,6 +136,6 @@ $('#scenario-status-dot').attr('class', '<%= "inline-block " + @scenario.status 
 <% if @scenario.booting? or @scenario.unbooting? %>
   setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 3000);
 <% else %>
-  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 10000);
+  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 8000);
 <% end %>
 
