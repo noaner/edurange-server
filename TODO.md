@@ -13,3 +13,7 @@
 - Enable dry run (don't create vpcs/instances, just parse & print debug info)
 
 - Add more exercises
+
+- implement admin pages
+
+- implement mailing features. i.e. invite through email to become instructor/student
