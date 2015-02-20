@@ -23,13 +23,14 @@ gem 'delayed_job_active_record'
 gem 'jquery-turbolinks'
 gem 'therubyracer'
 gem 'rails_config'
-gem 'aws-sdk'
+gem 'aws-sdk', '1.61.0'
 gem 'erubis'
 gem 'unix-crypt'
 gem 'ipaddress'
 gem 'nokogiri'
 # gem 'faye'
 # gem 'puma'
+gem 'pg'
 
 
 group :development do
