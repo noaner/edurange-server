@@ -2,6 +2,8 @@
 
 - fix Unable to autoload constant AWS error
 
+- get bash_history in real time
+
 - switch database to postgresql
 
 - get error handling to work in chef. on cookbook error send error message back to instructor machine
