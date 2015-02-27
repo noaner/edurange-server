@@ -2,7 +2,7 @@
 
 - Add instructor/student/team instructions to yml
 
-- Implement functions in yml files. $rannum(0,255), $ranhex(length)
+- Change yml files to yml.erb to be preprocessed in yml for adding ruby functions like random numbers.
 
 - Create scapyhunt scenario
 
