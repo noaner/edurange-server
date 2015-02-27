@@ -13,6 +13,7 @@ development:
   <<: *default
   database: db/development.sqlite3
 
+# Will be moving to postgresql soon
 # development:
 #   adapter: postgresql
 #   encoding: unicode 

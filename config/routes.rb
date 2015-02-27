@@ -80,8 +80,9 @@ Edurange::Application.routes.draw do
   get 'student', to: 'student#index'
 
   get 'admin', to: 'admin#index'
-  post 'admin/instructor_add'
-  post 'admin/instructor_remove'
+  post 'admin/instructor_delete'
+  post 'admin/instructor_create'
+  post 'admin/student_to_instructor'
 
   # Insecure, needs to be rewritten
   # get 'scoring/instructor/:scenario', to: 'scoring#instructor'

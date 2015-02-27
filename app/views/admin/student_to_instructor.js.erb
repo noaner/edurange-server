@@ -1,0 +1,14 @@
+<% if @user %>
+    <% if @user.errors.any? %>
+        <% if @user.errors[:email].any? %>
+            $('#modal-student-to-instructor').find('#email-div').addClass('has-error');
+            $('#modal-student-to-instructor').find('#email-help').text('<%= @user.errors[:email][0] %>');
+        <% end %>
+    <% else %>
+        $('#instructors-table').append("<tr id='instructor-<%= @user.id %>'><td><%= @user.name %></td><td><%= @user.email %></td><td><%= @user.organization %></td><td><a href='/admin/instructor_delete?id=<%= @user.id %>' data-method='post' rel='nofollow' data-remote='true'>delete</a></td></tr>"); 
+        $('#modal-student-to-instructor').modal('toggle');
+    <% end %>
+<% else %>
+    $('#modal-student-to-instructor').find('#email-div').addClass('has-error');
+    $('#modal-student-to-instructor').find('#email-help').text('User not found');
+<% end %>

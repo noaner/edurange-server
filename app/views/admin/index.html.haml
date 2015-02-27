@@ -1,43 +1,110 @@
-%h3 Admin Home
-%h3 Account Information: 
-%div
-  %dl
-    %dt
-      Name: 
-      =@user.name
-    %dt
-      Email:
-      =@user.email
-    %dt
-      Password: ********
-    %dt
-      = link_to 'edit', edit_user_registration_path, class: 'btn btn-primary'
-    %dt 
-      Last Sign In:
-      =@user.last_sign_in_at
-      From:
-      =@user.last_sign_in_ip 
+%div.modal#modal-create-instructor{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title= "Create Instructor"
+      %div.modal-body#modalbody
+        = form_tag admin_instructor_create_path(), remote:true, method: :post do 
+          %div#email-div
+            This will assign a random password for the instructor and will automatically send an email to the instructor with their credentials.
+            %p
+            = label_tag nil, 'Email:', class: 'control-label'
+            = text_field_tag :email, nil, class: 'form-control'
+            %span.help-block.inline#email-help
+          %div#name-div
+            = label_tag nil, 'Name:', class: 'control-label'
+            = text_field_tag :name, nil, class: 'form-control'
+            %span.help-block.inline#name-help
+          %div#organization-div
+            = label_tag nil, 'Organization:', class: 'control-label'
+            = text_field_tag :organization, nil, class: 'form-control'
+            %span.help-block.inline#organization-help
+          %p
+          = submit_tag 'Create', :class => 'btn btn-default'
 
-%h3 Instructors:
-%dl
-  %dt
-  = form_tag admin_instructor_add_path do
-    = label_tag 'Add Instructor:', nil, :style => "display:inline;"
-    = text_field :email, nil, :style => "width:300px;"
-    = submit_tag 'add'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
 
-%div
-  %dl
-    - if @instructors.size > 0
-      %table
-        %tr
-          %th Name
-          %th Email
-          %th
-        - @instructors.each do |instructor|
+%div.modal#modal-student-to-instructor{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title= "Make Student Instructor"
+      %div.modal-body#modalbody
+        = form_tag admin_student_to_instructor_path(), remote:true, method: :post do 
+          %div#email-div
+            = label_tag nil, 'Students Email:', class: 'control-label'
+            = text_field_tag :email, nil, class: 'form-control'
+            %span.help-block.inline#email-help
+          %p
+          = submit_tag 'Create', :class => 'btn btn-default'
+
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.panel.panel-default
+  %div.panel-heading.nav.nav-pills
+    %li
+      %h3
+        Admin Home
+
+  %div.panel-body
+    %h4 Account Information: 
+    %div
+      %dl
+        Name: 
+        =@user.name
+        %br
+        Email:
+        =@user.email
+        %br
+        Password: ********
+        %p
+        = link_to 'edit', edit_user_registration_path, class: 'btn btn-primary'
+        %p
+        Last Sign In:
+        =@user.last_sign_in_at
+        From:
+        =@user.last_sign_in_ip 
+
+    %h4 User Information:
+    %dl
+      = link_to 'Create Instructor', "#modal-create-instructor", :data => {:toggle=>"modal"}, class: 'btn btn-primary', onclick: "$('#modal-create-instructor').find('#email').val(''); $('#modal-create-instructor').find('#name').val(''); $('#modal-create-instructor').find('#organization').val('');"
+      = link_to 'Make Student Instructor', "#modal-student-to-instructor", :data => {:toggle=>"modal"}, class: 'btn btn-primary', onclick: "$('#modal-student-to-instructor').find('#email').val('');"
+
+    %div
+      %dl
+        %h4 Instructors:
+        %table#instructors-table
           %tr
-            %td= instructor.name
-            %td= instructor.email
-            %td= link_to 'remove', admin_instructor_remove_path(:id =>  instructor['id']), method: :post
-    - else
-      none
+            %th Name
+            %th Email
+            %th Organization
+            %th
+          - @instructors.each do |instructor|
+            %tr{ id: 'instructor-' + instructor.id.to_s }
+              %td= instructor.name
+              %td= instructor.email
+              %td= instructor.organization
+              %td= link_to 'delete', admin_instructor_delete_path(:id =>  instructor['id']), remote: true, method: :post
+
+      %dl
+        %h4 Students:
+        %table#instructors-table
+          %tr
+            %th Name
+            %th Email
+            %th Organization
+            %th
+          - @students.each do |student|
+            %tr{ id: 'student-' + student.id.to_s }
+              %td= student.name
+              %td= student.email
+              %td= student.organization
+              / # %td= link_to 'delete', admin_instructor_delete_path(:id =>  instructor['id']), remote: true, method: :post

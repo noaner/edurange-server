@@ -2,33 +2,53 @@ class AdminController < ApplicationController
   before_action :authenticate_admin
 
   def index
-    @instructors = User.where 'role' => 3
+    @instructors = User.where role: 3
+    @students = User.where role: 1
   end
 
-  def instructor_add
-    @email = params[:email]
-    if user = User.find_by_email(@email)
-      if user.is_instructor?
-        @error_message = "User is already an instructor"
-      else
-        user.set_instructor_role
-        user.update_attribute :registration_code, SecureRandom.base64(6)
-        user.student_groups.new(name: "All")
-        user.save
-      end
-    else
-      flash[:notice] = "No user found with that email"
+  def instructor_create
+    name = params[:name] == '' ? nil : params[:name]
+    @user = User.new(email: params[:email], name: name, organization: params[:organization])
+    password = SecureRandom.hex
+    @user.password = password
+    @user.save
+
+    if not @user.errors.any?
+      @user.set_instructor_role
+      @user.delay(queue: 'emails').email_credentials(password)
     end
-    redirect_to '/admin'
+
+    respond_to do |format|
+      format.js { render 'admin/instructor_create.js.erb', :layout => false }
+    end
   end
 
   # need to error messaging for this function
-  def instructor_remove
-    puts "\nInstructor Remove\n"
-    if user = User.find(params[:id])
-      user.set_student_role if user.is_instructor
+  def instructor_delete
+    if @user = User.find(params[:id])
+      @user.destroy
     end
-    redirect_to '/admin'
+    
+    respond_to do |format|
+      format.js { render 'admin/instructor_delete.js.erb', :layout => false }
+    end
+  end
+
+  def student_to_instructor
+    if @user = User.find_by_email(params[:email])
+      if not @user.is_student?
+        @user.errors.add(:email, "User is not a student")
+      else
+        @user.set_instructor_role
+        @user.update_attribute :registration_code, SecureRandom.base64(6)
+        @user.student_groups.new(name: "All")
+        @user.save
+      end
+    end
+
+    respond_to do |format|
+      format.js { render 'admin/student_to_instructor.js.erb', :layout => false }
+    end
   end
 
 end
