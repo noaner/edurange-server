@@ -1218,8 +1218,8 @@ module Aws
   def aws_scenario_create_scoring_pages
     begin
       s3 = AWS::S3.new
-      bucket = s3.buckets['higgz-edurange-scoring']
-      s3.buckets.create('higgz-edurange-scoring') unless bucket.exists?
+      bucket = s3.buckets[Settings.bucket_name]
+      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       self.update(scoring_pages: bucket.objects[aws_scenario_scoring_pages_name].url_for(:read, expires: 10.hours).to_s)
     rescue
       raise
@@ -1229,7 +1229,7 @@ module Aws
 
   def aws_scenario_write_to_scoring_pages
     begin 
-      AWS::S3.new.buckets['higgz-edurange-scoring'].objects[aws_scenario_scoring_pages_name].write(self[:scoring_pages_content])
+      AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_scoring_pages_name].write(self[:scoring_pages_content])
     rescue
       raise
       return
@@ -1238,7 +1238,7 @@ module Aws
 
   def aws_scenario_delete_scoring_pages
     begin 
-      AWS::S3.new.buckets['higgz-edurange-scoring'].objects[aws_scenario_scoring_pages_name].delete
+      AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_scoring_pages_name].delete
     rescue
       raise
       return
@@ -1252,8 +1252,8 @@ module Aws
   def aws_scenario_create_answers_page
     begin
       s3 = AWS::S3.new
-      bucket = s3.buckets['higgz-edurange-scoring']
-      s3.buckets.create('higgz-edurange-scoring') unless bucket.exists?
+      bucket = s3.buckets[Settings.bucket_name]
+      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       object = bucket.objects[aws_scenario_answers_name]
       object.write(self.answers)
       self.update(answers_url: object.url_for(:read, expires: 10.hours).to_s)
@@ -1265,7 +1265,7 @@ module Aws
 
   def aws_scenario_delete_answers_page
     begin 
-      AWS::S3.new.buckets['higgz-edurange-scoring'].objects[aws_scenario_answers_name].delete
+      AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_answers_name].delete
     rescue
       raise
       return
@@ -1279,8 +1279,8 @@ module Aws
   def aws_instance_create_scoring_page
     begin
       s3 = AWS::S3.new
-      bucket = s3.buckets['higgz-edurange-scoring']
-      s3.buckets.create('higgz-edurange-scoring') unless bucket.exists?
+      bucket = s3.buckets[Settings.bucket_name]
+      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       self.update(scoring_page: bucket.objects[aws_instance_scoring_name].url_for(:read, expires: 10.hours).to_s)
     rescue
       raise
@@ -1291,8 +1291,8 @@ module Aws
   def aws_instance_create_scoring_url
     begin
       s3 = AWS::S3.new
-      bucket = s3.buckets['higgz-edurange-scoring']
-      s3.buckets.create('higgz-edurange-scoring') unless bucket.exists?
+      bucket = s3.buckets[Settings.bucket_name]
+      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[aws_instance_scoring_name].write("# put your answers here")
       self.update(scoring_url: bucket.objects[aws_instance_scoring_name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
     rescue
@@ -1303,7 +1303,7 @@ module Aws
 
   def aws_instance_delete_scoring_page
     begin 
-      AWS::S3.new.buckets['higgz-edurange-scoring'].objects[aws_instance_scoring_name].delete
+      AWS::S3.new.buckets[Settings.bucket_name].objects[aws_instance_scoring_name].delete
     rescue
       raise
       return
