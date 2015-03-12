@@ -1,5 +1,5 @@
 class ScenariosController < ApplicationController
-  before_action :authenticate_instructor
+  before_action :authenticate_admin_or_instructor
   before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot, :unboot, :boot_status, :modify_players, :modify, :add_cloud, :add_student_group_to_players]
   before_action :set_cloud, only: [:add_subnet]
   before_action :set_subnet, only: [:add_instance]
@@ -8,6 +8,7 @@ class ScenariosController < ApplicationController
   # GET /scenarios
   # GET /scenarios.json
   def index
+    puts "\nSCENARIO INDEX\n"
     @user = User.find(current_user.id)
     @scenarios = []
     if @user.is_admin?

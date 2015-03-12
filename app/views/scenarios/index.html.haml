@@ -33,7 +33,10 @@
           %td= scenario.name
           %td= scenario.status
           - if @user.is_admin?
-            %td= User.find(scenario.user_id).name
+            - if scenario.user_id
+              %td= User.find(scenario.user_id).name
+            - else
+              %td
           %td
             %div.btn-group
               = link_to 'Show', scenario, class: 'btn btn-default'
