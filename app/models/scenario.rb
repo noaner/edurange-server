@@ -6,6 +6,7 @@ class Scenario < ActiveRecord::Base
   has_many :questions, dependent: :destroy
   validates_presence_of :name, :description
   belongs_to :user
+  before_destroy :purge, prepend: true
 
   def owner?(id)
     return self.user_id == id
@@ -15,22 +16,6 @@ class Scenario < ActiveRecord::Base
     log = self.log ? self.log : ''
     message = '' if !message
     self.update_attributes(log: log + message + "\n")
-  end
-
-  def purge
-    self.clouds.each do |cloud|
-      cloud.subnets.each do |subnet|
-        subnet.instances.each do |instance|
-          instance.instance_groups.each do |instance_group|
-            Group.where(:id => instance_group.group_id).destroy_all
-            Player.where(:group_id => instance_group.group_id).destroy_all
-            InstanceGroup.where(:id => instance_group.id).destroy_all
-          end
-          role_id = InstanceRole.where(:instance_id => instance.id).pluck(:role_id).first
-          Role.where(:id => role_id).destroy_all
-        end
-      end
-    end
   end
 
   def subnets
@@ -236,5 +221,24 @@ class Scenario < ActiveRecord::Base
     end
 
   end
+
+  private
+
+    def purge
+      self.clouds.each do |cloud|
+        cloud.subnets.each do |subnet|
+          subnet.instances.each do |instance|
+            instance.instance_groups.each do |instance_group|
+              Group.where(:id => instance_group.group_id).destroy_all
+              Player.where(:group_id => instance_group.group_id).destroy_all
+              InstanceGroup.where(:id => instance_group.id).destroy_all
+            end
+            role_id = InstanceRole.where(:instance_id => instance.id).pluck(:role_id).first
+            Role.where(:id => role_id).destroy_all
+          end
+        end
+      end
+      return true
+    end
 
 end

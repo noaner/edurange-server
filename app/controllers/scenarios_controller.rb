@@ -112,7 +112,6 @@ class ScenariosController < ApplicationController
   # DELETE /scenarios/1
   # DELETE /scenarios/1.json
   def destroy
-    @scenario.purge
     @scenario.destroy
 
     respond_to do |format|
