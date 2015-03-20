@@ -657,6 +657,7 @@ module Aws
     begin
       debug "generating - instance cookbook"
       self.aws_instance_create_com_page
+      self.aws_instance_create_bash_history_page
       instance_template = InstanceTemplate.new(self)
       cookbook_text = instance_template.generate_cookbook_new
 
@@ -922,10 +923,12 @@ module Aws
     end
 
     # remove s3 files
+    debug "removing s3 files"
     begin
       self.aws_instance_delete_cookbook
       self.aws_instance_delete_com_page
       self.aws_instance_delete_scoring_page
+      self.aws_instance_delete_bash_history_page
     rescue => e
       self.unboot_error(e)
       return
@@ -1131,8 +1134,8 @@ module Aws
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[name].write(content) if content
-      return bucket.objects[name].url_for(permissions, expires: 10.hours, :content_type => 'text/plain').to_s
-      # self.update(com_page: bucket.objects[name].url_for(permissions, expires: 10.hours, :content_type => 'text/plain').to_s)
+      return bucket.objects[name].url_for(permissions, expires: 10.days, :content_type => 'text/plain').to_s
+      # self.update(com_page: bucket.objects[name].url_for(permissions, expires: 10.days, :content_type => 'text/plain').to_s)
     rescue
       raise
       return
@@ -1161,12 +1164,13 @@ module Aws
   end
 
   def aws_instance_upload_cookbook(cookbook_text)
+    debug "creating s3 cookbook"
     begin 
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[self.aws_instance_cookbook_name].write(cookbook_text)
-      self.update(cookbook_url: bucket.objects[self.aws_instance_cookbook_name].url_for(:read, expires: 10.hours).to_s)
+      self.update(cookbook_url: bucket.objects[self.aws_instance_cookbook_name].url_for(:read, expires: 10.days).to_s)
     rescue
       raise
       return
@@ -1174,7 +1178,13 @@ module Aws
   end
 
   def aws_instance_delete_cookbook
-    aws_S3_delete_page(self.aws_instance_cookbook_name)
+    debug "deleting s3 cookbook"
+    begin
+      aws_S3_delete_page(self.aws_instance_cookbook_name)
+    rescue
+      raise
+      return
+    end
   end
 
   # Communication
@@ -1184,12 +1194,13 @@ module Aws
   end
 
   def aws_instance_create_com_page
+    debug "creating s3 com page"
     begin
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[aws_instance_com_page_name].write("waiting")
-      self.update(com_page: bucket.objects[aws_instance_com_page_name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
+      self.update(com_page: bucket.objects[aws_instance_com_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
     rescue
       raise
       return
@@ -1197,8 +1208,38 @@ module Aws
   end
 
   def aws_instance_delete_com_page
+    debug "deleting s3 com page"
     begin
       aws_S3_delete_page(self.aws_instance_com_page_name)
+    rescue
+      raise
+      return
+    end
+  end
+
+  # Bash History
+
+  def aws_instance_bash_history_page_name
+    return "#{aws_S3_name_prefix}_bash_history_page_#{self.name}_#{self.id.to_s}_#{self.uuid}"
+  end
+
+  def aws_instance_create_bash_history_page
+    debug "creating s3 bash history page"
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets[Settings.bucket_name]
+      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
+      self.update(bash_history_page: bucket.objects[aws_instance_bash_history_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
+    rescue
+      raise
+      return
+    end
+  end
+
+  def aws_instance_delete_bash_history_page
+    debug "deleting s3 bash history page"
+    begin
+      aws_S3_delete_page(self.aws_instance_bash_history_page_name)
     rescue
       raise
       return
@@ -1216,11 +1257,12 @@ module Aws
   end
 
   def aws_scenario_create_scoring_pages
+    debug "creating s3 scoring page"
     begin
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      self.update(scoring_pages: bucket.objects[aws_scenario_scoring_pages_name].url_for(:read, expires: 10.hours).to_s)
+      self.update(scoring_pages: bucket.objects[aws_scenario_scoring_pages_name].url_for(:read, expires: 10.days).to_s)
     rescue
       raise
       return
@@ -1237,6 +1279,7 @@ module Aws
   end
 
   def aws_scenario_delete_scoring_pages
+    debug "deleting s3 scoring pages"
     begin 
       AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_scoring_pages_name].delete
     rescue
@@ -1250,13 +1293,14 @@ module Aws
   end
 
   def aws_scenario_create_answers_page
+    debug "creating s3 answers page"
     begin
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       object = bucket.objects[aws_scenario_answers_name]
       object.write(self.answers)
-      self.update(answers_url: object.url_for(:read, expires: 10.hours).to_s)
+      self.update(answers_url: object.url_for(:read, expires: 10.days).to_s)
     rescue
       raise
       return
@@ -1264,6 +1308,7 @@ module Aws
   end
 
   def aws_scenario_delete_answers_page
+    debug "deleting s3 delete answers page"
     begin 
       AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_answers_name].delete
     rescue
@@ -1277,11 +1322,12 @@ module Aws
   end
 
   def aws_instance_create_scoring_page
+    debug "creating s3 scoring page"
     begin
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      self.update(scoring_page: bucket.objects[aws_instance_scoring_name].url_for(:read, expires: 10.hours).to_s)
+      self.update(scoring_page: bucket.objects[aws_instance_scoring_name].url_for(:read, expires: 10.days).to_s)
     rescue
       raise
       return
@@ -1294,7 +1340,7 @@ module Aws
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[aws_instance_scoring_name].write("# put your answers here")
-      self.update(scoring_url: bucket.objects[aws_instance_scoring_name].url_for(:write, expires: 10.hours, :content_type => 'text/plain').to_s)
+      self.update(scoring_url: bucket.objects[aws_instance_scoring_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
     rescue
       raise
       return
@@ -1302,6 +1348,7 @@ module Aws
   end
 
   def aws_instance_delete_scoring_page
+    debug "deleting s3 scoring page"
     begin 
       AWS::S3.new.buckets[Settings.bucket_name].objects[aws_instance_scoring_name].delete
     rescue

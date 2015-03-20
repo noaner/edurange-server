@@ -34,6 +34,7 @@
             = link_to 'Show log', getlog_scenario_path(instance, kind: 'instance'), method: :post, remote: true
             = link_to 'Modify', modify_instance_scenario_path(instance), method: :post, remote: true
             = link_to 'Delete', delete_instance_scenario_path(instance), method: :post, remote: true
+            = link_to "Show Bash History", get_instance_bash_history_scenario_path(instance_id: instance), method: :post, remote: true
 
     %ul{style: "padding-left: 20px;"}
       %li

@@ -5,7 +5,7 @@ ruby_block "finish" do
     put.body = "finished"
 
     # send the PUT request
-    http = Net::HTTP.new('higgz-edurange-com.s3.amazonaws.com', 443)
+    http = Net::HTTP.new('<%= Settings.bucket_name %>.s3.amazonaws.com', 443)
     http.set_debug_output(Logger.new($stdout))
     http.use_ssl = true
     http.start
@@ -17,3 +17,29 @@ ruby_block "finish" do
   action :run
 end
 
+ruby_block "get_bash_histories" do
+  block do
+    put = Net::HTTP::Put.new('<%= instance.bash_history_page %>', 'content-type' => 'text/plain')
+
+    bash_histories = Time.new.inspect + "\n"
+    users = Dir.glob('/home/*').select { |f| File.directory? f }
+    users.each do |user|
+      file = "#{user}/.bash_history"
+      bash_histories += "# #{file}\n"
+      if File.exists?(file)
+        bash_histories += File.open(file, "r").read + "\n"
+      end
+    end
+    put.body = bash_histories
+
+    # send the PUT request
+    http = Net::HTTP.new('<%= Settings.bucket_name %>.s3.amazonaws.com', 443)
+    http.set_debug_output(Logger.new($stdout))
+    http.use_ssl = true
+    http.start
+    resp = http.request(put)
+    resp = [resp.code.to_i, resp.to_hash, resp.body]
+    http.finish
+  end
+  action :run
+end

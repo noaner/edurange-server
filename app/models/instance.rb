@@ -52,6 +52,16 @@ class Instance < ActiveRecord::Base
     end
   end
 
+  def get_bash_history
+    return false if !self.bash_history_page
+    s3 = AWS::S3.new
+    bucket = s3.buckets[Settings.bucket_name]
+    if bucket.objects[self.aws_instance_bash_history_page_name].exists?
+      bash_history =  bucket.objects[self.aws_instance_bash_history_page_name].read()
+      return bash_history == nil ? "" : bash_history
+    end
+  end
+
   def initialized?
     return false if !self.com_page
 
@@ -102,10 +112,12 @@ class Instance < ActiveRecord::Base
     # TODO fix
     true
   end
+
   def add_progress(val)
     # debug "Adding progress to instance!"
     # PrivatePub.publish_to "/scenarios/#{self.subnet.cloud.scenario.id}", instance_progress: val
   end
+  
   def debug(message)
     log = self.log ? self.log : ''
     message = '' if !message

@@ -3,7 +3,7 @@ class ScenariosController < ApplicationController
   before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot, :unboot, :boot_status, :modify_players, :modify, :add_cloud, :add_student_group_to_players]
   before_action :set_cloud, only: [:add_subnet]
   before_action :set_subnet, only: [:add_instance]
-  before_action :set_instance, only: []
+  before_action :set_instance, only: [:get_instance_bash_history]
 
   # GET /scenarios
   # GET /scenarios.json
@@ -442,6 +442,13 @@ class ScenariosController < ApplicationController
   end
 
   ## Helpers
+
+  def get_instance_bash_history
+    @bash_history = @instance.get_bash_history.gsub("\n", "<br>").html_safe;
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/bash_history.js.erb', layout: false }
+    end
+  end
 
   def getlog
     if params[:kind] == 'scenario'
