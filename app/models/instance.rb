@@ -60,6 +60,7 @@ class Instance < ActiveRecord::Base
       bash_history =  bucket.objects[self.aws_instance_bash_history_page_name].read()
       return bash_history == nil ? "" : bash_history
     end
+    return ""
   end
 
   def initialized?
