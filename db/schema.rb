@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150226235053) do
+ActiveRecord::Schema.define(version: 20150319210145) do
 
   create_table "answers", force: :cascade do |t|
     t.integer  "student_id"
@@ -97,6 +97,7 @@ ActiveRecord::Schema.define(version: 20150226235053) do
     t.string   "uuid"
     t.string   "com_page"
     t.string   "log",                 default: ""
+    t.string   "bash_history_page",   default: ""
   end
 
   add_index "instances", ["subnet_id"], name: "index_instances_on_subnet_id"
