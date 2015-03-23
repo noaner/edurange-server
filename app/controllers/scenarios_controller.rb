@@ -1,6 +1,6 @@
 class ScenariosController < ApplicationController
   before_action :authenticate_admin_or_instructor
-  before_action :set_scenario, only: [:show, :edit, :update, :destroy, :status, :boot, :unboot, :boot_status, :modify_players, :modify, :add_cloud, :add_student_group_to_players]
+  before_action :set_scenario, only: [:show, :edit, :update, :destroyme, :status, :boot, :unboot, :boot_status, :modify_players, :modify, :add_cloud, :add_student_group_to_players]
   before_action :set_cloud, only: [:add_subnet]
   before_action :set_subnet, only: [:add_instance]
   before_action :set_instance, only: [:get_instance_bash_history]
@@ -111,12 +111,18 @@ class ScenariosController < ApplicationController
 
   # DELETE /scenarios/1
   # DELETE /scenarios/1.json
-  def destroy
-    @scenario.destroy
-
-    respond_to do |format|
-      format.html { redirect_to scenarios_url, notice: 'Scenario was successfully destroyed.' }
-      format.json { head :no_content }
+  def destroyme
+    if @scenario.booted?
+      respond_to do |format|
+        format.js { render 'scenarios/js/destroy_failed.js.erb', :layout => false }
+      end
+    else
+      @scenario.destroy
+      respond_to do |format|
+        format.js { render js: "window.location.pathname='/scenarios'" }
+        # format.js { redirect_to scenarios_url, notice: 'Scenario was successfully destroyed.' }
+        # format.json { head :no_content }
+      end
     end
   end
 

@@ -40,4 +40,4 @@
           %td
             %div.btn-group
               = link_to 'Show', scenario, class: 'btn btn-default'
-              = link_to 'Destroy', scenario, :method => :delete, :data => { :confirm => 'Are you sure?' }, class: 'btn btn-danger'
+              = link_to 'Destroy', destroyme_scenario_path(scenario), method: :post, remote: true, :data => { :confirm => 'Are you sure?' }, class: 'btn btn-danger'
