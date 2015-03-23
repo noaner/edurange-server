@@ -14,6 +14,7 @@ Edurange::Application.routes.draw do
 
   resources :scenarios do
     member do
+      post 'destroyme'
       post 'boot'
       post 'boot_cloud'
       post 'boot_subnet'
