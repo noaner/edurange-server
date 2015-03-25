@@ -17,7 +17,7 @@
       %span.caret
     %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-scenario'+@scenario.id.to_s}
       %li{role: 'presentation'}
-        = link_to 'Show log', getlog_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true
+        = link_to 'Show log', get_log_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true
       %li{role: 'presentation'}
         = link_to 'Modify', "#modal-modify", method: :post,  :data => {:toggle=>"modal"}
 

@@ -9,6 +9,7 @@ class Instance < ActiveRecord::Base
   has_many :instance_roles, dependent: :destroy
   has_many :groups, through: :instance_groups, dependent: :destroy
   has_many :roles, through: :instance_roles, dependent: :destroy
+  has_one :user, through: :subnet
 
   before_create :ensure_has_ip
   validate :ip_address_must_be_within_subnet

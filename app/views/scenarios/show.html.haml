@@ -29,7 +29,7 @@
 
           / = link_to 'Pause'
           = link_to 'Destroy', destroyme_scenario_path(@scenario), method: :post, remote: true
-          = link_to 'Show Boot Log', getlog_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true
+          = link_to 'Show Boot Log', get_log_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true
           = link_to 'Save Changes', save_changes_scenario_path(@scenario), method: :post, remote: true
 
   %div.panel-body

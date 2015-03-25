@@ -1,15 +1,22 @@
 class ScenariosController < ApplicationController
   before_action :authenticate_admin_or_instructor
+
+  before_action :set_user, only: [:index, :show, :boot_cloud, :delete_player, :get_log, :set_scenario, :set_cloud, :set_subnet, :set_instance]
+
   before_action :set_scenario, only: [:show, :edit, :update, :destroyme, :status, :boot, :unboot, :boot_status, :modify_players, :modify, :add_cloud, :add_student_group_to_players]
-  before_action :set_cloud, only: [:add_subnet]
-  before_action :set_subnet, only: [:add_instance]
-  before_action :set_instance, only: [:get_instance_bash_history]
+  
+  before_action :set_cloud, only: [:boot_cloud, :unboot_cloud, :delete_cloud, :modify_cloud, :add_subnet]
+  
+  before_action :set_subnet, only: [:boot_subnet, :unboot_subnet, :modify_subnet, :delete_subnet, :add_instance]
+  
+  before_action :set_instance, only: [:boot_instance, :unboot_instance, :delete_instance, :get_instance_bash_history]
+
+  before_action :set_group, only: [:add_player, :add_student_group, :remove_student_group]
+
 
   # GET /scenarios
   # GET /scenarios.json
   def index
-    puts "\nSCENARIO INDEX\n"
-    @user = User.find(current_user.id)
     @scenarios = []
     if @user.is_admin?
       @scenarios = Scenario.all
@@ -48,16 +55,6 @@ class ScenariosController < ApplicationController
   # GET /scenarios/1
   # GET /scenarios/1.json
   def show
-    @user = User.find(current_user.id)
-    # @cloud_booted = @scenario.clouds.select { |cloud| cloud.booted? }.size
-    # @cloud_count = @scenario.clouds.size
-    # @subnet_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.select { |subnet| subnet.booted? }.size
-    # @subnet_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.size
-    # @instance_booted = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.select { |instance| instance.booted? }.size
-    # @instance_count = @scenario.clouds.map { |cloud| cloud.subnets }.flatten.map { |subnet| subnet.instances }.flatten.size
-
-    # get studentGroups
-    # @student_groups = StudentGroup.where("instructor_id = #{current_user.id} AND student_id = #{current_user.id}")
   end
 
   # GET /scenarios/new
@@ -154,12 +151,6 @@ class ScenariosController < ApplicationController
   end
 
   def boot_cloud
-    @cloud = Cloud.find(params[:id])
-    if not @cloud.owner?(current_user.id)
-      head :ok, content_type: "text/html"
-      return
-    end
-
     @cloud.set_booting
     @cloud.delay(queue: 'clouds').boot
 
@@ -169,11 +160,6 @@ class ScenariosController < ApplicationController
   end
 
   def unboot_cloud
-    @cloud = Cloud.find(params[:id])
-    if not @cloud.owner?(current_user.id)
-      head :ok, content_type: "text/html"
-      return
-    end
     @cloud.set_unbooting
     @cloud.delay(queue: 'clouds').unboot
 
@@ -183,12 +169,6 @@ class ScenariosController < ApplicationController
   end
 
   def boot_subnet
-    @subnet = Subnet.find(params[:id])
-    if not @subnet.owner?(current_user.id)
-      head :ok, content_type: "text/html"
-      return
-    end
-
     if not @subnet.cloud.booted?
       @subnet.errors.add(:cloudnotbooted, "Instances Subnet must be booted first")
     else
@@ -202,12 +182,6 @@ class ScenariosController < ApplicationController
   end
 
   def unboot_subnet
-    @subnet = Subnet.find(params[:id])
-    if not @subnet.owner?(current_user.id)
-      head :ok, content_type: "text/html"
-      return
-    end
-
     @subnet.set_unbooting
     @subnet.delay(queue: 'subnets').unboot
 
@@ -217,12 +191,6 @@ class ScenariosController < ApplicationController
   end
 
   def boot_instance
-    @instance = Instance.find(params[:id])
-    if not @instance.owner?(current_user.id)
-      head :ok, content_type: "text/html"
-      return
-    end
-
     if not @instance.subnet.booted?
       @instance.errors.add(:subnetnotbooted, "Instances Subnet must be booted first")
     else
@@ -236,12 +204,6 @@ class ScenariosController < ApplicationController
   end
 
   def unboot_instance
-    @instance = Instance.find(params[:id])
-    if not @instance.owner?(current_user.id)
-      head :ok, content_type: "text/html"
-      return
-    end
-
     @instance.set_unbooting
     @instance.delay(queue: 'instances').unboot
 
@@ -253,8 +215,16 @@ class ScenariosController < ApplicationController
   ## Resources
   #
 
-  def add_cloud
+  def modify
+    @scenario.name = params[:name]
+    @scenario.save
 
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/modify.js.erb', layout: false }
+    end
+  end
+
+  def add_cloud
     @cloud = @scenario.clouds.new
     @cloud.name = params[:name]
     @cloud.cidr_block = params[:CIDR]
@@ -267,21 +237,18 @@ class ScenariosController < ApplicationController
 
   def delete_cloud
     # destroy all it's parts
-
-  end
-
-  def modify
-
-    @scenario.name = params[:name]
-    @scenario.save
+    if @cloud.subnets.size > 0
+      @cloud.errors.add(:has_dependents, "Cannot delete cloud because it has dependents")
+    else
+      @cloud.destroy
+    end
 
     respond_to do |format|
-      format.js { render template: 'scenarios/js/modify.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/delete_cloud.js.erb', layout: false }
     end
   end
 
   def modify_cloud
-    @cloud = Cloud.find(params[:cloud_id])
     @cloud.name = params[:name]
     @cloud.cidr_block = params[:CIDR]
     @cloud.save
@@ -292,10 +259,10 @@ class ScenariosController < ApplicationController
   end
 
   def add_subnet
-    # @subnet = Subnet.find(params[:id])
-    @subnet = Subnet.new
-    @subnet.errors.add(:name, "FOO")
-    @subnet.errors.add(:cidr_block, "FOO")
+    # should add a new subnet based on cloud
+    # @subnet = Subnet.new
+    # @subnet.errors.add(:name, "FOO")
+    # @subnet.errors.add(:cidr_block, "FOO")
 
     respond_to do |format|
       format.js { render template: 'scenarios/js/add_subnet.js.erb', layout: false }
@@ -303,7 +270,6 @@ class ScenariosController < ApplicationController
   end
 
   def modify_subnet
-    @subnet = Subnet.find(params[:subnet_id])
     @subnet.name = params[:name]
     @subnet.cidr_block = params[:CIDR]
 
@@ -321,11 +287,10 @@ class ScenariosController < ApplicationController
   end
 
   def delete_subnet
-    @subnet = Subnet.find(params[:id])
     if @subnet.instances.size > 0
       @subnet.errors.add(:has_dependents, "Cannot delete subnet because it has dependents")
     else
-     # @subnet.destroy
+      @subnet.destroy
     end
 
     respond_to do |format|
@@ -334,7 +299,6 @@ class ScenariosController < ApplicationController
   end
 
   def add_instance
-
     @instance = @subnet.instances.new(
       name: params[:name],
       ip_address: params[:ip],
@@ -350,7 +314,6 @@ class ScenariosController < ApplicationController
   end
 
   def delete_instance
-    @instance = Instance.find(params[:id])
     @instance.destroy
 
     respond_to do |format|
@@ -362,7 +325,6 @@ class ScenariosController < ApplicationController
   # 
 
   def add_player
-    @group = Group.find(params[:group_id])
     @player = @group.players.new(login: params[:login], password: params[:password])
     @player.save
 
@@ -374,7 +336,12 @@ class ScenariosController < ApplicationController
   end
 
   def delete_player
-    @player = Player.find(params[:id]).delete
+    @player = Player.find(params[:player_id])
+    if not @user.owns? @player
+      head :ok, content_type: "text/html"
+      return
+    end
+
     @player.delete
 
     respond_to do |format|
@@ -388,13 +355,10 @@ class ScenariosController < ApplicationController
       # return
     # end
     @players = []
-    @group = Group.find(params[:group_id])
     student_group = StudentGroup.where("name = ? AND user_id = #{current_user.id}", params[:student_group]).first
+    
     student_group.student_group_users.each do |student_group_user|
-      # if params[:add]
-        if !@group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
-        # if !group.players.find_by_user_id(student_group_user.user_id)
-          
+        if not @group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
           player = @group.players.new(
             login: "student_#{student_group_user.user.id}",
             password: SecureRandom.base64(7),
@@ -403,7 +367,6 @@ class ScenariosController < ApplicationController
           )
           player.save
           @players.push(player)
-
         end
     end
     
@@ -414,8 +377,8 @@ class ScenariosController < ApplicationController
 
   def remove_student_group
     @players = []
-    @group = Group.find(params[:group_id])
     student_group = StudentGroup.where("name = ? AND user_id = #{current_user.id}", params[:student_group]).first
+    
     student_group.student_group_users.each do |student_group_user|
       # if params[:add]
         # if !@group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
@@ -431,14 +394,12 @@ class ScenariosController < ApplicationController
         #   @players.push(player)
 
         # end
-
-
       # elsif params[:remove]
 
-        if player = @group.players.find_by_user_id(student_group_user.user.id)
-          @players.push(player)
-          player.delete
-        end
+      if player = @group.players.find_by_user_id(student_group_user.user.id)
+        @players.push(player)
+        player.delete
+      end
       # end
     end
 
@@ -456,7 +417,7 @@ class ScenariosController < ApplicationController
     end
   end
 
-  def getlog
+  def get_log
     if params[:kind] == 'scenario'
       resource = Scenario.find(params[:id])
     elsif params[:kind] == 'cloud'
@@ -465,6 +426,11 @@ class ScenariosController < ApplicationController
       resource = Subnet.find(params[:id])
     elsif params[:kind] == 'instance'
       resource = Instance.find(params[:id])
+    end
+
+    if not @user.owns? resource
+      head :ok, content_type: "text/html"
+      return
     end
 
     @htmllog = resource.log.gsub("\n", "<br>").html_safe;
@@ -484,9 +450,13 @@ class ScenariosController < ApplicationController
 
   private
     # Use callbacks to share common setup or constraints between actions.
+    def set_user
+      @user = User.find(current_user.id)
+    end
+
     def set_scenario
       @scenario = Scenario.find(params[:id])
-      if (not @scenario.owner?(current_user.id)) and (not User.find(current_user.id).is_admin?)
+      if not @user.owns? @scenario
         head :ok, content_type: "text/html"
         return
       end
@@ -494,7 +464,7 @@ class ScenariosController < ApplicationController
 
     def set_cloud
       @cloud = Cloud.find(params[:cloud_id])
-      if (not @cloud.owner?(current_user.id)) and (not User.find(current_user.id).is_admin?)
+      if not @user.owns? @cloud
         head :ok, content_type: "text/html"
         return
       end
@@ -502,7 +472,7 @@ class ScenariosController < ApplicationController
 
     def set_subnet
       @subnet = Subnet.find(params[:subnet_id])
-      if (not @subnet.owner?(current_user.id)) and (not User.find(current_user.id).is_admin?)
+      if not @user.owns? @subnet
         head :ok, content_type: "text/html"
         return
       end
@@ -510,7 +480,15 @@ class ScenariosController < ApplicationController
 
     def set_instance
       @instance = Instance.find(params[:instance_id])
-      if (not @instance.owner?(current_user.id)) and (not User.find(current_user.id).is_admin?)
+      if not @user.owns? @instance
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_group
+      @group = Group.find(params[:group_id])
+      if not @user.owns? @group
         head :ok, content_type: "text/html"
         return
       end

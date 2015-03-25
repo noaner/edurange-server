@@ -47,7 +47,7 @@
 
               %td= player.login
               %td= player.password
-              %td= link_to 'delete', delete_player_scenario_path(player), remote: true, method: :post
+              %td= link_to 'delete', delete_player_scenario_path(player_id: player), remote: true, method: :post
 
 
         / = form_tag modify_players_scenario_path(group: group) do

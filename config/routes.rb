@@ -53,7 +53,7 @@ Edurange::Application.routes.draw do
       post 'add_student_group'
       post 'remove_student_group'
 
-      post 'getlog'
+      post 'get_log'
       post 'get_instance_bash_history'
       post 'boot_status'
 

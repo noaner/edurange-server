@@ -8,8 +8,17 @@ class User < ActiveRecord::Base
   after_initialize :set_default_role, :if => :new_record?
   validates :email, uniqueness: true
   validates :name, presence: true
-
   has_many :student_groups
+
+  def owns?(obj)
+    return true if self.is_admin?
+    cl = obj.class
+    if cl == Cloud or cl == Group or cl == Instance or cl == Scenario or cl == StudentGroup or cl == Subnet
+      return obj.user == self
+    elsif cl == Player
+      return obj.group.user == self
+    end
+  end
 
   def set_default_role
     self.role ||= :student

@@ -1,4 +1,4 @@
-%li
+%li{ id: 'cloud-li-' + cloud.id.to_s}
   %input{ type: 'checkbox', id: 'item-cloud-' + cloud.id.to_s , checked: 'checked'}
     %label{ for: 'item-cloud-' + cloud.id.to_s}
       %span{ id: 'cloud-name-' + cloud.id.to_s}
@@ -28,13 +28,13 @@
               - boot_button_class = "hidden"
               - unboot_button_class = "hidden"
 
-            = link_to 'Boot', boot_cloud_scenario_path(cloud), method: :post, remote: true, id: "boot-button-cloud-#{cloud.id.to_s}", class: boot_button_class
-            = link_to 'Unboot', unboot_cloud_scenario_path(cloud), method: :post, remote: true, id: "unboot-button-cloud-#{cloud.id.to_s}", class: unboot_button_class
+            = link_to 'Boot', boot_cloud_scenario_path(cloud_id: cloud), method: :post, remote: true, id: "boot-button-cloud-#{cloud.id.to_s}", class: boot_button_class
+            = link_to 'Unboot', unboot_cloud_scenario_path(cloud_id: cloud), method: :post, remote: true, id: "unboot-button-cloud-#{cloud.id.to_s}", class: unboot_button_class
 
-            = link_to 'Show log', getlog_scenario_path(cloud, kind: 'cloud'), method: :post, remote: true
+            = link_to 'Show log', get_log_scenario_path(cloud, kind: 'cloud'), method: :post, remote: true
             = link_to 'Modify', "#modal-modify-cloud", method: :post,  :data => {:toggle=>"modal"}, :onclick => "$('#modal-modify-cloud').find('#modal-title').text('hi'); $('#modal-modify-cloud').find('#cloud_id').val('#{cloud.id}'); $('#modal-modify-cloud').find('#name').val('#{cloud.name}'); $('#modal-modify-cloud').find('#CIDR').val('#{cloud.cidr_block}');"
             %li{role: 'presentation'}
-              = link_to 'Delete', destroy_cloud_scenario_path(cloud), method: :post, remote: true
+              = link_to 'Delete', delete_cloud_scenario_path(cloud_id: cloud), method: :post, remote: true
 
     %ul{style: "padding-left: 20px;"}
       %li

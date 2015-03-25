@@ -6,6 +6,7 @@ class Subnet < ActiveRecord::Base
   belongs_to :cloud
 
   has_many :instances, dependent: :destroy
+  has_one :user, through: :cloud
 
   validate :cidr_block_must_be_within_cloud
   def cidr_block_must_be_within_cloud
