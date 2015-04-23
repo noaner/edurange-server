@@ -4,6 +4,6 @@ driver: aws
 access_key_id: CHANGE_ME 
 secret_access_key: CHANGE_ME
 bucket_name: # Enter something here like <my_bucket_name>, must be unique to your aws S3 buckets
-app_path: .
+app_path: ./
 host: # Enter something here like <my_computers_name>, must be unique to your aws account
 boot_asynchronously: false
