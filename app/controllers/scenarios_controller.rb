@@ -109,7 +109,7 @@ class ScenariosController < ApplicationController
   # DELETE /scenarios/1
   # DELETE /scenarios/1.json
   def destroyme
-    if @scenario.booted?
+    if @scenario.booted? or @scenario.partially_booted?
       respond_to do |format|
         format.js { render 'scenarios/js/destroy_failed.js.erb', :layout => false }
       end
@@ -123,36 +123,41 @@ class ScenariosController < ApplicationController
     end
   end
 
-  ## Booting
-  #
+  #############################################################
+  # BOOTING
 
   def boot
-    if @scenario.stopped?
-      @scenario.set_booting
+    if @scenario.stopped? or @scenario.partially_booted?
+      @scenario.set_queued_boot
       @scenario.delay(queue: 'scenarios').boot(boot_dependents: true, run_asynchronously: Settings.boot_asynchronously)
+      @flash_message = "Scenario #{@scenario.name} has been placed in the boot queue"
     end
 
     @hide_dropdown = true
     respond_to do |format|
-      format.js { render 'scenarios/js/boot_status.js.erb', :layout => false }
+      format.js { render 'scenarios/js/boot.js.erb', :layout => false }
     end
   end
 
   def unboot
-    if @scenario.booted?
-      @scenario.set_unbooting
+    if @scenario.booted? or @scenario.partially_booted?
+      @scenario.set_queued_unboot
       @scenario.delay(queue: 'scenarios').unboot(unboot_dependents: true, run_asynchronously: Settings.boot_asynchronously)
+      @flash_message = "Scenario #{@scenario.name} has been placed in the unboot queue"
     end
 
     @hide_dropdown = true
     respond_to do |format|
-      format.js { render 'scenarios/js/boot_status.js.erb', :layout => false }
+      format.js { render 'scenarios/js/unboot.js.erb', :layout => false }
     end
   end
 
   def boot_cloud
-    @cloud.set_booting
-    @cloud.delay(queue: 'clouds').boot
+    if @cloud.stopped?
+      @cloud.set_queued_boot
+      @cloud.delay(queue: 'clouds').boot
+      @flash_message = "Cloud #{@cloud.name} has been placed in the boot queue"
+    end
 
     respond_to do |format|
       format.js { render template: 'scenarios/js/boot_cloud.js.erb', layout: false }
@@ -160,8 +165,13 @@ class ScenariosController < ApplicationController
   end
 
   def unboot_cloud
-    @cloud.set_unbooting
-    @cloud.delay(queue: 'clouds').unboot
+    if @cloud.subnets_booted?
+      @cloud.errors.add(:active_subnets, "Clouds subnets must be unbooted before cloud can unboot")
+    else
+      @cloud.set_queued_unboot
+      @cloud.delay(queue: 'clouds').unboot
+      @flash_message = "Cloud #{@cloud.name} has been placed in the unboot queue"
+    end
 
     respond_to do |format|
       format.js { render template: 'scenarios/js/unboot_cloud.js.erb',  layout: false }
@@ -172,8 +182,9 @@ class ScenariosController < ApplicationController
     if not @subnet.cloud.booted?
       @subnet.errors.add(:cloudnotbooted, "Instances Subnet must be booted first")
     else
-      @subnet.set_booting
+      @subnet.set_queued_boot
       @subnet.delay(queue: 'subnets').boot
+      @flash_message = "Subnet #{@subnet.name} has been placed in the boot queue"
     end
 
     respond_to do |format|
@@ -182,8 +193,13 @@ class ScenariosController < ApplicationController
   end
 
   def unboot_subnet
-    @subnet.set_unbooting
-    @subnet.delay(queue: 'subnets').unboot
+    if @subnet.instances_active?
+      @subnet.errors.add(:instancesnotunbooted, "Subnets instances must be unbooted first")
+    else
+      @subnet.set_queued_unboot
+      @subnet.delay(queue: 'subnets').unboot
+      @flash_message = "Subnet #{@subnet.name} has been placed in the unboot queue"
+    end
 
     respond_to do |format|
       format.js { render template: 'scenarios/js/unboot_subnet.js.erb', layout: false }
@@ -194,8 +210,9 @@ class ScenariosController < ApplicationController
     if not @instance.subnet.booted?
       @instance.errors.add(:subnetnotbooted, "Instances Subnet must be booted first")
     else
-      @instance.set_booting
+      @instance.set_queued_boot
       @instance.delay(queue: 'instances').boot
+      @flash_message = "Instance #{@instance.name} has been placed in the boot queue"
     end
 
     respond_to do |format|
@@ -204,16 +221,26 @@ class ScenariosController < ApplicationController
   end
 
   def unboot_instance
-    @instance.set_unbooting
-    @instance.delay(queue: 'instances').unboot
+    if @instance.driver_id
+      @instance.set_queued_unboot
+      @instance.delay(queue: 'instances').unboot
+      @flash_message = "Instance #{@instance.name} has been placed in the unboot queue"
+    end
 
     respond_to do |format|
       format.js { render template: 'scenarios/js/unboot_instance.js.erb', layout: false }
     end
   end
 
-  ## Resources
-  #
+  def boot_status
+    @scenario.get_status
+    respond_to do |format|
+      format.js { render 'scenarios/js/boot_status.js.erb', :layout => false }
+    end
+  end
+
+  ###############################################################
+  #  Resource Modification
 
   def modify
     @scenario.name = params[:name]
@@ -438,13 +465,6 @@ class ScenariosController < ApplicationController
 
     respond_to do |format|
       format.js { render template: 'scenarios/js/log.js.erb', layout: false }
-    end
-  end
-
-  def boot_status
-    @scenario.get_status
-    respond_to do |format|
-      format.js { render 'scenarios/js/boot_status.js.erb', :layout => false }
     end
   end
 

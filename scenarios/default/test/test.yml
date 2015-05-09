@@ -3,6 +3,7 @@ Roles:
     Packages:
     Recipes:
       - sshd_password_login
+      - scoring
 
 Groups:
   - Name: Team_1
@@ -37,5 +38,13 @@ Instances:
     OS: ubuntu
     IP_Address: 10.0.129.5
     Internet_Accessible: true
+    Roles:
+      - Role_1
+
+  - Name: Instance_2
+    Subnet: Subnet_1
+    OS: ubuntu
+    IP_Address: 10.0.129.6
+    Internet_Accessible: false
     Roles:
       - Role_1

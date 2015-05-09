@@ -4,10 +4,15 @@ $('#dropdown-subnet-<%= @subnet.id.to_s %>').removeClass("open");
 	<% if @subnet.errors[:cloudnotbooted].any? %>
 		alert('Subnets Cloud must be booted first')
 	<% end %>
+<% else %>
+    $('<%= "#subnet-status-" + @subnet.id.to_s %>').text('<%= @subnet.status %>');
+    $('<%= "#subnet-status-dot-" + @subnet.id.to_s %>').attr('class', '<%= "inline-block " + @subnet.status %>');
+    $('#boot-button-subnet-<%= @subnet.id.to_s %>').attr('class', "hidden");
+    $('#unboot-button-subnet-<%= @subnet.id.to_s %>').attr('class', "hidden");
+
+    <% if @flash_message %>
+        update_flash("<%= @flash_message %>");
+    <% end %>
 <% end %>
 
-$('<%= "#subnet-status-" + @subnet.id.to_s %>').text('<%= @subnet.status %>');
-$('<%= "#subnet-status-dot-" + @subnet.id.to_s %>').hide();
-$('<%= "#subnet-spinner-" + @subnet.id.to_s %>').attr('class', '<%= "inline-block spin" %>');
-$('#boot-button-subnet-<%= @subnet.id.to_s %>').attr('class', "hidden");
-$('#unboot-button-subnet-<%= @subnet.id.to_s %>').attr('class', "");
+get_boot_status('<%= @subnet.scenario.id %>');

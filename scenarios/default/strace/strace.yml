@@ -6,6 +6,7 @@ Roles:
     Recipes:
       - sshd_password_login
       - strace
+      - scoring
 
 Groups: 
   - Name: Instructor

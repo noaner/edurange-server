@@ -53,4 +53,8 @@ class Subnet < ActiveRecord::Base
     return self.instances.select{ |i| i.booted? }.any?
   end
 
+  def instances_active?
+    return self.instances.select{ |i| i.driver_id != nil }.any?
+  end
+
 end

@@ -1,12 +1,18 @@
 $('#dropdown-cloud-<%= @cloud.id.to_s %>').removeClass("open");
 
-<% if @cloud.unbooting? %>
-	$('<%= "#cloud-status-" + @cloud.id.to_s %>').text('<%= @cloud.status %>');
-	$('<%= "#cloud-status-dot-" + @cloud.id.to_s %>').hide();
-	$('<%= "#cloud-spinner-" + @cloud.id.to_s %>').attr('class', '<%= "inline-block spin" %>');
-	$('#boot-button-cloud-<%= @cloud.id.to_s %>').attr('class', "hidden");
-	$('#unboot-button-cloud-<%= @cloud.id.to_s %>').attr('class', "hidden");
-<% elsif @cloud.stopped? %>
-	$('<%= "#cloud-spinner-" + @cloud.id.to_s %>').attr('class', '<%= "inline-block" %>');
-	$('<%= "#cloud-status-dot-" + @cloud.id.to_s %>').show();
+<% if @cloud.errors.any? %>
+    <% if @cloud.errors[:active_subnets].any? %>
+        alert('<%= @cloud.errors[:active_subnets][0] %>');
+    <% end %>
+<% else %>
+    $('<%= "#cloud-status-" + @cloud.id.to_s %>').text('<%= @cloud.status %>');
+    $('<%= "#cloud-status-dot-" + @cloud.id.to_s %>').attr('class', '<%= "inline-block " + @cloud.status %>');
+    $('#boot-button-cloud-<%= @cloud.id.to_s %>').attr('class', "hidden");
+    $('#unboot-button-cloud-<%= @cloud.id.to_s %>').attr('class', "hidden");
+
+    <% if @flash_message %>
+        update_flash("<%= @flash_message %>");
+    <% end %>
 <% end %>
+
+get_boot_status('<%= @cloud.scenario.id %>');

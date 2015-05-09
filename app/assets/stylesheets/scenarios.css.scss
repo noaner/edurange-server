@@ -22,7 +22,15 @@
 
 
 .stopped {
-  color: #FBB917;
+  color: black;
+}
+
+.queued_boot {
+  color: grey;
+}
+
+.queued_unboot {
+  color: grey;
 }
 
 .booted {
@@ -34,6 +42,26 @@
 }
 
 .unboot_failed {
+  color: red;
+}
+
+.partially_booted {
+  color: green;
+}
+
+.partially_unbooted {
+  color: green;
+}
+
+.partially_booted_with_failure {
+  color: red;
+}
+
+.partially_unbooted_with_failure {
+  color: red;
+}
+
+.failure {
   color: red;
 }
 

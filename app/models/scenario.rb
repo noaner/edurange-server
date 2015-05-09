@@ -18,6 +18,10 @@ class Scenario < ActiveRecord::Base
     self.update_attributes(log: log + message + "\n")
   end
 
+  def scenario
+    return self
+  end
+
   def subnets
     subnets = []
     self.clouds.each do |cloud|
@@ -134,90 +138,89 @@ class Scenario < ActiveRecord::Base
   end
 
   def get_status
-
-    all_stopped = true
+    some_booted = nil
+    some_stopped = nil
     all_booted = true
+    all_stopped = true
+    failure = false
 
-    boot_failed = nil
-    unboot_failed = nil
+    self.reload
 
-    booting = nil
-    unbooting = nil
+    if self.booting? or self.unbooting? or self.queued?
+      return
+    end
 
     self.clouds.each do |cloud|
 
-      if cloud.boot_failed?
-        self.set_boot_failed
-        return
-      elsif cloud.unboot_failed?
-        self.set_unboot_failed
+      cloud.reload
+
+      if cloud.booting?  or cloud.unbooting? or cloud.queued?
         return
       end
-      
-      if cloud.booted?
-        all_stopped = false
-      elsif cloud.stopped?
+
+      # mark if stopped or booted
+      if cloud.stopped?
         all_booted = false
-      elsif cloud.booting?
-        booting = true
-      elsif cloud.unbooting?
-        unbooting = true
+        some_stopped = true
+      elsif cloud.booted?
+        some_booted = true
+        all_stopped = false
+      elsif cloud.boot_failed? or cloud.unboot_failed?
+        failure = true
       end
 
       cloud.subnets.each do |subnet|
 
-        if subnet.boot_failed?
-          self.set_boot_failed
-          return
-        elsif subnet.unboot_failed?
-          self.set_unboot_failed
+        subnet.reload
+
+        if subnet.booting?  or subnet.unbooting? or subnet.queued?
           return
         end
-        
-        if subnet.booted?
-          all_stopped = false
-        elsif subnet.stopped?
+
+        # mark if stopped or booted
+        if subnet.stopped?
           all_booted = false
-        elsif subnet.booting?
-          booting = true
-        elsif subnet.unbooting?
-          unbooting = true
+          some_stopped = true
+        elsif subnet.booted?
+          some_booted = true
+          all_stopped = false
+        elsif subnet.boot_failed? or subnet.unboot_failed?
+          failure = true
         end
 
         subnet.instances.each do |instance|
 
-          if instance.boot_failed?
-            self.set_boot_failed
-            return
-          elsif instance.unboot_failed?
-            self.set_unboot_failed
+          instance.reload
+
+          if instance.booting?  or instance.unbooting? or instance.queued?
             return
           end
-          
-          if instance.booted?
-            all_stopped = false
-          elsif instance.stopped?
+
+          # mark if stopped or booted
+          if instance.stopped?
             all_booted = false
-          elsif instance.booting?
-            booting = true
-          elsif instance.unbooting?
-            unbooting = true
+            some_stopped = true
+          elsif instance.booted?
+            some_booted = true
+            all_stopped = false
+          elsif instance.boot_failed? or instance.unboot_failed?
+            failure = true
           end
 
         end
+
       end
+
     end
 
-    if all_stopped and not self.booting?
+    if failure
+      self.set_failure
+    elsif all_stopped and some_stopped
       self.set_stopped
-    elsif all_booted
+    elsif all_booted and some_booted
       self.set_booted
-    end
-
-    if booting
-      self.set_booting
-    elsif unbooting
-      self.set_unbooting
+    elsif some_booted
+      self.set_partially_booted
     end
 
   end
@@ -238,6 +241,7 @@ class Scenario < ActiveRecord::Base
           end
         end
       end
+      self.aws_scenario_scoring_purge
       return true
     end
 

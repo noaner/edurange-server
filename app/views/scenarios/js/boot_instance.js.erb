@@ -4,10 +4,15 @@ $('#dropdown-instance-<%= @instance.id.to_s %>').removeClass("open");
 	<% if @instance.errors[:subnetnotbooted].any? %>
 		alert('Instances Subnet must be booted first')
 	<% end %>
+<% else %>
+    $('<%= "#instance-status-" + @instance.id.to_s %>').text('<%= @instance.status %>');
+    $('<%= "#instance-status-dot-" + @instance.id.to_s %>').attr('class', '<%= "inline-block " + @instance.status %>');
+    $('#boot-button-instance-<%= @instance.id.to_s %>').attr('class', "hidden");
+    $('#unboot-button-instance-<%= @instance.id.to_s %>').attr('class', "hidden");
+
+    <% if @flash_message %>
+        update_flash("<%= @flash_message %>");
+    <% end %>
 <% end %>
 
-$('<%= "#instance-status-" + @instance.id.to_s %>').text('<%= @instance.status %>');
-$('<%= "#instance-status-dot-" + @instance.id.to_s %>').hide();
-$('<%= "#instance-spinner-" + @instance.id.to_s %>').attr('class', '<%= "inline-block spin" %>');
-$('#boot-button-instance-<%= @instance.id.to_s %>').attr('class', "hidden");
-$('#unboot-button-instance-<%= @instance.id.to_s %>').attr('class', "hidden");
+get_boot_status('<%= @instance.scenario.id %>');

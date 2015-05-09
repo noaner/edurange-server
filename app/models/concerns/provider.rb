@@ -9,10 +9,24 @@
 module Provider
   extend ActiveSupport::Concern
   included do
-    enum status: [:stopped, :booting, :booted, :failed, :boot_failed, :unboot_failed, :unbooting, :stopping]
+    enum status: [:stopped, :queued_boot, :queued_unboot, :booting, :booted, :failure, :boot_failed, :unboot_failed, :unbooting, :stopping, :partially_booted, :partially_booted_with_failure, :partially_unbooted, :partially_unbooted_with_failure]
   end
 
-  # def max_attempts; 0; end
+  def debug_booting
+    debug "------------------ booting ------------------"
+  end
+
+  def debug_booting_finished
+    debug "-------------- finished booting -------------"
+  end
+
+  def debug_unbooting
+    debug "----------------- unbooting -----------------"
+  end
+
+  def debug_unbooting_finished
+    debug "------------ finished unbooting ------------"
+  end
 
   def clear_log
     update_attributes(log: '')
@@ -52,87 +66,69 @@ module Provider
   end
 
 
-  ## Status set and get
-  # set status
+  #############################################################
+  #  Status set and get
 
   def set_stopped
-    self.status = "stopped"
-    self.save!
+    self.update_attribute(:status, :stopped)
   end
 
-  def set_stopping
-    self.status = "stopping"
-    self.save!
+  def set_queued_boot
+    self.update_attribute(:status, :queued_boot)
+  end
+
+  def set_queued_unboot
+    self.update_attribute(:status, :queued_unboot)
   end
 
   def set_booting
-    self.status = "booting"
-    self.save!
-  end
-
-  def set_boot_failed
-    self.status = :boot_failed
-    self.save!
-  end
-
-  def set_booted
-    self.status = "booted"
-    self.save!
+    self.update_attribute(:status, :booting)
   end
 
   def set_unbooting
-    self.status = "unbooting"
-    self.save!
+    self.update_attribute(:status, :unbooting)
   end
 
-  def set_failed
-    self.status = "failed"
-    self.save!
+  def set_boot_failed
+    self.update_attribute(:status, :boot_failed)
   end
 
   def set_unboot_failed
-    self.status = "unboot_failed"
-    self.save!
+    self.update_attribute(:status, :unboot_failed)
   end
 
-  # get status
+  def set_booted
+    self.update_attribute(:status, :booted)
+  end
 
-  # def booted?
-  #   return self.status == :booted
-  # end
+  def set_partially_booted
+    self.update_attribute(:status, :partially_booted)
+  end
 
-  # def boot_failed?
-  #   return self.status == :boot_failed
-  # end
+  def set_partially_unbooted
+    self.update_attribute(:status, :partially_unbooted)
+  end
+
+  def set_failure
+    self.update_attribute(:status, :failure)
+  end
+
+  def set_partially_booted_with_failure
+    self.update_attribute(:status, :partially_booted_with_failure)
+  end
+
+  def set_partially_unbooted_with_failure
+    self.update_attribute(:status, :partially_unbooted_with_failure)
+  end
 
   def is_failed?
     return self.status == "unboot_failed" || self.status == "boot_failed"
   end
 
-  def fooerr
-    begin
-      raise "fooggg"
-    rescue => e
-      puts e.message
-      return
-    end
+  def queued?
+    return true if self.queued_boot? or self.queued_unboot?
+    false
   end
-
-  # def booting?
-  #   return self.status == "booting"
-  # end
-
-  # def unbooting?
-  #   return self.status == "unbooting"
-  # end
-
-  # def boot_failed?
-  #   return self.status == "boot_failed"
-  # end
-
-  # def unboot_failed?
-  #   return self.status == "boot_failed"
-  # end
 
   # Polls the state in database, waiting to yield to given block until self is booted?
   # If self is not booted?, calls provider_check_status for self.
@@ -175,7 +171,6 @@ module Provider
   # @see #run_provider_method
   # @return [nil]
   def method_missing(meth, *args, &block)
-    puts "method missing"
     if meth.to_s =~ /^provider_(.+)$/
       run_provider_method($1, *args, &block)
     else

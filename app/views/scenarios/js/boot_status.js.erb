@@ -1,22 +1,21 @@
 
-
-// $('#notice').html("Saved.").slideDown(500).delay(3000).slideUp(500)
-
 <% if @hide_dropdown %>
   $('#action-dropdown').removeClass("open");
 <% end %>
 
-<% if @scenario.booting? %>
-  $('#boot-button').attr('class', 'hidden');
-  $('#unboot-button').attr('class', 'hidden');
-<% elsif @scenario.stopped? %>
+<% if @scenario.stopped? %>
   $('#boot-button').attr('class', '');
   $('#unboot-button').attr('class', 'hidden');
+<% elsif @scenario.queued? %>
+  $('#boot-button').attr('class', 'hidden');
+  $('#unboot-button').attr('class', 'hidden');
+<% elsif @scenario.partially_booted? %>
+  $('#boot-button').attr('class', '');
+  $('#unboot-button').attr('class', '');
 <% elsif @scenario.booted? or @scenario.boot_failed? or @scenario.unboot_failed? %>
   $('#boot-button').attr('class', 'hidden');
   $('#unboot-button').attr('class', '');
 <% end %>
-
 
 <% if @scenario.booting? or @scenario.unbooting? %>
   $('#scenario-status-dot').hide();
@@ -93,6 +92,11 @@ $('#scenario-status-dot').attr('class', '<%= "inline-block " + @scenario.status 
         $('<%= "#instance-status-dot-" + instance.id.to_s %>').show();
       <% end %>
 
+      <% if instance.boot_failed? %>
+        $('#boot-button-instance-<%= instance.id.to_s %>').attr('class', "hidden");
+        $('#unboot-button-instance-<%= instance.id.to_s %>').attr('class', "");
+      <% end %>
+
       <% if instance.booted? %>
         $('#boot-button-instance-<%= instance.id.to_s %>').attr('class', "hidden");
         $('#unboot-button-instance-<%= instance.id.to_s %>').attr('class', "");
@@ -133,9 +137,11 @@ $('#scenario-status-dot').attr('class', '<%= "inline-block " + @scenario.status 
   <% end %>
 <% end %>
 
-<% if @scenario.booting? or @scenario.unbooting? %>
-  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 3000);
+<% if @scenario.queued? or @scenario.booting? or @scenario.unbooting? %>
+  // setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 3000);
+  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 2000);
 <% else %>
-  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 8000);
+  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 5000);
+  // setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 1000);
 <% end %>
 

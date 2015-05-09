@@ -9,25 +9,31 @@ module Aws
   # #  Boot and Unboot
 
   def aws_boot_scenario(options = {})
+
+    # Do nothing if already booted
+    if self.booted?
+      return
+    end
+
     self.set_booting
-    debug "------------------------------------------"
-    debug "booting Scenario #{self.name}"
+    self.debug_booting
 
-
-    # do initial scoring setup
+    # Do initial scoring setup
     begin
-      self.aws_scenario_create_scoring_pages
-      self.aws_scenario_create_answers_page
+      self.aws_scenario_initialize_scoring
     rescue => e
       self.boot_error(e)
       return
     end
 
-    # boot each Cloud
+    # Boot each Cloud
     if options[:boot_dependents]
-      self.clouds.select{|c| !c.driver_id}.each do |cloud|
+      self.clouds.each do |cloud|
         begin
-          cloud.set_booting
+          if cloud.stopped?
+            debug "queuing - cloud #{cloud.name} for boot"
+            cloud.set_queued_boot
+          end
           if options[:run_asynchronously]
             cloud.delay(queue: 'clouds').boot(options)
           else
@@ -39,49 +45,66 @@ module Aws
         end
       end
 
-      debug "scenario #{self.name} waiting for clouds"
-      until not self.clouds_booting?
-        sleep 2
-        self.reload
+      # Wait for clouds to finish booting
+      begin
+        cnt = 0
+        until not self.clouds_booting?
+          debug "waiting - for clouds to finish booting"
+          if cnt > 600
+            raise "ERROR - scenario timed out waiting for clouds to finish"
+          end
+          cnt += 1
+          sleep 2
+          self.reload
+        end
+      rescue => e
+        self.boot_error(e)
       end
 
+      # Check if any clouds have failed to boot
       begin
         if self.clouds_boot_failed?
-          raise "clouds failed to boot"
+          raise "ERROR - one or more clouds have failed to boot"
         end
       rescue => e
         self.boot_error(e)
         return
       end
 
-      debug "waiting for instances to finish booting"
-      sleep 2 until self.instances.select{ |i| i.booted? }.size == self.instances.size
-      self.reload
-
-      # final scoring setup
-      debug "writing to scoring pages #{self.scoring_pages_content}"
+      # Wait for all instances to finish booting
       begin
-        self.aws_scenario_write_to_scoring_pages
+        debug "waiting - for instances to finish booting"
+        cnt = 0
+        until self.instances.select{ |i| i.booted? }.size == self.instances.size
+          sleep 2
+          cnt += 1
+          if cnt > 600
+            raise "ERROR - scenario timed out waiting for instances to finish booting"
+          end
+          self.reload
+        end
       rescue => e
         self.boot_error(e)
+        return
       end
 
     end
 
-    debug "[x] FINISHED unbooting - #{self.name}"
     self.set_booted
+    self.debug_booting_finished
   end
 
   def aws_unboot_scenario(options = {})
     self.set_unbooting
-    debug "unbooting - #{self.name}"
+    self.debug_unbooting
 
     if options[:unboot_dependents]
       self.clouds.each do |cloud|
         begin
           if cloud.driver_id
+            cloud.set_queued_unboot
+            debug "queueing - cloud #{cloud.name} for unboot"
             if options[:run_asynchronously]
-              cloud.set_unbooting
               cloud.delay(queue: 'clouds').unboot(options)
             else
               cloud.unboot(options)
@@ -95,150 +118,176 @@ module Aws
         end
       end
 
-      debug "wating - for clouds to unboot"
-      until not self.clouds_unbooting?
-        sleep 2
-        self.reload
+      # Wait for clouds to unboot
+      begin
+        debug "wating - for clouds to unboot"
+        cnt = 0
+        until not self.clouds_unbooting?
+          sleep 2
+          cnt += 1
+          if cnt > 600
+            raise "ERROR - unboot timed out waiting for clouds to finish unbooting"
+          end
+          self.reload
+        end
+      rescue => e
+        self.boot_error(e)
+        return
       end
 
+      # Check clouds for unboot errors
       begin
         if self.clouds_unboot_failed?
-          raise "clouds unboot failed"
+          raise "ERROR - one or more clouds have failed to unboot"
         end
       rescue => e
         self.unboot_error(e)
+        return
       end
 
-    else
-      if self.clouds_booted?
-        begin
-          raise "Clouds not unbooted"
-        rescue => e
-          self.unboot_error(e)
-          return
-        end
-      end
     end
 
-    # delete scoring pages
+    # Delete scoring pages
     begin
-      self.aws_scenario_delete_scoring_pages
-      self.aws_scenario_delete_answers_page
+      aws_scenario_scoring_purge
     rescue => e
       self.unboot_error(e)
       return
     end
 
     self.set_stopped
-    self.clear_log
-    debug "finished - unbooting scenario"
+    self.debug_unbooting_finished
   end
 
   # Boots {Cloud}, and all of its {Subnet Subnets}.
   # Creates a AWS::EC2::VPC object with Subnet's cidr_block
   # @return [nil]
   def aws_boot_cloud(options = {})
-    self.set_booting
-    debug "booting Cloud #{self.id}"
-    self.set_booting
 
-    # create vpc
-    debug "creating VPC"
+    # Initialize scoring if it is not already done
     begin
-      ec2vpc = AWS::EC2.new.vpcs.create(self.cidr_block)
+      self.scenario.aws_scenario_initialize_scoring
     rescue => e
       self.boot_error(e)
       return
     end
 
-    # assign driver_id
-    debug "assigning - VPC #{self.id} driver_id"
-    begin
-      self.update_attributes(driver_id: ec2vpc.id)
-    rescue => e
-      self.boot_error(e)
-      return
-    end
+    # Boot if not booted
+    if self.driver_id == nil
+      self.set_booting
+      self.debug_booting
 
-    # create internet gateway
-    debug "creating - Internet Gateway"
-    begin
-      ec2vpc.internet_gateway = AWS::EC2.new.internet_gateways.create
-    rescue => e
-      self.boot_error(e)
-      return
-    end
-
-    # wait for VPC to become available, erorr if timeout
-    begin
-      cnt = 0
-      until ec2vpc.state == :available
-        debug "waiting for - VPC #{self.driver_id} to become available"
-        sleep 2**cnt
-        cnt += 1
-        if cnt == 8
-          raise "Timeout Waiting for VPC to become available"
-          self.boot_error($!)
-          return
-        end
+      # Create VPC, assign driver_id, and create Internet Gateway
+      begin
+        debug "creating - VPC"
+        ec2vpc = AWS::EC2.new.vpcs.create(self.cidr_block)
+      rescue => e
+        self.boot_error(e)
+        return
       end
-    rescue => e
-      self.boot_error(e)
-      return
+
+      # Assign driver_id
+      debug "assigning - VPC driver_id"
+      begin
+        self.update_attributes(driver_id: ec2vpc.id)
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      # Create Internet Gateway
+      debug "creating - Internet Gateway"
+      begin
+        ec2vpc.internet_gateway = AWS::EC2.new.internet_gateways.create
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      # Wait for VPC to become available
+      begin
+        cnt = 0
+        debug "waiting - for VPC #{self.driver_id} to become available"
+        until ec2vpc.state == :available
+          sleep 2
+          cnt += 1
+          if cnt == 8
+            raise "timeout - waiting for VPC to become available"
+            return
+          end
+        end
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      # Create routing rules
+      begin
+        debug "creating - routing rules"
+        # Hardcoded firewall rules - TODO
+        ec2vpc.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)
+        ec2vpc.security_groups.first.revoke_egress('0.0.0.0/0') # Disable all outbound
+        ec2vpc.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 80)  # Enable port 80 outbound
+        ec2vpc.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 443) # Enable port 443 outbound
+        # TODO -- SECURITY -- delayed job in 20 min disable firewall.
+        ec2vpc.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      tries = 0
+      begin
+        debug "creating - tags"
+        AWS::EC2.new.tags.create(ec2vpc, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+        AWS::EC2.new.tags.create(ec2vpc, "host", value: Settings.host)
+        AWS::EC2.new.tags.create(ec2vpc, "instructor", value: self.scenario.user.name)
+        AWS::EC2.new.tags.create(ec2vpc, "scenario", value: self.scenario.id)
+
+        AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+        AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "host", value: Settings.host)
+        AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "instructor", value: self.scenario.user.name)
+        AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "scenario", value: self.scenario.id)
+
+        AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+        AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "host", value: Settings.host)
+        AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "instructor", value: self.scenario.user.name)
+        AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "scenario", value: self.scenario.id)
+
+        AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+        AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "host", value: Settings.host)
+        AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "instructor", value: self.scenario.user.name)
+        AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "scenario", value: self.scenario.id)
+
+        AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+        AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "host", value: Settings.host)
+        AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "instructor", value: self.scenario.user.name)
+        AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "scenario", value: self.scenario.id)
+
+      rescue AWS::EC2::Errors::InvalidVpcID::NotFound => e
+        debug "vpc id not found trying again"
+        tries += 1
+        if tries < 20
+          sleep 1
+          retry
+        else
+          self.boot_error(e)
+        end
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      self.set_booted
+      self.debug_booting_finished
     end
 
-    debug "creating - Firewall rules"
-    begin
-      # Hardcoded firewall rules - TODO
-      ec2vpc.security_groups.first.authorize_ingress(:tcp, 20..8080) #enable all traffic inbound from port 20 - 8080 (most we care about)
-      ec2vpc.security_groups.first.revoke_egress('0.0.0.0/0') # Disable all outbound
-      ec2vpc.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 80)  # Enable port 80 outbound
-      ec2vpc.security_groups.first.authorize_egress('0.0.0.0/0', protocol: :tcp, ports: 443) # Enable port 443 outbound
-      # TODO -- SECURITY -- delayed job in 20 min disable firewall.
-      ec2vpc.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
-    rescue => e
-      self.boot_error(e)
-      return
-    end
-
-    debug "creating tags"
-    begin
-      AWS::EC2.new.tags.create(ec2vpc, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
-      AWS::EC2.new.tags.create(ec2vpc, "host", value: Settings.host)
-      AWS::EC2.new.tags.create(ec2vpc, "instructor", value: self.scenario.user.name)
-      AWS::EC2.new.tags.create(ec2vpc, "scenario", value: self.scenario.id)
-
-      AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
-      AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "host", value: Settings.host)
-      AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "instructor", value: self.scenario.user.name)
-      AWS::EC2.new.tags.create(ec2vpc.internet_gateway, "scenario", value: self.scenario.id)
-
-      AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
-      AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "host", value: Settings.host)
-      AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "instructor", value: self.scenario.user.name)
-      AWS::EC2.new.tags.create(ec2vpc.security_groups.first, "scenario", value: self.scenario.id)
-
-      AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
-      AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "host", value: Settings.host)
-      AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "instructor", value: self.scenario.user.name)
-      AWS::EC2.new.tags.create(ec2vpc.network_acls.first, "scenario", value: self.scenario.id)
-
-      AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
-      AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "host", value: Settings.host)
-      AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "instructor", value: self.scenario.user.name)
-      AWS::EC2.new.tags.create(ec2vpc.route_tables.first, "scenario", value: self.scenario.id)
-
-    rescue => e
-      self.boot_error(e)
-      return
-    end
-
-    debug "booted - Cloud #{self.driver_id}"
-    self.set_booted
-
+    # boot dependent Subnets
     if options[:boot_dependents]
-      # boot Subnets
       self.subnets.each do |subnet|
+        if subnet.driver_id == nil
+          subnet.set_queued_boot
+        end
         begin
           if options[:run_asynchronously]
             subnet.delay(queue: 'subnets').boot(options)
@@ -252,84 +301,83 @@ module Aws
       end
     end
 
-    # debug "cloud #{self.name} waiting for subnets to finish booting"
-    # until not self.subnets_booting?
-    #   sleep 2
-    #   self.reload
-    # end
-
-    # begin
-    #   if self.subnets_boot_failed?
-    #     raise "subnets failed"
-    #   end
-    # rescue => e
-    #   self.boot_error(e)
-    #   return
-    # end
   end
 
   def aws_unboot_cloud(options = {})
-    self.set_unbooting
 
     if self.driver_id == nil
       self.set_stopped
-      return
+      return "cloud is already unbooted"
     end
 
-    # check for dependents
-    # self.dependents_booted?
+    if self.subnets.select { |s| s.driver_id != nil }.size > 0
+      return "clouds subnets are not unbooted"
+    end
 
-    debug "unbooting - Cloud #{self.id}"
+    self.set_unbooting
+    self.debug_unbooting
 
+    # Unboot dependents
     if options[:unboot_dependents]
 
       self.subnets.each do |subnet|
         begin
+          if subnet.driver_id != nil
+            subnet.set_queued_unboot
+          end
+
           if options[:run_asynchronously]
             subnet.set_unbooting
             subnet.delay(queue: 'subnets').unboot(options)
           else
             subnet.unboot(options)
           end
+
         rescue => e
           self.unboot_error(e)
           return
         end
       end
 
-      debug "wating - for subnets to unboot"
-      until not self.subnets_unbooting?
-        sleep 2
-        self.reload
+      # Wait for subnets to unboot
+      begin
+        debug "wating - for subnets to unboot"
+        cnt = 0
+        until not self.subnets_unbooting?
+          sleep 2
+          cnt += 1
+          if cnt > 600
+            raise "ERROR - unboot timed out waiting for subnets to finish unbooting"
+          end
+          self.reload
+        end
+      rescue => e
+        self.unboot_error(e)
+        return
       end
 
+      # Check subnets for unboot errors
       begin
         if self.subnets_unboot_failed?
           raise "subnets unboot failed"
         end
       rescue => e
         self.unboot_error(e)
+        return
       end
 
-    else
-      if self.subnets_booted?
-        begin
-          raise "Subnets not unbooted"
-        rescue => e
-          self.unboot_error(e)
-          return
-        end
-      end
     end
 
-    debug "getting - EC2 Cloud #{self.driver_id}"
+    # Get VPC object
     begin
+      debug "getting - EC2 Cloud #{self.driver_id}"
       vpc = AWS::EC2.new.vpcs[self.driver_id]
     rescue => e
       self.unboot_error(e)
       return
     end
 
+    # Detach and delete any InternetGateways 
     if vpc.internet_gateway and vpc.internet_gateway.exists?
       igw = vpc.internet_gateway
 
@@ -351,33 +399,37 @@ module Aws
 
     end
 
+    # Delete ACL's
     vpc.network_acls.select{ |acl| !acl.default}.each do |acl|
       aws_unboot_acl_new(acl, self)
     end
 
+    # Delete Security Groups
     vpc.security_groups.select{ |sg| !sg.name == "default"}.each do |security_group|
       aws_unboot_security_group_new(security_group, self)
     end
 
+    # Delete Routing Tables
     vpc.route_tables.select{ |rt| !rt.main?}.each do |route_table|
       aws_unboot_route_table_new(route_table, self)
     end
 
+    # Delete the VPC
+    tries = 0
     begin
-      network_acls = vpc.network_acls
-    rescue => e
-      self.unboot_error(e)
-      return
-    end
-
-    debug "unbooting - VPC #{self.driver_id}"
-    begin
+      debug "unbooting - VPC #{self.driver_id}"
       vpc.delete
     rescue AWS::EC2::Errors::DependencyViolation => e
-      if aws_instances_stopping?(self.scenario.instances)
-        sleep 2
-        retry
-      else
+      if tries < 120
+        if aws_instances_stopping?(self.scenario.instances)
+          sleep 2
+          tries += 1
+          retry
+        else
+          self.unboot_error(e)
+          return
+        end
+      else 
         self.unboot_error(e)
         return
       end
@@ -387,104 +439,116 @@ module Aws
     end
 
     self.driver_id = nil
-    self.clear_log
-    self.save
     self.set_stopped
+    self.debug_unbooting_finished
+    self.save
   end
 
   # Boots {Subnet}, and all of its {Instance Instances}.
   # Creates a AWS::EC2::Subnet object, taking Subnet's `cidr_block` and the `VPC ID` of the {Cloud} the {Subnet} resides in.
   # @return [nil]
   def aws_boot_subnet(options = {})
-    debug "booting - Subnet #{self.id}"
-    self.set_booting
 
-    # create Subnet
-    debug "creating - EC2 Subnet"
-    begin
-      ec2subnet = AWS::EC2::SubnetCollection.new.create(self.cidr_block, vpc_id: self.cloud.driver_id)
-    rescue => e
-      self.boot_error(e)
-      return
-    end
+    if self.driver_id == nil
 
-    # set driver_id
-    debug "assigning - Subnet #{self.id} driver_id"
-    begin
-      self.update_attributes(driver_id: ec2subnet.id)
-    rescue => e
-      self.boot_error(e)
-      return
-    end
+      self.set_booting
+      self.debug_booting
 
-    # wait till Subnet is available
-    begin
-      cnt = 0
-      until ec2subnet.state == :available
-        debug "waiting for - EC2 Subnet #{self.driver_id} to become available"
-        sleep 2**cnt
-        cnt += 1
-        if cnt == 9
-          raise "Timedout waiting for VPC to become available"
-          self.boot_error($!)
-          return
-        end
-      end
-    rescue AWS::EC2::Errors::InvalidSubnetID::NotFound
-      debug "invalid subnet id - trying again"
-      retry
-    rescue => e
-      self.boot_error(e)
-      return
-    end
-
-    # do routing 
-    debug "creating - EC2 RouteTable for #{self.driver_id}"
-    begin
-      ec2route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: self.cloud.driver_id)
-    rescue => e
-      self.boot_error(e)
-      return
-    end
-
-    debug "assigning - EC2 Route Table #{ec2route_table.id} to EC2 Subnet #{self.driver_id}"
-    begin
-      ec2subnet.route_table = ec2route_table
-    rescue => e
-      self.boot_error(e)
-      return
-    end
-
-    debug "getting - EC2 Cloud #{self.cloud.driver_id}"
-    begin
-      ec2cloud = AWS::EC2.new.vpcs[self.cloud.driver_id]
-    rescue => e
-      self.boot_error(e)
-      return
-    end
-
-    if self.internet_accessible
-      debug "creating - Internet Accessible RouteTable for EC2 Subnet #{self.driver_id}"
+      # create Subnet
+      debug "creating - EC2 Subnet"
       begin
-        ec2route_table.create_route("0.0.0.0/0", { internet_gateway: ec2cloud.internet_gateway} )
+        ec2subnet = AWS::EC2::SubnetCollection.new.create(self.cidr_block, vpc_id: self.cloud.driver_id)
       rescue => e
         self.boot_error(e)
         return
       end
+
+      # set driver_id
+      debug "assigning - Subnet #{self.id} driver_id"
+      begin
+        self.update_attributes(driver_id: ec2subnet.id)
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      # wait till Subnet is available
+      begin
+        cnt = 0
+        until ec2subnet.state == :available
+          debug "waiting for - EC2 Subnet #{self.driver_id} to become available"
+          sleep 2**cnt
+          cnt += 1
+          if cnt == 9
+            raise "Timedout waiting for VPC to become available"
+            self.boot_error($!)
+            return
+          end
+        end
+      rescue AWS::EC2::Errors::InvalidSubnetID::NotFound
+        debug "invalid subnet id - trying again"
+        retry
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      # do routing 
+      debug "creating - EC2 RouteTable for #{self.driver_id}"
+      begin
+        ec2route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: self.cloud.driver_id)
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      debug "assigning - EC2 Route Table #{ec2route_table.id} to EC2 Subnet #{self.driver_id}"
+      begin
+        ec2subnet.route_table = ec2route_table
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      debug "getting - EC2 Cloud #{self.cloud.driver_id}"
+      begin
+        ec2cloud = AWS::EC2.new.vpcs[self.cloud.driver_id]
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      if self.internet_accessible
+        debug "creating - Internet Accessible RouteTable for EC2 Subnet #{self.driver_id}"
+        begin
+          ec2route_table.create_route("0.0.0.0/0", { internet_gateway: ec2cloud.internet_gateway} )
+        rescue => e
+          self.boot_error(e)
+          return
+        end
+      end
+
+      debug "creating tags"
+      begin
+        AWS::EC2.new.tags.create(ec2subnet, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+        AWS::EC2.new.tags.create(ec2subnet, "host", value: Settings.host)
+        AWS::EC2.new.tags.create(ec2subnet, "instructor", value: self.scenario.user.name)
+        AWS::EC2.new.tags.create(ec2subnet, "scenario", value: self.scenario.id)
+
+        AWS::EC2.new.tags.create(ec2route_table, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
+        AWS::EC2.new.tags.create(ec2route_table, "host", value: Settings.host)
+        AWS::EC2.new.tags.create(ec2route_table, "instructor", value: self.scenario.user.name)
+        AWS::EC2.new.tags.create(ec2route_table, "scenario", value: self.scenario.id)
+      rescue => e
+        self.boot_error(e)
+        return
+      end
+
+      debug "booted - Subnet #{self.name}"
+      self.set_booted
+      self.debug_booting_finished
     end
 
-    # can only do this once instances are done
-    # else
-    #   debug "creating - Route for EC2 Subnet #{self.driver_id} to NAT"
-    #   begin
-    #     ec2route_table.create_route("0.0.0.0/0", { instance: self.cloud.scenario.instances.select{|i| i.internet_accessible}.first.driver_id } )
-    #   rescue
-    #     raise
-    #     return
-    #   end
-    # end
-
-    debug "booted - Subnet #{self.driver_id}"
     if options[:boot_dependents]
       self.instances.select{ |i| !i.driver_id}.each do |instance|
         begin
@@ -500,42 +564,11 @@ module Aws
       end
     end
 
-    # debug "subnet #{self.name} waiting for instances to finish booting"
-    # until not self.instances_booting?
-    #   sleep 2
-    #   self.reload
-    # end
-
-    # begin
-    #   if self.instances_boot_failed?
-    #     raise "instances failed"
-    #   end
-    # rescue => e
-    #   self.boot_error(e)
-    #   return
-    # end
-
-    debug "creating tag"
-    begin
-      AWS::EC2.new.tags.create(ec2subnet, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
-      AWS::EC2.new.tags.create(ec2subnet, "host", value: Settings.host)
-      AWS::EC2.new.tags.create(ec2subnet, "instructor", value: self.scenario.user.name)
-      AWS::EC2.new.tags.create(ec2subnet, "scenario", value: self.scenario.id)
-
-      AWS::EC2.new.tags.create(ec2route_table, "Name", value: Settings.host + "-" + self.scenario.user.name + '-' + self.scenario.name + '-' + self.scenario.id.to_s)
-      AWS::EC2.new.tags.create(ec2route_table, "host", value: Settings.host)
-      AWS::EC2.new.tags.create(ec2route_table, "instructor", value: self.scenario.user.name)
-      AWS::EC2.new.tags.create(ec2route_table, "scenario", value: self.scenario.id)
-    rescue => e
-      self.boot_error(e)
-      return
-    end
-
-    self.set_booted
   end
 
   def aws_unboot_subnet(options = {})
     self.set_unbooting
+    self.debug_unbooting
 
     # only unboot if instances are not booted
     if self.driver_id == nil
@@ -572,6 +605,7 @@ module Aws
         end
       rescue => e
         self.unboot_error(e)
+        return
       end
 
     else
@@ -625,7 +659,7 @@ module Aws
     end
 
     self.driver_id = nil
-    self.clear_log
+    self.debug_unbooting_finished
     self.set_stopped
     self.save
   end
@@ -636,16 +670,17 @@ module Aws
   # # Additionally, it uploads and stores the cookbook_url, which is generated by calling {#aws_instance_upload_cookbook}
   # # @return [nil]
   def aws_boot_instance(options = {})
+
     self.set_booting
-    debug "booting - Instance #{self.name}"
+    self.debug_booting
 
     # scoring
     if self.roles.select { |r| r.recipes.include?('scoring') }.size > 0
       begin
-        self.aws_instance_create_scoring_page
-        self.aws_instance_create_scoring_url
+        self.aws_instance_initialize_scoring
         self.reload
         self.scenario.update(scoring_pages_content: self.scenario.read_attribute(:scoring_pages_content) + self.scoring_page + "\n")
+        self.scenario.aws_scenario_write_to_scoring_pages
       rescue => e
         self.boot_error(e)
         return
@@ -852,13 +887,21 @@ module Aws
     end
 
     self.set_booted
+    self.debug_booting_finished
     self.save
     debug "[x] booted - Instance #{self.name}"
   end
 
   def aws_unboot_instance(options = {})
     self.set_unbooting
-    debug "unbooting - Instance #{self.name}"
+    self.debug_unbooting
+
+    if self.driver_id == nil
+      self.set_stopped
+      return
+    end
+
+    # check if instance exists
 
     debug "getting - EC2 Instance #{self.driver_id}"
     begin
@@ -936,9 +979,8 @@ module Aws
 
     self.driver_id = nil
     self.set_stopped
-    self.clear_log
+    self.debug_unbooting_finished
     self.save
-    debug "unbooted - Instance #{self.name}"
   end
 
   ## Unboot Helpers
@@ -1181,6 +1223,7 @@ module Aws
     debug "deleting s3 cookbook"
     begin
       aws_S3_delete_page(self.aws_instance_cookbook_name)
+      self.update(cookbook_url: nil)
     rescue
       raise
       return
@@ -1211,6 +1254,7 @@ module Aws
     debug "deleting s3 com page"
     begin
       aws_S3_delete_page(self.aws_instance_com_page_name)
+      self.update(com_page: nil)
     rescue
       raise
       return
@@ -1240,20 +1284,36 @@ module Aws
     debug "deleting s3 bash history page"
     begin
       aws_S3_delete_page(self.aws_instance_bash_history_page_name)
+      self.update(bash_history_page: nil)
     rescue
       raise
       return
     end
   end
 
+  #######################################################################
   # Scoring
 
-  def aws_scenario_scoring_name
-     return "#{aws_S3_name_prefix}_scoring_#{self.name}_#{self.id.to_s}_#{self.uuid}"
+  # Scenario Scoring
+
+  def aws_scenario_initialize_scoring
+    begin
+      if not self.scoring_pages
+        debug "creating scoring pages s3 file"
+        self.aws_scenario_create_scoring_pages
+      end
+      if not self.answers_url
+        debug "creating answers url s3 file"
+        self.aws_scenario_create_answers_url
+      end
+    rescue
+      raise
+      return
+    end
   end
 
   def aws_scenario_scoring_pages_name
-    self.name + "-" + self.uuid + "-scoring-pages"
+    return "#{aws_S3_name_prefix}_scenario_scoring_pages_#{self.name}_#{self.id.to_s}_#{self.uuid}"
   end
 
   def aws_scenario_create_scoring_pages
@@ -1282,23 +1342,24 @@ module Aws
     debug "deleting s3 scoring pages"
     begin 
       AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_scoring_pages_name].delete
+      self.update(scoring_pages: nil)
     rescue
       raise
       return
     end
   end
 
-  def aws_scenario_answers_name
-    self.name + "-" + self.uuid + "-answers"
+  def aws_scenario_answers_url_name
+    return "#{aws_S3_name_prefix}_scenario_answers_url_#{self.name}_#{self.id.to_s}_#{self.uuid}"
   end
 
-  def aws_scenario_create_answers_page
+  def aws_scenario_create_answers_url
     debug "creating s3 answers page"
     begin
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      object = bucket.objects[aws_scenario_answers_name]
+      object = bucket.objects[aws_scenario_answers_url_name]
       object.write(self.answers)
       self.update(answers_url: object.url_for(:read, expires: 10.days).to_s)
     rescue
@@ -1307,18 +1368,58 @@ module Aws
     end
   end
 
-  def aws_scenario_delete_answers_page
+  def aws_scenario_delete_answers_url
     debug "deleting s3 delete answers page"
     begin 
-      AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_answers_name].delete
+      AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_answers_url_name].delete
+      self.update(answers_url: nil)
     rescue
       raise
       return
     end
   end
 
-  def aws_instance_scoring_name
-    self.name + '-' + self.uuid + "-scoring"
+  def aws_scenario_scoring_purge
+    begin
+      self.aws_scenario_delete_scoring_pages
+      self.aws_scenario_delete_answers_url
+    rescue
+      raise
+      return
+    end
+  end
+
+  # Instance Scoring
+
+  def aws_instance_initialize_scoring
+    begin
+      if not self.scoring_page
+        self.aws_instance_create_scoring_page
+      end
+      if not self.scoring_url
+        self.aws_instance_create_scoring_url
+      end
+    rescue
+      raise
+      return
+    end
+  end
+
+  def aws_instance_scoring_page_name
+    return "#{aws_S3_name_prefix}_instance_scoring_#{self.name}_#{self.id.to_s}_#{self.uuid}"
+  end
+
+  def aws_instance_create_scoring_url
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets[Settings.bucket_name]
+      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
+      bucket.objects[aws_instance_scoring_page_name].write("# put your answers here")
+      self.update(scoring_url: bucket.objects[aws_instance_scoring_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
+    rescue
+      raise
+      return
+    end
   end
 
   def aws_instance_create_scoring_page
@@ -1327,20 +1428,7 @@ module Aws
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      self.update(scoring_page: bucket.objects[aws_instance_scoring_name].url_for(:read, expires: 10.days).to_s)
-    rescue
-      raise
-      return
-    end
-  end
-
-  def aws_instance_create_scoring_url
-    begin
-      s3 = AWS::S3.new
-      bucket = s3.buckets[Settings.bucket_name]
-      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      bucket.objects[aws_instance_scoring_name].write("# put your answers here")
-      self.update(scoring_url: bucket.objects[aws_instance_scoring_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
+      self.update(scoring_page: bucket.objects[aws_instance_scoring_page_name].url_for(:read, expires: 10.days).to_s)
     rescue
       raise
       return
@@ -1350,7 +1438,8 @@ module Aws
   def aws_instance_delete_scoring_page
     debug "deleting s3 scoring page"
     begin 
-      AWS::S3.new.buckets[Settings.bucket_name].objects[aws_instance_scoring_name].delete
+      AWS::S3.new.buckets[Settings.bucket_name].objects[aws_instance_scoring_page_name].delete
+      self.update(scoring_page: nil)
     rescue
       raise
       return
