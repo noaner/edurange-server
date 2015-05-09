@@ -97,13 +97,23 @@ module YmlRecord
       name_lookup_hash[subnet.name] = subnet.id
     end
 
+
     instance = nil
+    instance_ips = {}
     instances.each do |yaml_instance|
       instance = Instance.new
       instance_roles = yaml_instance["Roles"]
       instance.subnet = Subnet.find(name_lookup_hash[yaml_instance["Subnet"]])
       instance.name = yaml_instance["Name"]
-      instance.ip_address = yaml_instance["IP_Address"]
+
+      ipaddress, instance_ips = self.parse_ip(yaml_instance["IP_Address"], instance_ips)
+      if ipaddress == nil
+        scenario.destroy
+        raise "ERROR - could not assign IP adress to Instance"
+      end
+
+      instance.ip_address = ipaddress
+
       if yaml_instance["Internet_Accessible"]
         instance.internet_accessible = true
       end
@@ -180,4 +190,61 @@ module YmlRecord
       f.puts scenario.to_yaml
     end
   end
+
+  def self.parse_ip(ip, ips)
+    ipnew = ""
+    block = ips
+    ran = nil
+
+    ip_split = ip.split(".")
+    ip_split.each_with_index do |num, i|
+
+      # get block or create new one
+      if not i == ip_split.size - 1
+
+        if block[num]
+          block = block[num]
+        else
+          # insert hash unless last block then insert array
+          if i== (ip_split.size - 2)
+            block[num] = []
+          else
+            block[num] = {}
+          end
+          block = block[num]
+        end
+
+      end
+
+      # If range
+      num = num.split("-")
+      if num.size > 1
+
+          # get low and high ranges
+          low = num[0].to_i
+          high = num[1].to_i
+
+          # if last block check for room, if no room return false
+          if i == ip_split.size-1
+            if high-low+1 <= block.size
+              return nil, nil
+            end
+          end
+
+          # get random number, reroll if already taken
+          ran = Random.new.rand(num[0].to_i..num[1].to_i).to_s
+          until not block.include?(ran)
+            ran = Random.new.rand(num[0].to_i..num[1].to_i).to_s
+          end
+          ipnew += ran + "."
+      else
+        ipnew += num[0] + "."
+      end
+
+    end
+    block.push(ran)
+
+    return ipnew.chop, ips
+  end
+
 end

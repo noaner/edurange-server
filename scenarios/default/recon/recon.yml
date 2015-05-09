@@ -91,28 +91,28 @@ Instances:
   - Name: Battlespace_1_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
-    IP_Address: &bs_1_ip 10.0.0.6
+    IP_Address: &bs_1_ip 10.0.0-32.2-255
     Roles:
       - web_server
 
   - Name: Battlespace_2_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
-    IP_Address: &bs_2_ip 10.0.1.94
+    IP_Address: &bs_2_ip 10.0.0-32.2-255
     Roles:
       - dns_server
 
   - Name: Battlespace_3_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
-    IP_Address: &bs_3_ip 10.0.4.77
+    IP_Address: &bs_3_ip 10.0.33-64.2-255
     Roles:
       - dns_server
 
   - Name: Battlespace_4_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
-    IP_Address: &bs_4_ip 10.0.8.2
+    IP_Address: &bs_4_ip 10.0.33-64.2-255
     Roles:
       - dns_server
       - web_server
@@ -120,42 +120,42 @@ Instances:
   - Name: Battlespace_5_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
-    IP_Address: &bs_5_ip 10.0.34.90
+    IP_Address: &bs_5_ip 10.0.33-64.2-255
     Roles:
       - web_server
 
   - Name: Battlespace_6_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
-    IP_Address: &bs_6_ip 10.0.63.128
+    IP_Address: &bs_6_ip 10.0.65-100.2-255
     Roles:
       - web_server
 
   - Name: Battlespace_7_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
-    IP_Address: &bs_7_ip 10.0.121.122
+    IP_Address: &bs_7_ip 10.0.65-100.2-255
     Roles:
       - web_server
 
   - Name: Battlespace_8_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
-    IP_Address: &bs_8_ip 10.0.123.2
+    IP_Address: &bs_8_ip 10.0.64-127.2-255
     Roles:
       - web_server
 
   - Name: Battlespace_9_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
-    IP_Address: &bs_9_ip 10.0.123.8
+    IP_Address: &bs_9_ip 10.0.90-127.2-255
     Roles:
       - disable_ping
 
   - Name: Battlespace_10_Instance
     Subnet: Battlespace_Subnet
     OS: ubuntu
-    IP_Address: &bs_10_ip 10.0.127.127
+    IP_Address: &bs_10_ip 10.0.120-127.2-255
     Roles:
       - disable_ping
       - ssh_port_2345
