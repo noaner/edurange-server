@@ -16,7 +16,6 @@ module YmlRecord
     output = []
     Dir.foreach(Settings.app_path + "scenarios/local") do |filename|
       next if filename == '.' or filename == '..' or filename == 'ddos.yml'
-      puts filename
       scenario = YAML.load_file(Settings.app_path + "scenarios/local/#{filename}/#{filename}.yml")["Scenarios"][0]
       name = scenario["Name"]
       description = scenario["Description"]
