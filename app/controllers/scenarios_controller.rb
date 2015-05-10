@@ -73,7 +73,7 @@ class ScenariosController < ApplicationController
   def create
     # scrub this template input
     if template = scenario_params["template"]
-      @scenario = YmlRecord.load_yml("scenarios/default/#{template}/#{template}.yml")
+      @scenario = YmlRecord.load_yml("scenarios/local/#{template}/#{template}.yml")
     else
       @scenario = Scenario.new(scenario_params)
     end

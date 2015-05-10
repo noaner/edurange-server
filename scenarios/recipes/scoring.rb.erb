@@ -16,7 +16,7 @@ end
 
 script 'get scoring_url' do
   interpreter "bash"
-  code 'echo "<%= scoring_url %>" > /tmp/scoring/scoring_url'
+  code 'echo "<%= instance.scoring_url %>" > /tmp/scoring/scoring_url'
 end
 
 gem_package "daemons"

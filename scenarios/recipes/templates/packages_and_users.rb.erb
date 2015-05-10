@@ -1,0 +1,30 @@
+# Packages
+<% instance.roles.each do |role| %>
+  <% role.packages.each do |package| %>
+    package '<%= package %>' do
+      options '--force-yes'
+    end
+  <% end %>
+<% end %>
+
+# Users
+<% instance.users.each do |user| %>
+user '<%= user.login %>' do
+  supports :manage_home => true
+  password '<%= user.password_hash %>'
+  home '/home/<%= user.login %>'
+  shell '/bin/bash'
+  action :create
+end
+<% end %>
+# Administrators
+<% instance.administrators.each do |administrator| %>
+user '<%= administrator.login %>' do
+  supports :manage_home => true
+  home '/home/<%= administrator.login %>'
+  shell '/bin/bash'
+  password '<%= administrator.password_hash %>'
+  group 'sudo'
+  action :create
+end
+<% end %>

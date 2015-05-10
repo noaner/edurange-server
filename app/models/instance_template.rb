@@ -4,36 +4,40 @@ class InstanceTemplate
     self.instance = instance
   end
 
-  def generate_cookbook_new
-    begin
-      template = File.read(Settings.app_path + "lib/templates/cookbook_template_new.rb.erb")
-      template = Erubis::Eruby.new(template)
-
-      template2 = File.read(Settings.app_path + "scenarios/default/#{instance.subnet.cloud.scenario.name.downcase}/cookbook.rb.erb")
-      template2 = Erubis::Eruby.new(template2)
-
-      # do finish script
-      template3 = File.read(Settings.app_path + "lib/templates/cookbook_finished.rb.erb")
-      template3 = Erubis::Eruby.new(template3)
-
-      template.result(instance: instance) + "\n" + template2.result(instance: instance) + "\n" + template3.result(instance: instance)
-      # template.result(instance: instance) + "\n" + template3.result(instance: instance)
-    rescue
-      raise
-      return
-    end
-  end
-
   def generate_cookbook
     begin
-      template = File.read(Settings.app_path + "lib/templates/cookbook_template.rb.erb")
-      template = Erubis::Eruby.new(template)
-      template.result(scenario: instance.subnet.cloud.scenario, scoring_url: instance.scoring_url, users: instance.users, administrators: instance.administrators, roles: instance.roles)
+      cookbook = ""
+      # This recipe sets up packages and users and is run for every instance
+      cookbook += Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/recipes/templates/packages_and_users.rb.erb")).result(instance: instance) + "\n"
+      
+      # Get cookbook recipe
+      cookbook_path = "#{Settings.app_path}scenarios/local/#{instance.scenario.name.downcase}/cookbook.rb.erb"
+      if File.exists? cookbook_path
+        cookbook += Erubis::Eruby.new(File.read(cookbook_path)).result(instance: instance) + "\n"
+      end
+
+      # Get each recipe 
+      local_path = "#{Settings.app_path}scenarios/local/#{instance.scenario.name.downcase}/recipes"
+      shared_path = "#{Settings.app_path}scenarios/recipes"
+      instance.roles.each do |role|
+        role.recipes.each do |recipe|
+          # First look for local recipe
+          if File.exists? "#{local_path}/#{recipe}.rb.erb"
+            cookbook += Erubis::Eruby.new(File.read("#{local_path}/#{recipe}.rb.erb")).result(instance: instance) + "\n"
+          elsif File.exists? "#{shared_path}/#{recipe}.rb.erb"
+            cookbook += Erubis::Eruby.new(File.read("#{shared_path}/#{recipe}.rb.erb")).result(instance: instance) + "\n"
+          end
+        end
+      end
+      # This recipe signals the com page and also gets the bash histories
+      cookbook += Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/recipes/templates/com_page_and_bash_histories.rb.erb")).result(instance: instance) + "\n"
+      return cookbook
     rescue
       raise
       return
     end
   end
+
   def generate_cloud_init(cookbook_url)
     begin
     # Returns the bash code to initialize an instance with chef-solo

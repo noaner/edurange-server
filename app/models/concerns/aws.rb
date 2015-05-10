@@ -694,7 +694,7 @@ module Aws
       self.aws_instance_create_com_page
       self.aws_instance_create_bash_history_page
       instance_template = InstanceTemplate.new(self)
-      cookbook_text = instance_template.generate_cookbook_new
+      cookbook_text = instance_template.generate_cookbook
 
       debug "uploading - instance cookbook"
       self.aws_instance_upload_cookbook(cookbook_text)

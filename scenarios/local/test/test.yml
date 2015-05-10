@@ -44,7 +44,7 @@ Instances:
   - Name: Instance_2
     Subnet: Subnet_1
     OS: ubuntu
-    IP_Address: 10.0.129.6
+    IP_Address: 10.0.129.0-6
     Internet_Accessible: false
     Roles:
       - Role_1

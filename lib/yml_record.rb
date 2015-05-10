@@ -14,10 +14,10 @@ module YmlRecord
 
   def self.yml_headers
     output = []
-    Dir.foreach(Settings.app_path + "scenarios/default") do |filename|
+    Dir.foreach(Settings.app_path + "scenarios/local") do |filename|
       next if filename == '.' or filename == '..' or filename == 'ddos.yml'
       puts filename
-      scenario = YAML.load_file(Settings.app_path + "scenarios/default/#{filename}/#{filename}.yml")["Scenarios"][0]
+      scenario = YAML.load_file(Settings.app_path + "scenarios/local/#{filename}/#{filename}.yml")["Scenarios"][0]
       name = scenario["Name"]
       description = scenario["Description"]
       output.push [filename, name, description]
