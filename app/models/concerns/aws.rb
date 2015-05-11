@@ -310,10 +310,6 @@ module Aws
       return "cloud is already unbooted"
     end
 
-    if self.subnets.select { |s| s.driver_id != nil }.size > 0
-      return "clouds subnets are not unbooted"
-    end
-
     self.set_unbooting
     self.debug_unbooting
 
