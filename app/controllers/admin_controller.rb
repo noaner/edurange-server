@@ -15,7 +15,7 @@ class AdminController < ApplicationController
 
     if not @user.errors.any?
       @user.set_instructor_role
-      @user.delay(queue: 'emails').email_credentials(password)
+      UserMailer.email_credentials(@user, password).deliver
     end
 
     respond_to do |format|
