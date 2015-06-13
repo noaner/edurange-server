@@ -30,7 +30,7 @@ gem 'ipaddress'
 gem 'nokogiri'
 # gem 'faye'
 # gem 'puma'
-gem 'pg'
+# gem 'pg'
 
 
 group :development do
