@@ -44,6 +44,10 @@ class User < ActiveRecord::Base
     self.update_attribute :role, :student
   end
 
+  def set_admin_role
+    self.update_attribute :role, :admin
+  end
+
   def email_credentials(password)
     UserMailer.email_credentials(self, password).deliver
   end
