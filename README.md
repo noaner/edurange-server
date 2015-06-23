@@ -62,5 +62,25 @@ rails console
 Which should drop you into a ruby shell. Next we'll connect to the user table of the database and create a user within the table using the Ruby ORM.
 ```ruby
 2.1.5 :001 > User.connection()
+2.1.5 :002 > User.all()
+  User Load (3.2ms)  SELECT "users".* FROM "users"
+ => #<ActiveRecord::Relation []> 
+2.1.5 :003 > u = User.new(id: 1, name: "admin", email: "admin@edurange.org")
+ => #<User id: 1, email: "admin@edurange.org", encrypted_password: "", reset_password_token: nil, reset_password_sent_at: nil, remember_created_at: nil, sign_in_count: 0, current_sign_in_at: nil, last_sign_in_at: nil, current_sign_in_ip: nil, last_sign_in_ip: nil, created_at: nil, updated_at: nil, name: "admin", role: 4, organization: nil, registration_code: nil> 
+2.1.5 :004 > u.password = "admin"
+ => "admin" 
+2.1.5 :006 > u.set_admin_role()
+   (0.2ms)  begin transaction
+  SQL (0.6ms)  INSERT INTO "users" ("name", "email", "role", "encrypted_password", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?)  [["name", "admin"], ["email", "admin@edurange.org"], ["role", 2], ["encrypted_password", "$2a$10$I5W7il5QqPP0OeResa0DveYH9hrnSbvzMQ5dvwqt6JVk7S5xnp3kK"], ["created_at", "2015-06-23 22:31:35.332502"], ["updated_at", "2015-06-23 22:31:35.332502"]]
+   (203.8ms)  commit transaction
+ => true 
+2.1.5 :011 > u.save()
+   (0.1ms)  begin transaction
+  User Exists (0.2ms)  SELECT  1 AS one FROM "users" WHERE ("users"."email" = 'admin@edurange.org' AND "users"."id" != 1) LIMIT 1
+   (0.1ms)  rollback transaction
+ => false 
+ 2.1.5 :012 > User.all()
+  User Load (0.3ms)  SELECT "users".* FROM "users"
+ => #<ActiveRecord::Relation [#<User id: 1, email: "admin@edurange.org", encrypted_password: "$2a$10$I5W7il5QqPP0OeResa0DveYH9hrnSbvzMQ5dvwqt6JV...", reset_password_token: nil, reset_password_sent_at: nil, remember_created_at: nil, sign_in_count: 0, current_sign_in_at: nil, last_sign_in_at: nil, current_sign_in_ip: nil, last_sign_in_ip: nil, created_at: "2015-06-23 22:31:35", updated_at: "2015-06-23 22:31:35", name: "admin", role: 2, organization: nil, registration_code: nil>]> 
 
 ```
