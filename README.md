@@ -57,5 +57,10 @@ Point your web browser to localhost:3000 and you should see something like this:
 
 Currently you have no users locally stored in your database, so we'll have to drop into a ruby interpreter and create one. Open a new terminal, cd to the edurange directory and execute the following:
 ```bash
+rails console
+```
+Which should drop you into a ruby shell. Next we'll connect to the user table of the database and create a user within the table using the Ruby ORM.
+```ruby
+2.1.5 :001 > User.connection()
 
 ```
