@@ -19,6 +19,7 @@ rvm use 2.1.5
 You may have to do something like: `bin/bash --login` in order to set the RVM ruby version (which doens't refer to the system ruby version).
 
 Also, install bundler (to take care of gem dependencies) and the rails framework:
+
 Debian/Ubuntu Linux:
 ```bash
 sudo apt-get install rubygems
@@ -84,3 +85,6 @@ Which should drop you into a ruby shell. Next we'll connect to the user table of
  => #<ActiveRecord::Relation [#<User id: 1, email: "admin@edurange.org", encrypted_password: "$2a$10$I5W7il5QqPP0OeResa0DveYH9hrnSbvzMQ5dvwqt6JV...", reset_password_token: nil, reset_password_sent_at: nil, remember_created_at: nil, sign_in_count: 0, current_sign_in_at: nil, last_sign_in_at: nil, current_sign_in_ip: nil, last_sign_in_ip: nil, created_at: "2015-06-23 22:31:35", updated_at: "2015-06-23 22:31:35", name: "admin", role: 2, organization: nil, registration_code: nil>]> 
 
 ```
+
+With this newly created admin user, try logging into EDURange by using the email and password you supplied earlier. What should come up is a screen that looks like this:
+![alt-tag](http://i.imgur.com/fxaqNbc.jpg)
