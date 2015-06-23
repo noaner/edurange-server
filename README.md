@@ -41,6 +41,18 @@ bundle install
 Now you should be all ready to go!
 
 ## Development
+Once you've got the development environment put together the dev server can be started.
+If this is your first time running the edurange you'll probably have to run a database migration by saying:
+```bash
+bin/rake db:migrate RAILS_ENV=development
+```
 
+Now bootup the developement server:
+```bash
+rails server
+```
+
+Point your web browser to localhost:3000 and you should see something like this:
+![alt tag](http://i.imgur.com/2HR5k9K.jpg?1)
 
 
