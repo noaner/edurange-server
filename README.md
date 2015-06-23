@@ -10,10 +10,10 @@ First, clone this git repository:
 git clone https://github.com/edurange/edurange.git
 ```
 
-If you haven't already installed RVM (Ruby Version Manager), follow this [guide](https://rvm.io/rvm/install). This project uses Ruby 2.1->2.2.2 so use RVM to install and select the correct version of Ruby:
+If you haven't already installed RVM (Ruby Version Manager), follow this [guide](https://rvm.io/rvm/install). This project uses Ruby 2.1.5 so use RVM to install and select the correct version of Ruby:
 ```bash
-rvm install 2.2.2
-rvm use 2.2.2
+rvm install 2.1.5
+rvm use 2.1.5
 ```
 
 You may have to do something like: `bin/bash --login` in order to set the RVM ruby version (which doens't refer to the system ruby version).
@@ -55,4 +55,7 @@ rails server
 Point your web browser to localhost:3000 and you should see something like this:
 ![alt tag](http://i.imgur.com/2HR5k9K.jpg?1)
 
+Currently you have no users locally stored in your database, so we'll have to drop into a ruby interpreter and create one. Open a new terminal, cd to the edurange directory and execute the following:
+```bash
 
+```
