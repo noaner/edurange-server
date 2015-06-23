@@ -10,7 +10,7 @@ First, clone this git repository:
 git clone https://github.com/edurange/edurange.git
 ```
 
-If you haven't already installed RVM (Ruby Version Manager), follow the guide [https://rvm.io/rvm/install](here).
+If you haven't already installed RVM (Ruby Version Manager), follow this [guide](https://rvm.io/rvm/install).
 
 ## Development
 
