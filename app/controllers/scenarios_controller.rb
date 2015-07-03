@@ -217,7 +217,7 @@ class ScenariosController < ApplicationController
   def clone
     @clone = @scenario.clone(params[:name])
     respond_to do |format|
-      format.js { render "scenarios/js/clone.js.erb", layout: false }
+      format.js { render "scenarios/js/scenario_clone.js.erb", layout: false }
     end
   end
 

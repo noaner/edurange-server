@@ -261,7 +261,7 @@ class Scenario < ActiveRecord::Base
       FileUtils.cp "#{srcdir}/recipes/#{recipe}", "#{destdir}/recipes"
     end
 
-    clone = YmlRecord.load_yml(name, self.user, false)
+    clone = YmlRecord.load_yml(name, self.user)
   end
 
   def path
