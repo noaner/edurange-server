@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150319210145) do
+ActiveRecord::Schema.define(version: 20150625195253) do
 
   create_table "answers", force: :cascade do |t|
     t.integer  "student_id"
@@ -149,6 +149,7 @@ ActiveRecord::Schema.define(version: 20150319210145) do
     t.integer  "user_id"
     t.string   "instructions"
     t.string   "com_page"
+    t.boolean  "custom"
   end
 
   create_table "student_group_users", force: :cascade do |t|

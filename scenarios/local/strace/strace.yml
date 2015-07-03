@@ -1,3 +1,7 @@
+Name: Strace
+Description: "This game uses strace to examine executable files."
+Instructions: Players will first ssh into the NAT using it's Public IP Address.
+
 Roles: 
   - Name: NAT
     Packages:
@@ -6,7 +10,6 @@ Roles:
     Recipes:
       - sshd_password_login
       - strace
-      - scoring
 
 Groups: 
   - Name: Instructor
@@ -27,15 +30,9 @@ Groups:
         Password: sWfwkNGblfv
     Description: Describe this Player
 
-Scenarios: 
-  - Description: "This game uses strace to examine executable files."
-    Name: Strace
-    Instructions: Players will first ssh into the NAT using it's Public IP Address.
-
 Clouds: 
   - Name: Cloud_1
     CIDR_Block: 10.0.0.0/16
-    Scenario: Strace
 
 Subnets: 
   - Name: NAT_Subnet

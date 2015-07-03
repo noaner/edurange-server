@@ -5,6 +5,9 @@ class Player < ActiveRecord::Base
   belongs_to :student_group
   belongs_to :user
 
+  validates :login, presence: true, uniqueness: { scope: :group, message: "name already taken" }
+  validates :password, presence: true
+
    def password_hash
      UnixCrypt::SHA512.build(self.password)
    end

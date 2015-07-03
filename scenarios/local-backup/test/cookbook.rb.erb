@@ -1,0 +1,14 @@
+script "install" do
+
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  code <<-EOH
+
+  echo 'cookbook' > /tmp/cookbook
+
+  EOH
+
+  not_if "test -e /tmp/test"
+
+end

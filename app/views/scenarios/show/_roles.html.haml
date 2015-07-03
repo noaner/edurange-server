@@ -1,0 +1,35 @@
+%li
+  %label
+    Roles
+
+  %ul
+    - @scenario.roles.each do |role|
+      %li
+        %span.inline
+          = "Role: " + role.name
+          &nbsp&nbsp&nbsp
+        %div.inline-block
+      %li
+        Recipes:
+        - if role.scenario.custom?
+          %div.inline-block
+            %div.dropdown{ id: "dropdown-role-" + role.id.to_s }
+              %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-role-' + role.id.to_s, "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+                %span.caret
+              %ul.dropdown-menu{ id: "dropdown-role-menu" + role.id.to_s, role: 'menu', "aria-labelledby" => 'dropdown-role-' + role.id.to_s}
+                %li{role: 'presentation'}
+                  = link_to 'Add Global Recipe', recipe_global_get_scenario_path(@scenario), remote: true, method: :post
+
+                  = link_to 'Add Custom Recipe', "#modal-add-custom-recipe", :data => {:toggle=>"modal"}, onclick: "$('#modal-add-custom-recipe').find('#role_id').val('#{role.id}'); $('#modal-add-custom-recipe').find('#title').html('#{role.name}: Add Custom Recipe');"
+        
+        %dl{ id: "#{role.name}-recipes" }
+          - role.recipes.each do |recipe|
+            %dd
+              %div{ id: "#{role.name}-recipes-#{recipe}"}
+                = recipe
+                = link_to 'view', recipe_view_scenario_path(@scenario, recipe: recipe), remote: true, method: :post
+                
+                - if role.scenario.custom?
+                  = link_to 'update', recipe_update_view_scenario_path(@scenario, recipe: recipe), remote: true, method: :post
+                  = link_to 'remove', recipe_remove_scenario_path(@scenario, role_id: role, recipe: recipe), remote: true, method: :post
+                  

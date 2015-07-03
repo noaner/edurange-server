@@ -1,0 +1,21 @@
+
+<% if @cloud.errors.any? %>
+	<% if @cloud.errors[:name].any? %>
+		$('#modal-modify-cloud').find('#name-div').addClass('has-error');
+    	$('#modal-modify-cloud').find('#name-help').text('<%= @cloud.errors[:name][0] %>');
+	<% else %>
+		$('#modal-modify-cloud').find('#name-div').removeClass('has-error');
+    	$('#modal-modify-cloud').find('#name-help').text('');
+	<% end %>
+	<% if @cloud.errors[:cidr_block].any? %>
+		$('#modal-modify-cloud').find('#cidr-div').addClass('has-error');
+    	$('#modal-modify-cloud').find('#cidr-help').text('<%= @cloud.errors[:cidr_block][0] %>');
+	<% else %>
+		$('#modal-modify-cloud').find('#cidr-div').removeClass('has-error');
+    	$('#modal-modify-cloud').find('#cidr-help').text('');
+	<% end %>
+<% else %>
+	$('#cloud-name-<%= @cloud.id %>').text('<%= @cloud.name %>');
+	$('#cloud-cidr-<%= @cloud.id %>').text('<%= @cloud.cidr_block %>');
+	$('#modal-modify-cloud').modal('toggle');
+<% end %>

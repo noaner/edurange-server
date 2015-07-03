@@ -12,7 +12,36 @@ class Instance < ActiveRecord::Base
   has_one :user, through: :subnet
 
   before_create :ensure_has_ip
-  validate :ip_address_must_be_within_subnet
+  validates :name, presence: true, uniqueness: { scope: :subnet, message: "name already taken" } 
+  validates :ip_address, presence: true
+  validate :ip_address_validate, :internet_accessible_validate
+
+  def ip_address_validate
+
+    ip = IPAddress.valid_ipv4?(self.ip_address)
+    if not ip
+      errors.add(:ip_address, "IP Address is not valid")
+      return
+    end
+
+    if not NetAddr::CIDR.create(self.subnet.cidr_block).cmp(self.ip_address)
+      errors.add(:ip_address, "IP Address is not within instances subnet #{self.subnet.name} #{self.subnet.cidr_block}")
+      return
+    end
+
+    self.subnet.instances.each do |instance|
+      next if self == instance
+      if self.ip_address == instance.ip_address
+        errors.add(:ip_address, "IP Address is taken")
+      end
+    end
+  end
+
+  def internet_accessible_validate
+    if self.internet_accessible and not self.subnet.internet_accessible
+      errors.add(:internet_accessible, "Instances subnet must also be internet accessible")
+    end
+  end
 
   def generate_cookbooker
 
@@ -110,11 +139,6 @@ class Instance < ActiveRecord::Base
     return scenario.user.name + scenario.name + scenario.id.to_s + scenario.uuid
   end
 
-  def ip_address_must_be_within_subnet
-    # TODO fix
-    true
-  end
-
   def add_progress(val)
     # debug "Adding progress to instance!"
     # PrivatePub.publish_to "/scenarios/#{self.subnet.cloud.scenario.id}", instance_progress: val
@@ -126,6 +150,59 @@ class Instance < ActiveRecord::Base
     self.update_attributes(log: log + message + "\n")
   end
 
+  def generate_init
+    begin
+      # Returns the bash code to initialize an instance with chef-solo
+      init = ""
+      os_bootstrap_path = "#{Settings.app_path}scenarios/bootstrap/os_#{self.os.filename_safe}.sh.erb"
+      if File.exists? os_bootstrap_path
+        init += Erubis::Eruby.new(File.read(os_bootstrap_path)).result(instance: self) + "\n"
+      end
+
+      init += Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/chef.sh.erb")).result(instance: self) + "\n"
+
+
+      # Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/recipes/templates/bootstrap.sh.erb")).result(instance: self) + "\n"
+      init
+    rescue
+      raise
+      return
+    end
+  end
+
+  def generate_cookbook
+    begin
+      # Find out if this is a global or custom recipe
+      scenario_path = "#{Settings.app_path}scenarios/user/#{self.scenario.user.name.filename_safe}/#{self.scenario.name.filename_safe}"
+      scenario_path = "#{Settings.app_path}scenarios/local/#{self.scenario.name.filename_safe}" if not File.exists? scenario_path
+
+      # This recipe sets up packages and users and is run for every instance
+      cookbook = Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/packages_and_users.rb.erb")).result(instance: self) + "\n"
+
+      # get all recipes
+      local_recipe_path = "#{scenario_path}/recipes"
+      global_recipe_path = "#{Settings.app_path}scenarios/recipes"
+
+      self.roles.each do |role|
+        role.recipes.each do |recipe|
+          # Prioritze local recipes before global
+          if File.exists? "#{local_recipe_path}/#{recipe}.rb"
+            cookbook += File.read("#{local_recipe_path}/#{recipe}.rb") + "\n"
+
+          elsif File.exists? "#{global_recipe_path}/#{recipe}.rb.erb"
+            cookbook += Erubis::Eruby.new(File.read("#{global_recipe_path}/#{recipe}.rb.erb")).result(instance: self) + "\n"
+          end
+        end
+      end
+
+      # This recipe signals the com page and also gets the bash histories
+      cookbook += Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/com_page_and_bash_histories.rb.erb")).result(instance: self) + "\n"
+      cookbook
+    rescue
+      raise
+      return
+    end
+  end
 
   # Handy user methods
   def administrators

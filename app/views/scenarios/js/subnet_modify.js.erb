@@ -1,0 +1,28 @@
+<% if @subnet.errors.any? %>
+	<% if @subnet.errors[:name].any? %>
+		$('#modal-modify-subnet').find('#name-div').addClass('has-error');
+    	$('#modal-modify-subnet').find('#name-help').text('<%= @subnet.errors[:name][0] %>');
+	<% else %>
+		$('#modal-modify-subnet').find('#name-div').removeClass('has-error');
+    	$('#modal-modify-subnet').find('#name-help').text('');
+	<% end %>
+	<% if @subnet.errors[:cidr_block].any? %>
+		$('#modal-modify-subnet').find('#cidr-div').addClass('has-error');
+    	$('#modal-modify-subnet').find('#cidr-help').text('<%= @subnet.errors[:cidr_block][0] %>');
+	<% else %>
+		$('#modal-modify-subnet').find('#cidr-div').removeClass('has-error');
+    	$('#modal-modify-subnet').find('#cidr-help').text('');
+	<% end %>
+	<% if @subnet.errors[:internet_accessible].any? %>
+		$('#modal-modify-subnet').find('#internet-accessible-div').addClass('has-error');
+    	$('#modal-modify-subnet').find('#internet-accessible-help').text('<%= @subnet.errors[:internet_accessible][0] %>');
+	<% else %>
+		$('#modal-modify-subnet').find('#internet-accessible-div').removeClass('has-error');
+    	$('#modal-modify-subnet').find('#internet-accessible-help').text('');
+	<% end %>
+<% else %>
+	$('#subnet-name-<%= @subnet.id %>').text('<%= @subnet.name %>');
+	$('#subnet-cidr-<%= @subnet.id %>').text('<%= @subnet.cidr_block %>');
+	$('#subnet-internet-accessible-<%= @subnet.id %>').text('<%= @subnet.internet_accessible %>');
+	$('#modal-modify-subnet').modal('toggle');
+<% end %>

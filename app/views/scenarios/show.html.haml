@@ -29,26 +29,30 @@
 
           / = link_to 'Pause'
           = link_to 'Destroy', destroyme_scenario_path(@scenario), method: :post, remote: true
-          = link_to 'Show Boot Log', get_log_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true
-          = link_to 'Save Changes', save_changes_scenario_path(@scenario), method: :post, remote: true
+          = link_to 'Show Boot Log', log_get_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true
+          / = link_to 'Save Changes', save_changes_scenario_path(@scenario), method: :post, remote: true
+          = link_to 'Clone', "#modal-clone-scenario", :data => {:toggle=>"modal"}, :onclick => "$('#modal-clone-scenario').find('#name').val('#{@scenario.name}');"
 
   %div.panel-body
-
     %div.css-treeview
       %ul
         %li
-          %input{ type: 'checkbox', id: 'item-instructions', checked: 'checked'}
-          %label{ for: 'item-instructions'}
+          %label
             Instructions
-          %ul
-            = @scenario.instructions
+          %br
+          = @scenario.instructions
         %p
-        %li
-          = render '/scenarios/show/scenario'
-        %li
-          = render '/scenarios/show/players'
+        = render '/scenarios/show/scenario'
+        %p
+        = render '/scenarios/show/players'
+        %p
+        = render '/scenarios/show/roles'
 
 = link_to 'Back', scenarios_path, class: 'btn btn-default'
 
 %script
+  - if @clone
+    $('#modal-clone-scenario').modal('hide');
+%script
   = "get_boot_status('#{@scenario.id}');"
+  

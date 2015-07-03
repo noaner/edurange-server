@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '2.2.0'
+ruby '2.2.1'
 gem 'rails', '~> 4.2.0'
 gem 'sqlite3'
 gem 'sass-rails', '~> 4.0.3'
@@ -30,7 +30,8 @@ gem 'ipaddress'
 gem 'nokogiri'
 # gem 'faye'
 # gem 'puma'
-gem 'pg'
+# gem 'pg'
+gem 'netaddr'
 
 
 group :development do

@@ -689,16 +689,15 @@ module Aws
       debug "generating - instance cookbook"
       self.aws_instance_create_com_page
       self.aws_instance_create_bash_history_page
-      instance_template = InstanceTemplate.new(self)
-      cookbook_text = instance_template.generate_cookbook
+      # instance_template = InstanceTemplate.new(self)
+      # cookbook_text = instance_template.generate_cookbook
 
       debug "uploading - instance cookbook"
-      self.aws_instance_upload_cookbook(cookbook_text)
+      self.aws_instance_upload_cookbook(self.generate_cookbook)
       
-      # self.update(cookbook_url: aws_S3_create_page(self.s3_name_prefix + '-cookbook', :read, cookbook_text))
-
-      debug "generating - instance chef solo"
-      cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
+      debug "generating - instance chef script"
+      # cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
+      cloud_init = self.generate_init
     rescue => e
       self.boot_error(e)
       return

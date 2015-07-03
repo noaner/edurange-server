@@ -13,19 +13,37 @@
       /   = submit_tag "Upload Scenario", class: 'btn'
 
   %div.panel-body
-    - @templates.each do |template|
-      %b Name:
-      = template[0]
-      %br
-      / %span.label Description:
-      %b Description:
-      = template[2]
-      %p
-      = simple_form_for(@scenario) do |f|
-        = f.hidden_field :template, :value => template[1]
-        = f.button :submit, 'Create ' + template[0], class: 'btn btn-primary'
-      %p
-      %br
+    %h3 Default Scenarios:
+    %ul
+      - @templates.each do |template|
+        %b Name:
+        = template[0]
+        %br
+        / %span.label Description:
+        %b Description:
+        = template[2]
+        %p
+        = simple_form_for(@scenario) do |f|
+          = f.hidden_field :template, :value => template[0]
+          = f.button :submit, 'Create ' + template[0], class: 'btn btn-primary'
+        %p
+        %br
+
+    %h3 My Scenarios:
+    %ul
+      - @templates_user.each do |template|
+        %b Name:
+        = template[0]
+        %br
+        / %span.label Description:
+        %b Description:
+        = template[2]
+        %p
+        = simple_form_for(@scenario) do |f|
+          = f.hidden_field :template, :value => template[0]
+          = f.button :submit, 'Create ' + template[0], class: 'btn btn-primary'
+        %p
+        %br
 
     = link_to 'Back', scenarios_path
 

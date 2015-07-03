@@ -1,0 +1,17 @@
+<% if @role.errors.any? %>
+	<% if @role.errors[:recipe_name].any? %>
+		$('#modal-add-custom-recipe').find('#name-div').addClass('has-error');
+    	$('#modal-add-custom-recipe').find('#name-help').text('<%= @role.errors[:recipe_name][0] %>');
+	<% end %>
+	<% if @role.errors[:custom].any? %>
+		$('#modal-add-custom-recipe').find('#helper-div').addClass('has-error');
+    	$('#modal-add-custom-recipe').find('#helper').text('<%= @role.errors[:custom][0] %>');
+	<% end %>
+	<% if @role.errors[:global].any? %>
+		$('#modal-add-custom-recipe').find('#helper-div').addClass('has-error');
+    	$('#modal-add-custom-recipe').find('#helper').text('<%= @role.errors[:global][0] %>');
+	<% end %>
+<% else %>
+	$('#modal-add-custom-recipe').modal('hide')
+	$('#<%= "#{@role.name}-recipes" %>').append("<dd><div id='<%= @role.name %>-recipes-<%= @recipe %>'> <%= @recipe %> <a href='/scenarios/<%= @role.scenario.id %>/recipe_view?recipe=<%= @recipe %>' data-method='post' rel='nofollow' data-remote='true'>view</a> <a href='/scenarios/<%= @role.scenario.id %>/recipe_update_view?recipe=<%= @recipe %>' data-method='post' rel='nofollow' data-remote='true'>update</a> <a href='/scenarios/<%= @role.scenario.id %>/recipe_remove?recipe=<%= @recipe %>&role_id=<%= @role.id %>' data-method='post' rel='nofollow' data-remote='true'>remove</a> </div> ")
+<% end %>

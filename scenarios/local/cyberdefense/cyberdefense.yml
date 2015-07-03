@@ -1,3 +1,7 @@
+Name: CyberDefense
+Description:
+Instructions:
+
 Roles:
   - Name: NAT
     Recipes:
@@ -61,10 +65,6 @@ Groups:
       - Login: blue_team3
         Password: efgh
         
-Scenarios:
-  - Description: "This is a game that teaches students both how to defend a network of services and how to exploit vulnerabilities in one using the Metasploit framework."
-    Name: CyberDefense
-
 Clouds:
   - Name: CyberDefense_Cloud
     CIDR_Block: 10.0.0.0/16

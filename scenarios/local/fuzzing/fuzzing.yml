@@ -1,3 +1,7 @@
+Name: Fuzzing
+Description: "This game is an exercise that teaches students the basics of Fuzzing and Language Security"
+Instructions:
+
 Roles:
   - Name: NAT
     Packages:
@@ -60,10 +64,6 @@ Groups:
     Users:
       - Login: defending_team
         Password: efgh
-
-Scenarios:
-  - Description: "This game is an exercise that teaches students the basics of Fuzzing and Language Security"
-    Name: Fuzzing
 
 Clouds:
   - Name: Fuzzing_Cloud

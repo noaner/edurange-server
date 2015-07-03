@@ -15,11 +15,19 @@ module YmlRecord
   def self.yml_headers
     output = []
     Dir.foreach(Settings.app_path + "scenarios/local") do |filename|
-      next if filename == '.' or filename == '..' or filename == 'ddos.yml'
-      scenario = YAML.load_file(Settings.app_path + "scenarios/local/#{filename}/#{filename}.yml")["Scenarios"][0]
-      name = scenario["Name"]
-      description = scenario["Description"]
-      output.push [filename, name, description]
+      next if filename == '.' or filename == '..'
+      file = YAML.load_file(Settings.app_path + "scenarios/local/#{filename}/#{filename}.yml")
+      output.push [filename, file["Name"], file["Description"]]
+    end
+    return output
+  end
+
+  def self.yml_headers_user(user)
+    output = []
+    Dir.foreach(Settings.app_path + "scenarios/user/#{user.name.filename_safe}") do |filename|
+      next if filename == '.' or filename == '..'
+      file = YAML.load_file(Settings.app_path + "scenarios/user/#{user.name.filename_safe}/#{filename}/#{filename}.yml")
+      output.push [filename, file["Name"], file["Description"]]
     end
     return output
   end
@@ -30,14 +38,24 @@ module YmlRecord
   end
 
   # Returns a new Scenario with subobjects
-  def self.load_yml(yaml_file)
+  def self.load_yml(name, user)
     name_lookup_hash = Hash.new
     # Because in the YML we establish relationships by name we need to keep track of
     # what unique id corresponds to the current loading of the scenario. Whenever we
     # create an object, we store it within the above hash so that we can look it up
     # later in this function when we are creating objects referencing things in the database.
-    puts yaml_file
-    file = YAML.load_file(Settings.app_path + yaml_file)
+    
+
+    pathname = "scenarios/local/#{name.filename_safe}/#{name.filename_safe}.yml"
+    if File.exists? pathname
+      cusotm = false
+    else
+      custom = true
+      pathname = "scenarios/user/#{user.name.filename_safe}/#{name.filename_safe}/#{name.filename_safe}.yml"
+    end
+
+    file = YAML.load_file(Settings.app_path + pathname)
+    # file = YAML.load_file(Settings.app_path + "scenarios/local/#{name.filename_safe}/#{name.filename_safe}.yml")
 
     scenarios = file["Scenarios"]
     clouds = file["Clouds"]
@@ -48,11 +66,28 @@ module YmlRecord
     questions = file["Questions"]
     answers = file["Answers"]
 
+    scenario = Scenario.new
+    scenario.custom = custom
+    scenario.name = name
+    scenario.description = file["Description"]
+    scenario.instructions = file["Instructions"]
+    answers ||= []
+    scenario.answers = answers.join("\n")
+    scenario.uuid = `uuidgen`.chomp
+    scenario.user = user
+    scenario.save!
+    name_lookup_hash[scenario.name] = scenario.id
+
     roles.each do |yaml_role|
       role = Role.new
       role.name = yaml_role["Name"]
       if yaml_role["Recipes"]
-        yaml_role["Recipes"].each { |recipe| role.recipes << recipe }
+        yaml_role["Recipes"].each do |recipe|
+          if not scenario.recipe_file_path(recipe)
+            raise "Recipe '#{recipe}'' does not exist"
+          end
+          role.recipes << recipe
+        end
       end
       if yaml_role["Packages"]
         yaml_role["Packages"].each { |package| role.packages << package }
@@ -61,22 +96,9 @@ module YmlRecord
       name_lookup_hash[role.name] = role.id
     end
 
-    scenario = nil # Set scope for scenario
-    scenarios.each do |yaml_scenario|
-      scenario = Scenario.new
-      scenario.name = yaml_scenario["Name"]
-      scenario.description = yaml_scenario["Description"]
-      scenario.instructions = yaml_scenario["Instructions"]
-      answers ||= []
-      scenario.answers = answers.join("\n")
-      scenario.uuid = `uuidgen`.chomp
-      scenario.save!
-      name_lookup_hash[scenario.name] = scenario.id
-    end
-
     cloud = nil
     clouds.each do |yaml_cloud|
-      scenario = Scenario.find(name_lookup_hash[yaml_cloud["Scenario"]])
+      # scenario = Scenario.find(name_lookup_hash[yaml_cloud["Scenario"]])
       cloud = scenario.clouds.new
       cloud.name = yaml_cloud["Name"]
       cloud.cidr_block = yaml_cloud["CIDR_Block"]

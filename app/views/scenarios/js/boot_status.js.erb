@@ -141,7 +141,7 @@ $('#scenario-status-dot').attr('class', '<%= "inline-block " + @scenario.status 
   // setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 3000);
   setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 2000);
 <% else %>
-  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 5000);
+  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 20000);
   // setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 1000);
 <% end %>
 

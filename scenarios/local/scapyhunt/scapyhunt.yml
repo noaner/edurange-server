@@ -1,3 +1,7 @@
+Name: ScapyHunt
+Description: A series of Network Security puzzles and challenges designed to educate users on packet manipulation and common network attacks."
+Instructions:
+
 Roles:
   - Name: NAT
     Recipes:
@@ -13,6 +17,7 @@ Roles:
       - dsniff
     Recipes:
       - sshd_password_login
+      - scapyhunt
 
 Groups:
   - Name: Instructor
@@ -84,12 +89,6 @@ Groups:
       - Login: team5
         Password: bfuj6u99
     Description: Describe this Player
-
-
-Scenarios:
-  - Description: A series of Network Security puzzles and challenges designed to educate users on packet manipulation and common network attacks."
-    Name: ScapyHunt
-    Instructions:
 
 Clouds:
   - Name: Cloud_1

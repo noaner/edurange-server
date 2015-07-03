@@ -1,3 +1,7 @@
+Name: Elf
+Description: "This game teaches the basics of elf infection. Students can use tools like readelf, objdump, strace, and gdb to determine what files are infected and with what."
+Instructions: Students need to first login to the NAT. Find the Public IP Address of the NAT_Instance listed below under Instances and ssh to that address using logins credentials listed under Players below. If you are an Instructor you can use the Player with the login name 'instructor'. After you have logged into the NAT ssh into the Instace named Team_1_Instance. Now you need to examin the file '/tmp/bin/dist/bad-ls' and find the starting address and ending address of the malicous code.
+
 Roles:
   - Name: NAT
     Packages:
@@ -28,11 +32,6 @@ Groups:
       - Login: student
         Password: sWfwkNGblfv
     Description: Describe this Player
-
-Scenarios:
-  - Name: Elf
-    Description: "This game teaches the basics of elf infection. Students can use tools like readelf, objdump, strace, and gdb to determine what files are infected and with what."
-    Instructions: Students need to first login to the NAT. Find the Public IP Address of the NAT_Instance listed below under Instances and ssh to that address using logins credentials listed under Players below. If you are an Instructor you can use the Player with the login name 'instructor'. After you have logged into the NAT ssh into the Instace named Team_1_Instance. Now you need to examin the file '/tmp/bin/dist/bad-ls' and find the starting address and ending address of the malicous code.
 
 Clouds:
   - Name: Cloud_1

@@ -1,3 +1,7 @@
+Name: TEST
+Description: description
+Instructions: do this
+
 Roles:
   - Name: Role_1
     Packages:
@@ -16,15 +20,9 @@ Groups:
       - Login: instructor
         Password: vLCu3Crf
 
-Scenarios:
-  - Name: Test
-    Description: none
-    Instructions: none
-
 Clouds:
   - Name: Cloud_1
     CIDR_Block: 10.0.0.0/16
-    Scenario: Test
 
 Subnets:
   - Name: Subnet_1

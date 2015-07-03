@@ -15,6 +15,7 @@ Edurange::Application.routes.draw do
   resources :scenarios do
     member do
       post 'destroyme'
+
       post 'boot'
       post 'boot_cloud'
       post 'boot_subnet'
@@ -23,42 +24,44 @@ Edurange::Application.routes.draw do
       post 'unboot_cloud'
       post 'unboot_subnet'
       post 'unboot_instance'
+      post 'boot_status'
 
       post 'destroy_scenario'
       post 'destroy_cloud'
       post 'destroy_subnet'
       post 'destroy_instance'
 
-      post 'add_cloud'
-      post 'add_subnet'
-      post 'add_instance'
-
-      post 'modify_cloud'
-      post 'modify_subnet'
-      post 'modify_instance'
-
-      post 'delete_cloud'
-      post 'delete_subnet'
-      post 'delete_instance'
-
       post 'modify'
-      post 'modify_cloud'
-      post 'modify_subnet'
-      post 'modify_instance'
+      post 'log_get'
+      post 'status'
+      post 'clone'
 
-      post 'add_player'
-      post 'modify_players'
-      post 'delete_player'
+      post 'cloud_modify'
+      post 'cloud_add'
+      post 'cloud_delete'
 
-      post 'add_student_group'
-      post 'remove_student_group'
+      post 'subnet_modify'
+      post 'subnet_add'
+      post 'subnet_delete'
 
-      post 'get_log'
-      post 'get_instance_bash_history'
-      post 'boot_status'
+      post 'instance_modify'
+      post 'instance_add'
+      post 'instance_delete'
+      post 'instance_bash_history'
 
-      post 'upload'
-      post 'save_changes'
+      post 'player_modify'
+      post 'player_add'
+      post 'player_delete'
+      post 'player_student_group_add'
+      post 'player_student_group_remove'
+
+      post 'recipe_view'
+      post 'recipe_update_view'
+      post 'recipe_global_get'
+      post 'recipe_global_add'
+      post 'recipe_custom_add'
+      post 'recipe_remove'
+      post 'recipe_update'
 
     end
   end

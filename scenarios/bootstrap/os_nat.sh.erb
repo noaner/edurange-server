@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+echo "starting - CLOUD INIT"
+
+# NAT
+
+export PATH=$PATH:/usr/local/bin
+yum groupinstall -y "Development tools"
+yum install -y libxml2-devel libxslt-devel
+yum install -y git
+
+yum install -y ruby19 ruby19-devel rubygems19 rubygem19-rdoc rubygem19-rake rubygem19-bigdecimal
+ln -sf /usr/bin/ruby1.9 /usr/bin/ruby
+ln -sf /usr/bin/gem1.9 /usr/bin/gem
+ln -sf /usr/bin/irb1.9 /usr/bin/irb
+ln -sf /usr/bin/rdoc1.9 /usr/bin/rdoc
+ln -sf /usr/bin/rake1.9 /usr/bin/rake
+gem update --system --no-document
+
+gem install chef ruby-shadow --no-ri --no-rdoc --verbose
+
+wget -O- https://opscode.com/chef/install.sh | sudo bash

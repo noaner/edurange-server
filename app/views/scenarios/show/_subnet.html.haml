@@ -1,72 +1,73 @@
 %li{ id: 'subnet-li-' + subnet.id.to_s}
-  %input{ type: 'checkbox', id: 'item-subnet-' + subnet.id.to_s, checked: 'checked'}
-    %label{ for: 'item-subnet-' + subnet.id.to_s}
-      %span{ id: 'subnet-name-' + subnet.id.to_s}
-        = subnet.name
-      %div{ class: 'inline-block ' + subnet.status, id: 'subnet-status-dot-'+subnet.id.to_s}
-        &#9679;
+  %label{ for: 'item-subnet-' + subnet.id.to_s}
+    %span{ id: 'subnet-name-' + subnet.id.to_s}
+      = subnet.name
+    %div{ class: 'inline-block ' + subnet.status, id: 'subnet-status-dot-'+subnet.id.to_s}
+      &#9679;
 
-      - if subnet.booting?
-        %div.spin.inline-block{ id: 'subnet-spinner-' + subnet.id.to_s}
-      - else
-        %div.inline-block{ id: 'subnet-spinner-' + subnet.id.to_s}
+    - if subnet.booting?
+      %div.spin.inline-block{ id: 'subnet-spinner-' + subnet.id.to_s}
+    - else
+      %div.inline-block{ id: 'subnet-spinner-' + subnet.id.to_s}
 
-    %div.inline-block
-      %div.dropdown{id:'dropdown-subnet-'+subnet.id.to_s}
-        %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-subnet-'+subnet.id.to_s, "data-toggle" => 'dropdown', "aria-expanded" => "true"}
-          / %span.glyphicon.glyphicon-pencil{"aria-hidden" => "true"}
-          %span.caret
-        %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-subnet'+subnet.id.to_s}
-          %li{role: 'presentation'}
+  %div.inline-block
+    %div.dropdown{id:'dropdown-subnet-'+subnet.id.to_s}
+      %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-subnet-'+subnet.id.to_s, "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+        / %span.glyphicon.glyphicon-pencil{"aria-hidden" => "true"}
+        %span.caret
+      %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-subnet'+subnet.id.to_s}
+        %li{role: 'presentation'}
 
-            - if subnet.stopped?
-              - boot_button_class = ""
-              - unboot_button_class = "hidden"
-            - elsif subnet.booted? or subnet.boot_failed?
-              - boot_button_class = "hidden"
-              - unboot_button_class = ""
-            - elsif subnet.booting?
-              - boot_button_class = "hidden"
-              - unboot_button_class = "hidden"
+          - if subnet.stopped?
+            - boot_button_class = ""
+            - unboot_button_class = "hidden"
+          - elsif subnet.booted? or subnet.boot_failed?
+            - boot_button_class = "hidden"
+            - unboot_button_class = ""
+          - elsif subnet.booting?
+            - boot_button_class = "hidden"
+            - unboot_button_class = "hidden"
 
-            = link_to 'Boot', boot_subnet_scenario_path(subnet_id: subnet), method: :post, remote: true, id: "boot-button-subnet-#{subnet.id.to_s}", class: boot_button_class
-            = link_to 'Unboot', unboot_subnet_scenario_path(subnet_id: subnet), method: :post, remote: true, id: "unboot-button-subnet-#{subnet.id.to_s}", class: unboot_button_class
+          = link_to 'Boot', boot_subnet_scenario_path(subnet_id: subnet), method: :post, remote: true, id: "boot-button-subnet-#{subnet.id.to_s}", class: boot_button_class
+          = link_to 'Unboot', unboot_subnet_scenario_path(subnet_id: subnet), method: :post, remote: true, id: "unboot-button-subnet-#{subnet.id.to_s}", class: unboot_button_class
 
-            = link_to 'Show log', get_log_scenario_path(subnet, kind: 'subnet'), method: :post, remote: true
-            /= link_to 'Show routing rules'
-            = link_to 'Modify', "#modal-modify-subnet", method: :post, :data => {:toggle=>"modal"}, :onclick => "$('#modal-modify-subnet').find('#modal-title').text('#subnet.name');  $('#modal-modify-subnet').find('#subnet_id').val('#{subnet.id}'); $('#modal-modify-subnet').find('#name').val( $('#subnet-name-#{subnet.id}').text().trim() ); $('#modal-modify-subnet').find('#CIDR').val( $('#subnet-cidr-#{subnet.id}').text().trim() ); $('#modal-modify-subnet').find('#internet_accessible').val( $('#subnet-internet-accessible-#{subnet.id}').text().trim() );"
-            = link_to 'Delete', delete_subnet_scenario_path(subnet_id: subnet), method: :post, remote: true
+          = link_to 'Show Log', log_get_scenario_path(subnet, kind: 'subnet'), method: :post, remote: true
+          /= link_to 'Show routing rules'
+          
+          - if subnet.scenario.custom?
+            = link_to 'Modify', "#modal-modify-subnet", :data => {:toggle=>"modal"}, :onclick => "$('#modal-modify-subnet').find('#subnet-name').text($('#subnet-name-#{subnet.id}').html().trim()); $('#modal-modify-subnet').find('#subnet_id').val('#{subnet.id}'); $('#modal-modify-subnet').find('#name').val($('#subnet-name-#{subnet.id}').html().trim()); $('#modal-modify-subnet').find('#CIDR').val($('#subnet-cidr-#{subnet.id}').html().trim()); $('#modal-modify-subnet').find('#internet_accessible').val($('#subnet-internet-accessible-#{subnet.id}').html().trim()); $('#modal-modify-subnet').find('#name-div').removeClass('has-error'); $('#modal-modify-subnet').find('#name-help').html(''); $('#modal-modify-subnet').find('#name-div').removeClass('has-error'); $('#modal-modify-subnet').find('#name-help').html(''); $('#modal-modify-subnet').find('#cidr-div').removeClass('has-error'); $('#modal-modify-subnet').find('#cidr-help').html(''); $('#modal-modify-subnet').find('#internet-accessible-div').removeClass('has-error'); $('#modal-modify-subnet').find('#internet-accessible-help').html('');"
+            = link_to 'Delete', subnet_delete_scenario_path(subnet_id: subnet), method: :post, remote: true
 
-    %ul{style: "padding-left: 20px;"}
-      %li
-        Status:
-        %span{id: 'subnet-status-' + subnet.id.to_s}
-          = subnet.status
-      %li
-        Driver:
-        %span{id: 'subnet-driver-' + subnet.id.to_s}
-          = subnet.driver_id == nil ? "not set" : subnet.driver_id
-      %li
-        CIDR:
-        %span{ { id: 'subnet-cidr-' + subnet.id.to_s}}
-          = subnet.cidr_block
-      %li
-        Internet Accessible:
-        %span{ { id: 'subnet-internet-accessible-' + subnet.id.to_s}}
-          = subnet.internet_accessible
-      %p
-      %li
-        %input{ type: 'checkbox', id: 'item-instance-label-' + subnet.id.to_s, checked: 'checked'}
-          %label{ for: 'item-instance-label-' + subnet.id.to_s}
-            Instances:
+  %ul{style: "padding-left: 20px;"}
+    %li
+      Status:
+      %span{id: 'subnet-status-' + subnet.id.to_s}
+        = subnet.status
+    %li
+      Driver:
+      %span{id: 'subnet-driver-' + subnet.id.to_s}
+        = subnet.driver_id == nil ? "not set" : subnet.driver_id
+    %li
+      CIDR:
+      %span{ { id: 'subnet-cidr-' + subnet.id.to_s}}
+        = subnet.cidr_block
+    %li
+      Internet Accessible:
+      %span{ { id: 'subnet-internet-accessible-' + subnet.id.to_s}}
+        = subnet.internet_accessible
+    %p
+    %li
+      %label{ for: 'item-instance-label-' + subnet.id.to_s}
+        Instances:
+        - if subnet.scenario.custom?
           %div.inline-block
             %div.dropdown
               %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-instances', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
                 %span.caret
               %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-clouds'}
                 %li{role: 'presentation'}
-                  = link_to 'Add Instance', "#modal-add-instance", :data => {:toggle=>"modal"}, onclick: "$('#modal-add-instance').find('#subnet_id').val('#{subnet.id}');"
+                  = link_to 'Add Instance', "#modal-add-instance", :data => {:toggle=>"modal"}, onclick: "$('#modal-add-instance').find('#subnet_id').val('#{subnet.id}'); $('#modal-add-instance').find('#name').val(''); $('#modal-add-instance').find('#ip').val(''); $('#modal-add-instance').find('#internet_accessible').val('false'); $('#modal-add-instance').find('#os').val('ubuntu'); $('#modal-add-instance').find('#name-div').removeClass('has-error'); $('#modal-add-instance').find('#name-help').html(''); $('#modal-add-instance').find('#ip-div').removeClass('has-error'); $('#modal-add-instance').find('#ip-help').html(''); $('#modal-add-instance').find('#internet-accessible-div').removeClass('has-error'); $('#modal-add-instance').find('#internet-accessible-help').html(''); $('#modal-add-instance').find('#os-div').removeClass('has-error'); $('#modal-add-instance').find('#os-help').html('');"
 
-          %ul{id: "instances-ul-" + subnet.id.to_s, style: "padding-left: 20px;"}
-            - subnet.instances.each do |instance|
-              = render '/scenarios/show/instance', instance: instance
+      %ul{id: "instances-ul-" + subnet.id.to_s, style: "padding-left: 20px;"}
+        - subnet.instances.each do |instance|
+          = render '/scenarios/show/instance', instance: instance

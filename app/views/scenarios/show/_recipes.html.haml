@@ -1,0 +1,15 @@
+%p
+%li
+  %input{ type: 'checkbox', id: 'item-0', checked: 'checked'}
+    %label{ for: 'item-0' }
+      Recipes
+    %ul
+      - @scenario.recipes.each do |recipe|
+        %div{ id: "recipes-#{recipe[0]}"}
+          = recipe[0]
+          = link_to 'view', recipe_view_scenario_path(@scenario, recipe: recipe), remote: true, method: :post
+          - if recipe[1]
+            = link_to 'update', "#item-0", onclick: "alert('This is a global recipe. You must be admin to edit this');"
+          - else
+            = link_to 'update', recipe_update_view_scenario_path(@scenario, recipe: recipe), remote: true, method: :post
+          %br
