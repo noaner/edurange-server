@@ -419,7 +419,11 @@ class Scenario < ActiveRecord::Base
   private
 
     def purge
+      ever_booted = false
       self.clouds.each do |cloud|
+        if cloud.driver_id
+          ever_booted = true
+        end
         cloud.subnets.each do |subnet|
           subnet.instances.each do |instance|
             instance.instance_groups.each do |instance_group|
@@ -432,7 +436,9 @@ class Scenario < ActiveRecord::Base
           end
         end
       end
-      self.aws_scenario_scoring_purge
+      if ever_booted
+        self.aws_scenario_scoring_purge
+      end
       return true
     end
 
