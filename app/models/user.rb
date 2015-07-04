@@ -5,7 +5,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
   enum role: [:user, :vip, :admin, :instructor, :student]
   # attr_accessor :registration_code
-  after_initialize :set_default_role, :if => :new_record?
+  after_initialize :set_defaults, :if => :new_record?
   validates :email, uniqueness: true
   validates :name, presence: true
   has_many :student_groups
@@ -20,8 +20,9 @@ class User < ActiveRecord::Base
     end
   end
 
-  def set_default_role
+  def set_defaults
     self.role ||= :student
+    FileUtils.mkdir "#{Settings.app_path}scenarios/user/#{self.name.filename_safe}"
   end
 
   def is_admin?
