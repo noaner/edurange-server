@@ -178,7 +178,6 @@ class Instance < ActiveRecord::Base
 
       # This recipe sets up packages and users and is run for every instance
       cookbook = Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/packages_and_users.rb.erb")).result(instance: self) + "\n"
-
       # get all recipes
       local_recipe_path = "#{scenario_path}/recipes"
       global_recipe_path = "#{Settings.app_path}scenarios/recipes"
@@ -197,6 +196,8 @@ class Instance < ActiveRecord::Base
 
       # This recipe signals the com page and also gets the bash histories
       cookbook += Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/com_page_and_bash_histories.rb.erb")).result(instance: self) + "\n"
+      # This recipe changes /etc/bash.bashrc so that the bash history is written to file with every command
+      cookbook += Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/write_bash_histories.rb.erb")).result(instance: self) + "\n"
       cookbook
     rescue
       raise
