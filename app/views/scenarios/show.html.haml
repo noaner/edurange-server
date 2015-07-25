@@ -1,58 +1,125 @@
 = render '/scenarios/show/modals'
 
-%div.panel.panel-default#scenario{data: {id: @scenario.id}}
+%div.panel.panel-default
   %div.panel-heading.nav.nav-pills
     %li
-      %h4#scenario-main-title
-        =@scenario.name + ":"
-    %li.dropdown#action-dropdown
-      %a.dropdown-toggle{ "data-toggle" => "dropdown", href: "#", role: "button", "aria-expanded" => "false"}
-        Actions
-        %span.caret
-      %ul.dropdown-menu{role: "menu"}
-        %li
-          - if @scenario.stopped?
-            - boot_class = ""
-            - unboot_class = "hidden"
-          - elsif @scenario.booting?
-            - boot_class = ""
-            - unboot_class = "hidden"
-          - elsif (@scenario.booted? or @scenario.boot_failed?)
-            - boot_class = "hidden"
-            - unboot_class = ""
-          - elsif @scenario.is_failed?
-            - boot_class = "hidden"
-            - unboot_class = ""
+      %h4
+        %b
+          %span#scenario-name
+            = @scenario.name
+          \:
+    %li
+      &nbsp;
+    %li{ id: 'boot-button-li', class: @scenario.bootable? ? "" : "disabled" }
+      = link_to 'Boot', boot_scenario_path(@scenario), method: :post, remote:true, id: 'boot-button', class: 'btn btn-default'
+    %li{ id: 'unboot-button-li', class: @scenario.unbootable? ? "" : "disabled" }
+      = link_to 'Unboot', unboot_scenario_path(@scenario), method: :post, remote:true, id: 'unboot-button', class: 'btn btn-default'
+    %li
+      = link_to 'Clone', "#modal-scenario-clone", :data => {:toggle=>"modal"}, :onclick => "$('#modal-scenario-clone').find('#name-div').removeClass('has-error'); $('#modal-scenario-clone').find('#name').val(''); $('#modal-scenario-clone').find('#name-help').html('');", class: 'btn btn-default'
+    %li{ id: 'destroy-button-li', class: @scenario.stopped? ? "" : "disabled" }
+      = link_to 'Destroy', destroyme_scenario_path(@scenario), method: :post, remote: true, id: 'destroy-button', class: 'btn btn-default'
+    - if @scenario.custom?
+      %li{ id: "save-button-li", class: @scenario.modified? ? "" : "disabled" }
+        = link_to 'Save', save_scenario_path(@scenario), method: :post, remote: true, id: 'save-button', class: 'btn btn-default', href: @scenario.modified? ? "/scenarios/#{@scenario.id}/save" : "javascript: void(0)"
+      %li{ id: 'save-as-button-li', class: @scenario.stopped? ? "" : "disabled" }
+        = link_to 'Save As', "#modal-scenario-save-as", :data => {:toggle=>"modal"}, id: 'save-as-button', onclick: "$('#modal-scenario-save-as').find('#name').val(''); $('#modal-scenario-save-as').find('#name-div').removeClass('has-error'); $('#modal-scenario-save-as').find('#name-help').html(''); $('#modal-scenario-save-as').find('#help-div').removeClass('has-error'); $('#modal-scenario-save-as').find('#help-help').html('');", class: 'btn btn-default'
+    %li
+      = link_to 'Show Log', log_get_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true, class: 'btn btn-default'
 
-          = link_to 'Boot', boot_scenario_path(@scenario), method: :post, remote:true, id: 'boot-button', class: boot_class
-          = link_to 'Unboot', unboot_scenario_path(@scenario), method: :post, remote:true, id: 'unboot-button', class: unboot_class
+  %div.indent.panel-body
+    // Instructions
+    %label
+      Instructions:
+    %div.indent
+      = @scenario.instructions
+    %p
 
-          / = link_to 'Pause'
-          = link_to 'Destroy', destroyme_scenario_path(@scenario), method: :post, remote: true
-          = link_to 'Show Boot Log', log_get_scenario_path(@scenario, kind: 'scenario'), method: :post, remote: true
-          / = link_to 'Save Changes', save_changes_scenario_path(@scenario), method: :post, remote: true
-          = link_to 'Clone', "#modal-clone-scenario", :data => {:toggle=>"modal"}, :onclick => "$('#modal-clone-scenario').find('#name').val('#{@scenario.name}');"
+    // Scenario
+    %label
+      Scenario:
 
-  %div.panel-body
-    %div.css-treeview
-      %ul
-        %li
-          %label
-            Instructions
-          %br
-          = @scenario.instructions
-        %p
-        = render '/scenarios/show/scenario'
-        %p
-        = render '/scenarios/show/players'
-        %p
-        = render '/scenarios/show/roles'
+    %div.indent
+      Status:
+      %span#scenario-status
+        = @scenario.status
+      %div{ id: "scenario-status-dot", class: "inline-block #{@scenario.status} #{(@scenario.booting? or @scenario.unbooting?) ? 'hidden' : ''}" }
+        &#9679;
+      %div{ id: "scenario-spinner", class: "inline-block #{(@scenario.booting? or @scenario.unbooting?) ? 'spin' : ''}" }
+
+      %br
+      Created at:
+      = @scenario.created_at
+      %br
+
+      // Clouds
+      %label
+        Clouds:
+      %div.inline-block
+        - if @scenario.custom?
+          %div.dropdown
+            %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-clouds', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+              %span.caret
+            %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-clouds'}
+              %li
+                = link_to 'Add Cloud', "#modal-cloud-add", :data => {:toggle=>"modal"}, onclick: "$('#modal-cloud-add').find('#name').val(''); $('#modal-cloud-add').find('#name-div').removeClass('has-error'); $('#modal-cloud-add').find('#name-help').html(''); $('#modal-cloud-add').find('#cidr_block').val(''); $('#modal-cloud-add').find('#cidr-div').removeClass('has-error'); $('#modal-cloud-add').find('#cidr-help').html('');"
+      %ul#clouds
+        - @scenario.clouds.each do |cloud|
+          = render '/scenarios/show/cloud', cloud: cloud
+
+    // Groups
+    %label
+      Groups:
+    - if @scenario.custom?
+      %div.inline-block
+        %div.dropdown{id:'dropdown-roles'}
+          %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-roles', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+            %span.caret
+          %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-roles'}
+            %li{ id: 'group-add-button-li' }
+              = link_to 'Add Group', "#modal-group-add", :data => {:toggle=>"modal"}, onclick: "$('#modal-group-add').find('#name').val(''); $('#modal-group-add').find('#name-div').removeClass('has-error'); $('#modal-group-add').find('#name-help').html('');", id: 'group-add-button'
+    %ul#groups
+      - @scenario.groups.each do |group|
+        = render '/scenarios/show/group', group: group
+
+    %p
+    // Roles
+    %label
+      Roles:
+    - if @scenario.custom?
+      %div.inline-block
+        %div.dropdown{id:'dropdown-roles'}
+          %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-roles', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+            / %span.glyphicon.glyphicon-pencil{"aria-hidden" => "true"}
+            %span.caret
+          %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-roles'}
+            %li{ id: 'role-add-button-li' }
+              = link_to 'Add Role', "#modal-role-add", :data => {:toggle=>"modal"}, onclick: "$('#modal-role-add').find('#name').val(''); $('#modal-role-add').find('#name-div').removeClass('has-error'); $('#modal-role-add').find('#name-help').html('');", id: 'role-add-button'
+    %ul#roles
+      - @scenario.roles.each do |role|
+        = render '/scenarios/show/role', role: role
+
+    // Recipes
+    %label
+      Recipes:
+    - if @scenario.custom?
+      %div.inline-block
+        %div.dropdown{id:'dropdown-recipes'}
+          %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-recipes', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+            %span.caret
+          %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-recipes'}
+            %li
+              = link_to 'Add Global Recipe', recipe_global_get_scenario_path(@scenario), remote: true, method: :post
+            %li
+              = link_to 'Add Custom Recipe', "#modal-recipe-custom-add", :data => {:toggle=>"modal"}, onclick: "$('#modal-recipe-custom-add').find('#name-div').removeClass('has-error'); $('#modal-recipe-custom-add').find('#name-help').html(''); $('#modal-recipe-custom-add').find('#name').val(''); "
+    %ul#recipes
+      - @scenario.recipes.each do |recipe|
+        = render '/scenarios/show/recipe', recipe: recipe
 
 = link_to 'Back', scenarios_path, class: 'btn btn-default'
 
 %script
   - if @clone
-    $('#modal-clone-scenario').modal('hide');
+    update_flash("Scenario successfully cloned");
 %script
   = "get_boot_status('#{@scenario.id}');"
   

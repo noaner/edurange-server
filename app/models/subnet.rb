@@ -9,8 +9,37 @@ class Subnet < ActiveRecord::Base
 
   validates :name, presence: true, uniqueness: { scope: :cloud, message: "name already taken" } 
   validates_presence_of :cidr_block, :cloud
-  validate :cidr_validate, :internet_validate
+  validate :cidr_validate, :internet_validate, :validate_stopped
 
+  after_destroy :update_scenario_modified
+  before_destroy :validate_stopped, prepend: true
+
+  def validate_stopped
+    if not self.stopped?
+      errors.add(:running, "can not modify while subnet is booted")
+      return false
+    end
+    if self.scenario.custom?
+      self.scenario.update_attribute(:modified, true)
+    end
+    true
+  end
+
+  def independent_destroy
+    if self.instances.size > 0
+      errors.add(:dependents, "must not have any instances")
+      return false
+    end
+    self.destroy
+    true
+  end
+
+  def update_scenario_modified
+    if self.scenario.custom?
+      self.scenario.update_attribute(:modified, true)
+    end
+    true
+  end
 
   def internet_validate
     if not self.internet_accessible
@@ -21,7 +50,6 @@ class Subnet < ActiveRecord::Base
       end
     end
   end
-
 
   def cidr_validate
     return unless self.cidr_block
@@ -70,6 +98,14 @@ class Subnet < ActiveRecord::Base
     true
   end
 
+  def bootable?
+    return (self.stopped? and self.cloud.booted?)
+  end
+
+  def unbootable?
+    return (self.booted? or self.boot_failed? or self.unboot_failed?)
+  end
+
   def add_progress(val)
     # debug "Adding progress to subnet"
     # PrivatePub.publish_to "/scenarios/#{self.cloud.scenario.id}", subnet_progress: val
@@ -82,7 +118,7 @@ class Subnet < ActiveRecord::Base
   def debug(message)
     log = self.log ? self.log : ''
     message = '' if !message
-    self.update_attributes(log: log + message + "\n")
+    self.update_attribute(:log, log + message + "\n")
   end
 
   def scenario
@@ -90,15 +126,15 @@ class Subnet < ActiveRecord::Base
   end
 
   def instances_booting?
-    return self.instances.select{ |i| i.booting? }.any?
+    return self.instances.select{ |i| (i.booting? or i.queued_boot?) }.any?
+  end
+
+  def instances_unbooting?
+    return self.instances.select{ |i| (i.unbooting? or i.queued_unboot?) }.any?
   end
 
   def instances_boot_failed?
     return self.instances.select{ |i| i.boot_failed? }.any?
-  end
-
-  def instances_unbooting?
-    return self.instances.select{ |i| i.unbooting? }.any?
   end
 
   def instances_unboot_failed?
@@ -111,6 +147,10 @@ class Subnet < ActiveRecord::Base
 
   def instances_active?
     return self.instances.select{ |i| i.driver_id != nil }.any?
+  end
+
+  def instances_stopped?
+    self.instances.select{ |i| not i.stopped? }.size == 0
   end
 
 end

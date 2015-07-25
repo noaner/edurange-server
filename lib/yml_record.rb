@@ -17,17 +17,17 @@ module YmlRecord
     Dir.foreach(Settings.app_path + "scenarios/local") do |filename|
       next if filename == '.' or filename == '..'
       file = YAML.load_file(Settings.app_path + "scenarios/local/#{filename}/#{filename}.yml")
-      output.push [filename, file["Name"], file["Description"]]
+      output.push( { filename: filename, name: file["Name"], description: file["Description"] } )
     end
     return output
   end
 
   def self.yml_headers_user(user)
     output = []
-    Dir.foreach(Settings.app_path + "scenarios/user/#{user.name.filename_safe}") do |filename|
+    Dir.foreach(Settings.app_path + "scenarios/user/#{user.id}") do |filename|
       next if filename == '.' or filename == '..'
-      file = YAML.load_file(Settings.app_path + "scenarios/user/#{user.name.filename_safe}/#{filename}/#{filename}.yml")
-      output.push [filename, file["Name"], file["Description"]]
+      file = YAML.load_file(Settings.app_path + "scenarios/user/#{user.id}/#{filename}/#{filename}.yml")
+      output.push( { filename: filename, name: file["Name"], description: file["Description"] } )
     end
     return output
   end
@@ -46,12 +46,12 @@ module YmlRecord
     # later in this function when we are creating objects referencing things in the database.
     
 
-    pathname = "scenarios/local/#{name.filename_safe}/#{name.filename_safe}.yml"
+    pathname = "scenarios/local/#{name.downcase}/#{name.downcase}.yml"
     if File.exists? pathname
       cusotm = false
     else
       custom = true
-      pathname = "scenarios/user/#{user.name.filename_safe}/#{name.filename_safe}/#{name.filename_safe}.yml"
+      pathname = "scenarios/user/#{user.id}/#{name.downcase}/#{name.downcase}.yml"
     end
 
     file = YAML.load_file(Settings.app_path + pathname)
@@ -78,131 +78,152 @@ module YmlRecord
     scenario.save!
     name_lookup_hash[scenario.name] = scenario.id
 
-    roles.each do |yaml_role|
-      role = Role.new
-      role.name = yaml_role["Name"]
-      if yaml_role["Recipes"]
-        yaml_role["Recipes"].each do |recipe|
-          if not scenario.recipe_file_path(recipe)
-            raise "Recipe '#{recipe}'' does not exist"
+    if roles
+      roles.each do |yaml_role|
+        role = scenario.roles.new
+        role.name = yaml_role["Name"]
+        if yaml_role["Recipes"]
+          yaml_role["Recipes"].each do |recipe_name|
+
+            recipe = scenario.recipes.find_by_name(recipe_name)
+            if not recipe
+              recipe = scenario.recipes.new(name: recipe_name)
+            end
+            recipe.save
+            role_recipe = role.role_recipes.new(recipe_id: recipe.id)
+            scenario.save
           end
-          role.recipes << recipe
         end
+        if yaml_role["Packages"]
+          yaml_role["Packages"].each { |package| role.packages << package }
+        end
+        role.save!
+        name_lookup_hash[role.name] = role.id
       end
-      if yaml_role["Packages"]
-        yaml_role["Packages"].each { |package| role.packages << package }
-      end
-      role.save!
-      name_lookup_hash[role.name] = role.id
     end
 
     cloud = nil
-    clouds.each do |yaml_cloud|
-      # scenario = Scenario.find(name_lookup_hash[yaml_cloud["Scenario"]])
-      cloud = scenario.clouds.new
-      cloud.name = yaml_cloud["Name"]
-      cloud.cidr_block = yaml_cloud["CIDR_Block"]
-      cloud.save!
-      name_lookup_hash[cloud.name] = cloud.id
+    if clouds
+      clouds.each do |yaml_cloud|
+        # scenario = Scenario.find(name_lookup_hash[yaml_cloud["Scenario"]])
+        cloud = scenario.clouds.new
+        cloud.name = yaml_cloud["Name"]
+        cloud.cidr_block = yaml_cloud["CIDR_Block"]
+        cloud.save!
+        name_lookup_hash[cloud.name] = cloud.id
+      end
     end
 
-    subnets.each do |yaml_subnet|
-      cloud = Cloud.find(name_lookup_hash[yaml_subnet["Cloud"]])
-      subnet = cloud.subnets.new
-      subnet.name = yaml_subnet["Name"]
-      subnet.cidr_block = yaml_subnet["CIDR_Block"]
-      if yaml_subnet["Internet_Accessible"]
-        subnet.internet_accessible = true
+    if subnets
+      subnets.each do |yaml_subnet|
+        cloud = Cloud.find(name_lookup_hash[yaml_subnet["Cloud"]])
+        subnet = cloud.subnets.new
+        subnet.name = yaml_subnet["Name"]
+        subnet.cidr_block = yaml_subnet["CIDR_Block"]
+        if yaml_subnet["Internet_Accessible"]
+          subnet.internet_accessible = true
+        end
+        subnet.save!
+        name_lookup_hash[subnet.name] = subnet.id
       end
-      subnet.save!
-      name_lookup_hash[subnet.name] = subnet.id
     end
 
 
     instance = nil
     instance_ips = {}
-    instances.each do |yaml_instance|
-      instance = Instance.new
-      instance_roles = yaml_instance["Roles"]
-      instance.subnet = Subnet.find(name_lookup_hash[yaml_instance["Subnet"]])
-      instance.name = yaml_instance["Name"]
+    if instances
+      instances.each do |yaml_instance|
+        instance = Instance.new
+        instance_roles = yaml_instance["Roles"]
+        instance.subnet = Subnet.find(name_lookup_hash[yaml_instance["Subnet"]])
+        instance.name = yaml_instance["Name"]
 
-      ipaddress, instance_ips = self.parse_ip(yaml_instance["IP_Address"], instance_ips)
-      if ipaddress == nil
-        scenario.destroy
-        raise "ERROR - could not assign IP adress to Instance"
-      end
+        ipaddress, instance_ips = self.parse_ip(yaml_instance["IP_Address"], instance_ips)
+        if ipaddress == nil
+          scenario.destroy
+          raise "ERROR - could not assign IP adress to Instance"
+        end
 
-      instance.ip_address = ipaddress
+        instance.ip_address = ipaddress
 
-      if yaml_instance["Internet_Accessible"]
-        instance.internet_accessible = true
+        if yaml_instance["Internet_Accessible"]
+          instance.internet_accessible = true
+        end
+        instance.os = yaml_instance["OS"]
+        instance_roles.each do |instance_role|
+          role = Role.find(name_lookup_hash[instance_role])
+          instance.roles << role
+        end
+        instance.uuid = `uuidgen`.chomp
+        instance.save!
+        name_lookup_hash[instance.name] = instance.id
       end
-      instance.os = yaml_instance["OS"]
-      instance_roles.each do |instance_role|
-        role = Role.find(name_lookup_hash[instance_role])
-        instance.roles << role
-      end
-      instance.uuid = `uuidgen`.chomp
-      instance.save!
-      name_lookup_hash[instance.name] = instance.id
     end
 
+    if groups
+      groups.each do |yaml_group|
+        users = yaml_group["Users"]
+        access = yaml_group["Access"]
+        admin = access["Administrator"]
+        user = access["User"]
 
-    groups.each do |yaml_group|
-      users = yaml_group["Users"]
-      access = yaml_group["Access"]
-      admin = access["Administrator"]
-      user = access["User"]
+        group = Group.new
+        group.name = yaml_group["Name"]
+        group.scenario_id = scenario.id
+        group.save!
 
-      group = Group.new
-      group.name = yaml_group["Name"]
-      group.scenario_id = scenario.id
-      group.save!
+        if users
+          users.each do |user|
+            login = user["Login"]
+            password = user["Password"]
+            user_id = user["Id"]
 
-      if users
-        users.each do |user|
-          login = user["Login"]
-          password = user["Password"]
+            player = group.players.new
+            player.login = login
+            player.password = password
+            player.group = group
 
-          player = group.players.new
-          player.login = login
-          player.password = password
-          player.group = group
-          player.save!
-        end
-      end
+            if User.find_by_id(user_id)
+              player.user_id = user_id
+            end
 
-      # Do questions
-      if questions
-        questions.each do |yml_question|
-          question = scenario.questions.new
-          question.question_text = yml_question["Question"]
-          question.kind = yml_question["Type"]
-          if question.kind == "StringMatch"
-            question.answer_text = yml_question["Answer"]
+            player.save!
           end
-          question.save!
         end
-      end
 
-      # Give group admin on machines they own
-      if admin
-        admin.each do |admin_instance|
-          instance = Instance.find(name_lookup_hash[admin_instance])
-          instance.add_administrator(group)
-          instance.save!
+        # Do questions
+        if questions
+          questions.each do |yml_question|
+            question = scenario.questions.new
+            question.question_text = yml_question["Question"]
+            question.kind = yml_question["Type"]
+            if question.kind == "StringMatch"
+              question.answer_text = yml_question["Answer"]
+            end
+            question.save!
+          end
         end
-      end
 
-      if user
-        user.each do |user_instance|
-          instance = Instance.find(name_lookup_hash[user_instance])
-          instance.add_user(group)
-          instance.save!
+        # Give group admin on machines they own
+        if admin
+          admin.each do |admin_instance|
+            instance = Instance.find(name_lookup_hash[admin_instance])
+            instance.add_administrator(group)
+            instance.save!
+          end
+        end
+
+        if user
+          user.each do |user_instance|
+            instance = Instance.find(name_lookup_hash[user_instance])
+            instance.add_user(group)
+            instance.save!
+          end
         end
       end
     end
+    scenario.update(modified: false)
+    scenario.save
     return scenario # Return the scenario we created
   end
 

@@ -1,68 +1,12 @@
-%div.modal#modal1{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
-  %div.modal-dialog
-    %div.modal-content
-      %div.modal-header
-        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
-          &times;
-        %h3.modal-title.inline#title
-          %span#modal-log-name
-          \- Log
-
-      %div.modal-body#modalbody
-      %div.modal-footer
-        %button.btn.btn-default{"data-dismiss" => "modal"}
-          Close
-
-%div.modal#modal-bash-history{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
-  %div.modal-dialog
-    %div.modal-content
-      %div.modal-header
-        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
-          &times;
-        %h3.modal-title.inline#title
-          %span#modal-log-name
-          \- Bash History
-
-      %div.modal-body#modalbody
-      %div.modal-footer
-        %button.btn.btn-default{"data-dismiss" => "modal"}
-          Close
-
 // Scenario
-%div.modal#modal-modify-scenario{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-scenario-clone{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
         %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
           &times;
         %h3.modal-title.inline#title
-          Modify Scenario: 
-          %span#modal-scenario-name
-            hi       
-      %div.modal-body#modalbody
-        = form_tag modify_scenario_path(@scenario), remote:true, method: :post do
-          %div#name-div 
-            = label_tag "Name:", nil, class: 'control-label'
-            = text_field_tag "name", nil, class: 'form-control'
-            %span.help-block#name-help
-          %p
-          %div#help-div
-            %span.help-block#help-help
-
-          = submit_tag "Submit", :class => 'btn btn-default'
-      %div.modal-footer
-        %button.btn.btn-default{"data-dismiss" => "modal"}
-          Close
-
-%div.modal#modal-clone-scenario{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
-  %div.modal-dialog
-    %div.modal-content
-      %div.modal-header
-        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
-          &times;
-        %h3.modal-title.inline#title
-          = "Clone Scenario: #{@scenario.name}"
-          %span#modal-title
+          Clone Scenario
       %div.modal-body#modalbody
         = form_tag clone_scenario_path(@scenario), remote: true, method: :post do 
           %span#group
@@ -77,9 +21,44 @@
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
+%div.modal#modal-scenario-save-as{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Scenario Save As: 
+      %div.modal-body#modalbody
+        = form_tag save_as_scenario_path(@scenario), remote:true, method: :post do
+          %div#name-div
+            = label_tag "Name:", nil, class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
+
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-scenario-destroy{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Changes have been made to the Scenario
+      %div.modal-body.inline#modalbody
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Cancel
 
 // Cloud
-%div.modal#modal-add-cloud{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-cloud-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
@@ -96,7 +75,7 @@
           %p
           %div#cidr-div
             = label_tag nil, "CIDR:", class: 'control-label'
-            = text_field_tag "CIDR", nil, class: 'form-control'
+            = text_field_tag "cidr_block", nil, class: 'form-control'
             %span.help-block.inline#cidr-help
           %p
           = submit_tag "Submit", :class => 'btn btn-default'
@@ -104,7 +83,7 @@
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
-%div.modal#modal-modify-cloud{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-cloud-modify{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
@@ -126,14 +105,47 @@
             = text_field_tag "cidr_block", nil, class: 'form-control'
             %span.help-block#cidr-help
           %p
+          %div#help-div
+            %span.help-block#help-help
           = submit_tag "Submit", :class => 'btn btn-default'
       %div.modal-footer
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
-
 // Subnet
-%div.modal#modal-modify-subnet{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-subnet-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Add Subnet: 
+          %span#cloud-name
+      %div.modal-body#modalbody
+        = form_tag subnet_add_scenario_path, remote:true, method: :post do
+          = hidden_field_tag 'cloud_id'
+          %div#name-div
+            = label_tag "Name:", nil, class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block.inline#name-help
+          %p
+          %div#cidr-div
+            = label_tag nil, "CIDR:", class: 'control-label'
+            = text_field_tag "cidr_block", nil, class: 'form-control'
+            %span.help-block.inline#cidr-help
+          %p
+          %div#internet-accessible-div
+            = label_tag nil, "Internet Accessible:", class: 'control-label'
+            = select_tag "internet_accessible", "<option>false</option><option>true</option>".html_safe, class: "form-control"
+            %span.help-block.inline#internet_accessible-help
+          %p
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-subnet-modify{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
@@ -152,7 +164,7 @@
           %p
           %div#cidr-div
             = label_tag nil, "CIDR:", class: 'control-label'
-            = text_field_tag "CIDR", nil, class: 'form-control'
+            = text_field_tag "cidr_block", nil, class: 'form-control'
             %span.help-block.inline#cidr-help
           %p
           %div#internet-accessible-div
@@ -160,45 +172,16 @@
             = select_tag "internet_accessible", "<option>false</option><option>true</option>".html_safe, class: "form-control"
             %span.help-block.inline#internet-accessible-help
           %p
+          %div#help-div
+            %span.help-block#help-help
 
           = submit_tag "Submit", :class => 'btn btn-default'
       %div.modal-footer
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
-
-%div.modal#modal-add-subnet{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
-  %div.modal-dialog
-    %div.modal-content
-      %div.modal-header
-        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
-          &times;
-        %h3.modal-title.inline#title
-          Add Subnet
-      %div.modal-body#modalbody
-        = form_tag subnet_add_scenario_path, remote:true, method: :post do
-          = hidden_field_tag 'cloud_id'
-          %div#name-div
-            = label_tag "Name:", nil, class: 'control-label'
-            = text_field_tag "name", nil, class: 'form-control'
-            %span.help-block.inline#name-help
-          %p
-          %div#cidr-div
-            = label_tag nil, "CIDR:", class: 'control-label'
-            = text_field_tag "cidr_block", nil, class: 'form-control'
-            %span.help-block.inline#cidr-help
-          %p
-          %div#internet-accessible-div
-            = label_tag nil, "Internet Accessible:", class: 'control-label'
-            = select_tag "internet_accessible", "<option>false</option><option>true</option>".html_safe, class: "form-control"
-            %span.help-block.inline#internet_accessible-help
-          = submit_tag "Submit", :class => 'btn btn-default'
-      %div.modal-footer
-        %button.btn.btn-default{"data-dismiss" => "modal"}
-          Close
-
 
 // Instance
-%div.modal#modal-add-instance{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-instance-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
@@ -230,12 +213,42 @@
             / = select_tag "os", options_for_select(["ubuntu", "nat"]), class: 'form-control'
             = select_tag "os", options_for_select(["ubuntu", "nat"]), class: 'form-control'
             %span.help-block.inline#os-help
+          %p
           = submit_tag "Submit", :class => 'btn btn-default'
       %div.modal-footer
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
-%div.modal#modal-modify-instance{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-instance-bash-history{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Bash History: 
+          %span#modal-log-name
+      %div.modal-body#modalbody
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-instance-chef-error{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          %span#instance-name
+          \: Chef Error
+
+      %div.modal-body#modalbody
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-instance-modify{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
@@ -243,7 +256,7 @@
           &times;
         %h3.modal-title.inline#title
           Modify Instance:
-          / %span#instance-name
+          %span#instance-name
       %div.modal-body#modalbody
         = form_tag instance_modify_scenario_path(@scenario), remote:true, method: :post do 
           = hidden_field_tag 'instance_id'
@@ -267,24 +280,97 @@
             / = select_tag "os", options_for_select(["ubuntu", "nat"]), class: 'form-control'
             = select_tag "os", options_for_select(["ubuntu", "nat"]), class: 'form-control'
             %span.help-block.inline#os-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
           = submit_tag "Submit", :class => 'btn btn-default'
       %div.modal-footer
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
-
-// Player
-
-%div.modal#modal-add-player{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-instance-role-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
         %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
           &times;
         %h3.modal-title.inline#title
+          Add Role: 
+          %span#instance-name
+      %div.modal-body#modalbody
+        = form_tag instance_role_add_scenario_path(@scenario), remote:true, method: :post do
+          = hidden_field_tag 'instance_id'
+          %div#name-div 
+            = label_tag "Role Name:", nil, class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+// Group
+%div.modal#modal-group-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Add Group
+      %div.modal-body#modalbody
+        = form_tag group_add_scenario_path(@scenario), remote:true, method: :post do 
+          %div#name-div
+            = label_tag nil, "Name:", class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-group-modify{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Modify Group:
+          %span#group-name
+      %div.modal-body#modalbody
+        = form_tag group_modify_scenario_path(@scenario), remote:true, method: :post do
+          = hidden_field_tag "group_id"
+          %div#name-div
+            = label_tag nil, "Name:", class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-group-player-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Add Player:
+          %span#group-name
           
       %div.modal-body#modalbody
-        = form_tag player_add_scenario_path(@scenario), remote:true, method: :post do 
+        = form_tag group_player_add_scenario_path(@scenario), remote:true, method: :post do 
           = hidden_field_tag 'group_id'
           %div#login-div
             = label_tag nil, "Login:", class: 'control-label'
@@ -296,106 +382,225 @@
             = text_field_tag "password", nil, class: 'form-control'
             %span.help-block.inline#password-help
           %p
+          %div#help-div
+            %span.help-block#help-help
           = submit_tag "Submit", :class => 'btn btn-default'
       %div.modal-footer
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
-%div.modal#modal-add-student-group{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-group-student-group-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
         %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
           &times;
         %h3.modal-title.inline#title
-          = "#{@scenario.name} - Add Student Group"
-          %span#modal-title
+          Add Student Group:
+          %span#group-name
       %div.modal-body#modalbody
-        = form_tag player_student_group_add_scenario_path(@scenario), remote:true, method: :post do 
+        = form_tag group_student_group_add_scenario_path(@scenario), remote:true, method: :post do 
           = hidden_field_tag 'group_id'
-          = label_tag nil, "Group:"
-          %span#group
-          %p
           %div#student-group-div
             = label_tag nil, "Student Group:"
-            = select_tag "student_group", options_for_select(@user.student_groups.pluck(:name)), class: 'form-control'
+            = select_tag "name", options_for_select(@user.student_groups.pluck(:name)), class: 'form-control'
             %span.help-block.inline#student-group-div-help
-          
+          %p
+          %div#help-div
+            %span.help-block#help-help
           = submit_tag "Submit", :class => 'btn btn-default'
       %div.modal-footer
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
-%div.modal#modal-remove-student-group{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-group-student-group-remove{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
         %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
           &times;
         %h3.modal-title.inline#title
-          = "#{@scenario.name} - Remove Student Group"
-          %span#modal-title
+          Remove Student Group
+          %span#group-name
       %div.modal-body#modalbody
-        = form_tag player_student_group_remove_scenario_path(@scenario), remote:true, method: :post do 
+        = form_tag group_student_group_remove_scenario_path(@scenario), remote:true, method: :post do 
           = hidden_field_tag 'group_id'
-          = label_tag nil, "Group:"
-          %span#group
-          %p
           %div#student-group-div
             = label_tag nil, "Student Group:"
-            = select_tag "student_group", options_for_select(@user.student_groups.pluck(:name)), class: 'form-control'
+            = select_tag "name", options_for_select(@user.student_groups.pluck(:name)), class: 'form-control'
             %span.help-block.inline#student-group-div-help
-          
+          %div#help-div
+            %span.help-block#help-help
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-group-admin-access-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Add Admin Access:
+          %span#group-name
+      %div.modal-body#modalbody
+        = form_tag group_admin_access_add_scenario_path(@scenario), remote:true, method: :post do
+          = hidden_field_tag "group_id"
+          %div#name-div
+            = label_tag nil, "Instance Name:", class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-group-user-access-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Add User Access:
+          %span#group-name
+      %div.modal-body#modalbody
+        = form_tag group_user_access_add_scenario_path(@scenario), remote:true, method: :post do
+          = hidden_field_tag "group_id"
+          %div#name-div
+            = label_tag nil, "Instance Name:", class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+// Role
+%div.modal#modal-role-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Add Role
+      %div.modal-body#modalbody
+        = form_tag role_add_scenario_path(@scenario), remote:true, method: :post do
+          %div#name-div
+            = label_tag "Name:", nil, class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-role-modify{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Modify Role:
+          %span#role-name
+      %div.modal-body#modalbody
+        = form_tag role_modify_scenario_path(@scenario), remote:true, method: :post do
+          = hidden_field_tag "role_id"
+          %div#name-div
+            = label_tag "Name:", nil, class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-role-recipe-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Add Recipe:
+          %span#role-name
+      %div.modal-body#modalbody
+        = form_tag role_recipe_add_scenario_path(@scenario), remote:true, method: :post do
+          = hidden_field_tag "role_id"
+          %div#name-div
+            = label_tag "Name:", nil, class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
           = submit_tag "Submit", :class => 'btn btn-default'
       %div.modal-footer
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
 // Recipe
-
-%div.modal#modal-add-global-recipe{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-recipe-global-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
         %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
           &times;
         %h3.modal-title.inline#title
+          Add Global Recipe
       %div.modal-body#modalbody
 
       %div.modal-footer
-        %div#helper-div
-          %span.help-block.inline#helper
+        %div#name-div
+          %span.help-block.inline#name-help
 
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
-%div.modal#modal-add-custom-recipe{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-recipe-custom-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
         %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
           &times;
         %h3.modal-title.inline#title
+          Add Custom Recipe
       %div.modal-body#modalbody
         = form_tag recipe_custom_add_scenario_path(@scenario), remote: true, method: :post, id:'form' do
-          = hidden_field_tag 'role_id'
           %div#name-div
             = label_tag nil, "Name:"
-            = text_field_tag "recipe", nil, class: 'form-control'
+            = text_field_tag "name", nil, class: 'form-control'
             %div.help-block#name-help
           %br
           = label_tag nil, "Content:"
           = text_area_tag "text", nil, class: 'form-control', style: "height: 500px;"
-          
-
+          %p
+          %div#help-div
+            %span.help-block#help-help
       %div.modal-footer
         %div#helper-div
           %span.help-block.inline#helper
 
-        %button{ class: 'btn btn-default', onclick: "$('#modal-add-custom-recipe').find('#form').submit()"}
+        %button{ class: 'btn btn-default', onclick: "$('#modal-recipe-custom-add').find('#form').submit()"}
           Save
 
-%div.modal#modal-view-recipe{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-recipe-view{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
@@ -408,7 +613,7 @@
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
-%div.modal#modal-update-recipe{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-recipe-update{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
@@ -417,13 +622,30 @@
         %h3.modal-title.inline#title
       %div.modal-body#modalbody
         = form_tag recipe_update_scenario_path(@scenario), remote: true, method: :post, id:'form' do
-          = hidden_field_tag 'recipe'
-          = hidden_field_tag 'role_id'
+          = hidden_field_tag 'recipe_id'
           = text_area_tag "text", nil, class: 'form-control'
-          %br
+          %p
+          %div#help-div
+            %span.help-block#help-help
           
         %div#helper
 
       %div.modal-footer
-        %button{ class: 'btn btn-default', onclick: "$('#modal-update-recipe').find('#form').submit()"}
+        %button{ class: 'btn btn-default', onclick: "$('#modal-recipe-update').find('#form').submit()"}
           Save
+
+//Log
+%div.modal#modal-log{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Log:
+          %span#modal-log-name
+
+      %div.modal-body#modalbody
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close

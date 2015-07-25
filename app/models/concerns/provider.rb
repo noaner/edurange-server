@@ -29,8 +29,11 @@ module Provider
   end
 
   def clear_log
-    update_attributes(log: '')
+    self.update_attribute(:log, '')
   end
+
+  #############################################################
+  #  Booting
 
   def boot_error(error)
 
@@ -48,15 +51,92 @@ module Provider
   end
 
   def boot(options = {})
-    classname = self.class.to_s.downcase
-    puts classname
-    self.send("provider_boot_#{classname}", options)
+    classname = self.class
+    if classname == Scenario
+      if not (self.stopped? or self.partially_booted?)
+        errors.add(:boot, "#{self.class} must be stopped or partially booted to boot")
+        return false
+      end
+    elsif not self.stopped?
+      errors.add(:boot, "#{self.class} must be stopped to boot")
+      return false
+    end
+
+    if classname == Subnet
+      if not self.cloud.booted?
+        errors.add(:boot, "Subnets cloud must be booted")
+        return false
+      end
+    elsif classname == Instance
+      if not self.subnet.booted?
+        errors.add(:boot, "Instances subnet must be booted")
+        return false
+      end
+    end 
+
+    self.clear_log
+    self.debug_booting
+    
+    if options[:debug]
+      self.bootme(options)
+    elsif options[:asynchronous] or options[:solo] or classname == Scenario
+      debug "queuing - #{self.class.to_s} #{self.name} for boot"
+      self.set_queued_boot
+      self.delay(queue: self.class.to_s.downcase).bootme(options)
+    else
+      self.bootme(options)
+    end
+    
+    true
+  end
+
+  def bootme(options = {})
+    self.send("provider_boot_#{self.class.to_s.downcase}", options)
   end
 
   def unboot(options = {})
-    classname = self.class.to_s.downcase
-    puts classname
-    self.send("provider_unboot_#{classname}", options)
+    classname = self.class
+    if classname == Scenario
+      if not (self.booted? or self.partially_booted? or self.boot_failed? or self.unboot_failed?)
+        errors.add(:boot, "#{self.class} must be booted or partially booted or have a error to uboot")
+        return false
+      end
+    elsif not (self.booted? or self.boot_failed? or self.unboot_failed?)
+      errors.add(:boot, "#{self.class} must be booted or have a error to unboot")
+      return false
+    end
+
+    if not options[:dependents]
+      if classname == Cloud
+        if not self.subnets_stopped?
+          errors.add(:boot, "#{self.class}s subnets must be stopped")
+          return false
+        end
+      elsif classname == Subnet
+        if not self.instances_stopped?
+          errors.add(:boot, "#{self.class}s instances must be stopped")
+          return false
+        end
+      end
+    end
+
+    self.debug_unbooting
+    
+    if options[:debug]
+      self.bootme(options)
+    elsif options[:asynchronous] or options[:solo] or classname == Scenario
+      debug "queuing - #{self.class.to_s} #{self.name} for unboot"
+      self.set_queued_unboot
+      self.delay(queue: self.class.to_s.downcase).unbootme(options)
+    else
+      self.unbootme(options)
+    end
+
+    true
+  end
+
+  def unbootme(options = {})
+    self.send("provider_unboot_#{self.class.to_s.downcase}", options)
   end
 
   def unboot_error(error)
@@ -64,7 +144,6 @@ module Provider
     self.save
     debug(error.class.to_s + ' - ' + error.message.to_s + error.backtrace.join("\n"));
   end
-
 
   #############################################################
   #  Status set and get
@@ -126,8 +205,7 @@ module Provider
   end
 
   def queued?
-    return true if self.queued_boot? or self.queued_unboot?
-    false
+    return (self.queued_boot? or self.queued_unboot?)
   end
 
   # Polls the state in database, waiting to yield to given block until self is booted?

@@ -2,23 +2,19 @@
 
 %div.panel.panel-default
   %div.panel-heading
-    %h1
-      EDURange
-
-  %div.panel-body
-
-
-    %h2.page-description.fadeIn
+    %h1.inline
+      EDURange -
+    %h2.inline
       The cybersecurity training ground.
-
-    = form_tag session_path(:user) do
+  %div.panel-body
+    %h2.page-description.fadeIn
+    = form_tag session_path(:user), class: 'inline' do
       = text_field_tag 'user[email]'
       = password_field_tag 'user[password]'
       = check_box_tag 'user[remember_me]'
       = label_tag 'user[remember_me]', 'Remember me'
       = button_tag "Sign In", class: 'btn btn-primary'
-
-    %p
+    &nbsp;
     or
-    %p
+    &nbsp;
     = link_to 'Sign Up', 'users/sign_up', class: 'btn btn-primary'

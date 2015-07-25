@@ -1,9 +1,12 @@
 
-
 function get_boot_status (id) {
   var resource = '/scenarios/' + id + '/boot_status';
-  // alert(resource);
   $.post(resource, function(data) {
     // alert('done');
   });
+}
+
+function update_status (id, status) {
+	$('#'+id+"-status").text(status);
+	$('#'+id+"-status-dot").attr('class', 'inline-block ' + status);
 }

@@ -1,9 +1,0 @@
-
-$('#action-dropdown').removeClass("open");
-$('#scenario-status').text('<%= @scenario.status %>');
-
-<% if @flash_message %>
-    update_flash("<%= @flash_message %>");
-<% end %>
-
-get_boot_status('<%= @scenario.id %>');

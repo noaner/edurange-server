@@ -1,81 +1,84 @@
-%li{ id: 'instance-li-' + instance.id.to_s}
-  %label{ for: 'item-instance' + instance.id.to_s }
-    %span{ id: 'instance-name-' + instance.id.to_s}
+%li{ id: "instance-#{instance.id}" }
+  %label
+    %span{ id: "instance-#{instance.id}-name" }
       = instance.name
-    %div{ class: 'inline-block ' + instance.status, id: 'instance-status-dot-'+instance.id.to_s}
-      &#9679;
-    - if instance.booting?
-      %div.spin.inline-block{ id: 'instance-spinner-' + instance.id.to_s}
-    - else
-      %div.inline-block{ id: 'instance-spinner-' + instance.id.to_s}
-
   %div.inline-block
-    %div.dropdown{id:'dropdown-instance-'+instance.id.to_s}
-      %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-instance-'+instance.id.to_s, "data-toggle" => 'dropdown', "aria-expanded" => "true"}
-        / %span.glyphicon.glyphicon-pencil{"aria-hidden" => "true"}
+    %div.dropdown{ id:"instance-#{instance.id}-dropdown" }
+      %button.btn.btn-default.dropdown-toggle{type:'button', id:"instance-#{instance.id}-dropdown-button", "data-toggle" => 'dropdown', "aria-expanded" => "true"}
         %span.caret
-      %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-instance-'+instance.id.to_s}
-        %li{role: 'presentation'}
-          
-          - if instance.stopped?
-            - boot_button_class = ""
-            - unboot_button_class = "hidden"
-          - elsif instance.booted? or instance.boot_failed?
-            - boot_button_class = "hidden"
-            - unboot_button_class = ""
-          - elsif instance.booting?
-            - boot_button_class = "hidden"
-            - unboot_button_class = "hidden"
-
-          = link_to 'Boot', boot_instance_scenario_path(instance_id: instance), method: :post, remote: true, id: "boot-button-instance-#{instance.id.to_s}", class: boot_button_class
-          = link_to 'Unboot', unboot_instance_scenario_path(instance_id: instance), method: :post, remote: true, id: "unboot-button-instance-#{instance.id.to_s}", class: unboot_button_class
-
-          = link_to 'Show Log', log_get_scenario_path(instance, kind: 'instance'), method: :post, remote: true
-          = link_to "Show Bash History", instance_bash_history_scenario_path(instance_id: instance), method: :post, remote: true
-
+      %ul.dropdown-menu{role: 'menu', "aria-labelledby" => "instance-#{instance.id}-dropdown-button"}
+        %li
+          %li{ id: "instance-#{instance.id}-boot-button-li", class: instance.bootable? ? "" : "disabled" }
+            = link_to 'Boot', boot_instance_scenario_path(instance_id: instance), method: :post, remote: true, id: "instance-#{instance.id.to_s}-boot-button"
+          %li{ id: "instance-#{instance.id}-unboot-button-li", class: instance.unbootable? ? "" : "disabled" }
+            = link_to 'Unboot', unboot_instance_scenario_path(instance_id: instance), method: :post, remote: true, id: "instance-#{instance.id}-unboot-button"
+          %li.divider
           - if instance.scenario.custom?
-            = link_to 'Modify', "#modal-modify-instance", :data => {:toggle=>"modal"}, onclick: "$('#modal-modify-instance').find('#instance_id').val('#{instance.id}'); $('#modal-modify-instance').find('#name-div').removeClass('has-error'); $('#modal-modify-instance').find('#name-help').html(''); $('#modal-modify-instance').find('#ip-div').removeClass('has-error'); $('#modal-modify-instance').find('#ip-help').html(''); $('#modal-modify-instance').find('#internet-accessible-div').removeClass('has-error'); $('#modal-modify-instance').find('#internet-accessible-help').html(''); $('#modal-modify-instance').find('#os-div').removeClass('has-error'); $('#modal-modify-instance').find('#os-help').html(''); $('#modal-modify-instance').find('#name').val($('#instance-name-#{instance.id}').html().trim()); $('#modal-modify-instance').find('#ip_address').val($('#instance-ip-address-#{instance.id}').html().trim()); $('#modal-modify-instance').find('#internet_accessible').val($('#instance-internet-accessible-#{instance.id}').html().trim()); $('#modal-modify-instance').find('#os').val($('#instance-os-#{instance.id}').html().trim());"
-            = link_to 'Delete', instance_delete_scenario_path(instance_id: instance), method: :post, remote: true
-          
-
-  %ul{style: "padding-left: 20px;"}
-    %li
-      Status:
-      %span{id: 'instance-status-' + instance.id.to_s}
-        = instance.status
-    %li
-      Driver:
-      %span{id: 'instance-driver-' + instance.id.to_s}
-        = instance.driver_id == nil ? "not set" : instance.driver_id
-    %li
-      IP:
-      %span{ id: "instance-ip-address-#{instance.id}" }
-        = instance.ip_address
-    %li
-      Internet Accessible:
-      %span{ id: "instance-internet-accessible-#{instance.id}" }
-        = instance.internet_accessible ? "true" : "false"
-
-    %div{ id: "accessible-options-#{instance.id}" }
-      - if instance.internet_accessible
-        %div{ id: "instance-public-ip-div-#{instance.id}"}
+            %li{ id: "instance-#{instance.id}-modify-button-li", class: instance.stopped? ? "" : "disabled" }
+              = link_to 'Modify', "#modal-instance-modify", :data => {:toggle=>"modal"}, onclick: "$('#modal-instance-modify').find('#instance_id').val('#{instance.id}'); $('#modal-instance-modify').find('#instance-name').html($('#instance-#{instance.id}-name').html().trim()); $('#modal-instance-modify').find('#name-div').removeClass('has-error'); $('#modal-instance-modify').find('#name-help').html(''); $('#modal-instance-modify').find('#ip-div').removeClass('has-error'); $('#modal-instance-modify').find('#ip-help').html(''); $('#modal-instance-modify').find('#internet-accessible-div').removeClass('has-error'); $('#modal-instance-modify').find('#internet-accessible-help').html(''); $('#modal-instance-modify').find('#os-div').removeClass('has-error'); $('#modal-instance-modify').find('#os-help').html(''); $('#modal-instance-modify').find('#name').val($('#instance-#{instance.id}-name').html().trim()); $('#modal-instance-modify').find('#ip_address').val($('#instance-#{instance.id}-ip-address').html().trim()); $('#modal-instance-modify').find('#internet_accessible').val($('#instance-#{instance.id}-internet-accessible').html().trim()); $('#modal-instance-modify').find('#os').val($('#instance-#{instance.id}-os').html().trim()); $('#modal-instance-modify').find('#help-div').removeClass('has-error'); $('#modal-instance-modify').find('#help-help').html('');", id: "instance-#{instance.id}-modify-button"
+          %li{ id: "instance-#{instance.id}-delete-button-li", class: instance.stopped? ? "" : "disabled" }
+            = link_to 'Delete', instance_delete_scenario_path(instance_id: instance), method: :post, remote: true, id: "instance-#{instance.id}-delete-button"
+          %li.divider
           %li
-            Public IP:
-            %span{id: 'instance-public-ip-' + instance.id.to_s}
-              = instance.provider_instance_public_ip ? instance.provider_instance_public_ip : 'not set'
-          %li
-            SSH Ready:
-            %span{id: 'instance-ssh-ready-' + instance.id.to_s}
-              = instance.ssh_ready?
-    %li
-      Initialized:
-      %span{id: 'instance-initialized-' + instance.id.to_s}
-        = instance.initialized?
-    %li
-      OS:
-      %span{ id: "instance-os-#{instance.id}" }
-        = instance.os
-    %li
-      Roles:
-      / # = instance.roles.map { |r| %Q('#{r.name}') }.join(',')
-      = instance.roles.map { |r| %Q(#{r.name}) }.join(',')
+            = link_to 'Show Log', log_get_scenario_path(instance, kind: 'instance'), method: :post, remote: true
+            = link_to "Show Bash History", instance_bash_history_scenario_path(instance_id: instance), method: :post, remote: true
+  %br
+  Status:
+  %span{id: "instance-#{instance.id}-status" }
+    = instance.status
+  %div{ id: "instance-#{instance.id}-status-dot", class: "inline-block #{instance.status} #{(instance.booting? or instance.unbooting?) ? 'hidden' : ''}" }
+    &#9679;
+  %div{ id: "instance-#{instance.id}-spinner", class: "inline-block #{(instance.booting? or instance.unbooting?) ? 'spin' : ''}" }
+  %br
+  Driver:
+  %span{id: "instance-#{instance.id}-driver" }
+    = instance.driver_id == nil ? "not set" : instance.driver_id
+  %br
+  IP:
+  %span{ id: "instance-#{instance.id}-ip-address" }
+    = instance.ip_address
+  %br
+  Internet Accessible:
+  %span{ id: "instance-#{instance.id}-internet-accessible" }
+    = instance.internet_accessible ? "true" : "false"
+
+  %div{ id: "instance-#{instance.id}-accessible-options" }
+    - if instance.internet_accessible
+      %div{ id: "instance-#{instance.id}-public-ip-div"}
+        Public IP:
+        %span{id: "instance-#{instance.id}-public-ip" }
+          = instance.provider_instance_public_ip ? instance.provider_instance_public_ip : "-"
+        %br
+        SSH Ready:
+        %span{id: "instance-#{instance.id}-ssh-ready" }
+          = instance.ssh_ready? ? "true" : '-'
+  Initialized:
+  %span{id: "instance-#{instance.id}-initialized" }
+    = instance.initialized?
+  - hidden = (instance.initialized? == "chef script error") ? '' : 'hidden'
+  %span{id: "instance-#{instance.id}-initialized-error", class: hidden }
+    = link_to 'view', instance_chef_error_scenario_path(instance_id: instance), remote: true, method: :post
+  %br
+  OS:
+  %span{ id: "instance-#{instance.id}-os" }
+    = instance.os
+  %br
+
+  // Instance Roles
+  Roles:
+  - if instance.scenario.custom?
+    %div.inline-block
+      %div.dropdown{ id:"instance-#{instance.id}-role-dropdown" }
+        %button.btn.btn-default.dropdown-toggle{type:'button', id:"instance-#{instance.id}-role-dropdown-button", "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+          %span.caret
+        %ul.dropdown-menu{role: 'menu', "aria-labelledby" => "instance-#{instance.id}-role-dropdown-button" }
+          %li{ id: "instance-#{instance.id}-role-add-button-li", class: instance.stopped? ? "" : "disabled" }
+            = link_to 'Add Role', "#modal-instance-role-add", :data => {:toggle=>"modal"}, onclick: "$('#modal-instance-role-add').find('#instance-name').html($('#instance-#{instance.id}-name').html().trim()); $('#modal-instance-role-add').find('#name').val(''); $('#modal-instance-role-add').find('#instance_id').val('#{instance.id}'); $('#modal-instance-role-add').find('#name-div').removeClass('has-error'); $('#modal-instance-role-add').find('#name-help').html(''); $('#modal-instance-role-add').find('#help-div').removeClass('has-error'); $('#modal-instance-role-add').find('#help-help').html('');", id: "instance-#{instance.id}-role-add-button"
+  
+  %ul{ id: "instance-#{instance.id}-roles"}
+    - instance.instance_roles.each do |instance_role|
+      %li{ id: "instance-role-#{instance_role.id}" }
+        %span#name
+          = instance_role.role.name
+        - if instance.scenario.custom?
+          = link_to 'remove', instance_role_remove_scenario_path(instance_role_id: instance_role), method: :post, remote: true, id: "instance-role-#{instance_role.id}-remove-button", class: instance.stopped? ? "" : "hidden"

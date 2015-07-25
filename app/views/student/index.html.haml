@@ -1,34 +1,43 @@
-%h2 Student Home
+%div.panel.panel-default
+  %div.panel-heading.nav.nav-pills
+    %li
+      %h3 Student Home
 
-%h3 Running Scenarios:
-
-- @players.each do |player|
-  %dl
-    - if scenario = Scenario.find(player.group.scenario_id)
-      %h4= scenario.name
+  %div.panel-body
+    %label Account Information: 
+    %div
       %dl
-        %b.inline login:
-        = player.login
+        Name: 
+        =@user.name
         %br
-        %b.inline password:
-        = player.password
+        Email:
+        =@user.email
         %br
-        - scenario.instances.each do |instance|
-          - if instance.name == "NAT_Instance"
-            - if instance.provider_instance_public_ip
-              %b nat address:
-              = " #{instance.provider_instance_public_ip}"
-            - else
-              Not Set
-        %br
+        Password: ********
+        %p
+        = link_to 'edit', edit_user_registration_path, class: 'btn btn-primary'
+        %p
+        Last Sign In:
+        =@user.last_sign_in_at
+        From:
+        =@user.last_sign_in_ip
 
-        %b.iniline instructions:
-        = scenario.instructions
-        %br
-        / %b.inline instances:
-        / %dl
-        /   - scenario.instances.each do |instance|
-        /     = instance.name
-        /     %b
-        %b.inline Questions:
-        = link_to 'here', "/scoring/student/#{scenario.id}"
+    %label Running Scenarios:
+    - if @players.size == 0
+      %dl
+        none
+
+    - @players.each do |player|
+      %dl
+        - if scenario = Scenario.find(player.group.scenario_id)
+          %label= scenario.name
+          %dl
+            %b.inline login:
+            = player.login
+            %br
+            %b.inline password:
+            = player.password
+            %br
+            %b.iniline instructions:
+            = scenario.instructions
+            %br

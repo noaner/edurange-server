@@ -1,9 +1,0 @@
-$('#dropdown-subnet-<%= @subnet.id.to_s %>').removeClass("open");
-
-<% if @subnet.errors.any? %>
-    <% if @subnet.errors[:has_dependents].any? %>
-        alert('Cannot delete subnet with dependents.')
-    <% end %>
-<% else %>
-    $('#subnet-li-<%= @subnet.id.to_s %>').remove();
-<% end %>

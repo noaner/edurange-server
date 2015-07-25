@@ -8,7 +8,7 @@ class RegistrationsController < Devise::RegistrationsController
 
   def create
 
-    query = "registration_code = ? AND role = 3"
+    query = "registration_code = ? AND (role = 3 OR role = 2)"
     puts "query:#{query}"
     instructor = User.where(query, params[:user][:registration_code]).first
     if params[:user][:registration_code] == '' or !instructor
