@@ -3,10 +3,10 @@ script "instant_bash_history" do
     user "root"
     cwd "/tmp"
     code <<-EOH
-    if grep -R "shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r'" "/etc/bash.bashrc"; then
+    if grep -R "export HISTTIMEFORMAT='%d/%m/%y %T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r'"; then
         echo "legacy code jokes" > /dev/null
     else
-        echo "shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r'" >> /etc/bash.bashrc
+        echo "export HISTTIMEFORMAT='%d/%m/%y %T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r'" >> /etc/bash.bashrc
     fi
     EOH
 end
