@@ -1,6 +1,0 @@
-$('#modal-add-student-group').modal('toggle');
-
-<% @players.each do |player| %>
-	<% user = User.find(player.user_id) %>
-	$('#players-table-group-<%= @group.id.to_s %>').append("<tr id='group-table-player-<%= player.id.to_s %>'><td><%= user.name %></td><td><%= user.email %></td><td><%= player.student_group.name %></td><td><%= player.login %></td><td><%= player.password %></td><td><a href='/scenarios/<%= player.id %>/delete_player' data-remote='true'>delete</a></td>");
-<% end %>

@@ -1,22 +1,3 @@
-ruby_block "finish" do
-  block do
-
-    put = Net::HTTP::Put.new('<%= instance.com_page %>', 'content-type' => 'text/plain')
-    put.body = "finished"
-
-    # send the PUT request
-    http = Net::HTTP.new('<%= Settings.bucket_name %>.s3.amazonaws.com', 443)
-    http.set_debug_output(Logger.new($stdout))
-    http.use_ssl = true
-    http.start
-    resp = http.request(put)
-    resp = [resp.code.to_i, resp.to_hash, resp.body]
-    http.finish
-
-  end
-  action :run
-end
-
 ruby_block "get_bash_histories" do
   block do
     put = Net::HTTP::Put.new('<%= instance.bash_history_page %>', 'content-type' => 'text/plain')
@@ -40,6 +21,25 @@ ruby_block "get_bash_histories" do
     resp = http.request(put)
     resp = [resp.code.to_i, resp.to_hash, resp.body]
     http.finish
+  end
+  action :run
+end
+
+ruby_block "finish" do
+  block do
+
+    put = Net::HTTP::Put.new('<%= instance.com_page %>', 'content-type' => 'text/plain')
+    put.body = "finished"
+
+    # send the PUT request
+    http = Net::HTTP.new('<%= Settings.bucket_name %>.s3.amazonaws.com', 443)
+    http.set_debug_output(Logger.new($stdout))
+    http.use_ssl = true
+    http.start
+    resp = http.request(put)
+    resp = [resp.code.to_i, resp.to_hash, resp.body]
+    http.finish
+
   end
   action :run
 end

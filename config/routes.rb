@@ -26,34 +26,48 @@ Edurange::Application.routes.draw do
       post 'unboot_instance'
       post 'boot_status'
 
-      post 'destroy_scenario'
-      post 'destroy_cloud'
-      post 'destroy_subnet'
-      post 'destroy_instance'
-
-      post 'modify'
       post 'log_get'
-      post 'status'
       post 'clone'
+      get  'clone_set'
+      post 'save'
+      post 'save_as'
+      post 'obliterate_custom'
 
-      post 'cloud_modify'
       post 'cloud_add'
       post 'cloud_delete'
+      post 'cloud_modify'
 
-      post 'subnet_modify'
       post 'subnet_add'
       post 'subnet_delete'
+      post 'subnet_modify'
 
-      post 'instance_modify'
       post 'instance_add'
-      post 'instance_delete'
       post 'instance_bash_history'
+      post 'instance_chef_error'
+      post 'instance_delete'
+      post 'instance_modify'
+      post 'instance_role_add'
+      post 'instance_role_remove'
 
-      post 'player_modify'
-      post 'player_add'
-      post 'player_delete'
-      post 'player_student_group_add'
-      post 'player_student_group_remove'
+      post 'group_add'
+      post 'group_modify'
+      post 'group_delete'
+
+      post 'group_player_add'
+      post 'group_player_delete'
+      post 'group_student_group_add'
+      post 'group_student_group_remove'
+
+      post 'group_admin_access_add'
+      post 'group_admin_access_remove'
+      post 'group_user_access_add'
+      post 'group_user_access_remove'
+
+      post 'role_add'
+      post 'role_delete'
+      post 'role_modify'
+      post 'role_recipe_add'
+      post 'role_recipe_remove'
 
       post 'recipe_view'
       post 'recipe_update_view'
@@ -65,39 +79,29 @@ Edurange::Application.routes.draw do
 
     end
   end
-  
+
+  post 'scenarios/create_custom'
+  post 'scenarios/obliterate_custom'
   get 'scenarios/destroy/:id', to: 'scenarios#destroy'
 
-  get 'instructor', to: 'instructor#index'
-
-  post 'instructor/student_group_new'
-  post 'instructor/student_group_assign'
-  post 'instructor/student_group_delete'
-  post 'instructor/student_group_remove'
-
-  # get 'student_groups', to: 'student_groups#index'
-  # post 'student_groups/new'
-  # get 'student_groups/destroy'
-  post 'student_groups/add_to'
-  # get 'student_groups/remove_from'
-  # post 'student_groups/add_to'
-
-  get 'student', to: 'student#index'
-
-  get 'admin', to: 'admin#index'
-  post 'admin/instructor_delete'
+  get  'admin', to: 'admin#index'
+  post 'admin/user_delete'
   post 'admin/instructor_create'
   post 'admin/student_to_instructor'
+  post 'admin/instructor_to_student'
+  post 'admin/reset_password'
+  post 'admin/student_group_create'
+  post 'admin/student_group_destroy'
+  post 'admin/student_group_user_add'
+  post 'admin/student_group_user_remove'
 
-  # Insecure, needs to be rewritten
-  # get 'scoring/instructor/:scenario', to: 'scoring#instructor'
-  # get 'scoring/student/:scenario', to: 'scoring#student'
-  # post 'scoring/answer_question/:scenario/:question', to: 'scoring#answer_question'
-  # get 'scoring/instructor_student/:scenario/:user', to: 'scoring#instructor_student'
-  # post 'scoring/answer_open_question'
-  # get 'scoring/answer_dump'
-  # get 'documentation', to: 'documentation#index'
-  # get 'documentation/scenarios/:id', to: 'documentation#show'
+  get 'instructor', to: 'instructor#index'
+  post 'instructor/student_group_create'
+  post 'instructor/student_group_destroy'
+  post 'instructor/student_group_user_add'
+  post 'instructor/student_group_user_remove'
+
+  get 'student', to: 'student#index'
 
   root :to => "home#index"
   devise_for :users, :controllers => {:registrations => "registrations"}

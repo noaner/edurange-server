@@ -10,11 +10,56 @@ class Instance < ActiveRecord::Base
   has_many :groups, through: :instance_groups, dependent: :destroy
   has_many :roles, through: :instance_roles, dependent: :destroy
   has_one :user, through: :subnet
+  has_one :scenario, through: :subnet
 
   before_create :ensure_has_ip
-  validates :name, presence: true, uniqueness: { scope: :subnet, message: "name already taken" } 
+  validates :name, presence: true, uniqueness: { scope: :subnet, message: "Name taken" } 
   validates :ip_address, presence: true
-  validate :ip_address_validate, :internet_accessible_validate
+  validate :ip_address_validate, :internet_accessible_validate, :validate_stopped
+
+  after_destroy :update_scenario_modified
+  before_destroy :validate_stopped
+
+  def validate_stopped
+    if not self.stopped?
+      errors.add(:running, "can not modify while scenario is booted")
+      return false
+    end
+    if self.scenario.custom?
+      self.scenario.update_attribute(:modified, true)
+    end
+    true
+  end
+
+  def update_scenario_modified
+    if self.scenario.custom?
+      self.scenario.update_attribute(:modified, true)
+    end
+    true
+  end
+
+  def role_add(role_name)
+    if not self.stopped?
+      errors.add(:running, 'instance must be stopped to add role')
+      return false
+    end
+
+    self.roles.each do |r|
+      if r.name == role_name
+        self.errors.add(:role_name, "Instance already has #{role_name}")
+        return false
+      end
+    end
+
+    if not role = self.scenario.roles.find_by_name(role_name)
+      self.errors.add(:role_name, "Role does not exist")
+      return false
+    end
+    ir = self.instance_roles.new(role_id: role.id)
+    ir.save
+    update_scenario_modified
+    return ir
+  end
 
   def ip_address_validate
 
@@ -23,6 +68,9 @@ class Instance < ActiveRecord::Base
       errors.add(:ip_address, "IP Address is not valid")
       return
     end
+
+    # if ip.octets[3] < 2
+
 
     if not NetAddr::CIDR.create(self.subnet.cidr_block).cmp(self.ip_address)
       errors.add(:ip_address, "IP Address is not within instances subnet #{self.subnet.name} #{self.subnet.cidr_block}")
@@ -34,13 +82,22 @@ class Instance < ActiveRecord::Base
       if self.ip_address == instance.ip_address
         errors.add(:ip_address, "IP Address is taken")
       end
-    end
+    end 
+
   end
 
   def internet_accessible_validate
     if self.internet_accessible and not self.subnet.internet_accessible
       errors.add(:internet_accessible, "Instances subnet must also be internet accessible")
     end
+  end
+
+  def bootable?
+    return (self.stopped? and self.subnet.booted?) 
+  end
+
+  def unbootable?
+    return (self.booted? or self.boot_failed? or self.unboot_failed?)
   end
 
   def generate_cookbooker
@@ -83,7 +140,7 @@ class Instance < ActiveRecord::Base
   end
 
   def get_bash_history
-    return false if !self.bash_history_page
+    return "" if !self.bash_history_page
     s3 = AWS::S3.new
     bucket = s3.buckets[Settings.bucket_name]
     if bucket.objects[self.aws_instance_bash_history_page_name].exists?
@@ -93,15 +150,36 @@ class Instance < ActiveRecord::Base
     return ""
   end
 
-  def initialized?
-    return false if !self.com_page
-
+  def get_chef_error
+    return "" if !self.bash_history_page
     s3 = AWS::S3.new
     bucket = s3.buckets[Settings.bucket_name]
     if bucket.objects[self.aws_instance_com_page_name].exists?
-      return true if bucket.objects[self.aws_instance_com_page_name].read() == 'finished'
+      chef_err =  bucket.objects[self.aws_instance_com_page_name].read()
+      return chef_err == nil ? "" : chef_err
     end
-    false
+    return ""
+  end
+
+  def initialized?
+    return "-" if !self.com_page
+
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets[Settings.bucket_name]
+      if bucket.objects[self.aws_instance_com_page_name].exists?
+        text = bucket.objects[self.aws_instance_com_page_name].read()
+        status = text.split("\n")[0]
+        if status == "error"
+          return "chef script error"
+        elsif status == "finished"
+          return "true"
+        end
+      end
+    rescue AWS::S3::Errors::NoSuchKey
+      return false
+    end
+    "initializing"
   end
 
   def port_open?(ip, port)
@@ -122,7 +200,9 @@ class Instance < ActiveRecord::Base
 
   def ssh_ready?
     if ip = self.aws_instance_public_ip
-      return (self.port_open?(ip, 22) and self.initialized?)
+      if (self.port_open?(ip, 22) and self.initialized? == "true")
+        return true
+      end
     end
     return false
   end
@@ -147,7 +227,7 @@ class Instance < ActiveRecord::Base
   def debug(message)
     log = self.log ? self.log : ''
     message = '' if !message
-    self.update_attributes(log: log + message + "\n")
+    self.update_attribute(:log, log + message + "\n")
   end
 
   def generate_init
@@ -160,7 +240,6 @@ class Instance < ActiveRecord::Base
       end
 
       init += Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/chef.sh.erb")).result(instance: self) + "\n"
-
 
       # Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/recipes/templates/bootstrap.sh.erb")).result(instance: self) + "\n"
       init
@@ -178,18 +257,13 @@ class Instance < ActiveRecord::Base
 
       # This recipe sets up packages and users and is run for every instance
       cookbook = Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/packages_and_users.rb.erb")).result(instance: self) + "\n"
-      # get all recipes
-      local_recipe_path = "#{scenario_path}/recipes"
-      global_recipe_path = "#{Settings.app_path}scenarios/recipes"
 
       self.roles.each do |role|
         role.recipes.each do |recipe|
-          # Prioritze local recipes before global
-          if File.exists? "#{local_recipe_path}/#{recipe}.rb"
-            cookbook += File.read("#{local_recipe_path}/#{recipe}.rb") + "\n"
-
-          elsif File.exists? "#{global_recipe_path}/#{recipe}.rb.erb"
-            cookbook += Erubis::Eruby.new(File.read("#{global_recipe_path}/#{recipe}.rb.erb")).result(instance: self) + "\n"
+          if recipe.custom
+            cookbook += recipe.text + "\n"
+          else
+            cookbook += Erubis::Eruby.new(recipe.text).result(instance: self) + "\n"
           end
         end
       end

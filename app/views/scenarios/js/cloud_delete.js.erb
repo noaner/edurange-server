@@ -1,9 +1,0 @@
-$('#dropdown-cloud-<%= @cloud.id.to_s %>').removeClass("open");
-
-<% if @cloud.errors.any? %>
-    <% if @cloud.errors[:has_dependents].any? %>
-        alert('Cannot delete cloud with dependents.')
-    <% end %>
-<% else %>
-    $('#cloud-li-<%= @cloud.id.to_s %>').remove();
-<% end %>

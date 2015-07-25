@@ -1,25 +1,60 @@
-%div.panel.panel-default
+%div.modal#modal-scenario-destroy{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Changes have been made to the Scenario
+      %div.modal-body.inline#modalbody
+        
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Cancel
 
+%div.modal#modal-scenario-custom-new{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Create Custom Scenario
+      %div.modal-body#modalbody
+        = form_tag scenarios_create_custom_path, remote:true, method: :post do
+          %div#name-div
+            = label_tag "Name:", nil, class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
+
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.panel.panel-default
   %div.panel-heading.nav.nav-pills
     %li
       %h4
-        Scenarios
+        Scenarios:
     %li
-      = link_to 'Load Scenario', new_scenario_path
-    / %li
-    /   = link_to 'Create Scenario', 'scenarios/make_scenario'
-    /   = link_to 'Create Scenario', create_scenario_scenario_path(id:1)
-    / %li.dropdown
-    /   %a.dropdown-toggle{ "data-toggle" => "dropdown", href: "#", role: "button", "aria-expanded" => "false"}
-    /     Actions
-    /     %span.caret
-    /   %ul.dropdown-menu{role: "menu"}
-    /     %li
-    /        = link_to 'create scenario'
-    /        = link_to 'upload scenario'
+      &nbsp;&nbsp;
+    %li
+      = link_to 'Load New Scenario', new_scenario_path, class: 'btn btn-default'
+    %li
+      &nbsp;&nbsp;
+    %li
+      = link_to 'Create Custom Scenario', "#modal-scenario-custom-new", :data => {:toggle=>"modal"}, onclick: "$('#modal-scenario-custom-new').find('#name').val(''); $('#modal-scenario-custom-new').find('#name-div').removeClass('has-error'); $('#modal-scenario-custom-new').find('#name-help').html('');", class: 'btn btn-default'
 
   %div.panel-body
     %dl
+    %h4
+      %b
+        Current Scenarios:
+    %br
     %table.table.table-bordered
       %tr
         %th Name

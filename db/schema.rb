@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150625195253) do
+ActiveRecord::Schema.define(version: 20150714194359) do
 
   create_table "answers", force: :cascade do |t|
     t.integer  "student_id"
@@ -126,12 +126,30 @@ ActiveRecord::Schema.define(version: 20150625195253) do
 
   add_index "questions", ["scenario_id"], name: "index_questions_on_scenario_id"
 
+  create_table "recipes", force: :cascade do |t|
+    t.integer  "scenario_id"
+    t.string   "name"
+    t.boolean  "custom"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  create_table "role_recipes", force: :cascade do |t|
+    t.integer  "role_id"
+    t.integer  "recipe_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "role_recipes", ["recipe_id"], name: "index_role_recipes_on_recipe_id"
+  add_index "role_recipes", ["role_id"], name: "index_role_recipes_on_role_id"
+
   create_table "roles", force: :cascade do |t|
     t.string   "name"
     t.string   "packages"
-    t.string   "recipes"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "scenario_id"
   end
 
   create_table "scenarios", force: :cascade do |t|
@@ -150,6 +168,7 @@ ActiveRecord::Schema.define(version: 20150625195253) do
     t.string   "instructions"
     t.string   "com_page"
     t.boolean  "custom"
+    t.boolean  "modified",              default: false
   end
 
   create_table "student_group_users", force: :cascade do |t|

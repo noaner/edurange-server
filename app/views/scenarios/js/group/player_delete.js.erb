@@ -1,0 +1,6 @@
+$('#player-<%= @player.id.to_s %>').remove();
+<% if @player.group.scenario.custom? %>
+  $('#save-button-li').removeClass('disabled');
+  $('#save-button').attr('href', '/scenarios/<%= @player.group.scenario.id %>/save');
+<% end %>
+update_flash("Removed player '<%= @player.login %>' from group '<%= @player.group.name %>'.");

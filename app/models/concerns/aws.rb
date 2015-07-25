@@ -9,14 +9,12 @@ module Aws
   # #  Boot and Unboot
 
   def aws_boot_scenario(options = {})
-
     # Do nothing if already booted
     if self.booted?
       return
     end
 
     self.set_booting
-    self.debug_booting
 
     # Do initial scoring setup
     begin
@@ -27,18 +25,10 @@ module Aws
     end
 
     # Boot each Cloud
-    if options[:boot_dependents]
+    if options[:dependents]
       self.clouds.each do |cloud|
         begin
-          if cloud.stopped?
-            debug "queuing - cloud #{cloud.name} for boot"
-            cloud.set_queued_boot
-          end
-          if options[:run_asynchronously]
-            cloud.delay(queue: 'clouds').boot(options)
-          else
-            cloud.boot(options)
-          end
+          cloud.boot(options)
         rescue => e
           self.boot_error(e)
           return
@@ -71,6 +61,22 @@ module Aws
         return
       end
 
+      # Wait for subnets to finish booting
+      begin
+        cnt = 0
+        until not self.subnets_booting?
+          debug "waiting - for subnets to finish booting"
+          if cnt > 600
+            raise "ERROR - scenario timed out waiting for subnets to finish"
+          end
+          cnt += 1
+          sleep 2
+          self.reload
+        end
+      rescue => e
+        self.boot_error(e)
+      end
+
       # Wait for all instances to finish booting
       begin
         debug "waiting - for instances to finish booting"
@@ -96,22 +102,11 @@ module Aws
 
   def aws_unboot_scenario(options = {})
     self.set_unbooting
-    self.debug_unbooting
 
-    if options[:unboot_dependents]
+    if options[:dependents]
       self.clouds.each do |cloud|
         begin
-          if cloud.driver_id
-            cloud.set_queued_unboot
-            debug "queueing - cloud #{cloud.name} for unboot"
-            if options[:run_asynchronously]
-              cloud.delay(queue: 'clouds').unboot(options)
-            else
-              cloud.unboot(options)
-            end
-          else
-            cloud.set_stopped
-          end
+          cloud.unboot(options)
         rescue => e
           self.unboot_error(e)
           return
@@ -175,7 +170,6 @@ module Aws
     # Boot if not booted
     if self.driver_id == nil
       self.set_booting
-      self.debug_booting
 
       # Create VPC, assign driver_id, and create Internet Gateway
       begin
@@ -189,7 +183,7 @@ module Aws
       # Assign driver_id
       debug "assigning - VPC driver_id"
       begin
-        self.update_attributes(driver_id: ec2vpc.id)
+        self.update_attribute(:driver_id, ec2vpc.id)
       rescue => e
         self.boot_error(e)
         return
@@ -283,17 +277,10 @@ module Aws
     end
 
     # boot dependent Subnets
-    if options[:boot_dependents]
+    if options[:dependents]
       self.subnets.each do |subnet|
-        if subnet.driver_id == nil
-          subnet.set_queued_boot
-        end
         begin
-          if options[:run_asynchronously]
-            subnet.delay(queue: 'subnets').boot(options)
-          else
-            subnet.boot(options)
-          end
+          subnet.boot(options)
         rescue => e
           self.boot_error(e)
           return
@@ -311,24 +298,13 @@ module Aws
     end
 
     self.set_unbooting
-    self.debug_unbooting
 
     # Unboot dependents
-    if options[:unboot_dependents]
+    if options[:dependents]
 
       self.subnets.each do |subnet|
         begin
-          if subnet.driver_id != nil
-            subnet.set_queued_unboot
-          end
-
-          if options[:run_asynchronously]
-            subnet.set_unbooting
-            subnet.delay(queue: 'subnets').unboot(options)
-          else
-            subnet.unboot(options)
-          end
-
+          subnet.unboot(options)
         rescue => e
           self.unboot_error(e)
           return
@@ -434,10 +410,9 @@ module Aws
       return
     end
 
-    self.driver_id = nil
+    self.update_attribute(:driver_id, nil)
     self.set_stopped
     self.debug_unbooting_finished
-    self.save
   end
 
   # Boots {Subnet}, and all of its {Instance Instances}.
@@ -448,7 +423,6 @@ module Aws
     if self.driver_id == nil
 
       self.set_booting
-      self.debug_booting
 
       # create Subnet
       debug "creating - EC2 Subnet"
@@ -462,7 +436,7 @@ module Aws
       # set driver_id
       debug "assigning - Subnet #{self.id} driver_id"
       begin
-        self.update_attributes(driver_id: ec2subnet.id)
+        self.update_attribute(:driver_id, ec2subnet.id)
       rescue => e
         self.boot_error(e)
         return
@@ -545,14 +519,10 @@ module Aws
       self.debug_booting_finished
     end
 
-    if options[:boot_dependents]
+    if options[:dependents]
       self.instances.select{ |i| !i.driver_id}.each do |instance|
         begin
-          if options[:run_asynchronously]
-            instance.delay(queue: 'instances').boot(options)
-          else
-            instance.boot(options)
-          end
+          instance.boot(options)
         rescue => e
           self.boot_error(e)
           return
@@ -564,7 +534,6 @@ module Aws
 
   def aws_unboot_subnet(options = {})
     self.set_unbooting
-    self.debug_unbooting
 
     # only unboot if instances are not booted
     if self.driver_id == nil
@@ -574,12 +543,12 @@ module Aws
 
     debug "unbooting - Subnet #{self.id}"
 
-    if options[:unboot_dependents]
+    if options[:dependents]
       self.instances.each do |instance|
         if instance.driver_id
           if options[:run_asynchronously]
-            instance.set_unbooting
-            instance.delay(queue: 'instances').unboot
+            # instance.set_unbooting
+            instance.delay(queue: 'instance').unboot
           else
             instance.unboot
           end
@@ -654,10 +623,9 @@ module Aws
       return
     end
 
-    self.driver_id = nil
+    self.update_attribute(:driver_id, nil)
     self.debug_unbooting_finished
     self.set_stopped
-    self.save
   end
 
   # # Boots {Instance}, generating required cookbooks and startup scripts.
@@ -668,14 +636,13 @@ module Aws
   def aws_boot_instance(options = {})
 
     self.set_booting
-    self.debug_booting
 
     # scoring
-    if self.roles.select { |r| r.recipes.include?('scoring') }.size > 0
+    if self.roles.select { |r| r.recipes.find_by_name('scoring') }.size > 0
       begin
         self.aws_instance_initialize_scoring
         self.reload
-        self.scenario.update(scoring_pages_content: self.scenario.read_attribute(:scoring_pages_content) + self.scoring_page + "\n")
+        self.scenario.update_attribute(:scoring_pages_content, self.scenario.read_attribute(:scoring_pages_content) + self.scoring_page + "\n")
         self.scenario.aws_scenario_write_to_scoring_pages
       rescue => e
         self.boot_error(e)
@@ -689,14 +656,11 @@ module Aws
       debug "generating - instance cookbook"
       self.aws_instance_create_com_page
       self.aws_instance_create_bash_history_page
-      # instance_template = InstanceTemplate.new(self)
-      # cookbook_text = instance_template.generate_cookbook
 
       debug "uploading - instance cookbook"
       self.aws_instance_upload_cookbook(self.generate_cookbook)
       
       debug "generating - instance chef script"
-      # cloud_init = instance_template.generate_cloud_init(self.cookbook_url)
       cloud_init = self.generate_init
     rescue => e
       self.boot_error(e)
@@ -733,7 +697,7 @@ module Aws
         subnet: self.subnet.driver_id
       )
       debug "updating instance attribute"
-      self.update_attributes(driver_id: ec2instance.id)
+      self.update_attribute(:driver_id, ec2instance.id)
       debug "updated instance attribute - #{self.driver_id}"
     rescue NoMethodError => e
       debug "- NoMethodError"
@@ -883,13 +847,11 @@ module Aws
 
     self.set_booted
     self.debug_booting_finished
-    self.save
     debug "[x] booted - Instance #{self.name}"
   end
 
   def aws_unboot_instance(options = {})
     self.set_unbooting
-    self.debug_unbooting
 
     if self.driver_id == nil
       self.set_stopped
@@ -940,7 +902,6 @@ module Aws
     end
 
     debug "stopping - EC2 Instance #{self.driver_id}"
-    self.save
 
     # wait for instance to terminate
     begin
@@ -972,10 +933,9 @@ module Aws
       return
     end
 
-    self.driver_id = nil
+    self.update_attribute(:driver_id, nil)
     self.set_stopped
     self.debug_unbooting_finished
-    self.save
   end
 
   ## Unboot Helpers
@@ -1055,11 +1015,11 @@ module Aws
   # Fetches the {Cloud}'s AWS Virtual Private Cloud object's state
   # to see if it is booted.
   # @return [Boolean] if {Cloud} is booted
-  def aws_cloud_check_status
-    if self.aws_cloud_driver_object.state == :available
-      self.update(status: "booted")
-    end
-  end
+  # def aws_cloud_check_status
+  #   if self.aws_cloud_driver_object.state == :available
+  #     self.update(status: "booted")
+  #   end
+  # end
 
   # @return [Boolean] Whether or not the {Subnet} is internet_accessible
   def aws_subnet_nat?
@@ -1067,11 +1027,11 @@ module Aws
   end
 
   # @return [Boolean] Whether or not the {Subnet} is booted
-  def aws_subnet_check_status
-    if self.aws_subnet_driver_object.state == :available
-      self.update(status: "booted")
-    end
-  end
+  # def aws_subnet_check_status
+  #   if self.aws_subnet_driver_object.state == :available
+  #     self.update(status: "booted")
+  #   end
+  # end
 
   # Calls #aws_instance_allow_traffic on all of {Subnet}'s {Instance Instances}
   # @param cidr The cidr block to allow traffic to
@@ -1172,7 +1132,6 @@ module Aws
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[name].write(content) if content
       return bucket.objects[name].url_for(permissions, expires: 10.days, :content_type => 'text/plain').to_s
-      # self.update(com_page: bucket.objects[name].url_for(permissions, expires: 10.days, :content_type => 'text/plain').to_s)
     rescue
       raise
       return
@@ -1207,7 +1166,7 @@ module Aws
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[self.aws_instance_cookbook_name].write(cookbook_text)
-      self.update(cookbook_url: bucket.objects[self.aws_instance_cookbook_name].url_for(:read, expires: 10.days).to_s)
+      self.update_attribute(:cookbook_url, bucket.objects[self.aws_instance_cookbook_name].url_for(:read, expires: 10.days).to_s)
     rescue
       raise
       return
@@ -1218,7 +1177,7 @@ module Aws
     debug "deleting s3 cookbook"
     begin
       aws_S3_delete_page(self.aws_instance_cookbook_name)
-      self.update(cookbook_url: nil)
+      self.update_attribute(:cookbook_url, nil)
     rescue
       raise
       return
@@ -1238,7 +1197,7 @@ module Aws
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[aws_instance_com_page_name].write("waiting")
-      self.update(com_page: bucket.objects[aws_instance_com_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
+      self.update_attribute(:com_page, bucket.objects[aws_instance_com_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
     rescue
       raise
       return
@@ -1249,7 +1208,7 @@ module Aws
     debug "deleting s3 com page"
     begin
       aws_S3_delete_page(self.aws_instance_com_page_name)
-      self.update(com_page: nil)
+      self.update_attribute(:com_page, nil)
     rescue
       raise
       return
@@ -1268,7 +1227,7 @@ module Aws
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      self.update(bash_history_page: bucket.objects[aws_instance_bash_history_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
+      self.update_attribute(:bash_history_page, bucket.objects[aws_instance_bash_history_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
     rescue
       raise
       return
@@ -1279,7 +1238,7 @@ module Aws
     debug "deleting s3 bash history page"
     begin
       aws_S3_delete_page(self.aws_instance_bash_history_page_name)
-      self.update(bash_history_page: nil)
+      self.update_attribute(:bash_history_page, nil)
     rescue
       raise
       return
@@ -1317,7 +1276,7 @@ module Aws
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      self.update(scoring_pages: bucket.objects[aws_scenario_scoring_pages_name].url_for(:read, expires: 10.days).to_s)
+      self.update_attribute(:scoring_pages, bucket.objects[aws_scenario_scoring_pages_name].url_for(:read, expires: 10.days).to_s)
     rescue
       raise
       return
@@ -1337,7 +1296,7 @@ module Aws
     debug "deleting s3 scoring pages"
     begin 
       AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_scoring_pages_name].delete
-      self.update(scoring_pages: nil)
+      self.update_attribute(:scoring_pages, nil)
     rescue
       raise
       return
@@ -1356,7 +1315,7 @@ module Aws
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       object = bucket.objects[aws_scenario_answers_url_name]
       object.write(self.answers)
-      self.update(answers_url: object.url_for(:read, expires: 10.days).to_s)
+      self.update_attribute(:answers_url, object.url_for(:read, expires: 10.days).to_s)
     rescue
       raise
       return
@@ -1367,7 +1326,7 @@ module Aws
     debug "deleting s3 delete answers page"
     begin 
       AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_answers_url_name].delete
-      self.update(answers_url: nil)
+      self.update_attribute(:answers_url, nil)
     rescue
       raise
       return
@@ -1410,7 +1369,7 @@ module Aws
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[aws_instance_scoring_page_name].write("# put your answers here")
-      self.update(scoring_url: bucket.objects[aws_instance_scoring_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
+      self.update_attribute(:scoring_url, bucket.objects[aws_instance_scoring_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
     rescue
       raise
       return
@@ -1423,7 +1382,7 @@ module Aws
       s3 = AWS::S3.new
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
-      self.update(scoring_page: bucket.objects[aws_instance_scoring_page_name].url_for(:read, expires: 10.days).to_s)
+      self.update_attribute(:scoring_page, bucket.objects[aws_instance_scoring_page_name].url_for(:read, expires: 10.days).to_s)
     rescue
       raise
       return
@@ -1434,7 +1393,7 @@ module Aws
     debug "deleting s3 scoring page"
     begin 
       AWS::S3.new.buckets[Settings.bucket_name].objects[aws_instance_scoring_page_name].delete
-      self.update(scoring_page: nil)
+      self.update_attribute(:scoring_page, nil)
     rescue
       raise
       return

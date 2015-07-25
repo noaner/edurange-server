@@ -1,14 +1,57 @@
 class ScenariosController < ApplicationController
   before_action :authenticate_admin_or_instructor
-  before_action :set_user, only: [:index, :show, :new, :boot_cloud, :player_delete, :log_get, :set_scenario, :set_cloud, :set_subnet, :set_instance, :clone]
-  before_action :set_scenario, only: [:boot, :destroyme, :edit, :show, :status, :update, :unboot, :boot_status, :clone, :modify, :cloud_add, :player_modify, :player_student_group_add,
-    :recipe_custom_add, :recipe_global_add, :recipe_global_get, :recipe_remove, :recipe_update, :recipe_update_view, :recipe_view]
-  before_action :set_cloud, only: [:boot_cloud, :unboot_cloud, :cloud_delete, :cloud_modify, :subnet_add]
-  before_action :set_subnet, only: [:boot_subnet, :unboot_subnet, :subnet_modify, :subnet_delete, :instance_add, :instance_delete]
-  before_action :set_instance, only: [:boot_instance, :unboot_instance, :instance_delete, :instance_bash_history_get, :instance_modify]
-  before_action :set_group, only: [:player_add, :player_student_group_add, :player_student_group_remove]
-  before_action :set_role, only: [:recipe_global_add, :recipe_custom_add, :recipe_global_get, :recipe_remove, :recipe_update]
-  before_action :set_recipe, only: [:recipe_global_add, :recipe_custom_add, :recipe_remove, :recipe_update, :recipe_update_view, :recipe_update, :recipe_view]
+  before_action :set_user
+
+  # Scenario
+  before_action :set_scenario, only: [
+    :clone, :destroyme, :edit, :modify, :show, :update, :save, :save_as,
+    :boot, :boot_status, :unboot,
+    :cloud_add, 
+    :player_modify, :player_student_group_add, :player_add, :player_group_add, :player_delete, :player_group_admin_access_add, :player_group_user_access_add,
+    :role_recipe_add, :role_add,
+    :recipe_custom_add, :recipe_global_add, :recipe_global_get, :recipe_remove, :recipe_update, :recipe_update_view, :recipe_view,
+    :group_add
+  ]
+
+  # Cloud
+  before_action :set_cloud, only: [
+    :boot_cloud, :unboot_cloud, :cloud_delete, :cloud_modify, :subnet_add
+  ]
+
+  # Subnet
+  before_action :set_subnet, only: [
+    :boot_subnet, :unboot_subnet, :subnet_delete, :subnet_modify, :instance_add
+  ]
+
+  # Instance
+  before_action :set_instance, only: [
+    :boot_instance, :unboot_instance, :instance_role_add, :instance_delete, :instance_bash_history, :instance_chef_error, :instance_modify
+  ]
+
+  # Group
+  before_action :set_group, only: [
+    :group_delete, :group_modify, :group_admin_access_add, :group_user_access_add, :group_player_add, :group_student_group_add, :group_student_group_remove
+  ]
+  before_action :set_instance_group, only: [
+    :group_admin_access_remove, :group_user_access_remove
+  ]
+  before_action :set_player, only: [
+    :group_player_delete
+  ]
+
+  # Role
+  before_action :set_role, only: [
+    :role_recipe_add, :role_delete, :role_modify
+  ]
+  before_action :set_recipe, only: [
+    :recipe_remove, :recipe_update, :recipe_update_view, :recipe_update, :recipe_view
+  ]
+  before_action :set_role_recipe, only: [
+    :role_recipe_remove
+  ]
+  before_action :set_instance_role, only: [
+    :instance_role_remove
+  ]
 
   # GET /scenarios
   # GET /scenarios.json
@@ -24,14 +67,18 @@ class ScenariosController < ApplicationController
   # GET /scenarios/1
   # GET /scenarios/1.json
   def show
-    @clone = params[:clone]
+    # @clone = params[:clone]
+    @scenario.check_status
   end
 
   # GET /scenarios/new
   def new
     @scenario = Scenario.new
-    @templates = YmlRecord.yml_headers.map {|filename,name,desc| [name,filename,desc]}
-    @templates_user = YmlRecord.yml_headers_user(@user).map {|filename,name,desc| [name,filename,desc]}
+    @templates = YmlRecord.yml_headers
+    @templates_user = YmlRecord.yml_headers_user(@user)
+    puts @templates
+    puts
+    puts @templates_user
   end
 
   # GET /scenarios/1/edit
@@ -48,9 +95,6 @@ class ScenariosController < ApplicationController
     else
       @scenario = Scenario.new(scenario_params)
     end
-
-    # @scenario.user_id = current_user.id
-    # @scenario.save!
 
     respond_to do |format|
       if @scenario.save
@@ -77,186 +121,180 @@ class ScenariosController < ApplicationController
     end
   end
 
-  # DELETE /scenarios/1
-  # DELETE /scenarios/1.json
+  def create_custom
+    @scenario = Scenario.new(name: params[:name], custom: true, user_id: @user.id)
+    if @scenario.make_custom
+      @scenario.save
+    end
+
+    respond_to do |format|
+      format.js { render "scenarios/js/scenario/create_custom.js.erb", layout: false }
+    end
+  end
+
+  def obliterate_custom
+    @filename = params[:filename]
+    path = "#{Settings.app_path}/scenarios/user/#{@user.id}/#{params[:filename]}"
+    if not File.exists? path
+      @error = "does not exist."
+    end
+    FileUtils.rm_r path
+
+    respond_to do |format|
+      format.js { render "scenarios/js/scenario/obliterate_custom.js.erb", layout: false }
+    end
+  end
+
   def destroyme
-    if @scenario.booted? or @scenario.partially_booted?
+
+    if not @scenario.custom?
+      if @scenario.destroy
+        respond_to do |format|
+          format.js { render js: "window.location.pathname='/scenarios'" }
+        end
+      else
+        respond_to do |format|
+          format.js { render 'scenarios/js/scenario/destroy.js.erb', :layout => false }
+        end
+      end
+    elsif params[:save] == nil and @scenario.modified?
       respond_to do |format|
-        format.js { render 'scenarios/js/destroy_failed.js.erb', :layout => false }
+        format.js { render 'scenarios/js/scenario/destroy.js.erb', :layout => false }
       end
     else
-      @scenario.destroy
-      respond_to do |format|
-        format.js { render js: "window.location.pathname='/scenarios'" }
-        # format.js { redirect_to scenarios_url, notice: 'Scenario was successfully destroyed.' }
-        # format.json { head :no_content }
+      if params[:save] == "true"
+        @scenario.update_yml
+      end
+      if @scenario.destroy
+        respond_to do |format|
+          format.js { render js: "window.location.pathname='/scenarios'" }
+        end
+      else 
+        respond_to do |format|
+          format.js { render 'scenarios/js/scenario/destroy.js.erb', :layout => false }
+        end
       end
     end
+
+  end
+
+  def save
+    @scenario.update_yml
+    respond_to do |format|
+      format.js { render 'scenarios/js/scenario/save.js.erb', :layout => false }
+    end
+  end
+
+  def save_as
+    @scenario.change_name(params[:name])
+    respond_to do |format|
+      format.js { render 'scenarios/js/scenario/save_as.js.erb', :layout => false }
+    end
+  end
+
+  def clone
+    @clone = @scenario.clone(params[:name])
+    respond_to do |format|
+      format.js { render "scenarios/js/scenario/clone.js.erb", layout: false }
+    end
+  end
+
+  def clone_set
+    clone = Scenario.find(params[:clone_id])
+    redirect_to clone, notice: 'Scenario was successfully cloned.'
   end
 
   #############################################################
   # BOOTING
 
   def boot
-    if @scenario.stopped? or @scenario.partially_booted?
-      @scenario.set_queued_boot
-      @scenario.delay(queue: 'scenarios').boot(boot_dependents: true, run_asynchronously: Settings.boot_asynchronously)
-      @flash_message = "Scenario #{@scenario.name} has been placed in the boot queue"
-    end
-
-    @hide_dropdown = true
+    @scenario.boot(dependents: true)
     respond_to do |format|
-      format.js { render 'scenarios/js/boot_scenario.js.erb', :layout => false }
+      format.js { render 'scenarios/js/boot/boot_scenario.js.erb', :layout => false }
     end
   end
 
   def unboot
-    if @scenario.booted? or @scenario.partially_booted?
-      @scenario.set_queued_unboot
-      @scenario.delay(queue: 'scenarios').unboot(unboot_dependents: true, run_asynchronously: Settings.boot_asynchronously)
-      @flash_message = "Scenario #{@scenario.name} has been placed in the unboot queue"
-    end
-
-    @hide_dropdown = true
+    @scenario.unboot(dependents: true)
     respond_to do |format|
-      format.js { render 'scenarios/js/unboot.js.erb', :layout => false }
+      format.js { render 'scenarios/js/boot/unboot_scenario.js.erb', :layout => false }
     end
   end
 
   def boot_cloud
-    if @cloud.stopped?
-      @cloud.set_queued_boot
-      @cloud.delay(queue: 'clouds').boot
-      @flash_message = "Cloud #{@cloud.name} has been placed in the boot queue"
-    end
-
-    respond_to do |format|
-      format.js { render template: 'scenarios/js/boot_cloud.js.erb', layout: false }
+    @cloud.boot(solo: true)
+    respond_to  do |format|
+      format.js { render template: 'scenarios/js/boot/boot_cloud.js.erb', layout: false }
     end
   end
 
   def unboot_cloud
-    if @cloud.subnets_booted?
-      @cloud.errors.add(:active_subnets, "Clouds subnets must be unbooted before cloud can unboot")
-    else
-      @cloud.set_queued_unboot
-      @cloud.delay(queue: 'clouds').unboot
-      @flash_message = "Cloud #{@cloud.name} has been placed in the unboot queue"
-    end
-
+    @cloud.unboot(solo: true)
     respond_to do |format|
-      format.js { render template: 'scenarios/js/unboot_cloud.js.erb',  layout: false }
+      format.js { render template: 'scenarios/js/boot/unboot_cloud.js.erb',  layout: false }
     end
   end
 
   def boot_subnet
-    if not @subnet.cloud.booted?
-      @subnet.errors.add(:cloudnotbooted, "Instances Subnet must be booted first")
-    else
-      @subnet.set_queued_boot
-      @subnet.delay(queue: 'subnets').boot
-      @flash_message = "Subnet #{@subnet.name} has been placed in the boot queue"
-    end
-
+    @subnet.boot(solo: true)
     respond_to do |format|
-      format.js { render template: 'scenarios/js/boot_subnet.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/boot/boot_subnet.js.erb', layout: false }
     end
   end
 
   def unboot_subnet
-    if @subnet.instances_active?
-      @subnet.errors.add(:instancesnotunbooted, "Subnets instances must be unbooted first")
-    else
-      @subnet.set_queued_unboot
-      @subnet.delay(queue: 'subnets').unboot
-      @flash_message = "Subnet #{@subnet.name} has been placed in the unboot queue"
-    end
-
+    @subnet.unboot(solo: true)
     respond_to do |format|
-      format.js { render template: 'scenarios/js/unboot_subnet.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/boot/unboot_subnet.js.erb', layout: false }
     end
   end
 
   def boot_instance
-    if not @instance.subnet.booted?
-      @instance.errors.add(:subnetnotbooted, "Instances Subnet must be booted first")
-    else
-      @instance.set_queued_boot
-      @instance.delay(queue: 'instances').boot
-      @flash_message = "Instance #{@instance.name} has been placed in the boot queue"
-    end
-
+    @instance.boot(solo: true)
     respond_to do |format|
-      format.js { render template: 'scenarios/js/boot_instance.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/boot/boot_instance.js.erb', layout: false }
     end
   end
 
   def unboot_instance
-    if @instance.driver_id
-      @instance.set_queued_unboot
-      @instance.delay(queue: 'instances').unboot
-      @flash_message = "Instance #{@instance.name} has been placed in the unboot queue"
-    end
-
+    @instance.unboot(solo: true)
     respond_to do |format|
-      format.js { render template: 'scenarios/js/unboot_instance.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/boot/unboot_instance.js.erb', layout: false }
     end
   end
 
   def boot_status
-    @scenario.get_status
+    @scenario.check_status
     respond_to do |format|
-      format.js { render 'scenarios/js/boot_status.js.erb', :layout => false }
+      format.js { render 'scenarios/js/boot/boot_status.js.erb', :layout => false }
     end
   end
 
   ###############################################################
   #  Resource Modification
 
-  # SCENARIO
-  def clone
-    @clone = @scenario.clone(params[:name])
-    respond_to do |format|
-      format.js { render "scenarios/js/scenario_clone.js.erb", layout: false }
-    end
-  end
-
-  def modify
-    @scenario.change_name(params[:name])
-    respond_to do |format|
-      format.js { render template: 'scenarios/js/scenario_modify.js.erb', layout: false }
-    end
-  end
-
   # CLOUD
   def cloud_add
-    @cloud = @scenario.clouds.new(name: params[:name], cidr_block: params[:CIDR])
+    @cloud = @scenario.clouds.new(name: params[:name], cidr_block: params[:cidr_block])
     @cloud.save
 
     respond_to do |format|
-      format.js { render template: 'scenarios/js/cloud_add.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/cloud/add.js.erb', layout: false }
     end
   end
 
   def cloud_delete
-    if @cloud.subnets.size > 0
-      @cloud.errors.add(:has_dependents, "Cannot delete cloud because it has dependents")
-    else
-      @cloud.destroy
-    end
-
+    @cloud.destroy
     respond_to do |format|
-      format.js { render template: 'scenarios/js/cloud_delete.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/cloud/delete.js.erb', layout: false }
     end
   end
 
   def cloud_modify
-    @cloud.name = params[:name]
-    @cloud.cidr_block = params[:cidr_block]
-    @cloud.save
+    @cloud.update(name: params[:name], cidr_block: params[:cidr_block])
 
     respond_to do |format|
-      format.js { render template: 'scenarios/js/cloud_modify.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/cloud/modify.js.erb', layout: false }
     end
   end
 
@@ -266,36 +304,22 @@ class ScenariosController < ApplicationController
     @subnet.save
 
     respond_to do |format|
-      format.js { render template: 'scenarios/js/subnet_add.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/subnet/add.js.erb', layout: false }
     end
   end
 
   def subnet_delete
-    if @subnet.instances.size > 0
-      @subnet.errors.add(:has_dependents, "Cannot delete subnet because it has dependents")
-    else
-      @subnet.destroy
-    end
-
+    @subnet.destroy
     respond_to do |format|
-      format.js { render template: 'scenarios/js/subnet_delete.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/subnet/delete.js.erb', layout: false }
     end
   end
 
   def subnet_modify
-    @subnet.name = params[:name]
-    @subnet.cidr_block = params[:CIDR]
-
-    if params[:internet_accessible] == "true"
-      @subnet.internet_accessible = true
-    else
-      @subnet.internet_accessible = false
-    end
-
-    @subnet.save
+    @subnet.update(name: params[:name], cidr_block: params[:cidr_block], internet_accessible: params[:internet_accessible])
 
     respond_to do |format|
-      format.js { render template: 'scenarios/js/subnet_modify.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/subnet/modify.js.erb', layout: false }
     end
   end
 
@@ -311,15 +335,14 @@ class ScenariosController < ApplicationController
     @instance.save
 
     respond_to do |format|
-      format.js { render template: 'scenarios/js/instance_add.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/instance/add.js.erb', layout: false }
     end
   end
 
   def instance_delete
     @instance.destroy
-
     respond_to do |format|
-      format.js { render template: 'scenarios/js/instance_delete.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/instance/delete.js.erb', layout: false }
     end
   end
 
@@ -327,99 +350,181 @@ class ScenariosController < ApplicationController
     @accessible_to_not_accessible = ((@instance.internet_accessible == true) and (params[:internet_accessible] == "false"))
     @not_accessible_to_accessible = ((@instance.internet_accessible == false) and (params[:internet_accessible] == "true"))
 
-    @instance.name = params[:name]
-    @instance.ip_address = params[:ip_address]
-    @instance.internet_accessible = params[:internet_accessible] == "true"
-    @instance.os = params[:os]
-    @instance.save
-
+    @instance.update(
+      name:  params[:name],
+      ip_address:  params[:ip_address],
+      internet_accessible:  params[:internet_accessible],
+      os:  params[:os]
+    )
+    
     respond_to do |format|
-      format.js { render template: 'scenarios/js/instance_modify.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/instance/modify.js.erb', layout: false }
+    end
+  end
+
+  def instance_role_add
+    @instance_role = @instance.role_add(params[:name])
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instance/role_add.js.erb', layout: false }
+    end
+  end
+
+  def instance_role_remove
+    @instance_role.destroy
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instance/role_remove.js.erb', layout: false }
+    end
+  end
+
+  def instance_bash_history
+    @bash_history = @instance.get_bash_history.gsub("\n", "<br>").html_safe;
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instance/bash_history.js.erb', layout: false }
+    end
+  end
+
+  def instance_chef_error
+    @chef_error = @instance.get_chef_error.gsub("\"", "\\\"").gsub(/\n/, "\\n").gsub(/\r/, "").html_safe
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instance/chef_error.js.erb', layout: false }
     end
   end
 
   ###############################################################
   #  Players
 
-  def player_add
+  def group_add
+    @group = @scenario.groups.new(name: params[:name])
+    @group.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/add.js.erb', layout: false }
+    end
+  end
+
+  def group_delete
+    @group.destroy
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/delete.js.erb', layout: false }
+    end
+  end
+
+  def group_modify
+    @group.update(name: params[:name])
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/modify.js.erb', layout: false }
+    end
+  end
+
+  def group_admin_access_add
+    @instance = @group.scenario.instances.select { |i| i.name == params[:name] }.first
+    if @instance
+      @instance_group = @group.instance_groups.new(instance_id: @instance.id, administrator: true)
+      @instance_group.save
+    end
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/admin_access_add.js.erb', layout: false }
+    end
+  end
+
+  def group_admin_access_remove
+    @instance_group.destroy
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/admin_access_remove.js.erb', layout: false }
+    end
+  end
+
+  def group_user_access_add
+    @instance = @group.scenario.instances.select { |i| i.name == params[:name] }.first
+    if @instance
+      @instance_group = @group.instance_groups.new(instance_id: @instance.id, administrator: false)
+      @instance_group.save
+    end
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/user_access_add.js.erb', layout: false }
+    end
+  end
+
+  def group_user_access_remove
+    @instance_group.destroy
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/user_access_remove.js.erb', layout: false }
+    end
+  end
+
+  def group_player_add
     @player = @group.players.new(login: params[:login], password: params[:password])
     @player.save
 
     respond_to do |format|
-      format.js { render template: 'scenarios/js/player_add.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/group/player_add.js.erb', layout: false }
     end
   end
 
-  def player_delete
-    @player = Player.find(params[:player_id])
-    if not @user.owns? @player
-      head :ok, content_type: "text/html"
-      return
-    end
-
-    @player.delete
-
+  def group_player_delete
+    @player.destroy
     respond_to do |format|
-      format.js { render template: 'scenarios/js/player_delete.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/group/player_delete.js.erb', layout: false }
     end
   end
 
-  def player_student_group_add
-    # if @scenario.stopped?
-      # redirect_to @scenario, notice: "Can not modify players while scenario is booted"
-      # return
-    # end
-    @players = []
-    student_group = StudentGroup.where("name = ? AND user_id = #{current_user.id}", params[:student_group]).first
-    
-    student_group.student_group_users.each do |student_group_user|
-        if not @group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
-          player = @group.players.new(
-            login: "student_#{student_group_user.user.id}",
-            password: SecureRandom.base64(7),
-            user_id: student_group_user.user.id,
-            student_group_id: student_group_user.student_group.id
-          )
-          player.save
-          @players.push(player)
-        end
-    end
-    
+  def group_student_group_add
+    @student_group_name = params[:name]
+    @players = @group.student_group_add(params[:name])
     respond_to do |format|
-      format.js { render template: 'scenarios/js/player_student_group_add.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/group/student_group_add.js.erb', layout: false }
     end
   end
 
-  def player_student_group_remove
-    @players = []
-    student_group = StudentGroup.where("name = ? AND user_id = #{current_user.id}", params[:student_group]).first
-    
-    student_group.student_group_users.each do |student_group_user|
-      # if params[:add]
-        # if !@group.players.where("user_id = #{student_group_user.user_id} AND student_group_id = #{student_group.id}").first
-        # # if !group.players.find_by_user_id(student_group_user.user_id)
-          
-        #   player = @group.players.new(
-        #     login: "student_#{student_group_user.user.id}",
-        #     password: SecureRandom.base64(7),
-        #     user_id: student_group_user.user.id,
-        #     student_group_id: student_group_user.student_group.id
-        #   )
-        #   player.save
-        #   @players.push(player)
-
-        # end
-      # elsif params[:remove]
-
-      if player = @group.players.find_by_user_id(student_group_user.user.id)
-        @players.push(player)
-        player.delete
-      end
-      # end
-    end
-
+  def group_student_group_remove
+    @student_group_name = params[:name]
+    @players = @group.student_group_remove(params[:name])
+    puts @players
     respond_to do |format|
-      format.js { render template: 'scenarios/js/player_student_group_remove.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/group/student_group_remove.js.erb', layout: false }
+    end
+  end
+
+  ###############################################################
+  #  Roles
+
+  def role_add
+    @role = @scenario.roles.new(name: params[:name])
+    @role.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/role/add.js.erb', layout: false }
+    end
+  end
+
+  def role_delete
+    @instance_role_ids = @role.instance_roles.map { |ir| ir.id }
+    @role.destroy
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/role/delete.js.erb', layout: false }
+    end
+  end
+
+  def role_modify
+    @role.update(name: params[:name])
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/role/modify.js.erb', layout: false }
+    end
+  end
+
+  def role_recipe_add
+    @recipe = @scenario.recipes.find_by_name(params[:name])
+    if @recipe
+      @role_recipe = @role.role_recipes.new(recipe_id: @recipe.id)
+      @role_recipe.save
+    end
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/role/recipe_add.js.erb', layout: false }
+    end
+  end
+
+  def role_recipe_remove
+    @role_recipe.destroy
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/role/recipe_remove.js.erb', layout: false }
     end
   end
 
@@ -427,83 +532,83 @@ class ScenariosController < ApplicationController
   #  Recipes
 
   def recipe_custom_add
-    @role.add_custom_recipe(params[:recipe], params[:text])
+    # @scenario.recipe_custom_add(params[:recipe], params[:text])
+
+    @recipe = @scenario.recipes.new(name: params[:name], custom: true)
+    if @recipe and not @recipe.errors.any?
+      @recipe.text_update(params[:text])
+      @recipe.save
+    end
+
     respond_to do |format|
-      format.js { render template: 'scenarios/js/recipe_custom_add.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/recipe/custom_add.js.erb', layout: false }
     end
   end
 
   def recipe_global_add
-    @role.add_global_recipe(@recipe)
+    @recipe = @scenario.recipes.new(name: params[:name], custom: false)
+    @recipe.save
     respond_to do |format|
-      format.js { render template: 'scenarios/js/recipe_global_add.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/recipe/global_add.js.erb', layout: false }
     end
   end
 
   def recipe_global_get
-    @recipes = @role.scenario.get_global_recipes_and_descriptions
+    @recipes = @scenario.get_global_recipes_and_descriptions
     respond_to do |format|
-      format.js { render template: 'scenarios/js/recipe_global_get.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/recipe/global_get.js.erb', layout: false }
     end
   end
 
   def recipe_remove
-    @role.remove_recipe @recipe
-
+    @role_recipes_ids = @recipe.role_recipes.map { |rr| rr.id }
+    @recipe.destroy
     respond_to do |format|
-      format.js { render template: 'scenarios/js/recipe_remove.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/recipe/remove.js.erb', layout: false }
     end
   end
 
   def recipe_update
-    if @global
-      head :ok, content_type: "text/html"
-      return
-    end
-
-    @scenario.recipe_update(@recipe, params[:text])
+    @recipe.text_update(params[:text])
     respond_to do |format|
-      format.js { render template: 'scenarios/js/recipe_update.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/recipe/update.js.erb', layout: false }
     end
   end
 
   def recipe_update_view
-    if @global
+    if not @recipe.custom
       @error = "This is a global recipe can not update from here."
     else
-      @recipe_text = @scenario.recipe_text(@recipe).gsub("\"", "\\\"").gsub(/\n/, "\\n").gsub(/\r/, "").html_safe;
+      @recipe_text = @recipe.text.gsub("\"", "\\\"").gsub(/\n/, "\\n").gsub(/\r/, "").html_safe;
     end
     respond_to do |format|
-      format.js { render template: 'scenarios/js/recipe_update_view.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/recipe/update_view.js.erb', layout: false }
     end
   end
 
   def recipe_view
-    @recipe_text = @scenario.recipe_text(@recipe).gsub("\n", "<br>").gsub(" ", "&nbsp").gsub("'", "\"").gsub(/\r/, "").html_safe;
+    @recipe_text = @recipe.text.gsub("\n", "<br>").gsub(" ", "&nbsp").gsub("'", "\"").gsub(/\r/, "").html_safe;
     respond_to do |format|
-      format.js { render template: 'scenarios/js/recipe_view.js.erb', layout: false }
+      format.js { render template: 'scenarios/js/recipe/view.js.erb', layout: false }
     end
   end
 
   ###############################################################
   #  Helpers
 
-  def instance_bash_history
-    @bash_history = @instance.get_bash_history.gsub("\n", "<br>").html_safe;
-    respond_to do |format|
-      format.js { render template: 'scenarios/js/bash_history.js.erb', layout: false }
-    end
-  end
-
   def log_get
     if params[:kind] == 'scenario'
       resource = Scenario.find(params[:id])
+      @dropdown = "dropdown-scenario"
     elsif params[:kind] == 'cloud'
       resource = Cloud.find(params[:id])
+      @dropdown = "cloud-#{resource.id}-dropdown"
     elsif params[:kind] == 'subnet'
       resource = Subnet.find(params[:id])
+      @dropdown = "subnet-#{resource.id}-dropdown"
     elsif params[:kind] == 'instance'
       resource = Instance.find(params[:id])
+      @dropdown = "instance-#{resource.id}-dropdown"
     end
 
     if not @user.owns? resource
@@ -565,14 +670,52 @@ class ScenariosController < ApplicationController
       end
     end
 
+    def set_instance_role
+      @instance_role = InstanceRole.find(params[:instance_role_id])
+      if not @user.owns? @instance_role
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
     def set_role
-      @role = @scenario.roles.find(params[:role_id]).first
+      @role = Role.find(params[:role_id])
+      if not @user.owns? @role
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_role_recipe
+      @role_recipe = RoleRecipe.find(params[:role_recipe_id])
+      if not @user.owns? @role_recipe
+        head :ok, content_type: "text/html"
+        return
+      end
     end
 
     def set_recipe
-      @recipe = params[:recipe].filename_safe
-      @global = false
-      @global = true if File.exists? "#{Settings.app_path}scenarios/recipes/#{@recipe}.rb.erb"
+      @recipe = Recipe.find(params[:recipe_id])
+      if not @user.owns? @recipe
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_player
+      @player = Player.find(params[:player_id])
+      if not @user.owns? @player
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_instance_group
+      @instance_group = InstanceGroup.find(params[:instance_group_id])
+      if not @user.owns? @instance_group
+        head :ok, content_type: "text/html"
+        return
+      end
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.

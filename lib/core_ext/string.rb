@@ -1,5 +1,5 @@
 class String
   def filename_safe
-    self.gsub(/[^0-9A-z\-]/, '_').downcase
+    self.gsub(/\W/, '_').downcase
   end
 end

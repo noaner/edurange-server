@@ -1,0 +1,25 @@
+%li{ id: "role-#{role.id}" }
+  %label#role-name
+    = role.name
+  - if role.scenario.custom?
+    %div.inline-block
+      %div.dropdown{ id: "role-#{role.id}-dropdown"  }
+        %button.btn.btn-default.dropdown-toggle{type:'button', id:"role-#{role.id}-dropdown", "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+          %span.caret
+        %ul.dropdown-menu{ id: "dropdown-role-menu" , role: 'menu', "aria-labelledby" => "role-#{role.id}-dropdown" }
+          %li{ id: "role-#{role.id}-recipe-add-button-li", class: role.instances_stopped? ? "" : "disabled" }
+            = link_to 'Add Recipe', '#modal-role-recipe-add', :data => {:toggle=>"modal"}, onclick: "$('#modal-role-recipe-add').find('#title').html('#{role.name}: Add Recipe'); $('#modal-role-recipe-add').find('#role_id').val('#{role.id}'); $('#modal-role-recipe-add').find('#name-div').removeClass('has-error'); $('#modal-role-recipe-add').find('#name').val(''); $('#modal-role-recipe-add').find('#name-help').html(''); $('#modal-role-recipe-add').find('#help-div').removeClass('has-error'); $('#modal-role-recipe-add').find('#help-help').html('');"
+          %li.divider
+          %li{ id: "role-#{role.id}-modify-button-li" }
+            = link_to 'Modify','#modal-role-modify', :data => {:toggle=>"modal"}, onclick: "$('#modal-role-modify').find('#role-name').html($('#role-#{role.id}').find('#role-name').html().trim()); $('#modal-role-modify').find('#role_id').val('#{role.id}'); $('#modal-role-modify').find('#name-div').removeClass('has-error'); $('#modal-role-modify').find('#name').val(''); $('#modal-role-modify').find('#name-help').html(''); $('#modal-role-modify').find('#help-div').removeClass('has-error'); $('#modal-role-modify').find('#help-help').html('');"
+          %li{ id: "role-#{role.id}-delete-button-li", class: role.instances_stopped? ? "" : "disabled" }
+            = link_to 'Delete', role_delete_scenario_path(role_id: role), remote: true, method: :post
+  %br          
+  Recipes:
+  %ul{ id: "role-#{role.id}-recipes" }
+    - role.role_recipes.each do |role_recipe|
+      %li{ id: "role-recipe-#{role_recipe.id}"}
+        = role_recipe.recipe.name
+        - if role.scenario.custom?
+          = link_to 'remove', role_recipe_remove_scenario_path(role_recipe_id: role_recipe.id), remote: true, method: :post, id: "role-recipe-#{role_recipe.id}-remove-button", class: role.instances_stopped? ? "" : "hidden"
+                  

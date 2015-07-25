@@ -1,117 +1,120 @@
-%div.modal#modal-add-cloud{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-student-group-create{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
         %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
           &times;
         %h3.modal-title.inline#title
-          = "Add Student"
-          %span#modal-title
+          Create Student Group
       %div.modal-body#modalbody
-        = form_tag student_groups_add_to_path(@scenario), remote:true do 
-          %div#cidr-div
-            = label_tag "Name:", nil, class: 'control-label'
+        = form_tag instructor_student_group_create_path(@scenario), remote: true, method: :post do 
+          %div#name-div
+            = label_tag nil, "Name:"
             = text_field_tag "name", nil, class: 'form-control'
             %span.help-block.inline#name-help
-          %p
-          %div#cidr-div
-            = label_tag nil, "CIDR:", class: 'control-label'
-            = text_field_tag "CIDR", nil, class: 'form-control'
-            %span.help-block.inline#cidr-help
-          %p
+          %br
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
+%div.modal#modal-student-group-user-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Add User to Student Group
+      %div.modal-body#modalbody
+        = form_tag instructor_student_group_user_add_path(@scenario), remote: true, method: :post do
+          = label_tag nil, "User:"
+          %span#user-name
+          = hidden_field_tag 'user_id'
+          %div#name-div
+            = label_tag nil, "Student Group Name:"
+            = text_field_tag "student_group_name", nil, class: 'form-control'
+            %span.help-block.inline#name-help
+          %br
           = submit_tag "Submit", :class => 'btn btn-default'
       %div.modal-footer
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
 %div.panel.panel-default
-  %div.panel-heading
-    %h3 Instructor Home
+  %div.panel-heading.nav.nav-pills
+    %li
+      %h3
+        Instructor Home
 
   %div.panel-body
-    %dl
-      %dt Welcome instructors. On this page you can change your account information and view your Student Groups. Don't worry about Student Groups for now, you can test the Scenarios without them. They will be completed shortly though.
-      %p
-      /A Student Group is a collection of users. When you launch a Scenario you can specify which student groups are on which Teams in the Scenario. This gives all students in the Student Group login credentials for the Scenario. The student can login to this site to view those credentials. If you are just testing Scenarios out for yourself you do not need to worry about creating any Student Groups for now. Click 'edit' under Student Groups to manage them.
-      %p
+    %label Account Information: 
+    %div
+      %dl
+        Name: 
+        =@user.name
+        %br
+        Email:
+        =@user.email
+        %br
+        Password: ********
+        %p
+        = link_to 'edit', edit_user_registration_path, class: 'btn btn-primary'
+        %p
+        Last Sign In:
+        =@user.last_sign_in_at
+        From:
+        =@user.last_sign_in_ip
 
-    %h3 Getting Started:
-    %dl Click on the 'SCENARIOS' button on the top of the page to create a new Scenario.
-    %p
-    %h3 Registration Code:
+    %label Registration Code:
     %dl
       = @user.registration_code
+    %p
 
-    %h3 Student Groups:
-    %dl
-      = form_tag '/instructor/student_group_new' do
-        %b.inline New Student Group:
-        = text_field '', :name, :style => "width:200px;"
-        = submit_tag "create"
-      %p
-
+    %label Student Groups:
+    = link_to 'Create Student Group', '#modal-student-group-create', data: {toggle: "modal"}, class: 'btn btn-primary', onclick: "$('#modal-student-group-create').find('#name-div').removeClass('has-error'); $('#modal-student-group-create').find('#name').val(''); $('#modal-student-group-create').find('#name-help').html(''); "
+    %dl{ id: "student-groups" }
       - @user.student_groups.each do |student_group|
-        - if student_group.name == "All"
-          = form_tag 'instructor/student_group_assign' do
-            %b= student_group.name
-            %table
-              %tr
-                %th Name
-                %th Email
-              - student_group.student_group_users.each do |student_group_user|
-                %tr
-                  %td= student_group_user.user.name
-                  %td= student_group_user.user.email
-                  %td
-                    = select_tag 'selects[' + student_group_user.user.id.to_s + ']', options_for_select(@user.student_groups.pluck(:name).select{|a| a != "All"}.append(""), "") 
-              %tr
-                %td
-                %td
-            %p
-
-        - else
-          %b= student_group.name
-          = link_to 'delete', instructor_student_group_delete_path(student_group_id: student_group.id)
-
-          %table
+        %div{ id: "student-group-#{student_group.id}"}
+          %label
+            = student_group.name
+          - if student_group.name != "All"
+            = link_to 'delete', instructor_student_group_destroy_path(student_group_id: student_group.id), remote: true, method: :post, data: { confirm: "Are you sure you want to delete Student Group #{student_group.name}?" }
+          %table.table{ id: "student-group-#{student_group.id}-table"}
             %tr
               %th Name
               %th Email
+              %th Organization
               %th
-            - student_group.student_group_users.each do |student_group_user|
-              %tr
-                %td= student_group_user.user.name
-                %td= student_group_user.user.email
-                %td= link_to 'remove', instructor_student_group_remove_path(student_group_user: student_group_user)
-        %p
+              %th
+            - student_group.student_group_users.each do |sgu|
+              %tr{ id: "student-group-user-#{sgu.id}" }
+                %td= sgu.user.name
+                %td= sgu.user.email
+                %td= sgu.user.organization
+                - if student_group.name == "All"
+                  %td
+                    = link_to 'add to student group', '#modal-student-group-user-add', data: {toggle: "modal"}, onclick: "$('#modal-student-group-user-add').find('#user-name').html('#{sgu.user.name}'); $('#modal-student-group-user-add').find('#user_id').val('#{sgu.user.id}'); $('#modal-student-group-user-add').find('#name-div').removeClass('has-error'); $('#modal-student-group-user-add').find('#student_group_name').val(''); $('#modal-student-group-user-add').find('#name-help').html('');"
+                - else
+                  %td
+                    = link_to 'remove', instructor_student_group_user_remove_path(student_group_user_id: sgu.id), remote: :true, method: :post, data: { confirm: "Are you sure you want to delete Student Group User #{sgu.user.name}?" }
 
-      / %dl
-      /   - if @student_groups.size == 0
-      /     = "none"
-      /   - @student_groups.each do |student_group|
-      /     %dt
-      /     %b Name:
-      /     = student_group.name
-      /     %b Size:
-      /     = @student_groups_size[student_group.name]
-      /   %p
-      /   = link_to 'edit', student_groups_path, class: 'btn btn-primary'
-
-    %div
-      %h3 Account Information:
+    %label Running Scenarios:
+    - if @players.size == 0
       %dl
-        %dt
-          Name:
-          =@user.name
-        %dt
-          Email:
-          =@user.email
-        %dt Password: ********
-        %dt
-          = link_to 'edit', edit_user_registration_path, class: 'btn btn-primary'
-        %dt
-          Last Sign In:
-          =@user.last_sign_in_at
-          From:
-          =@user.last_sign_in_ip
+        none
 
+    - @players.each do |player|
+      %dl
+        - if scenario = Scenario.find(player.group.scenario_id)
+          %label= scenario.name
+          %dl
+            %b.inline login:
+            = player.login
+            %br
+            %b.inline password:
+            = player.password
+            %br
+            %b.iniline instructions:
+            = scenario.instructions
+            %br

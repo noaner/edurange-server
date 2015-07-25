@@ -1,9 +1,0 @@
-<% if @role.errors.any? %>
-	<% if @role.errors[:included].any? %>
-		$('#modal-add-global-recipe').find('#helper-div').addClass('has-error');
-    	$('#modal-add-global-recipe').find('#helper').text("<%= @role.errors[:included][0].html_safe %>");
-	<% end %>
-<% else %>
-	$('#modal-add-global-recipe').modal('hide');
-	$('#<%= "#{@role.name}-recipes" %>').append("<dd><div id='<%= @role.name %>-recipes-<%= @recipe %>'> <%= @recipe %> <a href='/scenarios/<%= @role.scenario.id %>/recipe_view?recipe=<%= @recipe %>' data-method='post' rel='nofollow' data-remote='true'>view</a> <a href='/scenarios/<%= @role.scenario.id %>/recipe_update_view?recipe=<%= @recipe %>' data-method='post' rel='nofollow' data-remote='true'>update</a> <a href='/scenarios/<%= @role.scenario.id %>/recipe_remove?recipe=<%= @recipe %>&role_id=<%= @role.id %>' data-method='post' rel='nofollow' data-remote='true'>remove</a> </div> ")
-<% end %>

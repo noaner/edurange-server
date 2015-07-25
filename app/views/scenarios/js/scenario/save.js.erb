@@ -1,0 +1,9 @@
+$('#save-button').blur();
+<% if @scenario.errors.any? %>
+  alert('There was an error saving scenario <%= @scenario.errors[:running] %>');
+<% else %>
+  $('#save-button-li').attr('class', 'disabled');
+  $('#save-button').attr('href', 'javascript: void(0)');
+  $('#dropdown-actions').removeClass("open");
+  update_flash("Scenario has been saved");
+<% end %>

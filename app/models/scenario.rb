@@ -2,11 +2,90 @@ class Scenario < ActiveRecord::Base
   include Aws
   include Provider
   attr_accessor :template # For picking a template when creating a new scenario
+  
+  belongs_to :user
   has_many :clouds, dependent: :destroy
   has_many :questions, dependent: :destroy
-  validates_presence_of :name, :description
-  belongs_to :user
-  before_destroy :purge, prepend: true
+  has_many :roles, dependent: :destroy
+  has_many :recipes, dependent: :destroy
+  has_many :groups, dependent: :destroy
+  has_many :subnets, through: :clouds
+  has_many :instances, through: :subnets
+
+  validate :validate_name, :validate_stopped
+  before_destroy :validate_stopped, prepend: true
+  
+  def validate_name
+    self.name = self.name.strip
+    if self.name == ""
+      errors.add(:name, "Can not be blank")
+      return false
+    elsif /\W/.match(self.name)
+      errors.add(:name, "Name can only contain alphanumeric and underscore")
+      return false
+    elsif /^_*_$/.match(self.name)
+      errors.add(:name, "Name not allowed")
+      return false
+    end
+    true
+  end
+
+  def validate_stopped
+    if not self.stopped?
+      errors.add(:running, "can only modify scenario if it is stopped")
+      return false
+    end
+    true
+  end
+
+  def bootable?
+    return (self.stopped? or self.partially_booted?) 
+  end
+
+  def unbootable?
+    return (self.partially_booted? or self.booted? or self.boot_failed? or self.unboot_failed?)
+  end
+
+  def path
+    local = "#{Settings.app_path}scenarios/local/#{self.name.downcase}"
+    return local if File.exists? local
+    return "#{Settings.app_path}scenarios/user/#{self.user.id}/#{self.name.downcase}"
+  end
+
+  def change_name(name)
+    if not self.stopped?
+      errors.add(:running, "can not modify while scenario is not stopped");
+      return false
+    end
+
+    name = name.strip
+    if name == ""
+      errors.add(:name, "Can not be blank")
+    elsif /\W/.match(name)
+      errors.add(:name, "Name can only contain alphanumeric and underscore")
+    elsif /^_*_$/.match(name)
+      errors.add(:name, "Name not allowed")
+    elsif not self.custom?
+      errors.add(:custom, "Scenario must be custom to change name")
+    elsif not self.stopped?
+      errors.add(:running, "Scenario must be stopped before name can be changed")
+    elsif File.exists? "#{Settings.app_path}scenarios/local/#{name.downcase}/#{name.downcase}.yml"
+      errors.add(:name, "Namte taken")
+    elsif File.exists? "#{Settings.app_path}scenarios/user/#{self.user.id}/#{name.downcase}/#{name.downcase}.yml"
+      errors.add(:name, "Namte taken")
+    else
+      oldpath = "#{Settings.app_path}scenarios/user/#{self.user.id}/#{self.name.downcase}"
+      newpath = "#{Settings.app_path}scenarios/user/#{self.user.id}/#{name.downcase}"
+      FileUtils.cp_r oldpath, newpath
+      FileUtils.mv "#{newpath}/#{self.name.downcase}.yml", "#{newpath}/#{name.downcase}.yml"
+      FileUtils.rm_r oldpath
+      self.name = name
+      self.save
+      self.update_yml
+      true
+    end
+    false
+  end
 
   def owner?(id)
     return self.user_id == id
@@ -15,57 +94,11 @@ class Scenario < ActiveRecord::Base
   def debug(message)
     log = self.log ? self.log : ''
     message = '' if !message
-    self.update_attributes(log: log + message + "\n")
+    self.update_attribute(:log, log + message + "\n")
   end
 
   def scenario
     return self
-  end
-
-  def subnets
-    subnets = []
-    self.clouds.each do |cloud|
-      cloud.subnets.each do |subnet|
-        subnets.push subnet
-      end
-    end
-    return subnets
-  end
-
-  def instances
-    instances = []
-    self.clouds.each do |cloud|
-      cloud.subnets.each do |subnet|
-        subnet.instances.each do |instance|
-          if !instances.include? instance
-              instances.push instance
-          end
-        end
-      end
-    end
-    return instances
-  end
-
-  def groups
-    groups = []
-    self.clouds.each do |cloud|
-      cloud.subnets.each do |subnet|
-        subnet.instances.each do |instance|
-          instance.instance_groups.each do |instance_group|
-            found = false
-            groups.each do |group|
-              if group.name == instance_group.group.name
-                found = true
-              end
-            end
-            if !found
-              groups.push(instance_group.group)
-            end
-          end
-        end
-      end
-    end
-    return groups
   end
 
   def players
@@ -92,22 +125,6 @@ class Scenario < ActiveRecord::Base
     return players
   end
 
-  def roles
-    roles = []
-    self.clouds.each do |cloud|
-      cloud.subnets.each do |subnet|
-        subnet.instances.each do |instance|
-          instance.roles.each do |role|
-            if !roles.include? role
-              roles.push(role)
-            end
-          end
-        end
-      end
-    end
-    return roles
-  end
-
   def public_instances_reachable?
     reachable
     return self.instances.select{ |i| not i.port_open?(22) }.any?
@@ -118,15 +135,23 @@ class Scenario < ActiveRecord::Base
   end
 
   def clouds_booting?
-    return self.clouds.select{ |c| c.booting? }.any?
+    return self.clouds.select{ |c| (c.booting? or c.queued_boot?) }.any?
+  end
+
+  def clouds_unbooting?
+    return self.clouds.select{ |c| c.unbooting? or c.queued_unboot? }.any?
+  end
+
+  def subnets_booting?
+    return self.subnets.select{ |s| (s.booting? or s.queued_boot?) }.any?
+  end
+
+  def subnets_unbooting?
+    return self.subnets.select{ |s| s.unbooting? or s.queued_unboot? }.any?
   end
 
   def clouds_boot_failed?
     return self.clouds.select{ |c| c.boot_failed? }.any?
-  end
-
-  def clouds_unbooting?
-    return self.clouds.select{ |c| c.unbooting? }.any?
   end
 
   def clouds_unboot_failed?
@@ -134,185 +159,80 @@ class Scenario < ActiveRecord::Base
   end
 
   def clouds_booted?
-    return self.clouds.select{ |c| c.booted? }.any?
+    return self.clouds.select{ |c| c.booted?  }.any?
   end
 
-  def get_status
-    return
-    some_booted = nil
-    some_stopped = nil
-    all_booted = true
-    all_stopped = true
-    failure = false
-
-    self.reload
-
-    if self.booting? or self.unbooting? or self.queued?
-      return
-    end
+  def check_status
+    cnt = 0
+    stopped = 0
+    queued_boot = 0
+    queued_unboot = 0
+    booted = 0
+    booting = 0
+    unbooting = 0
+    boot_failed = 0
+    unboot_failed = 0
 
     self.clouds.each do |cloud|
-
-      cloud.reload
-
-      if cloud.booting?  or cloud.unbooting? or cloud.queued?
-        return
-      end
-
-      # mark if stopped or booted
-      if cloud.stopped?
-        all_booted = false
-        some_stopped = true
-      elsif cloud.booted?
-        some_booted = true
-        all_stopped = false
-      elsif cloud.boot_failed? or cloud.unboot_failed?
-        failure = true
-      end
+      cnt += 1
+      stopped += 1 if cloud.stopped?
+      queued_boot += 1 if cloud.queued_boot?
+      queued_unboot += 1 if cloud.queued_unboot?
+      booted += 1 if cloud.booted?
+      booting += 1 if cloud.booting?
+      unbooting += 1 if cloud.unbooting?
+      boot_failed += 1 if cloud.boot_failed?
+      unboot_failed += 1 if cloud.unboot_failed?
 
       cloud.subnets.each do |subnet|
-
-        subnet.reload
-
-        if subnet.booting?  or subnet.unbooting? or subnet.queued?
-          return
-        end
-
-        # mark if stopped or booted
-        if subnet.stopped?
-          all_booted = false
-          some_stopped = true
-        elsif subnet.booted?
-          some_booted = true
-          all_stopped = false
-        elsif subnet.boot_failed? or subnet.unboot_failed?
-          failure = true
-        end
+        cnt += 1
+        stopped += 1 if subnet.stopped?
+        queued_boot += 1 if subnet.queued_boot?
+        queued_unboot += 1 if subnet.queued_unboot?
+        booted += 1 if subnet.booted?
+        booting += 1 if subnet.booting?
+        unbooting += 1 if subnet.unbooting?
+        boot_failed += 1 if subnet.boot_failed?
+        unboot_failed += 1 if subnet.unboot_failed?
 
         subnet.instances.each do |instance|
-
-          instance.reload
-
-          if instance.booting?  or instance.unbooting? or instance.queued?
-            return
-          end
-
-          # mark if stopped or booted
-          if instance.stopped?
-            all_booted = false
-            some_stopped = true
-          elsif instance.booted?
-            some_booted = true
-            all_stopped = false
-          elsif instance.boot_failed? or instance.unboot_failed?
-            failure = true
-          end
+          cnt += 1
+          stopped += 1 if instance.stopped?
+          queued_boot += 1 if instance.queued_boot?
+          queued_unboot += 1 if instance.queued_unboot?
+          booted += 1 if instance.booted?
+          booting += 1 if instance.booting?
+          unbooting += 1 if instance.unbooting?
+          boot_failed += 1 if instance.boot_failed?
+          unboot_failed += 1 if instance.unboot_failed?
 
         end
-
       end
-
     end
 
-    if failure
-      self.set_failure
-    elsif all_stopped and some_stopped
-      self.set_stopped
-    elsif all_booted and some_booted
-      self.set_booted
-    elsif some_booted
-      self.set_partially_booted
-    end
-
-  end
-
-  def clone(name)
-    clone = Scenario.new
-
-    userdir = "#{Settings.app_path}/scenarios/user/#{self.user.name.filename_safe}"
-    Dir.mkdir userdir unless File.exists? userdir
-
-    srcdir = "#{Settings.app_path}/scenarios/local/#{self.name.filename_safe}"
-    destdir = "#{Settings.app_path}/scenarios/user/#{self.user.name.filename_safe}/#{name.filename_safe}"
-
-    if File.exists?(destdir) or name.filename_safe == self.name.filename_safe
-      clone.errors.add(:name, "This name is taken. Try another name")
-      return clone
-    end
-
-    Dir.mkdir destdir
-    Dir.mkdir "#{destdir}/recipes"
-    ymlname = YAML.load_file("#{srcdir}/#{self.name.filename_safe}.yml")["Name"]
-
-    # Copy yml file and replace Name:
-    newyml = File.open("#{destdir}/#{name.filename_safe}.yml", "w")
-    lines = File.open("#{srcdir}/#{self.name.filename_safe}.yml").each do |line|
-      if /\s*Name:\s*#{self.name}/.match(line)
-        line = line.gsub("#{self.name}", name)
+    if boot_failed > 0
+      self.set_boot_failed
+    elsif unboot_failed > 0
+      self.set_unboot_failed
+    elsif booting > 0
+      self.set_booting
+    elsif unbooting > 0
+      self.set_unbooting
+    elsif queued_boot > 0
+      self.set_queued_boot
+    elsif queued_unboot > 0
+      self.set_queued_unboot
+    elsif booted > 0
+      if booted == cnt
+        self.set_booted
+      else
+        self.set_partially_booted
       end
-      puts line
-      newyml.write line
+    else
+      if not self.queued?
+        self.set_stopped
+      end
     end
-    newyml.close
-
-    # copy cookbook and every recipe
-    Dir.foreach("#{srcdir}/recipes") do |recipe|
-      next if recipe == '.' or recipe == '..'
-      FileUtils.cp "#{srcdir}/recipes/#{recipe}", "#{destdir}/recipes"
-    end
-
-    clone = YmlRecord.load_yml(name, self.user)
-  end
-
-  def path
-    local = "#{Settings.app_path}scenarios/local/#{self.name.filename_safe}"
-    return local if File.exists? local
-    return "#{Settings.app_path}scenarios/user/#{self.user.name.filename_safe}/#{self.name.filename_safe}"
-  end
-
-  def recipe_global?(recipe)
-    recipe = recipe.filename_safe
-    return File.exists? "#{Settings.app_path}/recipes/#{recipe}.rb.erb"
-  end
-
-  def recipe_file_path(recipe)
-    recipe = recipe.filename_safe
-    local = "#{self.path}/recipes/#{recipe}.rb"
-    shared = "#{Settings.app_path}scenarios/recipes/#{recipe}.rb.erb"
-    if File.exists? local
-      return local
-    elsif File.exists? shared
-      return shared
-    end
-    nil
-  end
-
-  def recipe_text(recipe)
-    recipe = recipe.filename_safe
-    local = "#{self.path}/recipes/#{recipe}.rb"
-    shared = "#{Settings.app_path}scenarios/recipes/#{recipe}.rb.erb"
-    if File.exists? local
-      text = File.read(local)
-    elsif File.exists? shared
-      text = File.read(shared)
-    end
-    text
-  end
-
-  def recipe_update(recipe, text)
-    recipe = recipe.filename_safe
-    local = "#{self.path}/recipes/#{recipe}.rb"
-    shared = "#{Settings.app_path}scenarios/recipes/#{recipe}.rb.erb"
-
-    if File.exists? local
-      file = local
-    elsif File.exists? shared
-      file = shared
-    end
-
-    f = File.open(file, "w")
-    f.write(text)
-    f.close
   end
 
   def get_global_recipes_and_descriptions
@@ -331,15 +251,106 @@ class Scenario < ActiveRecord::Base
     recipes
   end
 
-  def update_yml
-    if File.exists? "#{Settings.app_path}scenarios/local/#{self.name.filename_safe}"
-      self.errors.add(:customizable, "Scenario is not customizable")
-      return
+  def clone(name)
+    clone = Scenario.new
+
+    name = name.strip
+    if name == ""
+      clone.errors.add(:name, "Can not be blank")
+      return clone
+    elsif /\W/.match(name)
+      clone.errors.add(:name, "Name can only contain alphanumeric and underscore")
+      return clone
+    elsif /^_*_$/.match(name)
+      clone.errors.add(:name, "Name not allowed")
+      return clone
     end
+
+    userdir = "#{Settings.app_path}/scenarios/user/#{self.user.id}"
+    Dir.mkdir userdir unless File.exists? userdir
+
+    srcdir = self.path
+    destdir = "#{Settings.app_path}/scenarios/user/#{self.user.id}/#{name.downcase}"
+
+    if File.exists?(destdir) or (name.downcase == self.name.downcase)
+      clone.errors.add(:name, "Name taken")
+      return clone
+    end
+
+    Dir.mkdir destdir
+    Dir.mkdir "#{destdir}/recipes"
+    ymlname = YAML.load_file("#{srcdir}/#{self.name.downcase}.yml")["Name"]
+
+    # Copy yml file and replace Name:
+    newyml = File.open("#{destdir}/#{name.downcase}.yml", "w")
+    lines = File.open("#{srcdir}/#{self.name.downcase}.yml").each do |line|
+      if /\s*Name:\s*#{self.name}/.match(line)
+        line = line.gsub("#{self.name}", name)
+      end
+      puts line
+      newyml.write line
+    end
+    newyml.close
+
+    # copy cookbook and every recipe
+    Dir.foreach("#{srcdir}/recipes") do |recipe|
+      next if recipe == '.' or recipe == '..'
+      FileUtils.cp "#{srcdir}/recipes/#{recipe}", "#{destdir}/recipes"
+    end
+
+    clone = YmlRecord.load_yml(name, self.user)
+    clone.update_yml
+    return clone
+  end
+
+  def make_custom
+    self.name = self.name.strip
+    if self.name == ""
+      errors.add(:name, "Can not be blank")
+      return false
+    elsif /\W/.match(self.name)
+      errors.add(:name, "Name can only contain alphanumeric and underscore")
+      return false
+    elsif /^_*_$/.match(self.name)
+      errors.add(:name, "Name not allowed")
+      return false
+    end
+
+    if File.exists? "#{Settings.app_path}/scenarios/local/#{self.name.downcase}"
+      errors.add(:name, "A global scenario with that name already exists")
+      return false
+    end
+
+    if File.exists? "#{Settings.app_path}/scenarios/user/#{self.user.id}/#{self.name.downcase}"
+      errors.add(:name, "A custom scenario with that name already exists")
+      return false
+    end
+
+    FileUtils.mkdir self.path
+    FileUtils.mkdir "#{self.path}/recipes"
+    self.update_attribute(:modified, true)
+    self.update_yml
+
+    return true
+  end
+
+  def update_yml
+    puts "\nUPDATE_YML"
+    if not self.custom?
+      self.errors.add(:customizable, "Scenario is not customizable")
+      return false
+    end
+    if not self.modified?
+      self.errors.add(:modified, "Scenario is not modified")
+      return false
+    end
+
+    puts "\nWRITING_YML"
 
     yml = { 
       "Name" => self.name, 
       "Description" => self.description,
+      "Instructions" => self.instructions,
       "Groups" => nil,
       "Clouds" => nil,
       "Subnets" => nil,
@@ -349,7 +360,7 @@ class Scenario < ActiveRecord::Base
     yml["Roles"] = self.roles.empty? ? nil : self.roles.map { |r|
       { "Name"=>r.name, 
         "Packages" => r.packages.empty? ? nil : r.packages, 
-        "Recipes"=>r.recipes.empty? ? nil : r.recipes 
+        "Recipes"=>r.recipes.empty? ? nil : r.recipes.map { |rec| rec.name }
       }
     }
 
@@ -359,7 +370,7 @@ class Scenario < ActiveRecord::Base
           "Administrator" => group.instance_groups.select{ |ig| ig.administrator  }.map{ |ig| ig.instance.name },
           "User" => group.instance_groups.select{ |ig| not ig.administrator  }.map{ |ig| ig.instance.name }
         },
-        "Users" => group.players.empty? ? nil : group.players.map { |p| { "Login" => p.login, "Password" => p.password} }
+        "Users" => group.players.empty? ? nil : group.players.map { |p| { "Login" => p.login, "Password" => p.password, "Id" => p.user_id } }
       }
     }
 
@@ -385,61 +396,12 @@ class Scenario < ActiveRecord::Base
       }
     }
 
-    f = File.open("#{self.path}/#{self.name.filename_safe}.yml", "w")
+    f = File.open("#{self.path}/#{self.name.downcase}.yml", "w")
     f.write(yml.to_yaml)
     f.close()
-  end
-
-  def change_name(name)
-    if not self.custom?
-      self.errors.add(:custom, "Scenario must be custom to change name")
-      return
-    end
-
-    local_path = "#{Settings.app_path}scenarios/local/#{name.filename_safe}"
-    custom_path = "#{Settings.app_path}scenarios/user/#{self.user.name.filename_safe}/#{name.filename_safe}"
-
-    if not self.stopped?
-      self.errors.add(:running, "Scenario must be stopped before name can be changed")
-    elsif File.exists? local_path or File.exists? custom_path
-      self.errors.add(:name, "Name taken")
-    else
-      oldpath = self.path
-      oldname = self.name
-      self.name = name
-
-      FileUtils.cp_r oldpath, self.path
-      FileUtils.mv "#{self.path}/#{oldname.filename_safe}.yml", "#{self.path}/#{self.name.filename_safe}.yml"
-      FileUtils.rm_r "#{oldpath}"
-      self.update_yml
-      self.save
-    end
+    self.update_attribute(:modified, false)
   end
 
   private
-
-    def purge
-      ever_booted = false
-      self.clouds.each do |cloud|
-        if cloud.driver_id
-          ever_booted = true
-        end
-        cloud.subnets.each do |subnet|
-          subnet.instances.each do |instance|
-            instance.instance_groups.each do |instance_group|
-              Group.where(:id => instance_group.group_id).destroy_all
-              Player.where(:group_id => instance_group.group_id).destroy_all
-              InstanceGroup.where(:id => instance_group.id).destroy_all
-            end
-            role_id = InstanceRole.where(:instance_id => instance.id).pluck(:role_id).first
-            Role.where(:id => role_id).destroy_all
-          end
-        end
-      end
-      if ever_booted
-        self.aws_scenario_scoring_purge
-      end
-      return true
-    end
 
 end

@@ -1,9 +1,0 @@
-$('#dropdown-role-<%= @role.id %>').removeClass("open");
-
-$('#modal-add-global-recipe').find('#modalbody').empty();
-$('#modal-add-global-recipe').find('#title').html('Add Global Recipe to <%= @role.name %>');
-<% @recipes.each do |recipe, description| %>
-	$('#modal-add-global-recipe').find('#modalbody').append("<b>recipe:</b> <%= recipe %> <br> <b>description:</b> <%= description %> </br> <a href='/scenarios/<%= @role.scenario.id %>/recipe_global_add?recipe=<%= recipe %>&role_id=<%= @role.id %>' data-method='post' rel='nofollow' data-remote='true'>add</a> </p>");
-<% end %>
-
-$('#modal-add-global-recipe').modal('show');

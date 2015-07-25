@@ -1,14 +1,2 @@
-<% if @user %>
-    <% if @user.errors.any? %>
-        <% if @user.errors[:email].any? %>
-            $('#modal-student-to-instructor').find('#email-div').addClass('has-error');
-            $('#modal-student-to-instructor').find('#email-help').text('<%= @user.errors[:email][0] %>');
-        <% end %>
-    <% else %>
-        $('#instructors-table').append("<tr id='instructor-<%= @user.id %>'><td><%= @user.name %></td><td><%= @user.email %></td><td><%= @user.organization %></td><td><a href='/admin/instructor_delete?id=<%= @user.id %>' data-method='post' rel='nofollow' data-remote='true'>delete</a></td></tr>"); 
-        $('#modal-student-to-instructor').modal('toggle');
-    <% end %>
-<% else %>
-    $('#modal-student-to-instructor').find('#email-div').addClass('has-error');
-    $('#modal-student-to-instructor').find('#email-help').text('User not found');
-<% end %>
+$('#user-<%= @user.id %>').remove();
+$('#instructors-table').append("<tr id='user-<%= @user.id %>'><td><%= @user.name %></td><td><%= @user.email %></td><td><%= @user.organization %></td><td><a href='/admin/user_delete?id=<%= @user.id %>' data-method='post' rel='nofollow' data-remote='true' data-confirm='re you sure you want to delete Instructor <%= @user.name %>?'>delete</a></td><td><a href='/admin/instructor_to_student?id=<%= @user.id %>' data-method='post' rel='nofollow' data-remote='true' data-confirm='Are you sure you want to make Instructor <%= @user.name %> a student? This will erase all students accounts belonging to instructor.'>make student</a></td></tr>");

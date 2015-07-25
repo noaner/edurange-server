@@ -1,0 +1,31 @@
+<% if @player.errors.any? %>
+  <% if @player.errors[:login].any? %>
+    $('#modal-group-player-add').find('#login-div').addClass('has-error');
+    $('#modal-group-player-add').find('#login-help').text('<%= @player.errors[:login][0] %>');
+  <% else %>
+    $('#modal-group-player-add').find('#login-div').removeClass('has-error');
+    $('#modal-group-player-add').find('#login-help').text('');
+  <% end %>
+  <% if @player.errors[:password].any? %>
+    $('#modal-group-player-add').find('#password-div').addClass('has-error');
+    $('#modal-group-player-add').find('#password-help').text('<%= @player.errors[:password][0] %>');
+  <% else %>
+    $('#modal-group-player-add').find('#password-div').removeClass('has-error');
+    $('#modal-group-player-add').find('#password-help').text('');
+  <% end %>
+  <% if @player.errors[:running].any? %>
+    $('#modal-group-player-add').find('#help-div').addClass('has-error');
+    $('#modal-group-player-add').find('#help-help').text('<%= @player.errors[:running][0] %>');
+  <% else %>
+    $('#modal-group-player-add').find('#help-div').removeClass('has-error');
+    $('#modal-group-player-add').find('#help-help').text('');
+  <% end %>
+<% else %>
+  $('#modal-group-player-add').modal('toggle');
+  $('#group-<%= @group.id.to_s %>-players-table').append("<tr id='player-<%= @player.id.to_s %>'><td>-</td><td>-</td><td>-</td><td><%= @player.login %></td><td><%= @player.password %></td><td><a href='/scenarios/<%= @group.scenario.id %>/group_player_delete?player_id=<%= @player.id %>' data-method='post' rel='nofollow' data-remote='true'>delete</a></td>");
+  <% if @group.scenario.custom? %>
+    $('#save-button-li').removeClass('disabled');
+    $('#save-button').attr('href', '/scenarios/<%= @group.scenario.id %>/save');
+  <% end %>
+  update_flash("Added player '<%= @player.login %>' to group '<%= @group.name %>'.");
+<% end %>

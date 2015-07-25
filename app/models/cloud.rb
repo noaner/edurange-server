@@ -14,20 +14,52 @@ class Cloud < ActiveRecord::Base
   validates :name, presence: true, uniqueness: { scope: :scenario, message: "name already taken" } 
 
   validates_presence_of :cidr_block, :scenario
-  # validate :cidr_block_valid?, :cidr_encompasses_subnets?
-  validate :cidr_validate
+  validate :cidr_validate, :validate_stopped
 
-  # Debug function that adds 1 to this scenario's "cloud_progress", increasing the progress bar on the boot view.
-  # @return [nil]
-  def add_progress(val)
-    # PrivatePub.publish_to "/scenarios/#{self.scenario.id}", cloud_progress: val
+  after_destroy :update_scenario_modified
+  before_destroy :validate_stopped, prepend: true
+
+  def validate_stopped
+    if not self.stopped?
+      errors.add(:running, "can not modify while scenario is not stopped")
+      return false
+    end
+    if self.scenario.custom?
+      self.scenario.update_attribute(:modified, true)
+    end
+    true
   end
+
+  def independent_destroy
+    if self.subnets.size > 0
+      errors.add(:dependents, "must not have any subnets")
+      return false
+    end
+    self.destroy
+    true
+  end
+
+  def update_scenario_modified
+    if self.scenario.custom?
+      self.scenario.update_attribute(:modified, true)
+    end
+    true
+  end
+
+  def bootable?
+    return self.stopped? 
+  end
+
+  def unbootable?
+    return (self.booted? or self.boot_failed? or self.unboot_failed?)
+  end
+
   # @param message The message to print to the {Scenario}'s boot view
   # @return [nil]
   def debug(message)
     log = self.log ? self.log : ''
     message = '' if !message
-    self.update_attributes(log: log + message + "\n")
+    self.update_attribute(:log, log + message + "\n")
   end
 
   def owner?(id)
@@ -39,15 +71,15 @@ class Cloud < ActiveRecord::Base
   end
 
   def subnets_booting?
-    return self.subnets.select{ |s| s.booting? }.any?
+    return self.subnets.select{ |s| (s.booting? or s.queued_boot?) }.any?
+  end
+
+  def subnets_unbooting?
+    return self.subnets.select{ |s| s.unbooting? or s.queued_unboot? }.any?
   end
 
   def subnets_boot_failed?
     return self.subnets.select{ |s| s.boot_failed? }.any?
-  end
-
-  def subnets_unbooting?
-    return self.subnets.select{ |s| s.unbooting? }.any?
   end
 
   def subnets_unboot_failed?
@@ -56,6 +88,10 @@ class Cloud < ActiveRecord::Base
 
   def subnets_booted?
     return self.subnets.select{ |s| s.booted? }.any?
+  end
+
+  def subnets_stopped?
+    self.subnets.select{ |s| not s.stopped? }.size == 0
   end
 
   def cidr_validate

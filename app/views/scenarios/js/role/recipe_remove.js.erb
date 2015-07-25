@@ -1,0 +1,3 @@
+$('#role-recipe-<%= @role_recipe.id %>').remove();
+$('#save-button-li').attr('class', '');
+$('#save-button').attr('href', '/scenarios/<%= @role_recipe.scenario.id %>/save');
