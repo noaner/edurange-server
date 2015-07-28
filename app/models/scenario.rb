@@ -70,9 +70,9 @@ class Scenario < ActiveRecord::Base
     elsif not self.stopped?
       errors.add(:running, "Scenario must be stopped before name can be changed")
     elsif File.exists? "#{Settings.app_path}scenarios/local/#{name.downcase}/#{name.downcase}.yml"
-      errors.add(:name, "Namte taken")
+      errors.add(:name, "Name taken")
     elsif File.exists? "#{Settings.app_path}scenarios/user/#{self.user.id}/#{name.downcase}/#{name.downcase}.yml"
-      errors.add(:name, "Namte taken")
+      errors.add(:name, "Name taken")
     else
       oldpath = "#{Settings.app_path}scenarios/user/#{self.user.id}/#{self.name.downcase}"
       newpath = "#{Settings.app_path}scenarios/user/#{self.user.id}/#{name.downcase}"
