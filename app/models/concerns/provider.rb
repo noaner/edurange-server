@@ -9,7 +9,7 @@
 module Provider
   extend ActiveSupport::Concern
   included do
-    enum status: [:stopped, :queued_boot, :queued_unboot, :booting, :booted, :failure, :boot_failed, :unboot_failed, :unbooting, :stopping, :partially_booted, :partially_booted_with_failure, :partially_unbooted, :partially_unbooted_with_failure]
+    enum status: [:stopped, :paused, :pausing, :starting, :queued_boot, :queued_unboot, :booting, :booted, :failure, :boot_failed, :unboot_failed, :unbooting, :stopping, :partially_booted, :partially_booted_with_failure, :partially_unbooted, :partially_unbooted_with_failure]
   end
 
   def debug_booting
@@ -67,7 +67,6 @@ module Provider
         errors.add(:boot, "Subnets cloud must be booted")
         return false
       end
-      
     elsif classname == Instance
       if not self.subnet.booted?
         errors.add(:boot, "Instances subnet must be booted")
@@ -75,12 +74,14 @@ module Provider
       end
     end 
 
-    if classname == Cloud
+
+    if classname == Scenario or classname = Cloud
       if AWS::EC2.new.vpcs.count > 4
         errors.add(:boot, "VPC limit reached, find AWS edurange admin for help.")
         return false
       end
     end
+
 
     self.clear_log
     self.debug_booting
@@ -105,12 +106,12 @@ module Provider
   def unboot(options = {})
     classname = self.class
     if classname == Scenario
-      if not (self.booted? or self.partially_booted? or self.boot_failed? or self.unboot_failed?)
+      if not (self.booted? or self.partially_booted? or self.boot_failed? or self.unboot_failed? or self.paused?)
         errors.add(:boot, "#{self.class} must be booted or partially booted or have a error to uboot")
         return false
       end
-    elsif not (self.booted? or self.boot_failed? or self.unboot_failed?)
-      errors.add(:boot, "#{self.class} must be booted or have a error to unboot")
+    elsif not (self.booted? or self.boot_failed? or self.unboot_failed? or self.paused?)
+      errors.add(:boot, "#{self.class} must be booted, have an error, or be paused to unboot")
       return false
     end
 
@@ -153,11 +154,59 @@ module Provider
     debug(error.class.to_s + ' - ' + error.message.to_s + error.backtrace.join("\n"));
   end
 
+  def pause
+    if not (self.class == Instance or self.class == Scenario)
+      return
+    end
+
+    if not self.booted?
+      errors.add(:boot, "must be booted to pause")
+      return
+    end
+    
+    if self.class == Scenario
+      self.set_pausing
+      self.delay(queue: self.class.to_s.downcase).send("provider_pause_#{self.class.to_s.downcase}")
+    else
+      self.send("provider_pause_#{self.class.to_s.downcase}")
+    end
+  end
+
+  def start
+    if not (self.class == Instance or self.class == Scenario)
+      return
+    end
+
+    if not self.paused?
+      errors.add(:boot, "must be paused to start")
+      return
+    end
+
+    if self.class == Scenario
+      self.set_starting
+      self.delay(queue: self.class.to_s.downcase).send("provider_start_#{self.class.to_s.downcase}")
+    else
+      self.send("provider_start_#{self.class.to_s.downcase}")
+    end
+  end
+
   #############################################################
   #  Status set and get
 
   def set_stopped
     self.update_attribute(:status, :stopped)
+  end
+
+  def set_paused
+    self.update_attribute(:status, :paused)
+  end
+
+  def set_pausing
+    self.update_attribute(:status, :pausing)
+  end
+
+  def set_starting
+    self.update_attribute(:status, :starting)
   end
 
   def set_queued_boot

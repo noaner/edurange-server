@@ -154,6 +154,20 @@ module Aws
     self.debug_unbooting_finished
   end
 
+  def aws_pause_scenario
+    self.instances.each do |instance|
+      instance.pause
+    end
+    self.set_paused
+  end
+
+  def aws_start_scenario
+    self.instances.each do |instance|
+      instance.start
+    end
+    self.set_booted
+  end
+
   # Boots {Cloud}, and all of its {Subnet Subnets}.
   # Creates a AWS::EC2::VPC object with Subnet's cidr_block
   # @return [nil]
@@ -936,6 +950,64 @@ module Aws
     self.update_attribute(:driver_id, nil)
     self.set_stopped
     self.debug_unbooting_finished
+  end
+
+  def aws_pause_instance
+    if (not self.driver_id) or (not self.booted?)
+      return
+    end
+
+    self.set_pausing
+    begin
+      i = AWS::EC2.new.instances[self.driver_id]
+      return if not i.exists?
+      i.stop
+
+      cnt = 0
+      until i.status == :stopped
+        sleep 2**cnt
+        cnt += 1
+        if cnt == 20
+          raise "Timeout Waiting for VPC to stop"
+          self.boot_error($!)
+          return
+        end
+      end
+    rescue => e
+      self.boot_error(e)
+      return
+    end
+
+    self.set_paused
+  end
+
+  def aws_start_instance
+    if (not self.driver_id) or (not self.paused?)
+      return
+    end
+
+    self.set_starting
+    begin
+      i = AWS::EC2.new.instances[self.driver_id]
+      return if not i.exists?
+      i.start
+
+      cnt = 0
+      until i.status == :running
+        sleep 2**cnt
+        cnt += 1
+        if cnt == 20
+          raise "Timeout Waiting for VPC to start"
+          self.boot_error($!)
+          return
+        end
+      end
+    rescue => e
+      self.boot_error(e)
+      return
+    end
+
+    self.set_booted
   end
 
   ## Unboot Helpers

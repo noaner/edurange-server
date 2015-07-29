@@ -23,18 +23,19 @@
   $('#role-add-button-li').attr('class', 'disabled');
 <% end %>
 
-<% if @scenario.booting? or @scenario.unbooting? %>
-  $('#scenario-status-dot').hide();
-  $('#scenario-spinner').attr('class', "inline-block spin");
-  $('#scenario-spinner').show();
+<% if @scenario.paused? %>
+  $('#start-button-li').attr('class', '');
 <% else %>
-  $('#scenario-spinner').hide();
-  $('#scenario-spinner').attr('class', "inline-block");
-  $('#scenario-status-dot').show();
+  $('#start-button-li').attr('class', 'disabled');
 <% end %>
 
-$('#scenario-status').text("<%= @scenario.status %>");
-$('#scenario-status-dot').attr('class', "inline-block <%= @scenario.status %>");
+<% if @scenario.booted? %>
+  $('#pause-button-li').attr('class', '');
+<% else %>
+  $('#pause-button-li').attr('class', 'disabled');
+<% end %>
+
+update_status('scenario', '<%= @scenario.status %>')
 
 <% @scenario.clouds.each do |cloud| %>
   <% if cloud.bootable? %>
@@ -57,18 +58,8 @@ $('#scenario-status-dot').attr('class', "inline-block <%= @scenario.status %>");
     $("#cloud-<%= cloud.id %>-delete-button-li").attr('class', 'disabled');
   <% end %>
 
-  <% if cloud.booting? or cloud.unbooting? %>
-    $("#cloud-<%= cloud.id %>-status-dot").hide();
-    $("#cloud-<%= cloud.id %>-spinner").attr('class', "inline-block spin");
-    $("#cloud-<%= cloud.id %>-spinner").show();
-  <% else %>
-    $("#cloud-<%= cloud.id %>-spinner").hide();
-    $("#cloud-<%= cloud.id %>-status-dot").attr('class', "inline-block");
-    $("#cloud-<%= cloud.id %>-status-dot").show();
-  <% end %>
-
-  $("#cloud-<%= cloud.id %>-status").text("<%= cloud.status %>");
-  $("#cloud-<%= cloud.id %>-status-dot").attr('class', "inline-block <%= cloud.status %>");
+  update_status('cloud-<%= cloud.id %>', '<%= cloud.status %>');
+  
   $("#cloud-<%= cloud.id %>-driver").text('<%= cloud.driver_id ? cloud.driver_id : "not set" %>');
 
   <% cloud.subnets.each do |subnet| %>
@@ -93,18 +84,8 @@ $('#scenario-status-dot').attr('class', "inline-block <%= @scenario.status %>");
       $("#subnet-<%= subnet.id %>-delete-button").attr('href', 'javascript: void(0)');
     <% end %>
 
-    <% if subnet.booting? or subnet.unbooting? %>
-      $("#subnet-<%= subnet.id %>-status-dot").hide();
-      $("#subnet-<%= subnet.id %>-spinner").attr('class', "inline-block spin");
-      $("#subnet-<%= subnet.id %>-spinner").show();
-    <% else %>
-      $("#subnet-<%= subnet.id %>-spinner").hide();
-      $("#subnet-<%= subnet.id %>-status-dot").attr('class', "inline-block");
-      $("#subnet-<%= subnet.id %>-status-dot").show();
-    <% end %>
+    update_status('subnet-<%= subnet.id %>', '<%= subnet.status %>');
 
-    $("#subnet-<%= subnet.id %>-status").text("<%= subnet.status %>");
-    $("#subnet-<%= subnet.id %>-status-dot").attr('class', "inline-block <%= subnet.status %>");
     $("#subnet-<%= subnet.id %>-driver").text('<%= subnet.driver_id ? subnet.driver_id : "not set" %>');
 
     <% subnet.instances.each do |instance| %>
@@ -130,18 +111,8 @@ $('#scenario-status-dot').attr('class', "inline-block <%= @scenario.status %>");
         $("#instance-<%= instance.id %>-role-add-button-li").attr('class', 'disabled');
       <% end %>
 
-      <% if instance.booting? or instance.unbooting? %>
-        $("#instance-<%= instance.id %>-status-dot").hide();
-        $("#instance-<%= instance.id %>-spinner").attr('class', "inline-block spin");
-        $("#instance-<%= instance.id %>-spinner").show();
-      <% else %>
-        $("#instance-<%= instance.id %>-spinner").hide();
-        $("#instance-<%= instance.id %>-status-dot").attr('class', "inline-block");
-        $("#instance-<%= instance.id %>-status-dot").show();
-      <% end %>
+      update_status('instance-<%= instance.id %>', '<%= instance.status %>');
 
-      $("#instance-<%= instance.id %>-status").text("<%= instance.status %>");
-      $("#instance-<%= instance.id %>-status-dot").attr('class', "inline-block <%= instance.status %>");
       $("#instance-<%= instance.id %>-driver").text('<%= instance.driver_id ? instance.driver_id : "not set" %>');
       <% if instance.internet_accessible %>
         $("#instance-<%= instance.id %>-public-ip").text('<%= instance.provider_instance_public_ip ? instance.provider_instance_public_ip : "-"  %>');
@@ -189,5 +160,5 @@ $('#scenario-status-dot').attr('class', "inline-block <%= @scenario.status %>");
 <% if @scenario.queued? or @scenario.booting? or @scenario.unbooting? %>
   setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 2000);
 <% else %>
-  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 2000);
+  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 4000);
 <% end %>

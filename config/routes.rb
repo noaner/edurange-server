@@ -25,6 +25,8 @@ Edurange::Application.routes.draw do
       post 'unboot_subnet'
       post 'unboot_instance'
       post 'boot_status'
+      post 'pause'
+      post 'start'
 
       post 'log_get'
       post 'clone'

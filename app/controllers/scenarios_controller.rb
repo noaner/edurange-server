@@ -5,7 +5,7 @@ class ScenariosController < ApplicationController
   # Scenario
   before_action :set_scenario, only: [
     :clone, :destroyme, :edit, :modify, :show, :update, :save, :save_as,
-    :boot, :boot_status, :unboot,
+    :boot, :boot_status, :unboot, :pause, :start,
     :cloud_add, 
     :player_modify, :player_student_group_add, :player_add, :player_group_add, :player_delete, :player_group_admin_access_add, :player_group_user_access_add,
     :role_recipe_add, :role_add,
@@ -267,6 +267,20 @@ class ScenariosController < ApplicationController
     @scenario.check_status
     respond_to do |format|
       format.js { render 'scenarios/js/boot/boot_status.js.erb', :layout => false }
+    end
+  end
+
+  def pause
+    @scenario.pause
+    respond_to do |format|
+      format.js { render 'scenarios/js/boot/pause.js.erb', :layout => false }
+    end
+  end
+
+  def start
+    @scenario.start
+    respond_to do |format|
+      format.js { render 'scenarios/js/boot/start.js.erb', :layout => false }
     end
   end
 

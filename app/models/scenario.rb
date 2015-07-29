@@ -43,7 +43,7 @@ class Scenario < ActiveRecord::Base
   end
 
   def unbootable?
-    return (self.partially_booted? or self.booted? or self.boot_failed? or self.unboot_failed?)
+    return (self.partially_booted? or self.booted? or self.boot_failed? or self.unboot_failed? or self.paused?)
   end
 
   def path
@@ -163,6 +163,8 @@ class Scenario < ActiveRecord::Base
   end
 
   def check_status
+    return if (self.queued_boot? or self.queued_unboot?)
+
     cnt = 0
     stopped = 0
     queued_boot = 0
@@ -172,6 +174,9 @@ class Scenario < ActiveRecord::Base
     unbooting = 0
     boot_failed = 0
     unboot_failed = 0
+    paused = 0
+    pausing  = 0
+    starting = 0
 
     self.clouds.each do |cloud|
       cnt += 1
@@ -201,11 +206,13 @@ class Scenario < ActiveRecord::Base
           queued_boot += 1 if instance.queued_boot?
           queued_unboot += 1 if instance.queued_unboot?
           booted += 1 if instance.booted?
+          paused += 1 if instance.paused?
+          pausing += 1 if instance.pausing?
+          starting += 1 if instance.starting?
           booting += 1 if instance.booting?
           unbooting += 1 if instance.unbooting?
           boot_failed += 1 if instance.boot_failed?
           unboot_failed += 1 if instance.unboot_failed?
-
         end
       end
     end
@@ -222,16 +229,22 @@ class Scenario < ActiveRecord::Base
       self.set_queued_boot
     elsif queued_unboot > 0
       self.set_queued_unboot
+    elsif paused > 0
+      self.set_paused
+    elsif pausing > 0
+      self.set_pausing
+    elsif starting > 0
+      self.set_starting
     elsif booted > 0
+      return if self.booting? or self.unbooting? or self.pausing? or self.starting?
       if booted == cnt
         self.set_booted
       else
         self.set_partially_booted
       end
     else
-      if not self.queued?
-        self.set_stopped
-      end
+      return if self.booting? or self.unbooting? or self.pausing? or self.starting?
+      self.set_stopped
     end
   end
 
