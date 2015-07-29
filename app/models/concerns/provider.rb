@@ -67,12 +67,20 @@ module Provider
         errors.add(:boot, "Subnets cloud must be booted")
         return false
       end
+      
     elsif classname == Instance
       if not self.subnet.booted?
         errors.add(:boot, "Instances subnet must be booted")
         return false
       end
     end 
+
+    if classname == Cloud
+      if AWS::EC2.new.vpcs.count > 4
+        errors.add(:boot, "VPC limit reached, find AWS edurange admin for help.")
+        return false
+      end
+    end
 
     self.clear_log
     self.debug_booting
