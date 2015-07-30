@@ -14,6 +14,10 @@
       = link_to 'Boot', boot_scenario_path(@scenario), method: :post, remote:true, id: 'boot-button', class: 'btn btn-default'
     %li{ id: 'unboot-button-li', class: @scenario.unbootable? ? "" : "disabled" }
       = link_to 'Unboot', unboot_scenario_path(@scenario), method: :post, remote:true, id: 'unboot-button', class: 'btn btn-default'
+    %li{ id: 'pause-button-li', class: @scenario.booted? ? "" : "disabled" }
+      = link_to 'Pause', pause_scenario_path(@scenario), method: :post, remote:true, id: 'pause-button', class: 'btn btn-default'
+    %li{ id: 'start-button-li', class: @scenario.paused? ? "" : "disabled" }
+      = link_to 'Start', start_scenario_path(@scenario), method: :post, remote:true, id: 'start-button', class: 'btn btn-default'
     %li
       = link_to 'Clone', "#modal-scenario-clone", :data => {:toggle=>"modal"}, :onclick => "$('#modal-scenario-clone').find('#name-div').removeClass('has-error'); $('#modal-scenario-clone').find('#name').val(''); $('#modal-scenario-clone').find('#name-help').html('');", class: 'btn btn-default'
     %li{ id: 'destroy-button-li', class: @scenario.stopped? ? "" : "disabled" }

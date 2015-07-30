@@ -9,4 +9,13 @@ function get_boot_status (id) {
 function update_status (id, status) {
 	$('#'+id+"-status").text(status);
 	$('#'+id+"-status-dot").attr('class', 'inline-block ' + status);
+	if (status == "booting" || status == "unbooting" || status == "pausing" || status == "starting") {
+		$('#' + id + '-status-dot').hide();
+  	$('#' + id + '-spinner').attr('class', "inline-block spin");
+  	$('#' + id + '-spinner').show();
+	} else {
+		$('#' + id + '-spinner').hide();
+  	$('#' + id + '-spinner').attr('class', "inline-block");
+  	$('#' + id + '-status-dot').show();
+	}
 }

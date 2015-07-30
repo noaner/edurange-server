@@ -69,9 +69,6 @@ class Instance < ActiveRecord::Base
       return
     end
 
-    # if ip.octets[3] < 2
-
-
     if not NetAddr::CIDR.create(self.subnet.cidr_block).cmp(self.ip_address)
       errors.add(:ip_address, "IP Address is not within instances subnet #{self.subnet.name} #{self.subnet.cidr_block}")
       return
@@ -165,10 +162,9 @@ class Instance < ActiveRecord::Base
     return "-" if !self.com_page
 
     begin
-      s3 = AWS::S3.new
-      bucket = s3.buckets[Settings.bucket_name]
-      if bucket.objects[self.aws_instance_com_page_name].exists?
-        text = bucket.objects[self.aws_instance_com_page_name].read()
+      com_page = AWS::S3.new.buckets[Settings.bucket_name].objects[self.aws_instance_com_page_name]
+      if com_page.exists?
+        text = com_page.read()
         status = text.split("\n")[0]
         if status == "error"
           return "chef script error"
@@ -200,7 +196,7 @@ class Instance < ActiveRecord::Base
 
   def ssh_ready?
     if ip = self.aws_instance_public_ip
-      if (self.port_open?(ip, 22) and self.initialized? == "true")
+      if (self.port_open?(ip, 22))
         return true
       end
     end
