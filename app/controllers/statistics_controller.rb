@@ -4,7 +4,9 @@ class StatisticsController < ApplicationController
   def index
     @statistics = []
     if @user.is_admin?
-      @statistics = Statistics.all
+      @statistics = Statistic.all
+    else
+      @statistics = Statistic.where(user_id: current_user.id)
     end
   end
 
