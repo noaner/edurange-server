@@ -176,6 +176,7 @@ ActiveRecord::Schema.define(version: 20150728194650) do
     t.datetime "created_at",          null: false
     t.datetime "updated_at",          null: false
     t.string   "bash_histories"
+    t.text     "bash_analytics"
     t.string   "scenario_name"
     t.datetime "scenario_created_at"
   end

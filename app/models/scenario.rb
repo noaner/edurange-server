@@ -417,21 +417,26 @@ class Scenario < ActiveRecord::Base
   end
 
   private
-    # methods for creating statistics
-
+    # methods for creating statistics on scenarios
     def create_statistic
       statistic = Statistic.new
       # populate statistic with bash histories
       self.instances.all.each do |instance|
         statistic.bash_histories += instance.get_bash_history
+        puts instance.bash_history
       end
+
+      # perform simple analytics on the bash histories
+      statistic.bash_analytics = bash_analytics(statistic.bash_histories)
+
       # and with scenario metadata
       statistic.scenario_name = self.name
       statistic.scenario_created_at = self.created_at
-      statistic.save
+      statistic.save  # stuff into db
     end
 
-    def bash_analytics
+    def bash_analytics(bash_history)
+      # simply count frequencies of options and commands used during a session
       options_frequencies = Hash.new(0)
       bash_history = self.bash_histories.split("\n")
       bash_history.each do |command|
@@ -441,6 +446,7 @@ class Scenario < ActiveRecord::Base
         end
       end 
       options_frequencies.sort_by { |option| option[1] }
+      return options_frequencies
     end
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 end
