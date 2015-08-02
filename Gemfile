@@ -32,7 +32,9 @@ gem 'nokogiri'
 # gem 'puma'
 # gem 'pg'
 gem 'netaddr'
-
+gem 'chartkick'
+gem 'groupdate'
+gem 'active_median'
 
 group :development do
   gem 'better_errors'
