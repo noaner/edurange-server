@@ -3,7 +3,7 @@ class CreateStatistics < ActiveRecord::Migration
     create_table :statistics do |t|
       t.belongs_to :user
       t.timestamps null: false
-      t.string :bash_histories
+      t.string :bash_histories, :default => '' 
       
       t.text :bash_analytics
       t.string :scenario_name

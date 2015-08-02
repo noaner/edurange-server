@@ -173,9 +173,9 @@ ActiveRecord::Schema.define(version: 20150728194650) do
 
   create_table "statistics", force: :cascade do |t|
     t.integer  "user_id"
-    t.datetime "created_at",          null: false
-    t.datetime "updated_at",          null: false
-    t.string   "bash_histories"
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
+    t.string   "bash_histories",      default: ""
     t.text     "bash_analytics"
     t.string   "scenario_name"
     t.datetime "scenario_created_at"
