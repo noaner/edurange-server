@@ -88,3 +88,14 @@ Which should drop you into a ruby shell. Next we'll connect to the user table of
 
 With this newly created admin user, try logging into EDURange by using the email and password you supplied earlier. What should come up is a screen that looks like this:
 ![alt-tag](http://i.imgur.com/fxaqNbc.jpg)
+
+
+### Booting a Scenario
+Now that you have an admin user you can boot a scenario after some minor configurations. If you have AWS access keys already (provided by current AWS EDURange admins) then from there all you should have to do is set up some global environment variables from which the AWS code will read to authenticate the creation of EC2 instances. Fire up your favorite text-editor on the ~/.bashrc file and add these lines to the very bottom.
+
+```bash
+export AWS_ACCESS_KEY_ID='your-access-key-id'
+export AWS_SECRET_ACCESS_KEY='you-secret-access-key'
+```
+
+After doing that, go ahead and navigate to the "Scenarios" tab and load a new scenario. Choose from the default scenarios available. Once the scenario is loaded you should be brought to a detail view where you can boot the scenario.

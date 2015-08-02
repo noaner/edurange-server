@@ -11,6 +11,7 @@ Edurange::Application.routes.draw do
   resources :instances
   resources :subnets
   resources :clouds
+  resources :statistics
 
   resources :scenarios do
     member do

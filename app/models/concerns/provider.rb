@@ -76,8 +76,8 @@ module Provider
 
 
     if classname == Scenario or classname = Cloud
-      if AWS::EC2.new.vpcs.count > 4
-        errors.add(:boot, "VPC limit reached, find AWS edurange admin for help.")
+      if AWS::EC2.new.vpcs.count > 9
+        errors.add(:boot, "VPC limit of 10 reached, find AWS edurange admin for help.")
         return false
       end
     end

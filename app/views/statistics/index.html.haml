@@ -1,0 +1,20 @@
+%div.panel-body
+  %dl
+  %h4
+    %b
+      Scenarios Statistics:
+  %br
+  %table.table.table-bordered
+    %tr
+      %th Scenario Name
+      %th Date Created
+      %th Bash Histories
+      %th
+
+    - @statistics.each do |statistic|
+      %tr
+        %td= statistic.scenario_name
+        %td= statistic.created_at
+        %td= statistic.bash_histories
+        %td
+          %div.btn-group

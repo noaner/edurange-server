@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150714194359) do
+ActiveRecord::Schema.define(version: 20150728194650) do
 
   create_table "answers", force: :cascade do |t|
     t.integer  "student_id"
@@ -169,6 +169,16 @@ ActiveRecord::Schema.define(version: 20150714194359) do
     t.string   "com_page"
     t.boolean  "custom"
     t.boolean  "modified",              default: false
+  end
+
+  create_table "statistics", force: :cascade do |t|
+    t.integer  "user_id"
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
+    t.string   "bash_histories",      default: ""
+    t.text     "bash_analytics"
+    t.string   "scenario_name"
+    t.datetime "scenario_created_at"
   end
 
   create_table "student_group_users", force: :cascade do |t|
