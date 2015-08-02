@@ -426,7 +426,7 @@ class Scenario < ActiveRecord::Base
         puts instance.bash_history
       end
 
-      # perform simple analytics on the bash histories
+      # perform simple analytics on bash histories and save them into statistic
       statistic.bash_analytics = bash_analytics(statistic.bash_histories)
 
       # and with scenario metadata
@@ -438,13 +438,14 @@ class Scenario < ActiveRecord::Base
     def bash_analytics(bash_history)
       # simply count frequencies of options and commands used during a session
       options_frequencies = Hash.new(0)
-      bash_history = self.bash_histories.split("\n")
+      bash_history = bash_history.split("\n")
       bash_history.each do |command|
         options = command.scan(/[-'[A-Za-z]]+/);
         options.each do |option|
           options_frequencies[option] += 1;
         end
-      end 
+      end
+      # sort by number of times an command/option has been used
       options_frequencies.sort_by { |option| option[1] }
       return options_frequencies
     end
