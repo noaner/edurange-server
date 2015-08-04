@@ -1,17 +1,17 @@
-<% if @newuser.errors.any? %>
-    <% if @newuser.errors[:email].any? %>
+<% if @user.errors.any? %>
+    <% if @user.errors[:email].any? %>
         $('#modal-create-instructor').find('#email-div').addClass('has-error');
-        $('#modal-create-instructor').find('#email-help').text('<%= @newuser.errors[:email][0] %>');
+        $('#modal-create-instructor').find('#email-help').text('<%= @user.errors[:email][0] %>');
     <% end %>
-    <% if @newuser.errors[:name].any? %>
+    <% if @user.errors[:name].any? %>
         $('#modal-create-instructor').find('#name-div').addClass('has-error');
-        $('#modal-create-instructor').find('#name-help').text('<%= @newuser.errors[:name][0] %>');
+        $('#modal-create-instructor').find('#name-help').text('<%= @user.errors[:name][0] %>');
     <% end %>
-    <% if @newuser.errors[:organization].any? %>
+    <% if @user.errors[:organization].any? %>
         $('#modal-create-instructor').find('#organization-div').addClass('has-error');
-        $('#modal-create-instructor').find('#organization-help').text('<%= @newuser.errors[:organization][0] %>');
+        $('#modal-create-instructor').find('#organization-help').text('<%= @user.errors[:organization][0] %>');
     <% end %>
 <% else %>
-    $('#instructors-table').append("<tr id='instructor-<%= @newuser.id %>'><td><%= @newuser.name %></td><td><%= @newuser.email %></td><td><%= @newuser.organization %></td><td><a href='/admin/instructor_delete?id=<%= @newuser.id %>' data-method='post' rel='nofollow' data-remote='true'>delete</a></td></tr>"); 
+    $('#instructors-table').append("<tr id='instructor-<%= @user.id %>'><td><%= @user.name %></td><td><%= @user.email %></td><td><%= @user.organization %></td><td><a href='/admin/instructor_delete?id=<%= @user.id %>' data-method='post' rel='nofollow' data-remote='true'>delete</a></td></tr>"); 
     $('#modal-create-instructor').modal('toggle');
 <% end %>
