@@ -168,8 +168,6 @@ class Scenario < ActiveRecord::Base
   end
 
   def check_status
-    return if (self.queued_boot? or self.queued_unboot?)
-
     cnt = 0
     stopped = 0
     queued_boot = 0
@@ -241,14 +239,12 @@ class Scenario < ActiveRecord::Base
     elsif starting > 0
       self.set_starting
     elsif booted > 0
-      return if self.booting? or self.unbooting? or self.pausing? or self.starting?
       if booted == cnt
         self.set_booted
       else
         self.set_partially_booted
       end
     else
-      return if self.booting? or self.unbooting? or self.pausing? or self.starting?
       self.set_stopped
     end
   end
