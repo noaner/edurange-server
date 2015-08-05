@@ -219,7 +219,7 @@ module Aws
         until ec2vpc.state == :available
           sleep 2
           cnt += 1
-          if cnt == 8
+          if cnt == 30
             raise "timeout - waiting for VPC to become available"
             return
           end
