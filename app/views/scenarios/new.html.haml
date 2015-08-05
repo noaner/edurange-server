@@ -39,6 +39,7 @@
               &nbsp;&nbsp;
             %li
               = link_to 'Obliterate', scenarios_obliterate_custom_path(filename: template[:filename]), remote: true, method: :post, :data => { confirm: "This will completely erase the scenario. Are you sure?" }, class: 'btn btn-danger'
-
-    = link_to 'Back', scenarios_path
+  %p
+  
+= link_to 'Back', scenarios_path, class: 'btn btn-default'
 
