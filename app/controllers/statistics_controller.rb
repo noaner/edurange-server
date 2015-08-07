@@ -11,6 +11,9 @@ class StatisticsController < ApplicationController
   end
 
   def show
+    # detail view of statistic
+    @statistic = Statistic.find(params[:id])
+    @bash_analytics = @statistic.bash_analytics
   end
 
   def delete
