@@ -16,7 +16,7 @@ class AdminController < ApplicationController
 
     if not @user.errors.any?
       @user.set_instructor_role
-      UserMailer.email_credentials(@user, password).deliver
+      @user.email_credentials(password)
     end
 
     respond_to do |format|
@@ -31,8 +31,7 @@ class AdminController < ApplicationController
     @user.save
 
     if not @user.errors.any?
-      @user.set_instructor_role
-      UserMailer.email_credentials(@user, password).deliver
+      @user.email_credentials(password)
     end
 
     respond_to do |format|

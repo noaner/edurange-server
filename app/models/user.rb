@@ -14,6 +14,7 @@ class User < ActiveRecord::Base
   has_many :student_group_users, dependent: :destroy
 
   def validate_name
+    return if not self.name
     self.name = self.name.strip
     if self.name == ""
       errors.add(:name, "can not be blank")
@@ -98,7 +99,7 @@ class User < ActiveRecord::Base
   end
 
   def email_credentials(password)
-    UserMailer.email_credentials(self, password).deliver
+    UserMailer.email_credentials(self, password).deliver_now
   end
 
 end
