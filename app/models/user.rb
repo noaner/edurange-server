@@ -1,17 +1,17 @@
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
+  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
   enum role: [:user, :vip, :admin, :instructor, :student]
-  # attr_accessor :registration_code
+
+  has_many :scenarios
+  has_many :student_groups
+  has_many :student_group_users, dependent: :destroy
+
   after_initialize :set_defaults, :if => :new_record?
   validates :email, uniqueness: true
   validates :name, presence: true
   validate :validate_name, :validate_running
-  has_many :student_groups
-  has_many :scenarios
-  has_many :student_group_users, dependent: :destroy
 
   def validate_name
     return if not self.name
@@ -81,6 +81,10 @@ class User < ActiveRecord::Base
   end
 
   def set_student_role
+    if not self.validate_running
+      return
+    end
+    self.student_groups.destroy_all
     self.update_attribute :role, :student
   end
 
