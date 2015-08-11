@@ -5,7 +5,7 @@ class CreateStatistics < ActiveRecord::Migration
       t.timestamps null: false
       t.string :bash_histories, :default => '' 
       
-      t.text :bash_analytics
+      t.text :bash_analytics, :default => []
       t.string :scenario_name
       t.datetime :scenario_created_at	
     end

@@ -421,6 +421,7 @@ class Scenario < ActiveRecord::Base
       statistic.bash_analytics = bash_analytics(statistic.bash_histories)
 
       # and with scenario metadata
+      statistic.user_id = self.user_id
       statistic.scenario_name = self.name
       statistic.scenario_created_at = self.created_at
       statistic.save  # stuff into db
