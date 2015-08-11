@@ -5,7 +5,7 @@ class User < ActiveRecord::Base
   enum role: [:user, :vip, :admin, :instructor, :student]
 
   has_many :scenarios
-  has_many :student_groups
+  has_many :student_groups, dependent: :destroy
   has_many :student_group_users, dependent: :destroy
 
   after_initialize :set_defaults, :if => :new_record?
