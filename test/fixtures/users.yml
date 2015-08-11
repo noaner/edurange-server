@@ -1,0 +1,13 @@
+
+test1:
+  id: 1
+  name: test1
+  email: test@edurange.org
+  encrypted_password: <%= User.new.send(:password_digest, 'passwordfoo') %>
+
+student1:
+  id: 2
+  name: student1
+  email: student1@edurange.org
+  encrypted_password: <%= User.new.send(:password_digest, 'passwordfoo') %>
+  role: 4
