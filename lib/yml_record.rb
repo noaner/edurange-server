@@ -68,7 +68,7 @@ module YmlRecord
 
     scenario = Scenario.new
     scenario.custom = custom
-    scenario.name = name
+    scenario.name = file["Name"]
     scenario.description = file["Description"]
     scenario.instructions = file["Instructions"]
     answers ||= []

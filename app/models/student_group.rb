@@ -5,15 +5,15 @@ class StudentGroup < ActiveRecord::Base
 
   validates :name, presence: true, uniqueness: { scope: :user, message: "Name taken" } 
 
-  before_destroy :check_if_all
+  # before_destroy :check_if_all
 
-  def check_if_all
-  	if self.name == "All"
-  		errors.add(:name, "can not delete Student Group All")
-  		return false
-  	end
-  	true
-  end
+  # def check_if_all
+  # 	if self.name == "All"
+  # 		errors.add(:name, "can not delete Student Group All")
+  # 		return false
+  # 	end
+  # 	true
+  # end
 
   def user_add(user)
   	student_group_all = self.user.student_groups.find_by_name("All")

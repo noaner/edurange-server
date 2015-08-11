@@ -264,7 +264,6 @@ class ScenariosController < ApplicationController
   end
 
   def boot_status
-    @scenario.check_status
     respond_to do |format|
       format.js { render 'scenarios/js/boot/boot_status.js.erb', :layout => false }
     end

@@ -28,6 +28,7 @@ chef/.chef
 chef/cookbooks/edurange_bootstrap*
 nodes.txt
 players.txt
+vendor/*
 
 config/settings.local.yml
 config/settings/*.local.yml
