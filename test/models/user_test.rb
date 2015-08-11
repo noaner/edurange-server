@@ -207,6 +207,35 @@ class UserTest < ActiveSupport::TestCase
     assert_not user.student_group_users.any?
   end
 
+  test 'after user destroy student groups and student groups users should be destroyed' do
+    user = users(:test1)
+    student = users(:student1)
+    student2 = users(:student2)
+
+    # make user instructor
+    user.set_instructor_role
+
+    # add student to users student group "All"
+    sgu = user.student_groups.find_by_name("All").student_group_users.new(user_id: student.id)
+    sgu.save
+    assert sgu.valid?
+
+    # destroy user and make sure their student group user is destroyed as well
+    student.destroy
+    assert_not StudentGroupUser.find_by_id(sgu.id)
+
+    # add second student to group all. destroy user and make sure student groups and student group users are destroyed
+    sg = user.student_groups.find_by_name("All")
+    sgu2 = user.student_groups.find_by_name("All").student_group_users.new(user_id: student2.id)
+    sgu2.save
+    assert sgu2.valid?
+
+    user.destroy
+
+    assert_not StudentGroup.find_by_id(sg.id)
+    assert_not StudentGroupUser.find_by_id(sgu2.id)
+  end
+
   test 'should own all resources belonging to scenario and student groups' do
     user = users(:test1)
     user.set_admin_role
