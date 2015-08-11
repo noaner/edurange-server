@@ -53,6 +53,10 @@ class Scenario < ActiveRecord::Base
     return "#{Settings.app_path}scenarios/user/#{self.user.id}/#{self.name.downcase}"
   end
 
+  def yml_path
+    "#{self.path}/#{self.name.downcase}.yml"
+  end
+
   def change_name(name)
     if not self.stopped?
       errors.add(:running, "can not modify while scenario is not stopped");
@@ -164,8 +168,6 @@ class Scenario < ActiveRecord::Base
   end
 
   def check_status
-    return if (self.queued_boot? or self.queued_unboot?)
-
     cnt = 0
     stopped = 0
     queued_boot = 0
@@ -237,14 +239,12 @@ class Scenario < ActiveRecord::Base
     elsif starting > 0
       self.set_starting
     elsif booted > 0
-      return if self.booting? or self.unbooting? or self.pausing? or self.starting?
       if booted == cnt
         self.set_booted
       else
         self.set_partially_booted
       end
     else
-      return if self.booting? or self.unbooting? or self.pausing? or self.starting?
       self.set_stopped
     end
   end
@@ -266,55 +266,49 @@ class Scenario < ActiveRecord::Base
   end
 
   def clone(name)
-    clone = Scenario.new
+    clone = Scenario.new(name: name.strip, custom: true, user_id: self.user_id)
 
-    name = name.strip
-    if name == ""
+    # validate name
+    if clone.name == ""
       clone.errors.add(:name, "Can not be blank")
       return clone
-    elsif /\W/.match(name)
+    elsif /\W/.match(clone.name)
       clone.errors.add(:name, "Name can only contain alphanumeric and underscore")
       return clone
-    elsif /^_*_$/.match(name)
+    elsif /^_*_$/.match(clone.name)
       clone.errors.add(:name, "Name not allowed")
       return clone
-    end
-
-    userdir = "#{Settings.app_path}/scenarios/user/#{self.user.id}"
-    Dir.mkdir userdir unless File.exists? userdir
-
-    srcdir = self.path
-    destdir = "#{Settings.app_path}/scenarios/user/#{self.user.id}/#{name.downcase}"
-
-    if File.exists?(destdir) or (name.downcase == self.name.downcase)
+    elsif File.exists?("#{Settings.app_path}scenarios/local/#{clone.name.downcase}") or (clone.name.downcase == self.name.downcase)
       clone.errors.add(:name, "Name taken")
       return clone
     end
 
-    Dir.mkdir destdir
-    Dir.mkdir "#{destdir}/recipes"
-    ymlname = YAML.load_file("#{srcdir}/#{self.name.downcase}.yml")["Name"]
+    # make user directory
+    userdir = "#{Settings.app_path}/scenarios/user/#{self.user.id}"
+    Dir.mkdir userdir unless File.exists? userdir
+
+    # make clone directory
+    Dir.mkdir clone.path
+
+    # make recipe directory and copy every recipe
+    Dir.mkdir "#{clone.path}/recipes"
+    Dir.foreach("#{self.path}/recipes") do |recipe|
+      next if recipe == '.' or recipe == '..'
+      FileUtils.cp "#{self.path}/recipes/#{recipe}", "#{clone.path}/recipes"
+    end
 
     # Copy yml file and replace Name:
-    newyml = File.open("#{destdir}/#{name.downcase}.yml", "w")
-    lines = File.open("#{srcdir}/#{self.name.downcase}.yml").each do |line|
+    newyml = File.open(clone.yml_path, "w")
+    File.open(self.yml_path).each do |line|
       if /\s*Name:\s*#{self.name}/.match(line)
-        line = line.gsub("#{self.name}", name)
+        line = line.gsub("#{self.name}", clone.name)
       end
-      puts line
       newyml.write line
     end
     newyml.close
 
-    # copy cookbook and every recipe
-    Dir.foreach("#{srcdir}/recipes") do |recipe|
-      next if recipe == '.' or recipe == '..'
-      FileUtils.cp "#{srcdir}/recipes/#{recipe}", "#{destdir}/recipes"
-    end
-
-    clone = YmlRecord.load_yml(name, self.user)
-    clone.update_yml
-    return clone
+    # create and return cloned scenario
+    return YmlRecord.load_yml(clone.name, self.user)
   end
 
   def make_custom
@@ -349,7 +343,6 @@ class Scenario < ActiveRecord::Base
   end
 
   def update_yml
-    puts "\nUPDATE_YML"
     if not self.custom?
       self.errors.add(:customizable, "Scenario is not customizable")
       return false
@@ -358,8 +351,6 @@ class Scenario < ActiveRecord::Base
       self.errors.add(:modified, "Scenario is not modified")
       return false
     end
-
-    puts "\nWRITING_YML"
 
     yml = { 
       "Name" => self.name, 

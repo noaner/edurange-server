@@ -76,8 +76,8 @@ module Provider
 
 
     if classname == Scenario or classname = Cloud
-      if AWS::EC2.new.vpcs.count > 9
-        errors.add(:boot, "VPC limit of 10 reached, find AWS edurange admin for help.")
+      if AWS::EC2.new.vpcs.count >= Settings.vpc_limit
+        errors.add(:boot, "VPC limit of #{Settings.vpc_limit} reached, find AWS edurange admin for help.")
         return false
       end
     end
@@ -100,6 +100,7 @@ module Provider
   end
 
   def bootme(options = {})
+    self.set_booting
     self.send("provider_boot_#{self.class.to_s.downcase}", options)
   end
 
@@ -145,12 +146,12 @@ module Provider
   end
 
   def unbootme(options = {})
+    self.set_unbooting
     self.send("provider_unboot_#{self.class.to_s.downcase}", options)
   end
 
   def unboot_error(error)
     self.set_unboot_failed
-    self.save
     debug(error.class.to_s + ' - ' + error.message.to_s + error.backtrace.join("\n"));
   end
 
@@ -195,66 +196,114 @@ module Provider
 
   def set_stopped
     self.update_attribute(:status, :stopped)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_paused
     self.update_attribute(:status, :paused)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_pausing
     self.update_attribute(:status, :pausing)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_starting
     self.update_attribute(:status, :starting)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_queued_boot
     self.update_attribute(:status, :queued_boot)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_queued_unboot
     self.update_attribute(:status, :queued_unboot)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_booting
     self.update_attribute(:status, :booting)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_unbooting
     self.update_attribute(:status, :unbooting)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_boot_failed
     self.update_attribute(:status, :boot_failed)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_unboot_failed
     self.update_attribute(:status, :unboot_failed)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_booted
     self.update_attribute(:status, :booted)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_partially_booted
     self.update_attribute(:status, :partially_booted)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_partially_unbooted
     self.update_attribute(:status, :partially_unbooted)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_failure
     self.update_attribute(:status, :failure)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_partially_booted_with_failure
     self.update_attribute(:status, :partially_booted_with_failure)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def set_partially_unbooted_with_failure
     self.update_attribute(:status, :partially_unbooted_with_failure)
+    if self.class != Scenario
+      self.scenario.check_status
+    end
   end
 
   def is_failed?

@@ -68,7 +68,6 @@ Groups:
 Clouds:
   - Name: Fuzzing_Cloud
     CIDR_Block: 10.0.0.0/16
-    Scenario: Fuzzing
 
 Subnets:
   - Name: Fuzzing_Subnet

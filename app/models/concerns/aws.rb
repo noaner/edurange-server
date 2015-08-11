@@ -14,7 +14,7 @@ module Aws
       return
     end
 
-    self.set_booting
+    
 
     # Do initial scoring setup
     begin
@@ -101,8 +101,7 @@ module Aws
   end
 
   def aws_unboot_scenario(options = {})
-    self.set_unbooting
-
+    
     if options[:dependents]
       self.clouds.each do |cloud|
         begin
@@ -183,7 +182,6 @@ module Aws
 
     # Boot if not booted
     if self.driver_id == nil
-      self.set_booting
 
       # Create VPC, assign driver_id, and create Internet Gateway
       begin
@@ -219,7 +217,7 @@ module Aws
         until ec2vpc.state == :available
           sleep 2
           cnt += 1
-          if cnt == 8
+          if cnt == 30
             raise "timeout - waiting for VPC to become available"
             return
           end
@@ -288,6 +286,9 @@ module Aws
 
       self.set_booted
       self.debug_booting_finished
+    else
+      self.set_stopped
+      return
     end
 
     # boot dependent Subnets
@@ -310,8 +311,6 @@ module Aws
       self.set_stopped
       return "cloud is already unbooted"
     end
-
-    self.set_unbooting
 
     # Unboot dependents
     if options[:dependents]
@@ -436,7 +435,7 @@ module Aws
 
     if self.driver_id == nil
 
-      self.set_booting
+      
 
       # create Subnet
       debug "creating - EC2 Subnet"
@@ -547,7 +546,7 @@ module Aws
   end
 
   def aws_unboot_subnet(options = {})
-    self.set_unbooting
+    
 
     # only unboot if instances are not booted
     if self.driver_id == nil
@@ -649,7 +648,7 @@ module Aws
   # # @return [nil]
   def aws_boot_instance(options = {})
 
-    self.set_booting
+    
 
     # scoring
     if self.roles.select { |r| r.recipes.find_by_name('scoring') }.size > 0
@@ -865,7 +864,7 @@ module Aws
   end
 
   def aws_unboot_instance(options = {})
-    self.set_unbooting
+    
 
     if self.driver_id == nil
       self.set_stopped
