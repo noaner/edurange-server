@@ -1,0 +1,10 @@
+%script{:type => "text/javascript", :src => "http://www.google.com/jsapi"}
+%script{:type => "text/javascript", :src => "chartkick.js"}
+%div.panel.panel-default
+	%div.panel-heading.nav-nav-pills
+		%li
+			%h4
+				%b
+					%span#scenario-name
+						= @statistic.scenario_name
+	/ %column_chart[Statistic.groyup(:created_at).count]
