@@ -13,6 +13,8 @@ Edurange::Application.routes.draw do
   resources :clouds
   resources :statistics
 
+  get 'statistic/id', to: 'scenarios#id'
+
   resources :scenarios do
     member do
       post 'destroyme'
