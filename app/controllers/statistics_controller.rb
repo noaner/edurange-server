@@ -22,6 +22,9 @@ class StatisticsController < ApplicationController
     @statistic.destroy
   end
 
+  def download_all
+  end
+
   # download statistic data
   def download
     # save statistic as pdf

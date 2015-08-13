@@ -74,14 +74,14 @@ module Provider
       end
     end 
 
-
+=begin
     if classname == Scenario or classname = Cloud
       if AWS::EC2.new.vpcs.count >= Settings.vpc_limit
         errors.add(:boot, "VPC limit of #{Settings.vpc_limit} reached, find AWS edurange admin for help.")
         return false
       end
     end
-
+=end
 
     self.clear_log
     self.debug_booting

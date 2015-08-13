@@ -14,6 +14,8 @@ Edurange::Application.routes.draw do
   resources :statistics do
     member do
       post 'destroyme'
+      post 'download'
+      post 'download_all'
       end
     end
   

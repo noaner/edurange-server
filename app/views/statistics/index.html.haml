@@ -6,7 +6,7 @@
     %li
       &nbsp;&nbsp;
     %li
-      = link_to 'Download All Data', statistics_path, class: 'btn btn-default'
+      = link_to 'Download All Data', download_all_statistic_path(@statistics.each), method: :post, remote: true, class: 'btn btn-default'
 
 %div.panel-body
   %dl
@@ -26,5 +26,5 @@
         %td= statistic.created_at
         %td
           = link_to 'Show', statistic, class: 'btn btn-default'     
-          = link_to 'Download', statistic, class: 'btn btn-default'
+          = link_to 'Download', download_statistic_path(statistic), class: 'btn btn-default'
           = link_to 'Destroy', destroyme_statistic_path(statistic), method: :post, remote: true, :data => { :confirm => 'Are you sure?' }, class: 'btn btn-danger'
