@@ -1,3 +1,13 @@
+%div.panel.panel-default
+  %div.panel-heading.nav.nav-pills
+    %li
+      %h4
+        Statistics:
+    %li
+      &nbsp;&nbsp;
+    %li
+      = link_to 'Download All Data', statistics_path, class: 'btn btn-default'
+
 %div.panel-body
   %dl
   %h4
@@ -8,13 +18,13 @@
     %tr
       %th Scenario Name
       %th Date Created
-      %th Bash Histories
       %th
 
     - @statistics.each do |statistic|
       %tr
         %td= statistic.scenario_name
         %td= statistic.created_at
-        %td= statistic.bash_histories
         %td
-          %div.btn-group
+          = link_to 'Show', statistic, class: 'btn btn-default'     
+          = link_to 'Download', statistic, class: 'btn btn-default'
+          = link_to 'Destroy', destroyme_statistic_path(statistic), method: :post, remote: true, :data => { :confirm => 'Are you sure?' }, class: 'btn btn-danger'

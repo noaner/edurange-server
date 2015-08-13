@@ -18,7 +18,8 @@ class StatisticsController < ApplicationController
     @bash_analytics = @statistic.bash_analytics
   end
 
-  def delete
+  def destroyme
+    @statistic.destroy
   end
 
   # download statistic data
