@@ -11,7 +11,16 @@ Edurange::Application.routes.draw do
   resources :instances
   resources :subnets
   resources :clouds
-  resources :statistics
+  resources :statistics do
+    member do
+      post 'destroyme'
+      post 'download'
+      post 'download_all'
+      end
+    end
+  
+
+  get 'statistic/id', to: 'scenarios#id'
 
   resources :scenarios do
     member do

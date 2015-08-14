@@ -14,8 +14,9 @@ class Scenario < ActiveRecord::Base
 
   validate :validate_name, :validate_stopped
   before_destroy :validate_stopped, prepend: true
-  before_destroy :create_statistic
-  
+  before_destroy :create_statistic, prepend: true
+  before_destroy :destroy_s3_bash_histories
+
   def validate_name
     self.name = self.name.strip
     if self.name == ""
@@ -412,9 +413,10 @@ class Scenario < ActiveRecord::Base
     def create_statistic
       statistic = Statistic.new
       # populate statistic with bash histories
+      puts self.instances.all
       self.instances.all.each do |instance|
         statistic.bash_histories += instance.get_bash_history
-        puts instance.bash_history
+        puts instance.get_bash_history  # for debugging
       end
 
       # perform simple analytics on bash histories and save them into statistic
@@ -441,5 +443,14 @@ class Scenario < ActiveRecord::Base
       options_frequencies.sort_by { |option| option[1] }
       return options_frequencies
     end
+
+    def destroy_s3_bash_histories
+      # bash histories are persistent between boot cycles
+      # only once scenario is destroyed are they deleted from s3 bucket
+      self.instances.each do |instance|
+        instance.aws_instance_delete_bash_history_page
+      end
+    end
+
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 end
