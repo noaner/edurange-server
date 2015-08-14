@@ -1,7 +1,6 @@
 class Scenario < ActiveRecord::Base
   include Aws
   include Provider
-  extend ActiveRecord::Callbacks
   attr_accessor :template # For picking a template when creating a new scenario
   
   belongs_to :user
@@ -446,6 +445,8 @@ class Scenario < ActiveRecord::Base
     end
 
     def destroy_s3_bash_histories
+      # bash histories are persistent between boot cycles
+      # only once scenario is destroyed are they deleted from s3 bucket
       self.instances.each do |instance|
         instance.aws_instance_delete_bash_history_page
       end
