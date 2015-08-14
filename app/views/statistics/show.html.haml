@@ -1,5 +1,4 @@
-%script{:type => "text/javascript", :src => "http://www.google.com/jsapi"}
-%script{:type => "text/javascript", :src => "chartkick.js"}
+= javascript_include_tag "//www.google.com/jsapi", "chartkick"
 %div.panel.panel-default
     %div.panel-heading.nav-nav-pills
 	
@@ -9,12 +8,15 @@
                     = @statistic.scenario_name
                     = "created at: "
                     = @statistic.created_at
-        / %column_chart[Statistic.groyup(:created_at).count]
-      
+    = column_chart Statistic.group(:created_at).count
     %div.indent.panel-body    
         // Instructions
         %label
             Bash History:
             %div.indent
                 = @statistic.bash_histories
+                %p
+            Bash Analytics:
+            %div.indent
+                = @statistic.bash_analytics
                 %p
