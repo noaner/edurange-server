@@ -940,7 +940,6 @@ module Aws
       self.aws_instance_delete_cookbook
       self.aws_instance_delete_com_page
       self.aws_instance_delete_scoring_page
-      self.aws_instance_delete_bash_history_page
     rescue => e
       self.unboot_error(e)
       return
@@ -1309,7 +1308,7 @@ module Aws
     debug "deleting s3 bash history page"
     begin
       aws_S3_delete_page(self.aws_instance_bash_history_page_name)
-      self.update_attribute(:bash_history_page, nil)
+      # self.update_attribute(:bash_history_page, nil)
     rescue
       raise
       return
