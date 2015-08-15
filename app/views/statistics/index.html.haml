@@ -1,10 +1,11 @@
+
+= javascript_include_tag "//www.google.com/jsapi", "chartkick"
+
 %div.panel.panel-default
   %div.panel-heading.nav.nav-pills
     %li
       %h4
-        Statistics:
-    %li
-      &nbsp;&nbsp;
+        Statistics:      
     %li
       = link_to 'Download All Data', download_all_statistic_path(@statistics.each), method: :post, remote: true, class: 'btn btn-default'
 
@@ -14,6 +15,7 @@
     %b
       Scenarios Statistics:
   %br
+    = pie_chart Statistic.group(:scenario_name).count
   %table.table.table-bordered
     %tr
       %th Scenario Name
@@ -28,3 +30,6 @@
           = link_to 'Show', statistic, class: 'btn btn-default'     
           = link_to 'Download', download_statistic_path(statistic), class: 'btn btn-default'
           = link_to 'Destroy', destroyme_statistic_path(statistic), method: :post, remote: true, :data => { :confirm => 'Are you sure?' }, class: 'btn btn-danger'
+
+
+  
