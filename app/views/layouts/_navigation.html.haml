@@ -5,15 +5,17 @@
 
   %ul.nav.nav-tabs
 
-    %li{role: 'presentation', class: (params[:controller] == 'instructor' or params[:controller] == 'admin') ? "active" : "" }
-      = link_to 'Home', root_path
+    - if current_user
+      %li{role: 'presentation', class: (params[:controller] == 'instructor' or params[:controller] == 'admin') ? "active" : "" }
+        = link_to 'Home', root_path
 
-    - if User.find(current_user.id).is_instructor? or User.find(current_user.id).is_admin?
-      %li{role: 'presentation', class: params[:controller] == 'scenarios' ? "active" : "" }
-        = link_to 'Scenarios', scenarios_path
+      - if User.find(current_user.id).is_instructor? or User.find(current_user.id).is_admin?
 
-      %li{role: 'presentation', class: params[:controller] == 'statistics' ? "active" : "" }
-        = link_to 'Statistics', statistics_path
+        %li{role: 'presentation', class: params[:controller] == 'scenarios' ? "active" : "" }
+          = link_to 'Scenarios', scenarios_path
 
-    %li{role: 'presentation'}
-      = link_to 'Sign Out', destroy_user_session_path, :method => :delete
+        %li{role: 'presentation', class: params[:controller] == 'statistics' ? "active" : "" }
+          = link_to 'Statistics', statistics_path
+
+      %li{role: 'presentation'}
+        = link_to 'Sign Out', destroy_user_session_path, :method => :delete
