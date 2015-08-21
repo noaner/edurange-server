@@ -1,4 +1,3 @@
-
 = javascript_include_tag "//www.google.com/jsapi", "chartkick"
 
 %div.panel.panel-default
@@ -29,7 +28,7 @@
         %td
           = link_to 'Show', statistic, class: 'btn btn-default'     
           = link_to 'Download', download_statistic_path(statistic), class: 'btn btn-default'
-          = link_to 'Destroy', destroyme_statistic_path(statistic), method: :post, remote: true, :data => { :confirm => 'Are you sure?' }, class: 'btn btn-danger'
+          = link_to 'Destroy', destroyme_statistic_path(statistic), method: :post, remote: true, :data => { :confirm => 'Are you sure you want to permanently destroy this statistic?' }, class: 'btn btn-danger'
 
 
   

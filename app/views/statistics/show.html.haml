@@ -1,22 +1,26 @@
 = javascript_include_tag "//www.google.com/jsapi", "chartkick"
 %div.panel.panel-default
     %div.panel-heading.nav-nav-pills
-	
         %h4
             %b
                 %span#scenario-name
                     = @statistic.scenario_name
                     = "created at: "
                     = @statistic.created_at
-    = column_chart Statistic.group(:created_at).count
+    = column_chart @statistic.bash_analytics
+        
     %div.indent.panel-body    
         // Instructions
         %label
-            Bash History:
-            %div.indent
+            = link_to 'Show Bash History',"#toggle-bash-histories", onclick:"", class: 'btn btn-default'
+            %div.panel.panel-default{id: "bash-histories-field"}
                 = @statistic.bash_histories
                 %p
-            Bash Analytics:
-            %div.indent
+            = link_to 'Show Analytics',"#toggle-histories-field-add", onclick:"", class: 'btn btn-default'
+            %div.panel.panel-default{id: "bash-analytics-field"}
                 = @statistic.bash_analytics
                 %p
+            %div.panel.panel-default
+                = link_to 'All Statistics', statistics_path, class: 'btn btn-default'
+                = link_to 'Destroy Statistic', destroyme_statistic_path(@statistic), method: :post, remote: true, :data => { :confirm => 'Are you sure?' }, class: 'btn btn-default'
+
