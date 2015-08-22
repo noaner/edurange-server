@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '2.2.1'
+ruby '2.1.5'
 gem 'rails', '~> 4.2.0'
 gem 'sqlite3'
 gem 'sass-rails', '~> 4.0.3'
@@ -36,6 +36,7 @@ gem 'netaddr'
 gem 'chartkick'
 gem 'groupdate'
 gem 'active_median'
+gem 'rubyzip'
 
 group :development do
   gem 'better_errors'

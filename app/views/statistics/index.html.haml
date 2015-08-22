@@ -6,7 +6,7 @@
       %h4
         Statistics:      
     %li
-      = link_to 'Download All Data', download_all_statistic_path(@statistics.each), method: :post, remote: true, class: 'btn btn-default'
+      = link_to 'Download All Data', download_all_statistic_path(current_user), class: 'btn btn-default'
 
 %div.panel-body
   %dl

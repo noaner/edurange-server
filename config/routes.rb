@@ -14,13 +14,14 @@ Edurange::Application.routes.draw do
   resources :statistics do
     member do
       post 'destroyme'
-      post 'download'
-      post 'download_all'
-      end
+      get 'download'
+      get 'download_all'
     end
+  end
   
 
   get 'statistic/id', to: 'scenarios#id'
+  
 
   resources :scenarios do
     member do

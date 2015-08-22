@@ -427,6 +427,14 @@ class Scenario < ActiveRecord::Base
       statistic.scenario_name = self.name
       statistic.scenario_created_at = self.created_at
       statistic.save  # stuff into db
+
+      # create statistic file for download
+      bash_analytics = ""
+      statistic.bash_analytics.each do |analytic| 
+        bash_analytics = bash_analytics + "#{analytic}" + "\n"
+      end
+      file_text = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nBash Histories: \n \n#{statistic.bash_histories} \nBash Analytics: \n#{bash_analytics}"
+      File.write("#{Rails.root}/public/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt",file_text)
     end
 
     def bash_analytics(bash_history)
