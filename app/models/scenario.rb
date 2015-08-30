@@ -452,6 +452,57 @@ class Scenario < ActiveRecord::Base
       return options_frequencies
     end
 
+    def partition_bash_histories(bash_history)
+      #
+      # partition bash histories collected based on user 
+      # this method returns a nested hash where the outer
+      # keys are usernames which maps to an inner dictionary
+      # 
+
+      user_dict = Hash.new(0)
+      # split bash history string into array by newlines 
+      bash_history = bash_history.split("\n")
+      bash_len = bash_history.length
+      index = 0  # index into our bash histories
+
+      # syntax error of some kind, expecting and end block
+      do until (index + 1) == bash_history.length
+        if bash_history[index][0..1] == "##"
+          # grab user name
+          user = bash_history[index][3..bash_len]
+          index = index + 1  # move to the next line
+          if user_dict.keys.include?(user)
+            # do nothing and continue
+          else
+            # user maps to inner hash-table
+            user_dict[user] = Hash.new(0)
+          end
+          
+          # once we hit another user, add a new entry to
+          if (bash_history[index][0..1] == '##' || index == bash_history.length)
+            user = bash_history[index][3..bash_len]
+            if user_dict.keys.include?(user)
+              # nop
+            else
+              user_dict[user] = Hash.new(0)
+          end
+          
+          if bash_history[index][0..1] == "# "
+            # each command is preceded by a date
+            date = bash_history[index]
+            command = bash_history[index + 1]
+            user_dict[user][date] = command
+            index = index + 2
+          end
+
+          index = index + 1
+
+        else
+          index = index + 1
+        end
+      end
+    end
+
     def destroy_s3_bash_histories
       # bash histories are persistent between boot cycles
       # only once scenario is destroyed are they deleted from s3 bucket
@@ -461,4 +512,4 @@ class Scenario < ActiveRecord::Base
     end
 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-end
+end 
