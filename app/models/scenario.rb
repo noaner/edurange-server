@@ -135,7 +135,7 @@ class Scenario < ActiveRecord::Base
     students = []
     self.groups.each do |group|
       group.players.each do |player|
-        students << player.user if not students.include? player.user
+        students << player.user if not students.include? player.user and player.user
       end
     end
     students
