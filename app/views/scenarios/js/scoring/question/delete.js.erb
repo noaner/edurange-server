@@ -1,0 +1,5 @@
+<% if @question.errors.any? %>
+	alert('There was an error deleting question');
+<% else %>
+	$('#question-<%= @question.id %>').remove();
+<% end %>

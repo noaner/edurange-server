@@ -1,0 +1,15 @@
+<% if @answer.errors.any? %>
+	<% if @answer.errors[:text_essay].any? %>
+		$('#question-<%= @question.id %>-answers').find('#help-div').attr('class', 'has-error');
+		$('#question-<%= @question.id %>-answers').find('#help-span').text('<%= @answer.errors[:text_essay][0] %>');
+	<% end %>
+	<% if @answer.errors[:duplicate].any? %>
+		$('#question-<%= @question.id %>-answers').find('#help-div').attr('class', 'has-error');
+		$('#question-<%= @question.id %>-answers').find('#help-span').text('<%= @answer.errors[:duplicate][0] %>');
+	<% end %>
+<% else %>
+	$('#question-<%= @question.id %>-answers').find('#help-div').attr('class', '');
+	$('#question-<%= @question.id %>-answers').find('#help-span').text('');
+	$('#question-<%= @question.id %>-answers-table').append('<%= escape_javascript(render("answer_essay", answer: @answer).delete("\n")).html_safe %>');
+	$('#question-<%= @question.id %>-answers-text-field').val('');
+<% end %>

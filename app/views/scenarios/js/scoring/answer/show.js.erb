@@ -1,0 +1,3 @@
+$('#student-<%= @student.id %>-answers-show-button').attr('class', 'hidden');
+$('#student-<%= @student.id %>-answers-hide-button').attr('class', '');
+$('<%= escape_javascript(render("/scenarios/show/student_answers", scenario: @scenario, user: @student).delete("\n")).html_safe %>').insertAfter($('#student-<%= @student.id %>-answers'));

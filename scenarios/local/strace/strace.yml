@@ -49,6 +49,3 @@ Instances:
     Roles: 
       - NAT
 
-Answers:
-  - foo
-  - bar

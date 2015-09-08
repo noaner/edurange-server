@@ -1,0 +1,2 @@
+$('#modal-essay-answer-show').modal('show');
+$('#modal-essay-answer-show').find('#modalbody').html('<%= escape_javascript @answer.text_essay.gsub("\n", "<br>").html_safe %>');

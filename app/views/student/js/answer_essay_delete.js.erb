@@ -1,0 +1,5 @@
+<% if @answer.errors.any? %>
+
+<% else %>
+	$('#answer-<%= @answer.id %>').remove();
+<% end %>

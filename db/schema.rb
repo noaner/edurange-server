@@ -14,9 +14,13 @@
 ActiveRecord::Schema.define(version: 20150728194650) do
 
   create_table "answers", force: :cascade do |t|
-    t.integer  "student_id"
-    t.string   "answer_text"
+    t.integer  "user_id"
+    t.string   "text"
+    t.text     "text_essay"
+    t.text     "comment"
     t.boolean  "correct"
+    t.integer  "value_index"
+    t.string   "essay_points_earned"
     t.integer  "question_id"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -115,10 +119,13 @@ ActiveRecord::Schema.define(version: 20150728194650) do
   add_index "players", ["group_id"], name: "index_players_on_group_id"
 
   create_table "questions", force: :cascade do |t|
-    t.string   "answer_id"
-    t.string   "kind"
-    t.string   "question_text"
-    t.string   "answer_text"
+    t.integer  "order"
+    t.string   "text"
+    t.string   "type_of"
+    t.string   "options",        default: "--- []\n"
+    t.string   "values"
+    t.integer  "points"
+    t.integer  "points_penalty"
     t.integer  "scenario_id"
     t.datetime "created_at"
     t.datetime "updated_at"

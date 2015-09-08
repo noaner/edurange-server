@@ -1,0 +1,31 @@
+- if question.type_of == "String" or question.type_of == "Number"
+  %tr{ id: "answer-#{answer.id}" }
+    %td= answer.text
+    %td= answer.correct
+    %td= answer.correct ? answer.question.values[answer.value_index][:points] : 0
+    %td
+      = link_to 'create', '#modal-scoring-answer-comment', data: {toggle: 'modal'}, onclick: "scoring_answer_comment('#{answer.user.name}', #{question_index+1}, #{answer_index+1}, #{answer.id})", class: answer.comment == nil ? '' : 'hidden', id: "answer-#{answer.id}-create-button"
+      = link_to 'show', scoring_answer_comment_show_scenario_path(@scenario, answer_id: answer.id, question_index: question_index, answer_index: answer_index), remote: true, method: :post, class: answer.comment == nil ? 'hidden' : '', id: "answer-#{answer.id}-show-button"
+      = link_to 'edit', scoring_answer_comment_edit_show_scenario_path(@scenario, answer_id: answer.id, question_index: question_index, answer_index: answer_index), remote: true, method: :post, class: answer.comment == nil ? 'hidden' : '', id: "answer-#{answer.id}-edit-button"
+    %td= answer.created_at.to_formatted_s(:db)
+
+- elsif question.type_of == "Essay"
+  %tr{ id: "answer-#{answer.id}" }
+    %td= answer_index + 1
+    %td= link_to 'show', scoring_answer_essay_show_scenario_path(question.scenario.id, answer_id: answer), remote: true, method: :post
+
+    %td= answer.essay_points_earned != nil
+    %td
+      %span{ id: "answer-#{answer.id}-essay-points-earned" }
+        = answer.essay_points_earned
+      = link_to 'grade', '#modal-scoring-answer-essay-grade', data: {toggle: 'modal'}, onclick: "scoring_answer_essay_grade('#{answer.user.name}', #{question_index+1}, #{answer_index+1}, #{answer.id})", id: "answer-#{answer.id}-grade-button", class: answer.essay_points_earned == nil ? '' : 'hidden'
+      = link_to 'edit', '#modal-scoring-answer-essay-grade-edit', data: {toggle: 'modal'}, onclick: "scoring_answer_essay_grade_edit('#{answer.user.name}', #{question_index+1}, #{answer_index+1}, #{answer.id})", id: "answer-#{answer.id}-grade-edit-button", class: answer.essay_points_earned == nil ? 'hidden' : ''
+      = link_to 'delete', scoring_answer_essay_grade_delete_scenario_path(@scenario, answer_id: answer.id, question_index: question_index, answer_index: answer_index), remote: true, method: :post, class: answer.essay_points_earned == nil ? 'hidden' : '', id: "answer-#{answer.id}-grade-delete-button"
+    %td
+      %span{ id: "answer-#{answer.id}-points-possible" }
+        = answer.question.points
+    %td
+      = link_to 'create', '#modal-scoring-answer-comment', data: {toggle: 'modal'}, onclick: "scoring_answer_comment('#{answer.user.name}', #{question_index+1}, #{answer_index+1}, #{answer.id})", class: answer.comment == nil ? '' : 'hidden', id: "answer-#{answer.id}-create-button"
+      = link_to 'show', scoring_answer_comment_show_scenario_path(@scenario, answer_id: answer.id, question_index: question_index, answer_index: answer_index), remote: true, method: :post, class: answer.comment == nil ? 'hidden' : '', id: "answer-#{answer.id}-show-button"
+      = link_to 'edit', scoring_answer_comment_edit_show_scenario_path(@scenario, answer_id: answer.id, question_index: question_index, answer_index: answer_index), remote: true, method: :post, class: answer.comment == nil ? 'hidden' : '', id: "answer-#{answer.id}-edit-button"
+    %td= answer.created_at.to_formatted_s(:db)

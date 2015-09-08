@@ -1,0 +1,8 @@
+<% if @answer.errors.any? %>
+	alert('error deleting grade')
+<% else %>
+	$('#answer-<%= @answer.id %>-essay-points-earned').text('');
+	$('#answer-<%= @answer.id %>-grade-button').attr('class', '');
+	$('#answer-<%= @answer.id %>-grade-edit-button').attr('class', 'hidden');
+	$('#answer-<%= @answer.id %>-grade-delete-button').attr('class', 'hidden');
+<% end %>

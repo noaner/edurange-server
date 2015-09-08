@@ -1,0 +1,6 @@
+$('#question-<%= @question.id %>-dropdown').removeClass('open');
+<% if @question2 %>
+	$('#question-<%= @question.id %>').detach().insertBefore($('#question-<%= @question2.id %>'));
+	$('#question-<%= @question.id %>-order').text('<%= @question.order %>');
+	$('#question-<%= @question2.id %>-order').text('<%= @question2.order %>');
+<% end %>

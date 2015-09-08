@@ -22,22 +22,19 @@
         From:
         =@user.last_sign_in_ip
 
-    %label Running Scenarios:
-    - if @players.size == 0
-      %dl
-        none
-
-    - @players.each do |player|
-      %dl
-        - if scenario = Scenario.find(player.group.scenario_id)
-          %label= scenario.name
-          %dl
-            %b.inline login:
-            = player.login
-            %br
-            %b.inline password:
-            = player.password
-            %br
-            %b.iniline instructions:
-            = scenario.instructions
-            %br
+    %label Scenarios:
+    %dl
+      %table.table
+        %tr
+          %th Name
+          %th Status
+          %th Instructor
+          %th
+        - @scenarios.each do |scenario|
+          %tr
+            %td= scenario.name
+            %td= scenario.status
+            %td= scenario.user.name
+            %td
+              %div.btn-group
+                = link_to 'Show', "student/#{scenario.id}", class: 'btn btn-default'

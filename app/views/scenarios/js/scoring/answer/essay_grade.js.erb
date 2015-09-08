@@ -1,0 +1,12 @@
+<% if @answer.errors.any? %>
+	<% if @answer.errors[:essay_points_earned].any? %>
+    $('#modal-scoring-answer-essay-grade').find('#points-div').addClass('has-error');
+    $('#modal-scoring-answer-essay-grade').find('#points-help').text('<%= @answer.errors[:essay_points_earned][0] %>');
+  <% end %>
+<% else %>
+	$('#modal-scoring-answer-essay-grade').modal('toggle');
+	$('#answer-<%= @answer.id %>-essay-points-earned').text('<%= @answer.essay_points_earned %>');
+	$('#answer-<%= @answer.id %>-grade-button').attr('class', 'hidden');
+	$('#answer-<%= @answer.id %>-grade-edit-button').attr('class', '');
+	$('#answer-<%= @answer.id %>-grade-delete-button').attr('class', '');
+<% end %>

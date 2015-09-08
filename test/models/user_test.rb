@@ -137,7 +137,7 @@ class UserTest < ActiveSupport::TestCase
     assert scenario.user_id = user.id
 
     user.reload
-    assert user.scenarios.size == 1
+    assert user.owns? scenario
 
     assert user.validate_running
     scenario.set_booted
@@ -184,7 +184,7 @@ class UserTest < ActiveSupport::TestCase
     assert scenario.user_id = user.id
 
     user.reload
-    assert user.scenarios.size == 1
+    assert user.owns? scenario
 
     assert user.validate_running
     scenario.set_booted

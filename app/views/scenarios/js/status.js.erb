@@ -1,4 +1,5 @@
 
+// Update Boot Status on Scenario, Clouds, Subnets and Instances
 <% if @scenario.bootable? %>
   $('#boot-button-li').attr('class', '');
 <% else %>
@@ -63,6 +64,7 @@ update_status('scenario', '<%= @scenario.status %>')
   $("#cloud-<%= cloud.id %>-driver").text('<%= cloud.driver_id ? cloud.driver_id : "not set" %>');
 
   <% cloud.subnets.each do |subnet| %>
+
     <% if subnet.bootable? %>
       $("#subnet-<%= subnet.id %>-boot-button-li").attr('class', '');
     <% else %>
@@ -158,9 +160,26 @@ update_status('scenario', '<%= @scenario.status %>')
 <% end %>
 
 // Look for student answers
+student_questions = [];
+$('.student-questions').each(function(i, obj) {
+  student_id = $(obj).attr('student_id')
+  questions = [];
+  $('.student-' + student_id + '-answers').each(function(i, table) {
+    questions.push({question_id: $(table).attr('question_id'), question_index: $(table).attr('question_index'), answer_cnt: $(table).attr('answer_cnt') });
+  });
+  student_questions.push({ student_id: student_id, questions: questions });
+});
+
+// Render new answers
+<% @student_questions_update.each do |squ| %>
+  <% squ[:questions].each do |question_hash| %>
+    $('#student-<%= squ[:student].id %>-question-<%= question_hash[:question].id %>-answers-table').remove();
+    $('#student-<%= squ[:student].id %>-question-<%= question_hash[:question].id %>-answers-table-div').append('<%= escape_javascript(render "/scenarios/show/student_question_answer_table", question: question_hash[:question], question_index: question_hash[:index], user: squ[:student]).delete("\n").html_safe %>');
+  <% end %>
+<% end %>
 
 <% if @scenario.queued? or @scenario.booting? or @scenario.unbooting? %>
-  setTimeout(function() { get_scenario_status('<%= @scenario.id %>'); }, 2000);
+  setTimeout(function() { get_scnario_status('<%= @scenario.id %>', student_questions); }, 2000);
 <% else %>
-  setTimeout(function() { get_scenario_status('<%= @scenario.id %>'); }, 1000);
+  setTimeout(function() { get_scnario_status('<%= @scenario.id %>', student_questions); }, 3000);
 <% end %>

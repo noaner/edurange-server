@@ -131,6 +131,39 @@ class Scenario < ActiveRecord::Base
     return players
   end
 
+  def students
+    students = []
+    self.groups.each do |group|
+      group.players.each do |player|
+        students << player.user if not students.include? player.user
+      end
+    end
+    students
+  end
+
+  def questions_answered(user)
+    return nil if not self.has_student? user
+
+    answered = 0
+    self.questions.each do |question|
+      answered += 1 if question.answers.where("user_id = ?", user.id).size > 0
+    end
+    answered
+  end
+
+  def questions_correct(user)
+    return nil if not self.has_student? user
+
+    correct = 0
+    self.questions.each do |question|
+      # correct += 1 if question.answers.where("user_id = ? AND correct = 1", user.id).size > 0
+      question.answers.where("user_id = ?", user.id).each do |answer|
+        correct += 1 if answer.correct
+      end
+    end
+    correct
+  end
+
   def public_instances_reachable?
     reachable
     return self.instances.select{ |i| not i.port_open?(22) }.any?
@@ -402,10 +435,49 @@ class Scenario < ActiveRecord::Base
       }
     }
 
+    yml["Scoring"] = self.questions.empty? ? nil : self.questions.map { |question| {
+        "Text" => question.text,
+        "Type" => question.type_of,
+        "Options" => question.options,
+        "Values" => question.values == nil ? nil : question.values.map { |vals| { "Value" => vals[:value], "Points" => vals[:points] } },
+        "Order" => question.order,
+        "Points" => question.points
+      }
+    }
+
     f = File.open("#{self.path}/#{self.name.downcase}.yml", "w")
     f.write(yml.to_yaml)
     f.close()
     self.update_attribute(:modified, false)
+  end
+
+  def has_student?(user)
+    self.groups.each do |group| 
+      return true if group.players.select { |p| p.user == user }.size > 0
+    end
+    false
+  end
+
+  def has_question?(question)
+    self.questions.find_by_id(question.id) != nil
+  end
+
+  def answer_cnt(user)
+    return nil if not has_student?(user)
+    cnt = 0
+    self.questions.each do |question|
+      cnt += question.answers.where("user_id = ?", user.id).size
+    end
+    cnt
+  end
+
+  def find_student(user_id)
+    self.groups.each do |group| 
+      group.players.each do |player|
+        return player.user if player.user.id == user_id
+      end
+    end
+    nil
   end
 
   private

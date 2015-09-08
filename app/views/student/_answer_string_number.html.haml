@@ -1,0 +1,9 @@
+%tr{ id: "answer-#{answer.id}" }
+  %td= answer.text
+  %td= answer.correct
+  %td= answer.correct ? answer.question.values[answer.value_index][:points] : 0
+  - if answer.comment
+    %td= link_to 'show'
+  -else
+    %td -
+  %td= answer.created_at.to_formatted_s(:db)

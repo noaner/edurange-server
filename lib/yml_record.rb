@@ -63,8 +63,7 @@ module YmlRecord
     instances = file["Instances"]
     roles = file["Roles"]
     groups = file["Groups"]
-    questions = file["Questions"]
-    answers = file["Answers"]
+    scoring = file["Scoring"]
 
     scenario = Scenario.new
     scenario.custom = custom
@@ -191,19 +190,6 @@ module YmlRecord
           end
         end
 
-        # Do questions
-        if questions
-          questions.each do |yml_question|
-            question = scenario.questions.new
-            question.question_text = yml_question["Question"]
-            question.kind = yml_question["Type"]
-            if question.kind == "StringMatch"
-              question.answer_text = yml_question["Answer"]
-            end
-            question.save!
-          end
-        end
-
         # Give group admin on machines they own
         if admin
           admin.each do |admin_instance|
@@ -222,6 +208,24 @@ module YmlRecord
         end
       end
     end
+
+    # Do scoring
+    if scoring
+      scoring.each do |yml_question|
+        question = scenario.questions.new(type_of: yml_question['Type'], text: yml_question['Text'])
+        if yml_question["Options"]
+          yml_question['Options'].each do |opt| question.options << opt end
+        end
+        if yml_question["Values"]
+          question.values = []
+          yml_question['Values'].each do |val| question.values << { value: val["Value"], points: val["Points"] } end
+        end
+        question.points = yml_question["Points"]
+        question.order = yml_question["Order"]
+        question.save!
+      end
+    end
+
     scenario.update(modified: false)
     scenario.save
     return scenario # Return the scenario we created

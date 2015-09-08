@@ -4,6 +4,7 @@ class Player < ActiveRecord::Base
   validates_presence_of :group
   belongs_to :student_group
   belongs_to :user
+  has_one :scenario, through: :group
 
   validates :login, presence: true, uniqueness: { scope: :group, message: "name already taken" }
   validates :password, presence: true

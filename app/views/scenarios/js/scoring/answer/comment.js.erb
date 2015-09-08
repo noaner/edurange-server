@@ -1,0 +1,11 @@
+<% if @answer.errors.any? %>
+	<% if @answer.errors[:comment].any? %>
+    $('#modal-scoring-answer-comment').find('#comment-div').addClass('has-error');
+    $('#modal-scoring-answer-comment').find('#comment-help').text('<%= @answer.errors[:comment][0] %>');
+  <% end %>
+<% else %>
+	$('#modal-scoring-answer-comment').modal('toggle');
+	$('#answer-<%= @answer.id %>-create-button').attr('class', 'hidden');
+	$('#answer-<%= @answer.id %>-show-button').attr('class', '');
+	$('#answer-<%= @answer.id %>-edit-button').attr('class', '');
+<% end %>

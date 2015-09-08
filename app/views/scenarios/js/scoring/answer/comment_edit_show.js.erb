@@ -1,0 +1,8 @@
+$('#modal-scoring-answer-comment-edit').find('#student-name').html('<%= @answer.user.name %>');
+$('#modal-scoring-answer-comment-edit').find('#question-index').html('<%= @question_index %>');
+$('#modal-scoring-answer-comment-edit').find('#answer-index').html('<%= @answer_index %>');
+$('#modal-scoring-answer-comment-edit').find('#answer_id').val('<%= @answer.id %>');
+$('#modal-scoring-answer-comment-edit').find('#comment-div').attr('class', '');
+$('#modal-scoring-answer-comment-edit').find('#comment-help').text('');
+$('#modal-scoring-answer-comment-edit').modal('show');
+$('#modal-scoring-answer-comment-edit').find('#comment').val('<%= escape_javascript @answer.comment.html_safe %>');

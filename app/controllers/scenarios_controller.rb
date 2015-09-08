@@ -5,12 +5,15 @@ class ScenariosController < ApplicationController
   # Scenario
   before_action :set_scenario, only: [
     :clone, :destroyme, :edit, :modify, :show, :update, :save, :save_as,
-    :boot, :boot_status, :unboot, :pause, :start,
+    :boot, :status, :unboot, :pause, :start,
     :cloud_add, 
     :player_modify, :player_student_group_add, :player_add, :player_group_add, :player_delete, :player_group_admin_access_add, :player_group_user_access_add,
     :role_recipe_add, :role_add,
     :recipe_custom_add, :recipe_global_add, :recipe_global_get, :recipe_remove, :recipe_update, :recipe_update_view, :recipe_view,
-    :group_add
+    :group_add,
+    :scoring_question_add, :scoring_answers_show, :scoring_answer_essay_show, :scoring_answer_comment, :scoring_answer_comment_show,
+    :scoring_answer_comment_edit, :scoring_answer_comment_edit_show, :scoring_answer_essay_grade, :scoring_answer_essay_grade_edit,
+    :scoring_answer_essay_grade_delete
   ]
 
   # Cloud
@@ -51,6 +54,17 @@ class ScenariosController < ApplicationController
   ]
   before_action :set_instance_role, only: [
     :instance_role_remove
+  ]
+  before_action :set_question, only: [
+    :scoring_question_delete, :scoring_question_modify, :scoring_question_move_up, :scoring_question_move_down
+  ]
+  before_action :set_student, only: [
+    :scoring_answers_show
+  ]
+  before_action :set_answer, only: [
+    :scoring_answer_essay_show, :scoring_answer_comment, :scoring_answer_comment_show, 
+    :scoring_answer_comment_edit_show, :scoring_answer_comment_edit, :scoring_answer_essay_grade,
+    :scoring_answer_essay_grade_edit, :scoring_answer_essay_grade_delete
   ]
 
   # GET /scenarios
@@ -204,6 +218,33 @@ class ScenariosController < ApplicationController
     redirect_to clone, notice: 'Scenario was successfully cloned.'
   end
 
+  def status
+
+    # This find answers that have not yet been shown
+    @student_questions_update = [] # { students: [ { student: student, questions: [{question: <question>, index: 0}] } ] }
+    (params[:student_questions] == nil ? [] : params[:student_questions]).each do |key, value|
+      # find student
+      if student = @scenario.find_student(value["student_id"].to_i)
+        student_hash = { student: student, questions: [] }
+        value["questions"].each do |question_key, question_value|
+          # find question
+          if question = @scenario.questions.find(question_value["question_id"].to_i)
+            # check for new answers
+            if question.student_answers(student.id).size != question_value["answer_cnt"].to_i
+              student_hash[:questions] << { question: question, index: question_value["question_index"].to_i }
+            end
+          end
+        end
+        #if questions found not nil at to update array
+        @student_questions_update << student_hash if student_hash[:questions].size > 0
+      end
+    end
+
+    respond_to do |format|
+      format.js { render 'scenarios/js/status.js.erb', :layout => false }
+    end
+  end
+
   #############################################################
   # BOOTING
 
@@ -260,12 +301,6 @@ class ScenariosController < ApplicationController
     @instance.unboot(solo: true)
     respond_to do |format|
       format.js { render template: 'scenarios/js/boot/unboot_instance.js.erb', layout: false }
-    end
-  end
-
-  def boot_status
-    respond_to do |format|
-      format.js { render 'scenarios/js/boot/boot_status.js.erb', :layout => false }
     end
   end
 
@@ -607,6 +642,147 @@ class ScenariosController < ApplicationController
   end
 
   ###############################################################
+  #  Scoring
+
+  # Questions
+  def scoring_question_add
+    values = nil
+    if params[:values]
+      values = []
+      params[:values].each_with_index do |val, i| values << { value: val, points: params[:value_points][i] } end
+    end
+
+    @question = @scenario.questions.new(
+      type_of: params[:type],
+      options: params["#{params[:type].downcase}_options"] ? params["#{params[:type].downcase}_options"] : [],
+      text: params[:text],
+      values: params[:type] == "Essay" ? [] : values,
+      # because rails typecasts strings to integer '0' put in '-1' instead if not an integer to get proper validation
+      points: params[:points].is_integer? ? params[:points] : '-1'
+    )
+    @question.save
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/question/add.js.erb', layout: false }
+    end
+  end
+
+  def scoring_question_delete
+    @question.destroy
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/question/delete.js.erb', layout: false }
+    end
+  end
+
+  def scoring_question_modify
+    values = nil
+    if params[:values]
+      values = []
+      params[:values].each_with_index do |val, i| values << { value: val, points: params[:value_points][i] } end
+    end
+
+    puts values
+    
+    @question.update(
+      type_of: params[:type],
+      options: params["#{params[:type].downcase}_options"] ? params["#{params[:type].downcase}_options"] : [],
+      text: params[:text],
+      values: params[:type] == "Essay" ? [] : values,
+      points: params[:points].is_integer? ? params[:points] : '-1'
+    )
+    @question.save
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/question/modify.js.erb', layout: false }
+    end
+  end
+
+  def scoring_question_move_up
+    @question2 = @question.move_up
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/question/move_up.js.erb', layout: false }
+    end
+  end
+    
+  def scoring_question_move_down
+    @question2 = @question.move_down
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/question/move_down.js.erb', layout: false }
+    end
+  end
+
+  # Answers
+  def scoring_answers_show
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/show.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_essay_show
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/essay_show.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_essay_grade
+    @answer.essay_points_earned = params[:points]
+    @answer.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/essay_grade.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_essay_grade_edit
+    @answer.essay_points_earned = params[:points]
+    @answer.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/essay_grade_edit.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_essay_grade_delete
+    @answer.essay_points_earned = nil
+    @answer.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/essay_grade_delete.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_comment
+    @answer.comment = params[:comment]
+    @answer.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/comment.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_comment_show
+    @question_index = params[:question_index].to_i + 1
+    @answer_index = params[:answer_index].to_i + 1
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/comment_show.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_comment_edit
+    @answer.comment = params[:comment]
+    @answer.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/comment_edit.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_comment_edit_show
+    @question_index = params[:question_index].to_i + 1
+    @answer_index = params[:answer_index].to_i + 1
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/comment_edit_show.js.erb', layout: false }
+    end
+  end
+
+
+
+  ###############################################################
   #  Helpers
 
   def log_get
@@ -726,6 +902,30 @@ class ScenariosController < ApplicationController
     def set_instance_group
       @instance_group = InstanceGroup.find(params[:instance_group_id])
       if not @user.owns? @instance_group
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_question
+      @question = Question.find(params[:question_id])
+      if not @user.owns? @question
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_student
+      @student = User.find(params[:student_id])
+      if not @scenario.has_student? @student
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_answer
+      @answer = Answer.find(params[:answer_id])
+      if not @scenario.has_question? @answer.question
         head :ok, content_type: "text/html"
         return
       end

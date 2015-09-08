@@ -34,7 +34,7 @@ Edurange::Application.routes.draw do
       post 'unboot_cloud'
       post 'unboot_subnet'
       post 'unboot_instance'
-      post 'boot_status'
+      post 'status'
       post 'pause'
       post 'start'
 
@@ -89,6 +89,22 @@ Edurange::Application.routes.draw do
       post 'recipe_remove'
       post 'recipe_update'
 
+      post 'scoring_question_add'
+      post 'scoring_question_delete'
+      post 'scoring_question_modify'
+      post 'scoring_question_move_up'
+      post 'scoring_question_move_down'
+
+      post 'scoring_answers_show'
+      post 'scoring_answer_essay_show'
+      post 'scoring_answer_essay_grade'
+      post 'scoring_answer_essay_grade_edit'
+      post 'scoring_answer_essay_grade_delete'
+      post 'scoring_answer_comment'
+      post 'scoring_answer_comment_show'
+      post 'scoring_answer_comment_edit'
+      post 'scoring_answer_comment_edit_show'
+
     end
   end
 
@@ -114,6 +130,12 @@ Edurange::Application.routes.draw do
   post 'instructor/student_group_user_remove'
 
   get 'student', to: 'student#index'
+  get 'student/:id', to: 'student#show'
+  post 'student/:id/answer_string', to: 'student#answer_string', as: 'answer_string_student'
+  post 'student/:id/answer_number', to: 'student#answer_number', as: 'answer_number_student'
+  post 'student/:id/answer_essay', to: 'student#answer_essay', as: 'answer_essay_student'
+  post 'student/:id/answer_essay_delete', to: 'student#answer_essay_delete', as: 'answer_essay_delete_student'
+  post 'student/:id/answer_essay_show', to: 'student#answer_essay_show', as: 'answer_essay_show_student'
 
   root :to => "home#index"
   devise_for :users, :controllers => {:registrations => "registrations"}
