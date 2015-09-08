@@ -11,19 +11,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150728194650) do
+ActiveRecord::Schema.define(version: 20150908205433) do
 
   create_table "answers", force: :cascade do |t|
-    t.integer  "user_id"
-    t.string   "text"
-    t.text     "text_essay"
-    t.text     "comment"
     t.boolean  "correct"
-    t.integer  "value_index"
-    t.string   "essay_points_earned"
     t.integer  "question_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "text"
+    t.text     "text_essay"
+    t.text     "comment"
+    t.integer  "value_index"
+    t.string   "essay_points_earned"
+    t.integer  "user_id"
   end
 
   add_index "answers", ["question_id"], name: "index_answers_on_question_id"
@@ -119,6 +119,9 @@ ActiveRecord::Schema.define(version: 20150728194650) do
   add_index "players", ["group_id"], name: "index_players_on_group_id"
 
   create_table "questions", force: :cascade do |t|
+    t.integer  "scenario_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.integer  "order"
     t.string   "text"
     t.string   "type_of"
@@ -126,9 +129,6 @@ ActiveRecord::Schema.define(version: 20150728194650) do
     t.string   "values"
     t.integer  "points"
     t.integer  "points_penalty"
-    t.integer  "scenario_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   add_index "questions", ["scenario_id"], name: "index_questions_on_scenario_id"
