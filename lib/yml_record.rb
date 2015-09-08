@@ -175,18 +175,20 @@ module YmlRecord
           users.each do |user|
             login = user["Login"]
             password = user["Password"]
-            user_id = user["Id"]
 
             player = group.players.new
             player.login = login
             player.password = password
             player.group = group
 
-            if User.find_by_id(user_id)
-              player.user_id = user_id
+            if user_id = user["Id"]
+              if User.find_by_id(user_id)
+                player.save!
+              end
+            else
+              player.save!
             end
 
-            player.save!
           end
         end
 

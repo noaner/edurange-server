@@ -409,7 +409,7 @@ class Scenario < ActiveRecord::Base
           "Administrator" => group.instance_groups.select{ |ig| ig.administrator  }.map{ |ig| ig.instance.name },
           "User" => group.instance_groups.select{ |ig| not ig.administrator  }.map{ |ig| ig.instance.name }
         },
-        "Users" => group.players.empty? ? nil : group.players.map { |p| { "Login" => p.login, "Password" => p.password, "Id" => p.user_id } }
+        "Users" => group.players.empty? ? nil : group.players.map { |p| { "Login" => p.login, "Password" => p.password, "Id" => self.has_student?(p.user) ? p.user_id : nil } }
       }
     }
 
@@ -452,6 +452,7 @@ class Scenario < ActiveRecord::Base
   end
 
   def has_student?(user)
+    return false if not user
     self.groups.each do |group| 
       return true if group.players.select { |p| p.user == user }.size > 0
     end
