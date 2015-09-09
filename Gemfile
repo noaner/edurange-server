@@ -62,11 +62,11 @@ group :development, :test do
   gem 'daemons'
 end
 group :test do
-  # gem 'capybara'
-  # gem 'database_cleaner'
+  gem 'capybara'
+  gem 'database_cleaner'
+  gem 'selenium-webdriver'
   # gem 'faker'
   # gem 'launchy'
-  # gem 'selenium-webdriver'
   # gem 'plymouth'
   # gem 'pry'
 end
