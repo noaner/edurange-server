@@ -475,7 +475,9 @@ class Scenario < ActiveRecord::Base
   def find_student(user_id)
     self.groups.each do |group| 
       group.players.each do |player|
-        return player.user if player.user.id == user_id
+        if player
+          return player.user if player.user.id == user_id
+        end
       end
     end
     nil
