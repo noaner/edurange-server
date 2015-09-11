@@ -333,7 +333,7 @@ class Scenario < ActiveRecord::Base
     if File.exists? "#{Settings.app_path}/scenarios/user/#{self.user.id}/#{self.name.downcase}"
       errors.add(:name, "A custom scenario with that name already exists")
       return false
-    end
+    endpoint
 
     FileUtils.mkdir self.path
     FileUtils.mkdir "#{self.path}/recipes"
@@ -420,7 +420,7 @@ class Scenario < ActiveRecord::Base
       end
 
       # perform simple analytics on bash histories and save them into statistic
-      statistic.bash_analytics = bash_analytics(statistic.bash_histories)
+      statistic.bash_analytics = partition_bash(statistic.bash_histories.split("\n"))
 
       # and with scenario metadata
       statistic.user_id = self.user_id
@@ -452,55 +452,48 @@ class Scenario < ActiveRecord::Base
       return options_frequencies
     end
 
-    def partition_bash_histories(bash_history)
-      #
-      # partition bash histories collected based on user 
-      # this method returns a nested hash where the outer
-      # keys are usernames which maps to an inner dictionary
-      # 
-
-      user_dict = Hash.new(0)
-      # split bash history string into array by newlines 
-      bash_history = bash_history.split("\n")
-      bash_len = bash_history.length
-      index = 0  # index into our bash histories
-
-      # syntax error of some kind, expecting and end block
-      do until (index + 1) == bash_history.length
-        if bash_history[index][0..1] == "##"
-          # grab user name
-          user = bash_history[index][3..bash_len]
-          index = index + 1  # move to the next line
-          if user_dict.keys.include?(user)
-            # do nothing and continue
-          else
-            # user maps to inner hash-table
-            user_dict[user] = Hash.new(0)
+    def partition_bash(data)
+      d = Hash.new(0)  # {user -> { timestamp -> command }}
+      i = 0  # our index
+      # make two passes over the data
+      #   first, creating the users list
+      #   & then, grabbing commands associated
+      #     with each of those users    
+      
+      # outer hash
+      while i < data.length
+        if data[i][0..1] == "##"
+          e = data[i].length  # endpoint
+          u = data[i][3..e-1]  # username
+          if !d.include?(u)
+            # don't overwrite unless already included
+            d[u] = Hash.new(0)
           end
-          
-          # once we hit another user, add a new entry to
-          if (bash_history[index][0..1] == '##' || index == bash_history.length)
-            user = bash_history[index][3..bash_len]
-            if user_dict.keys.include?(user)
-              # nop
-            else
-              user_dict[user] = Hash.new(0)
-          end
-          
-          if bash_history[index][0..1] == "# "
-            # each command is preceded by a date
-            date = bash_history[index]
-            command = bash_history[index + 1]
-            user_dict[user][date] = command
-            index = index + 2
-          end
-
-          index = index + 1
-
-        else
-          index = index + 1
         end
+        i += 1
       end
+      i = 0  # reset index
+      users = d.keys  # users
+      u_i = 0 # user index
+
+      # inner hash
+      while i < data.length
+        if data[i][0..1] == "# "
+          e = data[i].length
+          t = data[i][2..e-1]  # timestamp
+          if data[i + 1] != ""
+            c = data[i + 1]  # command
+            d[users[u_i]][t] = [c, 0]
+            i += 1  # inc twice
+          end
+        elsif data[i][0..1] == "##"
+          e = data[i].length
+          u = data[i][3..e-1]  # to find index in users
+          u_i = users.find_index(u)  # & change user u
+        end
+        i += 1
+      end
+      return d
     end
 
     def destroy_s3_bash_histories
@@ -509,7 +502,8 @@ class Scenario < ActiveRecord::Base
       self.instances.each do |instance|
         instance.aws_instance_delete_bash_history_page
       end
-    end
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+    end  
+  end  # end private methods                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 end 
+
+
