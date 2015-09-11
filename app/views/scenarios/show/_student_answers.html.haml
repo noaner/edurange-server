@@ -1,6 +1,6 @@
 %tr{ id: "student-#{user.id}-answers-tr", class: "student-questions", student_id: user.id }
   %td{ colspan: 5 }
-    - scenario.questions.each_with_index do |question, question_index|
+    - scenario.questions.order(:order).each_with_index do |question, question_index|
       %b= question.order.to_s + '.'
       = question.text
       %p

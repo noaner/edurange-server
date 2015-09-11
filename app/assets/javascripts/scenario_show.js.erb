@@ -270,3 +270,9 @@ function scoring_answer_comment(student_name, question_index, answer_index, answ
 	$('#modal-scoring-answer-comment').find('#comment-help').text('');
 	$('#modal-scoring-answer-comment').find('#comment').val('');
 }
+
+// Student Answers
+function get_student_answers (id, student_id) {
+  resource = resource = '/scenarios/' + id + "/scoring_answers_show?student_id=" + student_id;
+  $.post(resource);
+}

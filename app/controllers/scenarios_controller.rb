@@ -219,26 +219,18 @@ class ScenariosController < ApplicationController
   end
 
   def status
-
-    # This find answers that have not yet been shown
-    @student_questions_update = [] # { students: [ { student: student, questions: [{question: <question>, index: 0}] } ] }
-    (params[:student_questions] == nil ? [] : params[:student_questions]).each do |key, value|
-      # find student
-      if student = @scenario.find_student(value["student_id"].to_i)
-        student_hash = { student: student, questions: [] }
-        value["questions"].each do |question_key, question_value|
-          # find question
-          if question = @scenario.questions.find(question_value["question_id"].to_i)
-            # check for new answers
-            if question.student_answers(student.id).size != question_value["answer_cnt"].to_i
-              student_hash[:questions] << { question: question, index: question_value["question_index"].to_i }
-            end
+    @student_answers_update = []
+    if params[:student_answers]
+      params[:student_answers].each do |key, value|
+        if student = @scenario.find_student(value['student_id'].to_i)
+          oldlist = value['answers'].split(',').map{ |n| n.to_i}
+          newlist = @scenario.answers_list(student)
+          if (oldlist.size != newlist.size) or not (oldlist - newlist).blank?
+            @student_answers_update << { student: student, show: value['show'] }
           end
         end
-        #if questions found not nil at to update array
-        @student_questions_update << student_hash if student_hash[:questions].size > 0
       end
-    end
+    end  
 
     respond_to do |format|
       format.js { render 'scenarios/js/status.js.erb', :layout => false }

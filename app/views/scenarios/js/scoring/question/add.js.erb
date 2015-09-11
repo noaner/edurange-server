@@ -36,6 +36,17 @@
 
 <% else %>
 	$('#questions').append("<%= escape_javascript( render('/scenarios/show/question', question: @question, index: @question.scenario.questions.size - 1).delete("\n") ).html_safe %>");
+  
+  // update student answered and correct
+  $('.student-answers-out-of').each(function(i, obj) {
+    $(obj).text('<%= @question.scenario.questions.size %>');
+  });
+  $('.student-questions').each(function(i, obj) {
+    $(obj).remove();
+    get_student_answers(<%= @question.scenario.id %>, $(obj).attr('student_id'));
+  });
+
+
   $('#modal-scoring-question-add').modal('toggle');
   $('#save-button-li').attr('class', '');
   $('#save-button').attr('href', '/scenarios/<%= @question.scenario.id %>/save');

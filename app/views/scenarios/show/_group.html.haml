@@ -78,5 +78,5 @@
 
         %td= player.login
         %td= player.password
-        %td= link_to 'delete', group_player_delete_scenario_path(@scenario, player_id: player), remote: true, method: :post, class: group.instances_stopped? ? "" : "hidden"
+        %td= link_to 'delete', group_player_delete_scenario_path(@scenario, player_id: player), remote: true, method: :post, class: group.instances_stopped? ? "" : "hidden", data: { confirm: "Are you sure? This will erase any answers to questions that the student has entered." }
         

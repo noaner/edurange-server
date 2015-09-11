@@ -472,6 +472,15 @@ class Scenario < ActiveRecord::Base
     cnt
   end
 
+  def answers_list(user)
+    return nil if not has_student?(user)
+    answers = []
+    self.questions.each do |question|
+      answers += question.answers.map { |a| a.id }
+    end
+    answers
+  end
+
   def find_student(user_id)
     self.groups.each do |group| 
       group.players.each do |player|

@@ -125,7 +125,7 @@
           = render '/scenarios/show/question', question: question, index: index
       %br
       %label Student Answers:
-      %table.table
+      %table.table#student-answers-table
         %tr
           %th
           %th Name
@@ -133,14 +133,7 @@
           %th Answered
           %th Correct
         - @scenario.students.each do |user|
-          %tr{ id: "student-#{user.id}-answers", style: "background-color: #F8F8F8" }
-            %td
-              = link_to 'show', scoring_answers_show_scenario_path(@scenario, student_id: user.id), remote: :true, method: :post, id: "student-#{user.id}-answers-show-button"
-              = link_to 'hide', 'javascript: void(0)', onclick: "scoring_answers_hide('#{user.id}')", id: "student-#{user.id}-answers-hide-button", class: 'hidden'
-            %td= user.name
-            %td= user.email
-            %td= "#{@scenario.questions_answered(user)}/#{@scenario.questions.size}"
-            %td= "#{@scenario.questions_correct(user)}/#{@scenario.questions.size}"
+          = render '/scenarios/show/student_answers_header', scenario: @scenario, user: user
 
 = link_to 'Back', scenarios_path, class: 'btn btn-default'
 
@@ -148,5 +141,5 @@
   - if @clone
     update_flash("Scenario successfully cloned");
 %script
-  = "get_scnario_status('#{@scenario.id}', [], []);"
+  = "get_scnario_status('#{@scenario.id}');"
   

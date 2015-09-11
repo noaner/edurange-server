@@ -159,27 +159,22 @@ update_status('scenario', '<%= @scenario.status %>')
   <% end %>
 <% end %>
 
-// Look for student answers
-student_questions = [];
-$('.student-questions').each(function(i, obj) {
-  student_id = $(obj).attr('student_id')
-  questions = [];
-  $('.student-' + student_id + '-answers').each(function(i, table) {
-    questions.push({question_id: $(table).attr('question_id'), question_index: $(table).attr('question_index'), answer_cnt: $(table).attr('answer_cnt') });
-  });
-  student_questions.push({ student_id: student_id, questions: questions });
-});
-
-// Render new answers
-<% @student_questions_update.each do |squ| %>
-  <% squ[:questions].each do |question_hash| %>
-    $('#student-<%= squ[:student].id %>-question-<%= question_hash[:question].id %>-answers-table').remove();
-    $('#student-<%= squ[:student].id %>-question-<%= question_hash[:question].id %>-answers-table-div').append('<%= escape_javascript(render "/scenarios/show/student_question_answer_table", question: question_hash[:question], question_index: question_hash[:index], user: squ[:student]).delete("\n").html_safe %>');
+<% @student_answers_update.each do |student_hash| %>
+  $('#student-<%= student_hash[:student].id %>-answers').attr('answers', '<%= @scenario.answers_list(student_hash[:student]).join(',') %>');
+  $('#student-<%= student_hash[:student].id %>-answered').text('<%= @scenario.questions_answered(student_hash[:student]) %>');
+  $('#student-<%= student_hash[:student].id %>-correct').text('<%= @scenario.questions_correct(student_hash[:student]) %>');
+  <% if student_hash[:show] == "true" %>
+    console.log('foobar');
+    if ($('#student-<%= student_hash[:student].id %>-answers-tr').length > 0) {
+      console.log('open');
+      $('#student-<%= student_hash[:student].id %>-answers-tr').remove();
+      $('<%= escape_javascript(render("/scenarios/show/student_answers", scenario: @scenario, user: student_hash[:student]).delete("\n")).html_safe %>').insertAfter($('#student-<%= student_hash[:student].id %>-answers'));
+    }
   <% end %>
 <% end %>
 
 <% if @scenario.queued? or @scenario.booting? or @scenario.unbooting? %>
-  setTimeout(function() { get_scnario_status('<%= @scenario.id %>', student_questions); }, 2000);
+  setTimeout(function() { get_scnario_status('<%= @scenario.id %>'); }, 2000);
 <% else %>
-  setTimeout(function() { get_scnario_status('<%= @scenario.id %>', student_questions); }, 3000);
+  setTimeout(function() { get_scnario_status('<%= @scenario.id %>'); }, 3000);
 <% end %>
