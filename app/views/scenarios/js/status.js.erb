@@ -1,117 +1,48 @@
-
 // Update Boot Status on Scenario, Clouds, Subnets and Instances
-<% if @scenario.bootable? %>
-  $('#boot-button-li').attr('class', '');
-<% else %>
-  $('#boot-button-li').attr('class', 'disabled');
-<% end %>
+$('#boot-button-li').attr('class', '<%= @scenario.bootable? ? "" : "disabled" %>');
+$('#unboot-button-li').attr('class', '<%= @scenario.unbootable? ? "" : "disabled" %>');
 
-<% if @scenario.unbootable? %>
-  $('#unboot-button-li').attr('class', '');
-<% else %>
-  $('#unboot-button-li').attr('class', 'disabled');
-<% end %>
+$('#destroy-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+$('#save-as-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+$('#group-add-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+$('#role-add-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
 
-<% if @scenario.stopped? %>
-  $('#destroy-button-li').attr('class', '');
-  $('#save-as-button-li').attr('class', '');
-  $('#group-add-button-li').attr('class', '');
-  $('#role-add-button-li').attr('class', '');
-<% else %>
-  $('#destroy-button-li').attr('class', 'disabled');
-  $('#save-as-button-li').attr('class', 'disabled');
-  $('#group-add-button-li').attr('class', 'disabled');
-  $('#role-add-button-li').attr('class', 'disabled');
-<% end %>
-
-<% if @scenario.paused? %>
-  $('#start-button-li').attr('class', '');
-<% else %>
-  $('#start-button-li').attr('class', 'disabled');
-<% end %>
-
-<% if @scenario.booted? %>
-  $('#pause-button-li').attr('class', '');
-<% else %>
-  $('#pause-button-li').attr('class', 'disabled');
-<% end %>
+$('#start-button-li').attr('class', '<%= @scenario.paused? ? "" : "disabled" %>');
+$('#pause-button-li').attr('class', '<%= @scenario.booted? ? "" : "disabled" %>');
 
 update_status('scenario', '<%= @scenario.status %>')
 
 <% @scenario.clouds.each do |cloud| %>
-  <% if cloud.bootable? %>
-    $("#cloud-<%= cloud.id %>-boot-button-li").attr('class', '');
-  <% else %>
-    $("#cloud-<%= cloud.id %>-boot-button-li").attr('class', 'disabled');
-  <% end %>
 
-  <% if cloud.unbootable? %>
-    $("#cloud-<%= cloud.id %>-unboot-button-li").attr('class', '');
-  <% else %>
-    $("#cloud-<%= cloud.id %>-unboot-button-li").attr('class', 'disabled');
-  <% end %>
+  $("#cloud-<%= cloud.id %>-boot-button-li").attr('class', '<%= @scenario.bootable? ? "" : "disabled" %>');
+  $("#cloud-<%= cloud.id %>-unboot-button-li").attr('class', '<%= @scenario.unbootable? ? "" : "disabled" %>');
 
-  <% if cloud.stopped? %>
-    $("#cloud-<%= cloud.id %>-modify-button-li").attr('class', '');
-    $("#cloud-<%= cloud.id %>-delete-button-li").attr('class', '');
-  <% else %>
-    $("#cloud-<%= cloud.id %>-modify-button-li").attr('class', 'disabled');
-    $("#cloud-<%= cloud.id %>-delete-button-li").attr('class', 'disabled');
-  <% end %>
+  $("#cloud-<%= cloud.id %>-modify-button-li").attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+  $("#cloud-<%= cloud.id %>-delete-button-li").attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
 
   update_status('cloud-<%= cloud.id %>', '<%= cloud.status %>');
-  
   $("#cloud-<%= cloud.id %>-driver").text('<%= cloud.driver_id ? cloud.driver_id : "not set" %>');
 
   <% cloud.subnets.each do |subnet| %>
+    $("#subnet-<%= subnet.id %>-boot-button-li").attr('class', '<%= @scenario.bootable? ? "" : "disabled" %>');
+    $("#subnet-<%= subnet.id %>-unboot-button-li").attr('class', '<%= @scenario.unbootable? ? "" : "disabled" %>');
 
-    <% if subnet.bootable? %>
-      $("#subnet-<%= subnet.id %>-boot-button-li").attr('class', '');
-    <% else %>
-      $("#subnet-<%= subnet.id %>-boot-button-li").attr('class', 'disabled');
-    <% end %>
-
-    <% if subnet.unbootable? %>
-      $("#subnet-<%= subnet.id %>-unboot-button-li").attr('class', '');
-    <% else %>
-      $("#subnet-<%= subnet.id %>-unboot-button-li").attr('class', 'disabled');
-    <% end %>
-
-    <% if subnet.stopped? %>
-      $("#subnet-<%= subnet.id %>-modify-button-li").attr('class', '');
-      $("#subnet-<%= subnet.id %>-delete-button-li").attr('class', '');
-    <% else %>
-      $("#subnet-<%= subnet.id %>-modify-button-li").attr('class', 'disabled');
-      $("#subnet-<%= subnet.id %>-delete-button-li").attr('class', 'disabled');
+    $("#subnet-<%= subnet.id %>-modify-button-li").attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+    $("#subnet-<%= subnet.id %>-delete-button-li").attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+    <% if not subnet.stopped? %>
       $("#subnet-<%= subnet.id %>-delete-button").attr('href', 'javascript: void(0)');
     <% end %>
 
     update_status('subnet-<%= subnet.id %>', '<%= subnet.status %>');
-
     $("#subnet-<%= subnet.id %>-driver").text('<%= subnet.driver_id ? subnet.driver_id : "not set" %>');
 
     <% subnet.instances.each do |instance| %>
-      <% if instance.bootable? %>
-        $("#instance-<%= instance.id %>-boot-button-li").attr('class', '');
-      <% else %>
-        $("#instance-<%= instance.id %>-boot-button-li").attr('class', 'disabled');
-      <% end %>
+      $("#instance-<%= instance.id %>-boot-button-li").attr('class', '<%= @scenario.bootable? ? "" : "disabled" %>');
+      $("#instance-<%= instance.id %>-unboot-button-li").attr('class', '<%= @scenario.unbootable? ? "" : "disabled" %>');
 
-      <% if instance.unbootable? %>
-        $("#instance-<%= instance.id %>-unboot-button-li").attr('class', '');
-      <% else %>
-        $("#instance-<%= instance.id %>-unboot-button-li").attr('class', 'disabled');
-      <% end %>
-
-      <% if instance.stopped? %>
-        $("#instance-<%= instance.id %>-modify-button-li").attr('class', '');
-        $("#instance-<%= instance.id %>-delete-button-li").attr('class', '');
-        $("#instance-<%= instance.id %>-role-add-button-li").attr('class', '');
-      <% else %>
-        $("#instance-<%= instance.id %>-modify-button-li").attr('class', 'disabled');
-        $("#instance-<%= instance.id %>-delete-button-li").attr('class', 'disabled');
-        $("#instance-<%= instance.id %>-role-add-button-li").attr('class', 'disabled');
-      <% end %>
+      $("#instance-<%= instance.id %>-modify-button-li").attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+      $("#instance-<%= instance.id %>-delete-button-li").attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+      $("#instance-<%= instance.id %>-role-add-button-li").attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
 
       update_status('instance-<%= instance.id %>', '<%= instance.status %>');
 
@@ -132,31 +63,17 @@ update_status('scenario', '<%= @scenario.status %>')
 <% end %>
 
 <% @scenario.groups.each do |group| %>
-  <% if group.instances_stopped? %>
-    $('#group-<%= group.id %>-player-add-button-li').attr('class', '');
-    $('#group-<%= group.id %>-student-group-add-button-li').attr('class', '');
-    $('#group-<%= group.id %>-student-group-remove-button-li').attr('class', '');
-    $('#group-<%= group.id %>-modify-button-li').attr('class', '');
-    $('#group-<%= group.id %>-delete-button-li').attr('class', '');
-    $('#group-<%= group.id %>-admin-access-button-li').attr('class', '');
-    $('#group-<%= group.id %>-user-access-button-li').attr('class', '');
-  <% else %>
-    $('#group-<%= group.id %>-player-add-button-li').attr('class', 'disabled');
-    $('#group-<%= group.id %>-student-group-add-button-li').attr('class', 'disabled');
-    $('#group-<%= group.id %>-student-group-remove-button-li').attr('class', 'disabled');
-    $('#group-<%= group.id %>-modify-button-li').attr('class', 'disabled');
-    $('#group-<%= group.id %>-delete-button-li').attr('class', 'disabled');
-    $('#group-<%= group.id %>-admin-access-button-li').attr('class', 'disabled');
-    $('#group-<%= group.id %>-user-access-button-li').attr('class', 'disabled');
-  <% end %>
+  $('#group-<%= group.id %>-player-add-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+  $('#group-<%= group.id %>-student-group-add-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+  $('#group-<%= group.id %>-student-group-remove-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+  $('#group-<%= group.id %>-modify-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+  $('#group-<%= group.id %>-delete-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+  $('#group-<%= group.id %>-admin-access-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
+  $('#group-<%= group.id %>-user-access-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
 <% end %>
 
 <% @scenario.roles.each do |role| %>
-  <% if @scenario.stopped? %>
-    $('#role-<%= role.id %>-delete-button-li').attr('class', '');
-  <% else %>
-    $('#role-<%= role.id %>-delete-button-li').attr('class', 'disabled');
-  <% end %>
+  $('#role-<%= role.id %>-delete-button-li').attr('class', '<%= @scenario.stopped? ? "" : "disabled" %>');
 <% end %>
 
 <% @student_answers_update.each do |student_hash| %>
@@ -164,9 +81,7 @@ update_status('scenario', '<%= @scenario.status %>')
   $('#student-<%= student_hash[:student].id %>-answered').text('<%= @scenario.questions_answered(student_hash[:student]) %>');
   $('#student-<%= student_hash[:student].id %>-correct').text('<%= @scenario.questions_correct(student_hash[:student]) %>');
   <% if student_hash[:show] == "true" %>
-    console.log('foobar');
     if ($('#student-<%= student_hash[:student].id %>-answers-tr').length > 0) {
-      console.log('open');
       $('#student-<%= student_hash[:student].id %>-answers-tr').remove();
       $('<%= escape_javascript(render("/scenarios/show/student_answers", scenario: @scenario, user: student_hash[:student]).delete("\n")).html_safe %>').insertAfter($('#student-<%= student_hash[:student].id %>-answers'));
     }
