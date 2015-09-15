@@ -1,0 +1,3 @@
+$('#dropdown-instructions-student').removeClass('open');
+$('#modal-instructions-student-modify').modal('show');
+$('#modal-instructions-student-modify').find('#text').val('<%= escape_javascript(@scenario.instructions_student.html_safe) %>');

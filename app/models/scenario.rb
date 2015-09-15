@@ -13,9 +13,16 @@ class Scenario < ActiveRecord::Base
   has_many :instances, through: :subnets
 
   validate :validate_name, :validate_stopped
+
   before_destroy :validate_stopped, prepend: true
   before_destroy :create_statistic, prepend: true
   before_destroy :destroy_s3_bash_histories
+
+  def update_modified
+    if self.custom?
+      self.update_attribute(:modified, true)
+    end
+  end
 
   def validate_name
     self.name = self.name.strip
@@ -390,6 +397,7 @@ class Scenario < ActiveRecord::Base
       "Name" => self.name, 
       "Description" => self.description,
       "Instructions" => self.instructions,
+      "InstructionsStudent" => self.instructions_student,
       "Groups" => nil,
       "Clouds" => nil,
       "Subnets" => nil,
@@ -404,7 +412,8 @@ class Scenario < ActiveRecord::Base
     }
 
     yml["Groups"] = self.groups.empty? ? nil : self.groups.map { |group| 
-      { "Name" => group.name, 
+      { "Name" => group.name,
+        "Instructions" => group.instructions,
         "Access" => { 
           "Administrator" => group.instance_groups.select{ |ig| ig.administrator  }.map{ |ig| ig.instance.name },
           "User" => group.instance_groups.select{ |ig| not ig.administrator  }.map{ |ig| ig.instance.name }
@@ -484,12 +493,33 @@ class Scenario < ActiveRecord::Base
   def find_student(user_id)
     self.groups.each do |group| 
       group.players.each do |player|
-        if player
+        if player.user
           return player.user if player.user.id == user_id
         end
       end
     end
     nil
+  end
+
+  def students_groups(user)
+    groups = []
+    self.groups.each do |group|
+      group.players.each do |player|
+        if player.user
+          groups << group if player.user == user
+        end
+      end
+    end
+  end
+
+  def update_instructions(instructions)
+    self.update_attribute(:instructions, instructions)
+    self.update_modified
+  end
+
+  def update_instructions_student(instructions)
+    self.update_attribute(:instructions, instructions)
+    self.update_modified
   end
 
   private

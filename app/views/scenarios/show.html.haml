@@ -31,9 +31,32 @@
 
   %div.indent.panel-body
     // Instructions
-    %label Instructions:
-    %div.indent= @scenario.instructions
+    %label Instructor Instructions:
+    - if @scenario.custom?
+      %div.inline-block
+        %div.dropdown{id:'dropdown-instructions'}
+          %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-instructions', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+            %span.caret
+          %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-instructions'}
+            %li{ id: 'instructions-modify-button-li' }
+              = link_to 'Modify', instructions_get_scenario_path(@scenario), method: :post, remote: true
+    %div.indent#instructor-instructions
+      = @scenario.instructions
     %p
+
+    %label Student Instructions:
+    - if @scenario.custom?
+      %div.inline-block
+        %div.dropdown{id:'dropdown-instructions-student'}
+          %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-instructions-student', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+            %span.caret
+          %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-instructions-student'}
+            %li{ id: 'instructions-student-modify-button-li' }
+              = link_to 'Modify', instructions_student_get_scenario_path(@scenario), method: :post, remote: true
+    %div.indent#instructor-instructions-student
+      = @scenario.instructions_student
+    %p
+    
 
     // Scenario
     %label Scenario:

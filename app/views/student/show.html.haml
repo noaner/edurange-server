@@ -27,9 +27,42 @@
     %label Organization:
     = @scenario.user.organization
     %br
-    %label Instructions:
-    = @scenario.instructions
+    %label Scenario Instructions:
+    = @scenario.instructions_student
     %br
+    %label Groups:
+    %ul
+      - @scenario.students_groups(@user).each do |group|
+        %li
+          %label= group.name
+          %br
+          %label Instructions:
+          = group.instructions
+          %br
+          %label Credentials:
+          %ul
+            - if player = group.find_player_by_student_id(@user.id)
+              login:
+              = player.login
+              %br
+              password:
+              = player.password
+
+          %label Instances:
+          %ul
+            - group.instances.each do |instance|
+              %li
+                %label Name:
+                = instance.name
+                - if instance.internet_accessible
+                  %br
+                  %label Public IP Address:
+                  = instance.provider_instance_public_ip ? instance.provider_instance_public_ip : "not set"
+                %br
+                %label IP Address:
+                = instance.ip_address
+              %br
+
     %label Questions:
     %p
 

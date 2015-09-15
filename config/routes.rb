@@ -45,6 +45,11 @@ Edurange::Application.routes.draw do
       post 'save_as'
       post 'obliterate_custom'
 
+      post 'instructions_get'
+      post 'instructions_modify'
+      post 'instructions_student_get'
+      post 'instructions_student_modify'
+
       post 'cloud_add'
       post 'cloud_delete'
       post 'cloud_modify'
@@ -64,6 +69,9 @@ Edurange::Application.routes.draw do
       post 'group_add'
       post 'group_modify'
       post 'group_delete'
+
+      post 'group_instructions_get'
+      post 'group_instructions_modify'
 
       post 'group_player_add'
       post 'group_player_delete'

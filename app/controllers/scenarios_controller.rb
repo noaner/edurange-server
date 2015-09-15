@@ -10,10 +10,11 @@ class ScenariosController < ApplicationController
     :player_modify, :player_student_group_add, :player_add, :player_group_add, :player_delete, :player_group_admin_access_add, :player_group_user_access_add,
     :role_recipe_add, :role_add,
     :recipe_custom_add, :recipe_global_add, :recipe_global_get, :recipe_remove, :recipe_update, :recipe_update_view, :recipe_view,
-    :group_add,
+    :group_add, :group_instructions_get, :group_instructions_modify,
     :scoring_question_add, :scoring_answers_show, :scoring_answer_essay_show, :scoring_answer_comment, :scoring_answer_comment_show,
     :scoring_answer_comment_edit, :scoring_answer_comment_edit_show, :scoring_answer_essay_grade, :scoring_answer_essay_grade_edit,
-    :scoring_answer_essay_grade_delete
+    :scoring_answer_essay_grade_delete,
+    :instructions_get, :instructions_modify, :instructions_student_get, :instructions_student_modify
   ]
 
   # Cloud
@@ -33,7 +34,8 @@ class ScenariosController < ApplicationController
 
   # Group
   before_action :set_group, only: [
-    :group_delete, :group_modify, :group_admin_access_add, :group_user_access_add, :group_player_add, :group_student_group_add, :group_student_group_remove
+    :group_delete, :group_modify, :group_admin_access_add, :group_user_access_add, :group_player_add, 
+    :group_student_group_add, :group_student_group_remove, :group_instructions_get, :group_instructions_modify
   ]
   before_action :set_instance_group, only: [
     :group_admin_access_remove, :group_user_access_remove
@@ -82,7 +84,7 @@ class ScenariosController < ApplicationController
   # GET /scenarios/1.json
   def show
     # @clone = params[:clone]
-    @scenario.check_status
+    #@scenario.check_status
   end
 
   # GET /scenarios/new
@@ -313,6 +315,33 @@ class ScenariosController < ApplicationController
   ###############################################################
   #  Resource Modification
 
+  # Instructions
+  def instructions_get
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instructions/get.js.erb', layout: false }
+    end
+  end
+
+  def instructions_modify
+    @scenario.update_instructions(params[:text])
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instructions/modify.js.erb', layout: false }
+    end
+  end
+
+  def instructions_student_get
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instructions/student_get.js.erb', layout: false }
+    end
+  end
+
+  def instructions_student_modify
+    @scenario.update_instructions_student(params[:text])
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instructions/student_modify.js.erb', layout: false }
+    end
+  end
+
   # CLOUD
   def cloud_add
     @cloud = @scenario.clouds.new(name: params[:name], cidr_block: params[:cidr_block])
@@ -452,6 +481,20 @@ class ScenariosController < ApplicationController
     @group.update(name: params[:name])
     respond_to do |format|
       format.js { render template: 'scenarios/js/group/modify.js.erb', layout: false }
+    end
+  end
+
+  def group_instructions_get
+    @instructions = @group.instructions.gsub("\n", "<br>").gsub(" ", "&nbsp").gsub("'", "\"").gsub(/\r/, "").html_safe;
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/instructions_get.js.erb', layout: false }
+    end
+  end
+
+  def group_instructions_modify
+    @group.update_instructions(params[:text])
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/instructions_modify.js.erb', layout: false }
     end
   end
 

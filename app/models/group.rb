@@ -102,4 +102,18 @@ class Group < ActiveRecord::Base
     players
   end
 
+  def find_player_by_student_id(student_id)
+    self.players.each do |player|
+      if player.user
+        return player if player.user.id == student_id
+      end
+    end
+    nil
+  end
+
+  def update_instructions(instructions)
+    self.update_attribute(:instructions, instructions)
+    self.update_scenario_modified
+  end
+
 end

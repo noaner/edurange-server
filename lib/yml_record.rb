@@ -69,7 +69,8 @@ module YmlRecord
     scenario.custom = custom
     scenario.name = file["Name"]
     scenario.description = file["Description"]
-    scenario.instructions = file["Instructions"]
+    scenario.instructions = file["Instructions"] ? file["Instructions"] : ""
+    scenario.instructions_student = file["InstructionsStudent"] ? file["InstructionsStudent"] : ""
     answers ||= []
     scenario.answers = answers.join("\n")
     scenario.uuid = `uuidgen`.chomp
@@ -168,6 +169,7 @@ module YmlRecord
 
         group = Group.new
         group.name = yaml_group["Name"]
+        group.instructions = yaml_group["Instructions"] ? yaml_group["Instructions"] : ""
         group.scenario_id = scenario.id
         group.save!
 
