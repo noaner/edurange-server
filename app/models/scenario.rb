@@ -518,7 +518,7 @@ class Scenario < ActiveRecord::Base
   end
 
   def update_instructions_student(instructions)
-    self.update_attribute(:instructions, instructions)
+    self.update_attribute(:instructions_student, instructions)
     self.update_modified
   end
 
