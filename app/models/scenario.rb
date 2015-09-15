@@ -510,6 +510,7 @@ class Scenario < ActiveRecord::Base
         end
       end
     end
+    groups
   end
 
   def update_instructions(instructions)
