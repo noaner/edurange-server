@@ -855,7 +855,9 @@ class ScenariosController < ApplicationController
     end
 
     def set_scenario
-      @scenario = Scenario.find(params[:id])
+      if not @scenario = Scenario.find_by_id(params[:id])
+        redirect_to '/scenarios/'
+      end
       if not @user.owns? @scenario
         head :ok, content_type: "text/html"
         return
