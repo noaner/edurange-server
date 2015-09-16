@@ -333,7 +333,7 @@ class Scenario < ActiveRecord::Base
     if File.exists? "#{Settings.app_path}/scenarios/user/#{self.user.id}/#{self.name.downcase}"
       errors.add(:name, "A custom scenario with that name already exists")
       return false
-    end
+    endpoint
 
     FileUtils.mkdir self.path
     FileUtils.mkdir "#{self.path}/recipes"
@@ -420,7 +420,7 @@ class Scenario < ActiveRecord::Base
       end
 
       # perform simple analytics on bash histories and save them into statistic
-      statistic.bash_analytics = bash_analytics(statistic.bash_histories)
+      statistic.bash_analytics = partition_bash(statistic.bash_histories.split("\n"))
 
       # and with scenario metadata
       statistic.user_id = self.user_id
@@ -452,13 +452,58 @@ class Scenario < ActiveRecord::Base
       return options_frequencies
     end
 
+    def partition_bash(data)
+      d = Hash.new(0)  # {user -> { timestamp -> command }}
+      i = 0  # our index
+      # make two passes over the data
+      #   first, creating the users list
+      #   & then, grabbing commands associated
+      #     with each of those users    
+      
+      # outer hash
+      while i < data.length
+        if data[i][0..1] == "##"
+          e = data[i].length  # endpoint
+          u = data[i][3..e-1]  # username
+          if !d.include?(u)
+            # don't overwrite unless already included
+            d[u] = Hash.new(0)
+          end
+        end
+        i += 1
+      end
+      i = 0  # reset index
+      users = d.keys  # users
+      u_i = 0 # user index
+
+      # inner hash
+      while i < data.length
+        if data[i][0..1] == "# "
+          e = data[i].length
+          t = data[i][2..e-1]  # timestamp
+          if data[i + 1] != ""
+            c = data[i + 1]  # command
+            d[users[u_i]][t] = [c, 0]
+            i += 1  # inc twice
+          end
+        elsif data[i][0..1] == "##"
+          e = data[i].length
+          u = data[i][3..e-1]  # to find index in users
+          u_i = users.find_index(u)  # & change user u
+        end
+        i += 1
+      end
+      return d
+    end
+
     def destroy_s3_bash_histories
       # bash histories are persistent between boot cycles
       # only once scenario is destroyed are they deleted from s3 bucket
       self.instances.each do |instance|
         instance.aws_instance_delete_bash_history_page
       end
-    end
+    end  
+  end  # end private methods                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+end 
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-end
+
