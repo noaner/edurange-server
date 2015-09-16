@@ -333,7 +333,7 @@ class Scenario < ActiveRecord::Base
     if File.exists? "#{Settings.app_path}/scenarios/user/#{self.user.id}/#{self.name.downcase}"
       errors.add(:name, "A custom scenario with that name already exists")
       return false
-    endpoint
+    end
 
     FileUtils.mkdir self.path
     FileUtils.mkdir "#{self.path}/recipes"
