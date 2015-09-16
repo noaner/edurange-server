@@ -106,4 +106,29 @@ class User < ActiveRecord::Base
     UserMailer.email_credentials(self, password).deliver_now
   end
 
+  def student_to_instructor
+    puts self.student_group_users.destroy_all
+    self.student_group_users.destroy
+    self.set_instructor_role
+  end
+
+  def student_add_to_all(student)
+    if sg = self.student_groups.find_by_name("All")
+      sgu = sg.student_group_users.new(user_id: student.id)
+      sgu.save
+    end
+    return sg, sgu
+  end
+
+  def instructor_to_student(user)
+    if user and (user.is_admin? or user.is_instructor?)
+      if sg = user.student_groups.find_by_name("All")
+        sgu = sg.student_group_users.new(user_id: self.id)
+        sgu.save
+      end
+    end
+    self.set_student_role
+    return sg, sgu
+  end
+
 end

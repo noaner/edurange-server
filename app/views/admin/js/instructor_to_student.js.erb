@@ -1,0 +1,3 @@
+$('#user-<%= @user.id %>').remove();
+$('#students-table').append('<%= escape_javascript(render("/admin/student", user: @user)) %>');
+$('#student-group-<%= @student_group.id %>-table').append('<%= escape_javascript(render("/admin/student_group_student", student_group: @student_group, sgu: @student_group_user)) %>')

@@ -124,6 +124,7 @@ Edurange::Application.routes.draw do
   post 'admin/user_delete'
   post 'admin/instructor_create'
   post 'admin/student_to_instructor'
+  post 'admin/student_add_to_all'
   post 'admin/instructor_to_student'
   post 'admin/reset_password'
   post 'admin/student_group_create'
