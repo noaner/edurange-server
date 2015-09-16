@@ -182,6 +182,8 @@ module YmlRecord
             player.login = login
             player.password = password
             player.group = group
+            player.user_id = user["UserId"]
+            player.student_group_id = user["StudentGroupId"]
 
             if user_id = user["Id"]
               if User.find_by_id(user_id)

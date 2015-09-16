@@ -418,7 +418,14 @@ class Scenario < ActiveRecord::Base
           "Administrator" => group.instance_groups.select{ |ig| ig.administrator  }.map{ |ig| ig.instance.name },
           "User" => group.instance_groups.select{ |ig| not ig.administrator  }.map{ |ig| ig.instance.name }
         },
-        "Users" => group.players.empty? ? nil : group.players.map { |p| { "Login" => p.login, "Password" => p.password, "Id" => self.has_student?(p.user) ? p.user_id : nil } }
+        "Users" => group.players.empty? ? nil : group.players.map { |p| { 
+          "Login" => p.login, 
+          "Password" => p.password, 
+          "Id" => self.has_student?(p.user) ? p.user_id : nil,
+          "UserId" => p.user_id,
+          "StudentGroupId" => p.student_group_id
+          } 
+        }
       }
     }
 
