@@ -66,7 +66,7 @@
     %label Questions:
     %p
 
-    - @scenario.questions.each do |question|
+    - @scenario.questions.order(:order).each do |question|
       %dl{ id: "question.#{question.id}" }
         %b= question.order.to_s + '.'
         = question.text

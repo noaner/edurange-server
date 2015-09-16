@@ -272,7 +272,14 @@ function scoring_answer_comment(student_name, question_index, answer_index, answ
 }
 
 // Student Answers
-function get_student_answers (id, student_id) {
+function scoring_student_answers_get(id, student_id) {
   resource = resource = '/scenarios/' + id + "/scoring_answers_show?student_id=" + student_id;
   $.post(resource);
+}
+
+function scoring_student_answers_reload(id) {
+	$('.student-questions').each(function(i, obj) {
+    $(obj).remove();
+    scoring_student_answers_get(id, $(obj).attr('student_id'));
+  });
 }
