@@ -77,19 +77,21 @@
       %th
     - group.players.each do |player|
       %tr{id: "player-#{player.id}" }
-        - if player.user_id
-          - user = User.find(player.user_id)
+
+        - if user = User.find_by_id(player.user_id)
           %td= user.name
           %td= user.email
+          %td= player.student_group ? player.student_group.name : '-'
         - else
           %td= "-"
           %td= "-"
-        - if player.student_group_id
-          %td= player.student_group.name
-        - else
-          %td= '-'
+          %td= "-"
 
         %td= player.login
         %td= player.password
-        %td= link_to 'delete', group_player_delete_scenario_path(@scenario, player_id: player), remote: true, method: :post, class: group.instances_stopped? ? "" : "hidden", data: { confirm: "Are you sure? This will erase any answers to questions that the student has entered." }
+
+        - if user
+          %td= link_to 'delete', group_player_delete_scenario_path(@scenario, player_id: player), remote: true, method: :post, class: group.instances_stopped? ? "" : "hidden", data: { confirm: "Are you sure? This will erase any answers to questions that the student has entered." }
+        - else
+          %td= link_to 'delete', group_player_delete_scenario_path(@scenario, player_id: player), remote: true, method: :post, class: group.instances_stopped? ? "" : "hidden"
         
