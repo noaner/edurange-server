@@ -58,6 +58,11 @@ update_status('scenario', '<%= @scenario.status %>')
       <% else %>
         $("#instance-<%= instance.id %>-initialized-error").addClass('hidden');
       <% end %>
+
+      <% instance.instance_roles.each do |instance_role| %>
+        $("#instance-role-<%= instance_role.id %>-remove-button").attr('class', '<%= instance.stopped? ? "" : "hidden" %>');
+      <% end %>
+
     <% end %>
   <% end %>
 <% end %>
