@@ -503,7 +503,5 @@ class Scenario < ActiveRecord::Base
         instance.aws_instance_delete_bash_history_page
       end
     end  
-  end  # end private methods                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
-end 
-
+  end  # end private methods       
 
