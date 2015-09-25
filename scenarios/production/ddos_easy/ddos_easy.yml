@@ -52,49 +52,45 @@ Groups:
 Clouds:
   - Name: Cloud1
     CIDR_Block: 10.0.0.0/16
+    Subnets:
+      - Name: NATSubnet
+        Cloud: Cloud1
+        CIDR_Block: 10.0.129.0/24
+        Internet_Accessible: true
+        Instances:
+          - Name: NATInstance
+            OS: nat
+            IP_Address: 10.0.129.5
+            Internet_Accessible: true
+            Roles:
+              - RoleSSH
 
-Subnets:
-  - Name: NATSubnet
-    Cloud: Cloud1
-    CIDR_Block: 10.0.129.0/24
-    Internet_Accessible: true
+      - Name: PlayerSubnet
+        CIDR_Block: 10.0.128.0/24
+        Instances:
+          - Name: PlayerInstance
+            Subnet: PlayerSubnet
+            OS: ubuntu
+            IP_Address: 10.0.128.8
+            Internet_Accessible: false
+            Roles:
+              - RoleSSH
+              - RolePlayer
 
-  - Name: PlayerSubnet
-    Cloud: Cloud1
-    CIDR_Block: 10.0.128.0/24
+          - Name: WebServerInstance
+            Subnet: PlayerSubnet
+            OS: ubuntu
+            IP_Address: 10.0.128.10
+            Internet_Accessible: false
+            Roles:
+              - RoleSSH
+              - RoleWebServer
 
-Instances:
-  - Name: NATInstance
-    Subnet: NATSubnet
-    OS: nat
-    IP_Address: 10.0.129.5
-    Internet_Accessible: true
-    Roles:
-      - RoleSSH
-
-  - Name: PlayerInstance
-    Subnet: PlayerSubnet
-    OS: ubuntu
-    IP_Address: 10.0.128.8
-    Internet_Accessible: false
-    Roles:
-      - RoleSSH
-      - RolePlayer
-
-  - Name: WebServerInstance
-    Subnet: PlayerSubnet
-    OS: ubuntu
-    IP_Address: 10.0.128.10
-    Internet_Accessible: false
-    Roles:
-      - RoleSSH
-      - RoleWebServer
-
-  - Name: AttackerInstance
-    Subnet: PlayerSubnet
-    OS: ubuntu
-    IP_Address: 10.0.128.12
-    Internet_Accessible: false
-    Roles:
-      - RoleSSH
-      - RoleAttacker
+          - Name: AttackerInstance
+            Subnet: PlayerSubnet
+            OS: ubuntu
+            IP_Address: 10.0.128.12
+            Internet_Accessible: false
+            Roles:
+              - RoleSSH
+              - RoleAttacker

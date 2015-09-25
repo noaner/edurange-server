@@ -50,7 +50,7 @@ Groups:
         Password: abcd
       - Login: red_team3
         Password: abcd
-        
+
   - Name: Blue_Team
     Access:
       Administrator:
@@ -64,53 +64,48 @@ Groups:
         Password: efgh
       - Login: blue_team3
         Password: efgh
-        
+
 Clouds:
   - Name: CyberDefense_Cloud
     CIDR_Block: 10.0.0.0/16
+    Subnets:
+      - Name: BLUETEAM_Subnet
+        CIDR_Block: 10.0.24.0/24
+        Instances:
+          - Name: Blue_Instance
+            Subnet: BLUETEAM_Subnet
+            OS: win2008
+            IP_Address: 10.0.24.129
+            Roles:
+              - blueteam
 
-Subnets:
-  - Name: BLUETEAM_Subnet
-    Cloud: CyberDefense_Cloud
-    CIDR_Block: 10.0.24.0/24
+      - Name: REDTEAM_Subnet
+        CIDR_Block: 10.0.22.0/24
+        Instances:
+          - Name: Red_Instance
+            Subnet: REDTEAM_Subnet
+            OS: kali
+            IP_Address: 10.0.22.130
+            Roles:
+              - redteam
 
-  - Name: REDTEAM_Subnet
-    Cloud: CyberDefense_Cloud
-    CIDR_Block: 10.0.22.0/24
+      - Name: NAT_Subnet
+        CIDR_Block: 10.0.17.0/24
+        Internet_Accessible: true
+        Instances:
+          - Name: NAT_Instance
+            Subnet: NAT_Subnet
+            OS: nat
+            IP_Address: 10.0.17.122
+            Internet_Accessible: true
+            Roles:
+              - NAT
 
-  - Name: NAT_Subnet
-    Cloud: CyberDefense_Cloud
-    CIDR_Block: 10.0.17.0/24
-    Internet_Accessible: true
-
-  - Name: BATTLESPACE_Subnet
-    Cloud: CyberDefense_Cloud
-    CIDR_Block: 10.0.27.0/24
-
-Instances:
-  - Name: Scorer_Instance
-    Subnet: BATTLESPACE_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.27.128
-    Roles:
-      - scoring
-  - Name: NAT_Instance
-    Subnet: NAT_Subnet
-    OS: nat
-    IP_Address: 10.0.17.122
-    Internet_Accessible: true
-    Roles:
-      - NAT
-
-  - Name: Blue_Instance
-    Subnet: BLUETEAM_Subnet
-    OS: win2008
-    IP_Address: 10.0.24.129
-    Roles:
-      - blueteam
-  - Name: Red_Instance
-    Subnet: REDTEAM_Subnet
-    OS: kali
-    IP_Address: 10.0.22.130
-    Roles:
-      - redteam
+      - Name: BATTLESPACE_Subnet
+        CIDR_Block: 10.0.27.0/24
+        Instances:
+          - Name: Scorer_Instance
+            OS: ubuntu
+            IP_Address: 10.0.27.128
+            Roles:
+              - scoring

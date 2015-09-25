@@ -46,11 +46,10 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test 'should not allow name update while scenario is running' do
-    user = users(:test1)
+    user = users(:instructor1)
 
-    scenario = user.scenarios.new(name: 'testscenario')
+    scenario = user.scenarios.new(location: :test, name: 'test1')
     scenario.save
-
     assert scenario.valid?
 
     scenario.set_booted
@@ -111,9 +110,9 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test 'should have student group user if instructor or admin' do
-    user = users(:test1)
+    user = users(:instructor1)
     student = users(:student1)
-    scenario = scenarios(:test1)
+    scenario = user.scenarios.new(location: :test, name: 'test1')
 
     # test instructor role
     user.set_instructor_role
@@ -131,8 +130,6 @@ class UserTest < ActiveSupport::TestCase
     assert allsg.student_group_users.find_by_user_id(student.id).valid?
     
     # make sure user can not become student with a scenario that is running
-    scenario.user_id = user.id
-    scenario.save
     assert scenario.valid?
     assert scenario.user_id = user.id
 
@@ -250,7 +247,8 @@ class UserTest < ActiveSupport::TestCase
     end
 
     # test ownership of scenario and its resources
-    scenario = YmlRecord.load_yml('strace', user)
+    scenario = user.scenarios.new(location: :production, name: 'strace')
+    scenario.save
     assert user.owns? scenario
 
     scenario.clouds.each do |cloud|

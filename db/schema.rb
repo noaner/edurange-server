@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150914210424) do
+ActiveRecord::Schema.define(version: 20150918235319) do
 
   create_table "answers", force: :cascade do |t|
     t.boolean  "correct"
@@ -174,10 +174,10 @@ ActiveRecord::Schema.define(version: 20150914210424) do
     t.text     "scoring_pages_content", default: ""
     t.integer  "user_id"
     t.string   "com_page"
-    t.boolean  "custom"
     t.boolean  "modified",              default: false
     t.text     "instructions",          default: ""
     t.text     "instructions_student",  default: ""
+    t.integer  "location",              default: 0
   end
 
   create_table "statistics", force: :cascade do |t|

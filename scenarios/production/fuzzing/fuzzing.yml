@@ -68,43 +68,39 @@ Groups:
 Clouds:
   - Name: Fuzzing_Cloud
     CIDR_Block: 10.0.0.0/16
+    Subnets:
+      - Name: NAT_Subnet
+        CIDR_Block: 10.0.21.0/24
+        Internet_Accessible: true
+        Instances:
+          - Name: NAT_Instance
+            Subnet: NAT_Subnet
+            OS: nat
+            IP_Address: 10.0.21.122
+            Internet_Accessible: true
+            Roles:
+              - NAT
 
-Subnets:
-  - Name: Fuzzing_Subnet
-    Cloud: Fuzzing_Cloud
-    CIDR_Block: 10.0.26.0/24
-
-  - Name: NAT_Subnet
-    Cloud: Fuzzing_Cloud
-    CIDR_Block: 10.0.21.0/24
-    Internet_Accessible: true
-
-Instances:
-  - Name: Scorer_Instance
-    Subnet: Fuzzing_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.26.128
-    Roles:
-      - scoring
-  - Name: NAT_Instance
-    Subnet: NAT_Subnet
-    OS: nat
-    IP_Address: 10.0.21.122
-    Internet_Accessible: true
-    Roles:
-      - NAT
-
-  - Name: Attacker_Instance
-    Subnet: Fuzzing_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.26.129
-    Roles:
-      - attacking
-  - Name: Defender_Instance
-    Subnet: Fuzzing_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.26.130
-    Roles:
-      - defending
+      - Name: Fuzzing_Subnet
+        CIDR_Block: 10.0.26.0/24
+        Instances:
+          - Name: Scorer_Instance
+            Subnet: Fuzzing_Subnet
+            OS: ubuntu
+            IP_Address: 10.0.26.128
+            Roles:
+              - scoring
+          - Name: Attacker_Instance
+            Subnet: Fuzzing_Subnet
+            OS: ubuntu
+            IP_Address: 10.0.26.129
+            Roles:
+              - attacking
+          - Name: Defender_Instance
+            Subnet: Fuzzing_Subnet
+            OS: ubuntu
+            IP_Address: 10.0.26.130
+            Roles:
+              - defending
 
 Answers:

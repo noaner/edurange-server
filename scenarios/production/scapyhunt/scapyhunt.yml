@@ -93,58 +93,49 @@ Groups:
 Clouds:
   - Name: Cloud_1
     CIDR_Block: 10.0.0.0/16
+    Subnets:
+      - Name: NAT_Subnet
+        CIDR_Block: 10.0.129.0/24
+        Internet_Accessible: true
+        Instances:
+          - Name: NAT_Instance
+            Subnet: NAT_Subnet
+            OS: nat
+            IP_Address: 10.0.129.5
+            Internet_Accessible: true
+            Roles:
+              - NAT
 
-Subnets:
-  - Name: NAT_Subnet
-    Cloud: Cloud_1
-    CIDR_Block: 10.0.129.0/24
-    Internet_Accessible: true
+      - Name: Player_Subnet
+        CIDR_Block: 10.0.130.0/24
+        Internet_Accessible: false
+        Instances:
+          - Name: Team1_Instance
+            OS: ubuntu
+            IP_Address: 10.0.130.5
+            Roles:
+              - Player
 
-  - Name: Player_Subnet
-    Cloud: Cloud_1
-    CIDR_Block: 10.0.130.0/24
-    Internet_Accessible: false
+          - Name: Team2_Instance
+            OS: ubuntu
+            IP_Address: 10.0.130.6
+            Roles:
+              - Player
 
-Instances:
-  - Name: NAT_Instance
-    Subnet: NAT_Subnet
-    OS: nat
-    IP_Address: 10.0.129.5
-    Internet_Accessible: true
-    Roles:
-      - NAT
+          - Name: Team3_Instance
+            OS: ubuntu
+            IP_Address: 10.0.130.7
+            Roles:
+              - Player
 
-  - Name: Team1_Instance
-    Subnet: Player_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.130.5
-    Roles:
-      - Player
+          - Name: Team4_Instance
+            OS: ubuntu
+            IP_Address: 10.0.130.8
+            Roles:
+              - Player
 
-  - Name: Team2_Instance
-    Subnet: Player_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.130.6
-    Roles:
-      - Player
-
-  - Name: Team3_Instance
-    Subnet: Player_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.130.7
-    Roles:
-      - Player
-
-  - Name: Team4_Instance
-    Subnet: Player_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.130.8
-    Roles:
-      - Player
-
-  - Name: Team5_Instance
-    Subnet: Player_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.130.9
-    Roles:
-      - Player
+          - Name: Team5_Instance
+            OS: ubuntu
+            IP_Address: 10.0.130.9
+            Roles:
+              - Player

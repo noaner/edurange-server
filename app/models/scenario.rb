@@ -12,17 +12,17 @@ class Scenario < ActiveRecord::Base
   has_many :subnets, through: :clouds
   has_many :instances, through: :subnets
 
-  validate :validate_name, :validate_stopped
+  validate :validate_name, :validate_paths, :validate_user, :validate_stopped
 
   before_destroy :validate_stopped, prepend: true
   before_destroy :create_statistic, prepend: true
   before_destroy :destroy_s3_bash_histories
 
-  def update_modified
-    if self.custom?
-      self.update_attribute(:modified, true)
-    end
-  end
+  after_create :load
+
+  enum location: [:development, :production, :local, :custom, :test]
+
+  # Validations
 
   def validate_name
     self.name = self.name.strip
@@ -39,6 +39,21 @@ class Scenario < ActiveRecord::Base
     true
   end
 
+  def validate_paths
+    if not self.path
+      errors.add(:path, 'scenario with that name and location does not exist.')
+      return false
+    end
+    if not self.path_yml
+      errors.add(:path, 'could not find scenario yml file.')
+      return false
+    end
+    if not self.path_recipes
+      errors.add(:path, 'could not find scenario recipes folder.')
+      return false
+    end
+  end
+
   def validate_stopped
     if not self.stopped?
       errors.add(:running, "can only modify scenario if it is stopped")
@@ -47,22 +62,287 @@ class Scenario < ActiveRecord::Base
     true
   end
 
+  def validate_user
+    if not self.user
+      errors.add(:user, 'must have a user')
+      return false
+    end
+    if not user = User.find_by_id(self.user)
+      errors.add(:user, 'must have a user')
+      return false
+    end
+    if not (user.is_admin? or user.is_instructor?)
+      errors.add(:user, 'must be admin or instructor.')
+      return
+    end
+  end
+
+  # Loading and file structure
+
+  def destroy_dependents
+    self.clouds.each do |cloud| cloud.destroy end
+    self.groups.each do |group| group.destroy end
+    self.roles.each do |role| role.destroy end
+    self.recipes.each do |recipe| recipe.destroy end
+    self.questions.each do |question| question.destroy end
+  end
+
+  def load
+    name_lookup_hash = Hash.new
+    # Because in the YML we establish relationships by name we need to keep track of
+    # what unique id corresponds to the current loading of the scenario. Whenever we
+    # create an object, we store it within the above hash so that we can look it up
+    # later in this function when we are creating objects referencing things in the database.
+    
+    begin
+      file = YAML.load_file(Settings.app_path + self.path_yml)
+      clouds = file["Clouds"]
+      subnets = file["Subnets"]
+      instances = file["Instances"]
+      roles = file["Roles"]
+      groups = file["Groups"]
+      scoring = file["Scoring"]
+
+      self.name = file["Name"]
+      self.description = file["Description"]
+      self.instructions = file["Instructions"]
+      self.uuid = `uuidgen`.chomp
+      self.answers = ''
+
+      roles_name_lookup_hash = {}
+      if roles
+        roles.each do |yaml_role|
+          role = self.roles.new(name: yaml_role["Name"])
+
+          if yaml_role["Recipes"]
+            yaml_role["Recipes"].each do |recipe_name|
+
+              recipe = self.recipes.find_by_name(recipe_name)
+              if not recipe
+                recipe = self.recipes.new(name: recipe_name)
+              end
+
+              if not recipe.save
+                self.destroy_dependents
+                errors.add(:load, "error creating recipe. #{recipe.errors.messages}")
+                return false
+              end
+
+              role_recipe = role.role_recipes.new(recipe_id: recipe.id)
+              if not role_recipe.save
+                self.destroy_dependents
+                errors.add(:load, "error creating role recipe. #{role_recipe.errors.messages}")
+                return false
+              end
+
+            end
+          end
+          if yaml_role["Packages"]
+            yaml_role["Packages"].each { |package| role.packages << package }
+          end
+
+          if not role.save
+            self.destroy_dependents
+            errors.add(:load, "error creating role. #{role.errors.messages}")
+            return false
+          end
+          roles_name_lookup_hash[role.name] = role
+        end
+      end
+
+      if clouds
+        clouds.each do |yaml_cloud|
+
+          cloud = scenario.clouds.new(name: yaml_cloud["Name"], cidr_block: yaml_cloud["CIDR_Block"])
+          if not cloud.save
+            self.destroy_dependents
+            errors.add(:load, "error creating cloud. #{cloud.errors.messages}")
+            return false
+          end
+
+          yaml_cloud["Subnets"].each do |yaml_subnet|
+
+            subnet = cloud.subnets.new(
+              name: yaml_subnet["Name"], 
+              cidr_block: yaml_subnet["CIDR_Block"],
+              internet_accessible: yaml_subnet["Internet_Accessible"] == "true" ? true : false
+            )
+            if not subnet.save
+              self.destroy_dependents
+              errors.add(:load, "error creating subnet. #{subnet.errors.messages}")
+              return false
+            end
+
+            instance_ips = {}
+            yaml_subnet["Instances"].each do |yaml_instance|
+
+              ip_address, instance_ips = YmlRecord.parse_ip(yaml_instance["IP_Address"], instance_ips)
+              if not ip_address
+                errors.add(:load, "could not parse ip address for Instance #{yaml_instance['IP_Address']}")
+                return false
+              end
+
+              instance = subnet.instances.new(
+                name: yaml_instance["Name"],
+                ip_address: ip_address,
+                internet_accessible: yaml_instance["Internet_Accessible"] == "true" ? true : false,
+                os: yaml_instance["OS"],
+                uuid: `uuidgen`.chomp
+              )
+              if not instance.save
+                self.destroy_dependents
+                errors.add(:load, "error creating instance. #{instance.errors.messages}")
+                return false
+              end
+
+              yaml_instance["Roles"].each do |role_name|
+                if not role = roles_name_lookup_hash[role_name]
+                  errors.add(:load, 'role not found #{role_name}')
+                  return false
+                end
+                instance.roles << role
+              end
+
+              name_lookup_hash[instance.name] = instance
+            end
+          end
+
+        end
+      end
+
+      if groups
+        groups.each do |yaml_group|
+
+          users = yaml_group["Users"]
+          access = yaml_group["Access"]
+          admin = access["Administrator"]
+          user = access["User"]
+
+          group = self.groups.new(name: yaml_group["Name"])
+          if not group.save
+            self.destroy_dependents
+            errors.add(:load, "error creating group. #{group.errors.messages}")
+            return false
+          end
+
+          if users
+            users.each do |yaml_user|
+
+              user_id = nil
+              if user = User.find_by_id(yaml_user["Id"])
+                user_id = user.is_student? ? user.id : nil
+              end
+
+              player = group.players.new(
+                login: yaml_user["Login"],
+                password: yaml_user["Password"],
+                user_id: user_id
+              )
+
+              if not player.save
+                self.destroy_dependents
+                errors.add(:load, "error creating player. #{player.errors.messages}")
+                return false
+              end
+
+            end
+          end
+
+          # Give group admin on machines they own
+          if admin
+            admin.each do |admin_instance|
+              instance = name_lookup_hash[admin_instance]
+              instance.add_administrator(group)
+              if not instance.save
+                self.destroy_dependents
+                errors.add(:load, "error adding group access admin to instance #{instance.name}")
+                return false
+              end
+            end
+          end
+
+          if access["User"]
+            access["User"].each do |user_instance|
+              instance = name_lookup_hash[user_instance]
+              instance.add_user(group)
+              if not instance.save
+                self.destroy_dependents
+                errors.add(:load, "error adding group access user to instance #{instance.name}")
+                return false
+              end
+            end
+          end
+        end
+      end
+
+      # Do scoring
+      if scoring
+        scoring.each do |yaml_question|
+
+          question = scenario.questions.new(
+            type_of: yaml_question['Type'], 
+            text: yaml_question['Text'],
+            points: yaml_question["Points"],
+            order: yaml_question["Order"],
+            options: yaml_question["Options"] ? yaml_question['Options'] : [],
+            values: yaml_question["Values"] ? yaml_question['Values'].map { |val| ({ value: val["Value"], points: val["Points"] }) } : []
+          )
+
+          if not question.save
+            self.destroy_dependents
+            errors.add(:load, "error adding question. #{question.errors.messages}")
+            return false
+          end
+
+        end
+      end
+    rescue => e
+      self.destroy_dependents
+      errors.add(:load, 'there was an error loading scenarios yml file.')
+      return false
+    end
+
+    self.update(modified: false)
+    scenario.save
+  end
+
+  def path
+    if self.custom?
+      path = "#{Settings.app_path}scenarios/custom/#{self.user.id}/#{self.name.downcase}"
+    else
+      path = "#{Settings.app_path}scenarios/#{self.location}/#{self.name.downcase}"
+    end
+
+    return path if File.exists? path
+    false
+  end
+
+  def path_yml
+    path = "#{self.path}/#{self.name.downcase}.yml"
+    return path if File.exists? path
+    false
+  end
+
+  def path_recipes
+    path = "#{self.path}/recipes"
+    return path if File.exists? path
+    false
+  end
+
+  #
+
+  def update_modified
+    if self.custom?
+      self.update_attribute(:modified, true)
+    end
+  end
+
   def bootable?
     return (self.stopped? or self.partially_booted?) 
   end
 
   def unbootable?
     return (self.partially_booted? or self.booted? or self.boot_failed? or self.unboot_failed? or self.paused?)
-  end
-
-  def path
-    local = "#{Settings.app_path}scenarios/local/#{self.name.downcase}"
-    return local if File.exists? local
-    return "#{Settings.app_path}scenarios/user/#{self.user.id}/#{self.name.downcase}"
-  end
-
-  def yml_path
-    "#{self.path}/#{self.name.downcase}.yml"
   end
 
   def change_name(name)

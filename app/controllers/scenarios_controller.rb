@@ -90,11 +90,18 @@ class ScenariosController < ApplicationController
   # GET /scenarios/new
   def new
     @scenario = Scenario.new
-    @templates = YmlRecord.yml_headers
-    @templates_user = YmlRecord.yml_headers_user(@user)
-    puts @templates
-    puts
-    puts @templates_user
+    @templates = []
+    if Rails.env == 'production'
+      @templates << {title: 'Production', headers: YmlRecord.yml_headers('production', @user)}
+      @templates << {title: 'Local', headers: YmlRecord.yml_headers('local', @user)}
+    elsif Rails.env == 'development'
+      @templates << {title: 'Development', headers: YmlRecord.yml_headers('development', @user)}
+      @templates << {title: 'Production', headers: YmlRecord.yml_headers('production', @user)}
+      @templates << {title: 'Local', headers: YmlRecord.yml_headers('local', @user)}
+    elsif Rails.env == 'test'
+      @templates << {title: 'Test', headers: YmlRecord.yml_headers('test', @user)}
+    end
+    @templates << {title: 'Custom', headers: YmlRecord.yml_headers('custom', @user)}
   end
 
   # GET /scenarios/1/edit
@@ -105,20 +112,15 @@ class ScenariosController < ApplicationController
   # POST /scenarios
   # POST /scenarios.json
   def create
-    # scrub this template input
-    if template = scenario_params["template"]
-      @scenario = YmlRecord.load_yml(scenario_params["template"], @user)
-    else
-      @scenario = Scenario.new(scenario_params)
-    end
+    @scenario = @user.scenarios.new(scenario_params)
+    @scenario.save
 
     respond_to do |format|
-      if @scenario.save
-        format.html { redirect_to @scenario, notice: 'Scenario was successfully created.' }
-        format.json { render :show, status: :created, location: @scenario }
+      if @scenario.errors.any?
+        @scenario.destroy
+        format.html { redirect_to '/scenarios/new', alert: "There was an error creating Scenario #{@scenario.name} please contact administrator."}
       else
-        format.html { render :new }
-        format.json { render json: @scenario.errors, status: :unprocessable_entity }
+        format.html { redirect_to @scenario, notice: 'Scenario was successfully created.' }
       end
     end
   end
@@ -970,6 +972,6 @@ class ScenariosController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def scenario_params
-      params.require(:scenario).permit(:game_type, :name, :template)
+      params.require(:scenario).permit(:game_type, :name, :template, :location)
     end
 end

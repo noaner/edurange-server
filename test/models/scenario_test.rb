@@ -2,102 +2,41 @@ require 'test_helper'
 
 class ScenarioTest < ActiveSupport::TestCase
 
-  # def test_scenario_com_page
+  test 'should only allow instructor and admin to create scenario' do
+    student = users(:student1)
+    instructor = users(:instructor1)
+    admin = users(:admin1)
 
-  #   s = YmlRecord.load_yml("scenarios-yml/strace.yml")
-  #   s.provider_scenario_upload_com_page
+    scenario = student.scenarios.new(location: :test, name: 'test1')
+    scenario.save
+    assert_not scenario.valid?
+    assert_equal [:user], scenario.errors.keys
 
-  #   puts s.com_page
+    scenario = instructor.scenarios.new(location: :test, name: 'test1')
+    scenario.save
+    assert scenario.valid?
+    assert_equal [], scenario.errors.keys
+  end
 
-  #   put = Net::HTTP::Put.new(s.com_page, 'content-type' => 'text/plain')
-  #   put.body = "finished"
+  test 'should rescue when yml is corrupted' do
+    instructor = users(:instructor1)
+    scenario = instructor.scenarios.new(location: :test, name: 'badyml')
+    scenario.save
+    assert_equal [:load], scenario.errors.keys
 
-  #   # # send the PUT request
-  #   http = Net::HTTP.new('higgz-edurange-com.s3.amazonaws.com', 443)
-  #   http.set_debug_output(Logger.new($stdout))
-  #   http.use_ssl = true
-  #   http.start
-  #   resp = http.request(put)
-  #   resp = [resp.code.to_i, resp.to_hash, resp.body]
-  #   http.finish
+    scenario = instructor.scenarios.new(location: :test, name: 'badyml2')
+    scenario.save
+    assert_equal [:load], scenario.errors.keys
+  end
 
-  #   assert(s.uuid.is_a? String)
-
-  # end
-
-  # def test_s3
-  #   i = Instance.new
-  #   name = "test-" + Time.new.to_i.to_s
-  #   i.aws_s3_create_page(name, :write, "thisistest")
-  #   obj = AWS::S3.new.buckets[Settings.bucket_name].objects[name]
-  #   assert obj.exists?, "s3 object creation failed"
-  #   obj.delete
-  #   assert !obj.exists?, "s3 object failed to delete"
-  # end
-
-  # def test_instance_boot
-  #   i = Instance.new
-  # end
-
-  # def test_yml_headers
-  #   @templates = YmlRecord.yml_headers.map {|filename,name,desc| [name,filename,desc]}
-  # end
-
-  # def test_load_yml
-
-  # end
-
-
-  # def test_scenario_yml
-
-  # end
-
-  # def test_write_file
-  #   sleep 3
-  #   File.open("findme", "a").write("second")
-  # end
-  # # handle_asynchronously :test_write_file
-
-  # def test_boot_simple_scenario
-
-  #   s = YmlRecord.load_yml("test/scenarios/simple/simple.yml")
-  #   s.delay.foome
-
-  #   delay.test_write_file
-  #   File.open("findme", "a").write("first")
-
-
-  #   sleep 10
-  #   # load scenario
-  #   # s = YmlRecord.load_yml("test/scenarios/simple/simple.yml")
-  #   # do error checking on yaml
-
-  #   # do parallel boot
-  #   # s.boot
-  #   # puts s.name
-  #   # puts s
-  #   # s.save
-
-  #   # puts "Waiting for scenario to bootroo"
-  #   # until s.booted? or s.failed?
-  #     # sleep 1
-  #   # end
-
-  #   # wait for everything to report in
-  #   # puts s.log
-
-  #   # if s.failed?
-
-  #   # sleep 1 until s.booted?
-  #   # puts "Press [enter] to unboot scenario"
-  #   # key = nil
-  #   # until key == "\n"
-  #     # key = gets
-  #   # end
-
-  #   # s.purge
-  #   # s.destroy
-
-  # end
+  test 'production scenarios should load' do
+    instructor = users(:instructor1)
+    Dir.foreach('scenarios/production') do |filename|
+      next if ['.','..'].include? filename
+      scenario = instructor.scenarios.new(location: :production, name: filename)
+      scenario.save
+      assert_equal [], scenario.errors.keys, "production scenario #{filename} does not load. #{scenario.errors.messages}"
+    end
+  end
 
 end

@@ -36,18 +36,14 @@ Groups:
 Clouds:
   - Name: Cloud_1
     CIDR_Block: 10.0.0.0/16
-
-Subnets:
-  - Name: NAT_Subnet
-    Cloud: Cloud_1
-    CIDR_Block: 10.0.129.0/24
-    Internet_Accessible: true
-
-Instances:
-  - Name: NAT_Instance
-    Subnet: NAT_Subnet
-    OS: ubuntu
-    IP_Address: 10.0.129.5
-    Internet_Accessible: true
-    Roles:
-      - NAT
+    Subnets:
+      - Name: NAT_Subnet
+        CIDR_Block: 10.0.129.0/24
+        Internet_Accessible: true
+        Instances:
+          - Name: NAT_Instance
+            OS: ubuntu
+            IP_Address: 10.0.129.5
+            Internet_Accessible: true
+            Roles:
+              - NAT

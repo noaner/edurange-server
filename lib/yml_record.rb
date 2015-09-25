@@ -12,12 +12,19 @@ module YmlRecord
     return output
   end
 
-  def self.yml_headers
+  def self.yml_headers(location, user)
     output = []
-    Dir.foreach(Settings.app_path + "scenarios/local") do |filename|
+
+    if location == 'custom'
+      path = Settings.app_path + "scenarios/custom/#{user.id}"
+    else
+      path = Settings.app_path + "scenarios/#{location}"
+    end
+
+    Dir.foreach(path) do |filename|
       next if filename == '.' or filename == '..'
-      file = YAML.load_file(Settings.app_path + "scenarios/local/#{filename}/#{filename}.yml")
-      output.push( { filename: filename, name: file["Name"], description: file["Description"] } )
+      file = YAML.load_file(Settings.app_path + "#{path}/#{filename}/#{filename}.yml")
+      output.push( { filename: filename, name: file["Name"], description: file["Description"], location: location } )
     end
     return output
   end
