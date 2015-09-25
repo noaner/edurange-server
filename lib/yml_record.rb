@@ -23,7 +23,7 @@ module YmlRecord
 
     Dir.foreach(path) do |filename|
       next if filename == '.' or filename == '..'
-      file = YAML.load_file(Settings.app_path + "#{path}/#{filename}/#{filename}.yml")
+      file = YAML.load_file("#{path}/#{filename}/#{filename}.yml")
       output.push( { filename: filename, name: file["Name"], description: file["Description"], location: location } )
     end
     return output

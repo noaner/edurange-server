@@ -95,7 +95,7 @@ class Scenario < ActiveRecord::Base
     # later in this function when we are creating objects referencing things in the database.
     
     begin
-      file = YAML.load_file(Settings.app_path + self.path_yml)
+      file = YAML.load_file(self.path_yml)
       clouds = file["Clouds"]
       subnets = file["Subnets"]
       instances = file["Instances"]
