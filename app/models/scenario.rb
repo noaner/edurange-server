@@ -504,4 +504,4 @@ class Scenario < ActiveRecord::Base
       end
     end  
   end  # end private methods       
-
+end
