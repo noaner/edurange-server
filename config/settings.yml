@@ -6,3 +6,5 @@ app_path: ./
 host: # your hostname
 boot_asynchronously: false
 vpc_limit: # your AWS VPC Limit
+ami_nat:
+ami_ubuntu:

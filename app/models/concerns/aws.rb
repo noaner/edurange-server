@@ -681,15 +681,10 @@ module Aws
     end
 
     # get ami based on OS
-    if self.os == 'ubuntu'
-      # aws_instance_ami = 'ami-31727d58' # Private ubuntu image with chef and deps, updates etc.
-      # aws_instance_ami = 'ami-1ea3d176'
-      # aws_instance_ami = 'ami-56e7953e'
-      # aws_instance_ami = 'ami-d2ec9eba'
-      aws_instance_ami = 'ami-b80b76d0'
-    elsif self.os == 'nat'
-      # aws_instance_ami = 'ami-51727d38' # Private NAT image with chef and deps, updates etc.
-      aws_instance_ami = 'ami-7092d118'
+    if self.os == 'nat'
+      aws_instance_ami = Settings.ami_nat
+    elsif self.os == 'ubuntu'
+      aws_instance_ami = Settings.ami_ubuntu
     end
 
     # create EC2 Instance
