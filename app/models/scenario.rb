@@ -165,7 +165,7 @@ class Scenario < ActiveRecord::Base
             subnet = cloud.subnets.new(
               name: yaml_subnet["Name"], 
               cidr_block: yaml_subnet["CIDR_Block"],
-              internet_accessible: yaml_subnet["Internet_Accessible"] == "true" ? true : false
+              internet_accessible: yaml_subnet["Internet_Accessible"] ? true : false
             )
             if not subnet.save
               self.destroy_dependents
@@ -185,7 +185,7 @@ class Scenario < ActiveRecord::Base
               instance = subnet.instances.new(
                 name: yaml_instance["Name"],
                 ip_address: ip_address,
-                internet_accessible: yaml_instance["Internet_Accessible"] == "true" ? true : false,
+                internet_accessible: yaml_instance["Internet_Accessible"] ? true : false,
                 os: yaml_instance["OS"],
                 uuid: `uuidgen`.chomp
               )
