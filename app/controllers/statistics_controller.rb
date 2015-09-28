@@ -14,13 +14,17 @@ class StatisticsController < ApplicationController
     end
   end
 
-  # GET /statistic/1
+  # GET /statistic/<id>
   def show
-    # grab statistics data for detailed view
+    # find the statistic by id
     @statistic = Statistic.find(params[:id])
+    # grab the analytics data
     @bash_analytics = @statistic.bash_analytics
+    # grab usernames & make available in UI
+    @users = @bash_analytics.keys
   end
-
+  
+  # GET /statistic/<id>/destroyme
   def destroyme
     statistic = Statistic.find(params[:id])
     statistic.destroy
@@ -31,6 +35,8 @@ class StatisticsController < ApplicationController
     end
   end
 
+
+  # GET /statistic/1/download_all
   def download_all
     @statistics = []
     if @user.is_admin?
@@ -71,7 +77,8 @@ class StatisticsController < ApplicationController
     end
   end
 
-
+  
+  # GET /statistic/<id>/download
   # download statistic data
   def download
     # save statistic as pdf
@@ -89,4 +96,25 @@ class StatisticsController < ApplicationController
       send_data(file_text, filename: file_name, type: "application/txt")
     end
   end
+
+
+  # GET /statistic/<id>/perform_analytics?users=[]&start_time=<timestamp>&end_time=<timestamp
+  
+  # an example of passing data in as array
+  # /statistic/<id>/generate_analytics?users[]="student"?users[]="instructor"
+  def generate_analytics
+    # parameters passed in via query string, see comment above
+    statistic = Statistic.find(params[:id]) # yank statistic entry
+    users = params[:users]  # array of usernames
+    start_time = params[:start_time]  # start of time window (as string)
+    end_time = params[:end_time]  # end of time window (also as string)
+
+    # find relevant commands based on query params above
+    commands = statistic.grab_relevant_commands(users, start_time, end_time)
+    # perform analytics on the collected commands & make accessible to UI
+    @analytics = statistic.perform_analytics(commands)
+
+    # no return value
+  end
+
 end

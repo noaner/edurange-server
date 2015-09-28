@@ -12,10 +12,14 @@ Edurange::Application.routes.draw do
   resources :subnets
   resources :clouds
   resources :statistics do
-    member do
+    member do  # define routing for the statistics controller methods
+      # destorying statistics
       post 'destroyme'
+      # downloading statistics
       get 'download'
-      get 'download_all'
+      get 'download_all'  
+      # analytics, complicated query params
+      get 'generate_analytics' 
     end
   end
   
