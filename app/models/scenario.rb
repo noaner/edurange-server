@@ -477,7 +477,7 @@ class Scenario < ActiveRecord::Base
       #   first, creating the users list
       #   & then, grabbing commands associated
       #     with each of those users    
-      
+
       # outer hash
       while i < data.length
         if data[i][0..1] == "##"
@@ -501,7 +501,7 @@ class Scenario < ActiveRecord::Base
           t = data[i][2..e-1]  # timestamp
           if data[i + 1] != ""
             c = data[i + 1]  # command
-            d[users[u_i]][t] = [c, 0]
+            d[users[u_i]][t] = c
             i += 1  # inc twice
           end
         elsif data[i][0..1] == "##"
