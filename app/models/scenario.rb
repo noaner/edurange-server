@@ -413,6 +413,21 @@ class Scenario < ActiveRecord::Base
 
   private
     # methods for creating statistics on scenarios
+
+    # utility method
+    def is_numeric?(s)
+      # input -> s: a string
+      # output -> true if the string is a number value, false otherwise
+      begin
+        if Float(s)
+          return true
+        end
+      rescue
+        return false
+      end
+    end
+    # utility method end
+
     def create_statistic
       # private method to initialize a statistic entry
       # during Scenario destriction time. These are the first
@@ -449,26 +464,6 @@ class Scenario < ActiveRecord::Base
       File.write("#{Rails.root}/public/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt",file_text)
     end
 
-
-    # depreciated code: analytics portion of the code
-    # now lives with the statistic model. Beyond that,
-    # we can now delete statistics without any trouble
-    def bash_analytics(bash_history)
-      # simply count frequencies of options and commands used during a session
-      options_frequencies = Hash.new(0)
-      bash_history = bash_history.split("\n")
-      bash_history.each do |command|
-        # count the occurances w/a simple regexp
-        options = command.scan(/[-'[A-Za-z]]+/);
-        options.each do |option|
-          options_frequencies[option] += 1;
-        end
-      end
-      # sort by number of times an command/option has been used
-      options_frequencies.sort_by { |option| option[1] }
-      return options_frequencies
-    end
-
     def partition_bash(data)
       # input -> data: a list of strings of bash commands split by newline
       # output -> d: a hash {user->{timestamp->command}}
@@ -483,8 +478,6 @@ class Scenario < ActiveRecord::Base
       #   & then, grabbing commands associated
       #     with each of those users    
       
-     
-
       # outer hash
       while i < data.length
         if data[i][0..1] == "##"
@@ -503,7 +496,7 @@ class Scenario < ActiveRecord::Base
 
       # inner hash
       while i < data.length
-        if data[i][0..1] == "# "
+        if is_numeric?(data[i][1..data[i].length])
           e = data[i].length
           t = data[i][2..e-1]  # timestamp
           if data[i + 1] != ""
