@@ -24,7 +24,7 @@ class Statistic < ActiveRecord::Base
     return window
 	end
 
-	def is_numeric?(s)
+	def is_numeric?(s)  # check if a string is numeric or not
     # input -> s: a string
     # output -> true if the string is a number value, false otherwise
     begin
@@ -39,11 +39,21 @@ class Statistic < ActiveRecord::Base
 	## end utility methods
 
   # private
-
+    # The methods below should not be private methods, as they will be
+    # called from outside of this file. Namely, it will be taken care of
+    # by the controller, with input coming from the statistics UI template. 	
+    # Statistic creation initially goes through a pipeline of operations
+    # which successively cleans the unstructured data and organizes it
+    # in such a way that analytics can be made possible.
+    # Currently Statistic creation is done during the destruction of a Scenario,
+    # whereby the bash data is brought down from an s3 bucket and
+    # parsed into a nested Hash, mapping users to timestamps to commands.
+    # The methods defined below are helper methods that allow the
+    # investigator to reveal certain aspects of the data.
     def perform_analytics(data)
       # input -> data: a hash of the form { users -> list of strings of commands }
       # output -> results: a nested array of two-element arrays
-      results = []  # [[ string, count ]]
+      results = []  # [[ string, count ]] or {string => count},  chartkick can deal with either.
       frequencies = Hash.new(0)
       data.keys.each do | user |
         data[user].each do | cmd |
@@ -54,23 +64,21 @@ class Statistic < ActiveRecord::Base
           end
         end
       end
-      return frequencies
+      return frequencies 	
     end
 
 
-    def grab_relevant_commands(users, start_time, end_time, data)
+    def grab_relevant_commands(users, start_time, end_time)
 	    # input -> users: a list of username strings
 	    #          start_time, end_time: strings which represent dates
 	    #                                that define a window of time
 	    # output -> a dictionary mapping users to a list of
 	    #           commands they've entered during a window of time
 
-	    # method params determine portion of bash data which is relevant
 	    result = Hash.new(0)  # {user -> relevant-commmands}
 	    start_time = unix_to_dt(start_time)
 	    end_time = unix_to_dt(end_time)
 	    bash_data = self.bash_analytics  # yank the data from model
-
 	    if users.length == 1  # single user
         u = users[0]  # grab that user and,
         timestamps = bash_data[u]  # create {timestamps -> command} from {user -> {timestamps -> command}}
@@ -101,4 +109,4 @@ class Statistic < ActiveRecord::Base
 
   end # end private methods
 
-end  # end statistic model
+# end  # end statistic model

@@ -14,7 +14,10 @@ class Scenario < ActiveRecord::Base
 
   validate :validate_name, :validate_stopped
   before_destroy :validate_stopped, prepend: true
+  # upon the destruction of a scenario, create an
+  # entry in the statistic table.
   before_destroy :create_statistic, prepend: true
+  # after creating statistic, destory the s3 buckets where the bash histories were cached
   before_destroy :destroy_s3_bash_histories
 
   def validate_name
@@ -411,21 +414,30 @@ class Scenario < ActiveRecord::Base
   private
     # methods for creating statistics on scenarios
     def create_statistic
+      # private method to initialize a statistic entry
+      # during Scenario destriction time. These are the first
+      # steps of the analytics pipeline.
+
       statistic = Statistic.new
       # populate statistic with bash histories
-      puts self.instances.all
       self.instances.all.each do |instance|
+        # concatenate all bash histories into one big string
         statistic.bash_histories += instance.get_bash_history
         puts instance.get_bash_history  # for debugging
       end
-
-      # perform simple analytics on bash histories and save them into statistic
+  
+      # partition the big bash history string into a nested hash structure
+      # mapping usernames to the commands they entered.
       statistic.bash_analytics = partition_bash(statistic.bash_histories.split("\n"))
+      puts statistic.bash_analytics
 
       # and with scenario metadata
       statistic.user_id = self.user_id
       statistic.scenario_name = self.name
       statistic.scenario_created_at = self.created_at
+      # we'll also want to grab a list of users from the scenario,
+      # otherwise this data can be got, from the keys of
+      # the bash analytics field
       statistic.save  # stuff into db
 
       # create statistic file for download
@@ -437,11 +449,16 @@ class Scenario < ActiveRecord::Base
       File.write("#{Rails.root}/public/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt",file_text)
     end
 
+
+    # depreciated code: analytics portion of the code
+    # now lives with the statistic model. Beyond that,
+    # we can now delete statistics without any trouble
     def bash_analytics(bash_history)
       # simply count frequencies of options and commands used during a session
       options_frequencies = Hash.new(0)
       bash_history = bash_history.split("\n")
       bash_history.each do |command|
+        # count the occurances w/a simple regexp
         options = command.scan(/[-'[A-Za-z]]+/);
         options.each do |option|
           options_frequencies[option] += 1;
@@ -453,13 +470,21 @@ class Scenario < ActiveRecord::Base
     end
 
     def partition_bash(data)
+      # input -> data: a list of strings of bash commands split by newline
+      # output -> d: a hash {user->{timestamp->command}}
+
+      # method to populate the bash_analytics field of
+      # a Statistic model with a nested hash
+      # that maps users to timestamps to commands
       d = Hash.new(0)  # {user -> { timestamp -> command }}
-      i = 0  # our index
+      i = 4  # our index, begin @ index four to skip unneeded lines
       # make two passes over the data
       #   first, creating the users list
       #   & then, grabbing commands associated
       #     with each of those users    
       
+     
+
       # outer hash
       while i < data.length
         if data[i][0..1] == "##"
@@ -493,7 +518,7 @@ class Scenario < ActiveRecord::Base
         end
         i += 1
       end
-      return d
+      return d  # {users => { timestamps => commands }}
     end
 
     def destroy_s3_bash_histories
@@ -504,4 +529,4 @@ class Scenario < ActiveRecord::Base
       end
     end  
   end  # end private methods       
-end
+# end
