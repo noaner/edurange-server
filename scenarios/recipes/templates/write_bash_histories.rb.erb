@@ -3,10 +3,10 @@ script "instant_bash_history" do
     user "root"
     cwd "/tmp"
     code <<-EOH
-    if grep -q "export HISTTIMEFORMAT='%T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r; echo !!,$? >> ~/.exit_status'" >> /etc/bash.bashrc; then
+    if grep -q "export HISTTIMEFORMAT='%T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r; echo !!,$? >> ~/.exit_status';exec &> >(tee ~/.stdout.log)" >> /etc/bash.bashrc; then
         :
     else
-        echo "export HISTTIMEFORMAT='%T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r; echo !!,$? >> ~/.exit_status'" >> /etc/bash.bashrc
+        echo "export HISTTIMEFORMAT='%T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r; echo !!,$? >> ~/.exit_status';exec &> >(tee ~/.stdout.log)" >> /etc/bash.bashrc
     fi
     EOH
 end

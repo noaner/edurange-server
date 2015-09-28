@@ -29,8 +29,11 @@
                     = link_to 'Time2'
                     = link_to 'Time3'
 
-
-    //= column_chart @statistic.bash_analytics
+    - time_start = "1443473522"
+    - time_end = "1443473830"
+    - rel_com = @statistic.grab_relevant_commands(["instructor"],time_start,time_end)
+    - analyzzzed = @statistic.perform_analytics(rel_com)
+    = column_chart analyzzzed
         
     %div.indent.panel-body    
         // Instructions
