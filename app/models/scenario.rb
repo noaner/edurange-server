@@ -503,6 +503,7 @@ class Scenario < ActiveRecord::Base
     starting = 0
 
     self.clouds.each do |cloud|
+      cloud.reload
       cnt += 1
       stopped += 1 if cloud.stopped?
       queued_boot += 1 if cloud.queued_boot?
@@ -514,6 +515,7 @@ class Scenario < ActiveRecord::Base
       unboot_failed += 1 if cloud.unboot_failed?
 
       cloud.subnets.each do |subnet|
+        subnet.reload
         cnt += 1
         stopped += 1 if subnet.stopped?
         queued_boot += 1 if subnet.queued_boot?
@@ -525,6 +527,7 @@ class Scenario < ActiveRecord::Base
         unboot_failed += 1 if subnet.unboot_failed?
 
         subnet.instances.each do |instance|
+          instance.reload
           cnt += 1
           stopped += 1 if instance.stopped?
           queued_boot += 1 if instance.queued_boot?

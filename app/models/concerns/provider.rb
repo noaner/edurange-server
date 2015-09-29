@@ -42,6 +42,8 @@ module Provider
     self.save
     self.reload
 
+    self.scenario.set_boot_failed
+
     # time = Time.new
     # File.open("#{Rails.root}/log/boot.#{scenario.id}-#{scenario.name}.log", 'a') do |f|
       # f.puts "\n"
@@ -93,7 +95,9 @@ module Provider
       self.set_queued_boot
       self.delay(queue: self.class.to_s.downcase).bootme(options)
     else
-      self.bootme(options)
+      if not self.bootme(options)
+        return false
+      end
     end
     
     true
@@ -101,7 +105,10 @@ module Provider
 
   def bootme(options = {})
     self.set_booting
-    self.send("provider_boot_#{self.class.to_s.downcase}", options)
+    if not self.send("provider_boot_#{self.class.to_s.downcase}", options)
+      return false
+    end
+    true
   end
 
   def unboot(options = {})
@@ -111,9 +118,14 @@ module Provider
         errors.add(:boot, "#{self.class} must be booted or partially booted or have a error to uboot")
         return false
       end
-    elsif not (self.booted? or self.boot_failed? or self.unboot_failed? or self.paused?)
-      errors.add(:boot, "#{self.class} must be booted, have an error, or be paused to unboot")
-      return false
+    else
+      if self.driver_id == nil
+        self.set_stopped
+        return true
+      end
+    # elsif not (self.booted? or self.boot_failed? or self.unboot_failed? or self.paused?)
+    #   errors.add(:boot, "#{self.class} must be booted, have an error, or be paused to unboot")
+    #   return false
     end
 
     if not options[:dependents]
@@ -139,7 +151,9 @@ module Provider
       self.set_queued_unboot
       self.delay(queue: self.class.to_s.downcase).unbootme(options)
     else
-      self.unbootme(options)
+      if not self.unbootme(options)
+        return false
+      end
     end
 
     true
@@ -147,12 +161,16 @@ module Provider
 
   def unbootme(options = {})
     self.set_unbooting
-    self.send("provider_unboot_#{self.class.to_s.downcase}", options)
+    if not self.send("provider_unboot_#{self.class.to_s.downcase}", options)
+      return false
+    end
+    true
   end
 
   def unboot_error(error)
     self.set_unboot_failed
     debug(error.class.to_s + ' - ' + error.message.to_s + error.backtrace.join("\n"));
+    self.scenario.set_unboot_failed
   end
 
   def pause
