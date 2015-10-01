@@ -32,8 +32,9 @@
                 = link_to 'All Statistics', statistics_path, class: 'btn btn-default'
                 = link_to 'Destroy Statistic', destroyme_statistic_path(@statistic), method: :post, remote: true, :data => { :confirm => 'Are you sure?' }, class: 'btn btn-default'
             %div.panel.panel-body{id: "bash-histories-field"}
-                - history_lines = @statistic.bash_histories.split(/\n/)
+                %h3 Bash Histories
+                - history_lines = @statistic.bash_histories.split(/#/)
                 - history_lines.each do |line|
                     %br
-                    = line
+                    = if /1443.*/.match(line) then Time.at(Integer(line[0..10])).strftime("%I:%M %p") + ' ' + line[11..-1] else line end
             
