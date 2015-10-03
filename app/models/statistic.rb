@@ -79,8 +79,8 @@ class Statistic < ActiveRecord::Base
 	    start_time = unix_to_dt(start_time)
 	    end_time = unix_to_dt(end_time)
 	    bash_data = self.bash_analytics  # yank the data from model
-	    if users.length == 1  # single user
-        u = users[0]  # grab that user and,
+	    if users  # single user
+        u = users  # grab that user and,
         timestamps = bash_data[u]  # create {timestamps -> command} from {user -> {timestamps -> command}}
         # grab list of timestamps within specified window of time
         window = dates_in_window(start_time, end_time, timestamps)         
@@ -90,18 +90,18 @@ class Statistic < ActiveRecord::Base
         end
         result[u] = cmds  # {user -> array of relevant commands}
         return result
-	    elsif users.length > 1  # many users
-        users.each do |u| # same as above but for each user
-          cmds = []
-          timestamps = bash_data[u]
-          window = dates_in_window(start_time, end_time, timestamps)
-          window.each do |d|
-              cmds << timestamps[d]
-          end
-          result[u] = cmds
-        end
-        return result # users that map to lists of strings of commands
-	    # empty hash (no commands within timeframe?)
+	    # elsif users.length > 1  # many users
+     #    users.each do |u| # same as above but for each user
+     #      cmds = []
+     #      timestamps = bash_data[u]
+     #      window = dates_in_window(start_time, end_time, timestamps)
+     #      window.each do |d|
+     #          cmds << timestamps[d]
+     #      end
+     #      result[u] = cmds
+     #    end
+     #    return result # users that map to lists of strings of commands
+	    # # empty hash (no commands within timeframe?)
 	    else
 	      return result  
 	    end
