@@ -3,6 +3,7 @@ class StatisticsController < ApplicationController
   require 'rubygems'
   require 'zip'
   require 'tempfile'
+  require 'json'
 
   def index
     # view for all statistics
@@ -22,6 +23,7 @@ class StatisticsController < ApplicationController
     @bash_analytics = @statistic.bash_analytics
     # grab usernames & make available in UI
     @users = @bash_analytics.keys
+    @statistic_id = @statistic.id
   end
   
   # GET /statistic/<id>/destroyme
@@ -97,24 +99,22 @@ class StatisticsController < ApplicationController
     end
   end
 
-
-  # GET /statistic/<id>/perform_analytics?users=[]&start_time=<timestamp>&end_time=<timestamp
-  
-  # an example of passing data in as array
-  # /statistic/<id>/generate_analytics?users[]="student"?users[]="instructor"
+  # method called via AJAX request, sends javascript response after performing analytics  
   def generate_analytics
     # parameters passed in via query string, see comment above
     statistic = Statistic.find(params[:id]) # yank statistic entry
-    users = params[:users]  # array of usernames
-    start_time = params[:start_time]  # start of time window (as string)
-    end_time = params[:end_time]  # end of time window (also as string)
-
+    user = params[:user]  # array of usernames
+    # start_time = params[:start_time]  # start of time window (as string)
+    # end_time = params[:end_time]  # end of time window (also as string)
+    start_time = '1439592472'  # hardcoded timestamps for now
+    end_time = '1439593381'
     # find relevant commands based on query params above
-    commands = statistic.grab_relevant_commands(users, start_time, end_time)
-    # perform analytics on the collected commands & make accessible to UI
-    @analytics = statistic.perform_analytics(commands)
-
-    # no return value
+    commands = statistic.grab_relevant_commands(user, start_time, end_time)
+    # perform analytics on the comands & put into serializable for
+    @analytics = statistic.perform_analytics(commands).to_json
+    respond_to do |format|
+      format.js{ render js: "new Chartkick.ColumnChart('chart', #{@analytics});" }
+    end
   end
 
 end
