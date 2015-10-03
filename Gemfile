@@ -37,7 +37,6 @@ gem 'chartkick'
 gem 'groupdate'
 gem 'active_median'
 gem 'rubyzip'
-gem 'bootstrap-datepicker-rails'
 
 group :development do
   gem 'better_errors'
