@@ -10,20 +10,11 @@
     %div.panel-heading.nav.nav-pills
         %li.dropdown#action-dropdown
             %a.dropdown-toggle{ "data-toggle" => "dropdown", href: "#", role: "button", "aria-expanded" => "false"}
-                Users
-                %span.caret
-            %ul.dropdown-menu{role: "menu"}
-                %li
-                - bash_users = @statistic.bash_analytics.keys
-                - current_userlist = bash_users
-                - bash_users.each do |bash_user|
-                    %li
-                        = link_to bash_user, onclick:""
-                %li
-                    = link_to 'all users'
-
-        = link_to 'Generate Graph',"#generate-graph", onclick:"", class: 'btn btn-default'
-        
+            Users
+            = select_tag :users, options_for_select(@users)
+        %br
+        %button{onclick:"request_graph(#{@statistic_id});", class: 'btn btn-default'} Generate Analytics
+    %div{ "id" => "chart", "style" => "height: 300px"}
     %div.indent.panel-body    
         // Instructions
         %label
