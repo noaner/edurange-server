@@ -177,7 +177,7 @@ class Question < ActiveRecord::Base
   end
 
   def update_scenario_modified
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update_attribute(:modified, true)
     end
     true

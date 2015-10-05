@@ -11,7 +11,7 @@ class Recipe < ActiveRecord::Base
   after_destroy :update_scenario_modified
 
   def update_scenario_modified
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update(modified: true)
     end
   end

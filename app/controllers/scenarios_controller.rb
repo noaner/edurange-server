@@ -98,6 +98,7 @@ class ScenariosController < ApplicationController
       @templates << {title: 'Development', headers: YmlRecord.yml_headers('development', @user)}
       @templates << {title: 'Production', headers: YmlRecord.yml_headers('production', @user)}
       @templates << {title: 'Local', headers: YmlRecord.yml_headers('local', @user)}
+      @templates << {title: 'Test', headers: YmlRecord.yml_headers('test', @user)}
     elsif Rails.env == 'test'
       @templates << {title: 'Test', headers: YmlRecord.yml_headers('test', @user)}
     end
@@ -165,7 +166,7 @@ class ScenariosController < ApplicationController
 
   def destroyme
 
-    if not @scenario.custom?
+    if not @scenario.modifiable?
       if @scenario.destroy
         respond_to do |format|
           format.js { render js: "window.location.pathname='/scenarios'" }

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150918235319) do
+ActiveRecord::Schema.define(version: 20150929023359) do
 
   create_table "answers", force: :cascade do |t|
     t.boolean  "correct"
@@ -178,6 +178,7 @@ ActiveRecord::Schema.define(version: 20150918235319) do
     t.text     "instructions",          default: ""
     t.text     "instructions_student",  default: ""
     t.integer  "location",              default: 0
+    t.boolean  "modifiable",            default: false
   end
 
   create_table "statistics", force: :cascade do |t|

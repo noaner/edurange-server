@@ -25,14 +25,14 @@ class Instance < ActiveRecord::Base
       errors.add(:running, "can not modify while scenario is booted")
       return false
     end
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update_attribute(:modified, true)
     end
     true
   end
 
   def update_scenario_modified
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update_attribute(:modified, true)
     end
     true
@@ -137,13 +137,19 @@ class Instance < ActiveRecord::Base
   end
 
   def get_bash_history
-    return "" if !self.bash_history_page
-    s3 = AWS::S3.new
-    bucket = s3.buckets[Settings.bucket_name]
-    if bucket.objects[self.aws_instance_bash_history_page_name].exists?
-      bash_history =  bucket.objects[self.aws_instance_bash_history_page_name].read()
-      return bash_history == nil ? "" : bash_history
+    return "" if (!self.bash_history_page or (self.bash_history_page == ""))
+
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets[Settings.bucket_name]
+      if bucket.objects[self.aws_instance_bash_history_page_name].exists?
+        bash_history =  bucket.objects[self.aws_instance_bash_history_page_name].read()
+        return bash_history == nil ? "" : bash_history
+      end
+    rescue
+      return "error getting bash history"
     end
+
     return ""
   end
 
@@ -236,6 +242,7 @@ class Instance < ActiveRecord::Base
       end
 
       init += Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/chef.sh.erb")).result(instance: self) + "\n"
+      init += Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/sshd_password_login.sh.erb")).result(instance: self) + "\n"
 
       # Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/recipes/templates/bootstrap.sh.erb")).result(instance: self) + "\n"
       init
@@ -268,6 +275,7 @@ class Instance < ActiveRecord::Base
       cookbook += Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/com_page_and_bash_histories.rb.erb")).result(instance: self) + "\n"
       # This recipe changes /etc/bash.bashrc so that the bash history is written to file with every command
       cookbook += Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/write_bash_histories.rb.erb")).result(instance: self) + "\n"
+      
       cookbook
     rescue
       raise

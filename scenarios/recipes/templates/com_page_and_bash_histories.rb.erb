@@ -32,7 +32,7 @@ ruby_block "finish" do
     put.body = "finished"
 
     # send the PUT request
-    http = Net::HTTP.new('<%= Settings.bucket_name %>.s3.amazonaws.com', 443)
+    http = Net::HTTP.new('<%= Settings.bucket_name %>.s3-<%= Settings.region %>.amazonaws.com', 443)
     http.set_debug_output(Logger.new($stdout))
     http.use_ssl = true
     http.start

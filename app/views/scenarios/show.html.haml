@@ -21,7 +21,7 @@
       = link_to 'Clone', "#modal-scenario-clone", :data => {:toggle=>"modal"}, :onclick => "$('#modal-scenario-clone').find('#name-div').removeClass('has-error'); $('#modal-scenario-clone').find('#name').val(''); $('#modal-scenario-clone').find('#name-help').html('');", class: 'btn btn-default'
     %li{ id: 'destroy-button-li', class: @scenario.stopped? ? "" : "disabled" }
       = link_to 'Destroy', destroyme_scenario_path(@scenario), method: :post, remote: true, id: 'destroy-button', class: 'btn btn-default'
-    - if @scenario.custom?
+    - if @scenario.modifiable?
       %li{ id: "save-button-li", class: @scenario.modified? ? "" : "disabled" }
         = link_to 'Save', save_scenario_path(@scenario), method: :post, remote: true, id: 'save-button', class: 'btn btn-default', href: @scenario.modified? ? "/scenarios/#{@scenario.id}/save" : "javascript: void(0)"
       %li{ id: 'save-as-button-li', class: @scenario.stopped? ? "" : "disabled" }
@@ -32,7 +32,7 @@
   %div.indent.panel-body
     // Instructions
     %label Instructor Instructions:
-    - if @scenario.custom?
+    - if @scenario.modifiable?
       %div.inline-block
         %div.dropdown{id:'dropdown-instructions'}
           %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-instructions', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -45,7 +45,7 @@
     %p
 
     %label Student Instructions:
-    - if @scenario.custom?
+    - if @scenario.modifiable?
       %div.inline-block
         %div.dropdown{id:'dropdown-instructions-student'}
           %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-instructions-student', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -76,7 +76,7 @@
       // Clouds
       %label Clouds:
       %div.inline-block
-        - if @scenario.custom?
+        - if @scenario.modifiable?
           %div.dropdown
             %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-clouds', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
               %span.caret
@@ -89,7 +89,7 @@
 
     // Groups
     %label Groups:
-    - if @scenario.custom?
+    - if @scenario.modifiable?
       %div.inline-block
         %div.dropdown{id:'dropdown-roles'}
           %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-roles', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -103,7 +103,7 @@
 
     %p
     %label Roles:
-    - if @scenario.custom?
+    - if @scenario.modifiable?
       %div.inline-block
         %div.dropdown{id:'dropdown-roles'}
           %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-roles', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -118,7 +118,7 @@
 
     // Recipes
     %label Recipes:
-    - if @scenario.custom?
+    - if @scenario.modifiable?
       %div.inline-block
         %div.dropdown{id:'dropdown-recipes'}
           %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-recipes', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -133,7 +133,7 @@
         = render '/scenarios/show/recipe', recipe: recipe
 
     %label Scoring:
-    - if @scenario.custom?
+    - if @scenario.modifiable?
       %div.inline-block
         %div.dropdown{id:'dropdown-scoring'}
           %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-scoring', "data-toggle" => 'dropdown', "aria-expanded" => "true"}

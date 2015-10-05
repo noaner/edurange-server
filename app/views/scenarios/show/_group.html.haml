@@ -12,7 +12,7 @@
           = link_to 'Add Student Group', "#modal-group-student-group-add", :data => {:toggle=>"modal"}, onclick: "$('#modal-group-student-group-add').find('#group_id').val('#{group.id}'); $('#modal-group-student-group-add').find('#group-name').html($('#group-#{group.id}-name').html().trim());"
         %li{ id: "group-#{group.id}-student-group-remove-button-li", class: group.instances_stopped? ? "" : "disabled" }
           = link_to 'Remove Student Group', "#modal-group-student-group-remove", :data => {:toggle=>"modal"}, onclick: "$('#modal-group-student-group-remove').find('#group_id').val('#{group.id}'); $('#modal-group-student-group-remove').find('#group-name').html($('#group-#{group.id}-name').html().trim());"
-        - if @scenario.custom?
+        - if @scenario.modifiable?
           %li.divider
           %li{ id: "group-#{group.id}-modify-button-li", class: group.instances_stopped? ? "" : "disabled" }
             = link_to 'Modify', "#modal-group-modify", :data => {:toggle=>"modal"}, onclick: "$('#modal-group-modify').find('#group-name').html($('#group-#{group.id}-name').html().trim()); $('#modal-group-modify').find('#group_id').val('#{group.id}'); $('#modal-group-modify').find('#name-div').removeClass('has-error'); $('#modal-group-modify').find('#name').val(''); $('#modal-group-modify').find('#name-help').html(''); $('#modal-group-modify').find('#help-div').removeClass('has-error'); $('#modal-group-modify').find('#help-help').html('');"
@@ -20,7 +20,7 @@
             = link_to 'Delete', group_delete_scenario_path(group_id: group), remote: true, method: :post
   %p
   Instructions:
-  - if @scenario.custom?
+  - if @scenario.modifiable?
     %div.inline-block
       %div.dropdown{id:"dropdown-group-#{group.id}-instructions"}
         %button.btn.btn-default.dropdown-toggle{type:'button', id:"dropdown-button-group-#{group.id}-instructions", "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -33,7 +33,7 @@
 
   %p
   Admin Access:
-  - if @scenario.custom?
+  - if @scenario.modifiable?
     %div.inline-block
       %div.dropdown{ id: "group-#{group.id}-admin-access-dropdown" }
         %button.btn.btn-default.dropdown-toggle{type:'button', id: "group-#{group.id}-admin-access-dropdown-button", "data-toggle" => 'dropdown', "aria-expanded" => "true" }
@@ -47,11 +47,11 @@
       %li{ id: "instance-group-#{instance_group.id}" }
         %span#name
           = instance_group.instance.name
-        - if @scenario.custom?
+        - if @scenario.modifiable?
           = link_to 'remove', group_admin_access_remove_scenario_path(instance_group_id: instance_group), remote: true, method: :post, class: group.instances_stopped? ? "" : "hidden" 
   %br
   User Access:
-  - if @scenario.custom?
+  - if @scenario.modifiable?
     %div.inline-block
       %div.dropdown{ id: "group-#{group.id}-user-access-dropdown" }
         %button.btn.btn-default.dropdown-toggle{type:'button', id: "group-#{group.id}-user-access-dropdown-button", "data-toggle" => 'dropdown', "aria-expanded" => "true" }
@@ -64,7 +64,7 @@
       %li{ id: "instance-group-#{instance_group.id}" }
         %span#name
           = instance_group.instance.name
-        - if @scenario.custom?
+        - if @scenario.modifiable?
           = link_to 'remove', group_user_access_remove_scenario_path(instance_group_id: instance_group), remote: true, method: :post, class: group.instances_stopped? ? "" : "hidden"
   %br
   %table.table{id: "group-#{group.id}-players-table" }

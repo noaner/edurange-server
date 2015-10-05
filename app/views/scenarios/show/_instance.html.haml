@@ -13,7 +13,7 @@
           %li{ id: "instance-#{instance.id}-unboot-button-li", class: instance.unbootable? ? "" : "disabled" }
             = link_to 'Unboot', unboot_instance_scenario_path(instance_id: instance), method: :post, remote: true, id: "instance-#{instance.id}-unboot-button"
           %li.divider
-          - if instance.scenario.custom?
+          - if instance.scenario.modifiable?
             %li{ id: "instance-#{instance.id}-modify-button-li", class: instance.stopped? ? "" : "disabled" }
               = link_to 'Modify', "#modal-instance-modify", :data => {:toggle=>"modal"}, onclick: "$('#modal-instance-modify').find('#instance_id').val('#{instance.id}'); $('#modal-instance-modify').find('#instance-name').html($('#instance-#{instance.id}-name').html().trim()); $('#modal-instance-modify').find('#name-div').removeClass('has-error'); $('#modal-instance-modify').find('#name-help').html(''); $('#modal-instance-modify').find('#ip-div').removeClass('has-error'); $('#modal-instance-modify').find('#ip-help').html(''); $('#modal-instance-modify').find('#internet-accessible-div').removeClass('has-error'); $('#modal-instance-modify').find('#internet-accessible-help').html(''); $('#modal-instance-modify').find('#os-div').removeClass('has-error'); $('#modal-instance-modify').find('#os-help').html(''); $('#modal-instance-modify').find('#name').val($('#instance-#{instance.id}-name').html().trim()); $('#modal-instance-modify').find('#ip_address').val($('#instance-#{instance.id}-ip-address').html().trim()); $('#modal-instance-modify').find('#internet_accessible').val($('#instance-#{instance.id}-internet-accessible').html().trim()); $('#modal-instance-modify').find('#os').val($('#instance-#{instance.id}-os').html().trim()); $('#modal-instance-modify').find('#help-div').removeClass('has-error'); $('#modal-instance-modify').find('#help-help').html('');", id: "instance-#{instance.id}-modify-button"
           %li{ id: "instance-#{instance.id}-delete-button-li", class: instance.stopped? ? "" : "disabled" }
@@ -66,7 +66,7 @@
 
   // Instance Roles
   Roles:
-  - if instance.scenario.custom?
+  - if instance.scenario.modifiable?
     %div.inline-block
       %div.dropdown{ id:"instance-#{instance.id}-role-dropdown" }
         %button.btn.btn-default.dropdown-toggle{type:'button', id:"instance-#{instance.id}-role-dropdown-button", "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -80,5 +80,5 @@
       %li{ id: "instance-role-#{instance_role.id}" }
         %span#name
           = instance_role.role.name
-        - if instance.scenario.custom?
+        - if instance.scenario.modifiable?
           = link_to 'remove', instance_role_remove_scenario_path(instance_role_id: instance_role), method: :post, remote: true, id: "instance-role-#{instance_role.id}-remove-button", class: instance.stopped? ? "" : "hidden"

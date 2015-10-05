@@ -8,7 +8,7 @@ class InstanceGroup < ActiveRecord::Base
   after_destroy :update_scenario_modified
 
   def update_scenario_modified
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       return self.instance.scenario.update_attribute(:modified, true)
     end
     false

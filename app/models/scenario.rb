@@ -298,8 +298,12 @@ class Scenario < ActiveRecord::Base
       end
     rescue => e
       self.destroy_dependents
-      errors.add(:load, 'there was an error loading scenarios yml file.')
+      errors.add(:load, e.class.to_s + ' - ' + e.message.to_s + "\n" + e.backtrace.join("\n"))
       return false
+    end
+
+    if self.test? or self.development? or self.custom?
+      self.update_attribute(:modifiable, true)
     end
 
     self.update(modified: false)
@@ -332,7 +336,7 @@ class Scenario < ActiveRecord::Base
   #
 
   def update_modified
-    if self.custom?
+    if self.modifiable?
       self.update_attribute(:modified, true)
     end
   end
@@ -358,8 +362,8 @@ class Scenario < ActiveRecord::Base
       errors.add(:name, "Name can only contain alphanumeric and underscore")
     elsif /^_*_$/.match(name)
       errors.add(:name, "Name not allowed")
-    elsif not self.custom?
-      errors.add(:custom, "Scenario must be custom to change name")
+    elsif not self.modifiable?
+      errors.add(:custom, "Scenario must be modifiable to change name")
     elsif not self.stopped?
       errors.add(:running, "Scenario must be stopped before name can be changed")
     elsif File.exists? "#{Settings.app_path}scenarios/local/#{name.downcase}/#{name.downcase}.yml"
@@ -667,12 +671,12 @@ class Scenario < ActiveRecord::Base
   end
 
   def update_yml
-    if not self.custom?
-      self.errors.add(:customizable, "Scenario is not customizable")
+    if not self.modifiable?
+      self.errors.add(:customizable, "Scenario is not modifiable.")
       return false
     end
     if not self.modified?
-      self.errors.add(:modified, "Scenario is not modified")
+      self.errors.add(:modified, "Scenario is not modified.")
       return false
     end
 
@@ -713,25 +717,24 @@ class Scenario < ActiveRecord::Base
     }
 
     yml["Clouds"] = self.clouds.empty? ? nil : self.clouds.map { |cloud|
-      { "Name" => cloud.name, "CIDR_Block" => cloud.cidr_block}
-    }
-
-    yml["Subnets"] = self.subnets.empty? ? nil : self.subnets.map { |subnet| {
+      { 
+      "Name" => cloud.name, 
+      "CIDR_Block" => cloud.cidr_block,
+      "Subnets" => cloud.subnets.empty? ? nil : cloud.subnets.map { |subnet| 
+        {
         "Name" => subnet.name, 
-        "Cloud" => subnet.cloud.name, 
         "CIDR_Block" => subnet.cidr_block, 
-        "Internet_Accessible" => subnet.internet_accessible
-      }
-    }
-
-    yml["Instances"] = self.instances.empty? ? nil : self.instances.map { |instance| {
-        "Name" => instance.name, 
-        "Subnet" => instance.subnet.name,
-        "OS" => instance.os,
-        "IP_Address" => instance.ip_address, 
-        "Internet_Accessible" => instance.internet_accessible,
-        "Roles" => instance.roles.map { |r| r.name }
-      }
+        "Internet_Accessible" => subnet.internet_accessible,
+        "Instances" => subnet.instances.empty? ? nil : subnet.instances.map { |instance| 
+          {
+          "Name" => instance.name, 
+          "OS" => instance.os,
+          "IP_Address" => instance.ip_address, 
+          "Internet_Accessible" => instance.internet_accessible,
+          "Roles" => instance.roles.map { |r| r.name }
+          }
+        }}
+      }}
     }
 
     yml["Scoring"] = self.questions.empty? ? nil : self.questions.map { |question| {

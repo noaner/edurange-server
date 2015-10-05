@@ -14,7 +14,7 @@ class Player < ActiveRecord::Base
   after_destroy :update_scenario_modified
 
   def update_scenario_modified
-    if self.group.scenario.custom?
+    if self.group.scenario.modifiable?
       if self.group.scenario
         self.group.scenario.update(modified: true)
       end
