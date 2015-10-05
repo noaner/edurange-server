@@ -109,9 +109,8 @@ class StatisticsController < ApplicationController
     # find relevant commands based on query params above
     if statistic.bash_analytics.keys.include?(user) && statistic.bash_analytics[user] != {}
       times = statistic.bash_analytics[user].keys.sort
-      start = times[0]
+      start = times[0]  # by default we'll look at the entire window
       end_ = times[-1]
-
       commands = statistic.grab_relevant_commands(user, start, end_)
       # perform analytics on the comands & put into serializable for
       @analytics = statistic.perform_analytics(commands).to_json
@@ -120,7 +119,7 @@ class StatisticsController < ApplicationController
       end
     else
       respond_to do |format|
-        format.js{ render js: "alert('Use doesn't exist');"}
+        format.js{ render js: "alert('User not in scenario.');"}
       end
     end
   end
