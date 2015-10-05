@@ -106,14 +106,22 @@ class StatisticsController < ApplicationController
     user = params[:user]  # array of usernames
     # start_time = params[:start_time]  # start of time window (as string)
     # end_time = params[:end_time]  # end of time window (also as string)
-    start_time = '1439592472'  # hardcoded timestamps for now
-    end_time = '1439593381'
     # find relevant commands based on query params above
-    commands = statistic.grab_relevant_commands(user, start_time, end_time)
-    # perform analytics on the comands & put into serializable for
-    @analytics = statistic.perform_analytics(commands).to_json
-    respond_to do |format|
-      format.js{ render js: "new Chartkick.ColumnChart('chart', #{@analytics});" }
+    if statistic.bash_analytics.keys.include?(user) && statistic.bash_analytics[user] != {}
+      times = statistic.bash_analytics[user].keys.sort
+      start = times[0]
+      end_ = times[-1]
+
+      commands = statistic.grab_relevant_commands(user, start, end_)
+      # perform analytics on the comands & put into serializable for
+      @analytics = statistic.perform_analytics(commands).to_json
+      respond_to do |format|
+        format.js{ render js: "new Chartkick.ColumnChart('chart', #{@analytics});" }
+      end
+    else
+      respond_to do |format|
+        format.js{ render js: "alert('Use doesn't exist');"}
+      end
     end
   end
 
