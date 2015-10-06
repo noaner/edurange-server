@@ -1158,8 +1158,9 @@ module Aws
     begin 
       return @public_ip ||= self.aws_instance_driver_object.public_ip_address
     rescue AWS::EC2::Errors::InvalidInstanceID::NotFound => e
-      if cnt < 3
-        sleep 1
+      if cnt < 60
+        sleep 2
+        cnt += 1
         retry
       else
         return false
