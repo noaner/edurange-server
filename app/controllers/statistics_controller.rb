@@ -111,16 +111,15 @@ class StatisticsController < ApplicationController
       times = statistic.bash_analytics[user].keys.sort
       start = times[0]
       end_ = times[-1]
-
       commands = statistic.grab_relevant_commands(user, start, end_)
-      # perform analytics on the comands & put into serializable for
+      # perform analytics on the comands & put into serializable form
       @analytics = statistic.perform_analytics(commands).to_json
       respond_to do |format|
         format.js{ render js: "new Chartkick.ColumnChart('chart', #{@analytics});" }
       end
     else
       respond_to do |format|
-        format.js{ render js: "alert('Use doesn't exist');"}
+        format.js{ render js: "alert('User not in scenario.');"}
       end
     end
   end
