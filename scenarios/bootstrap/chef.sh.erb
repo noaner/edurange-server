@@ -44,7 +44,7 @@ if File.exists? "/root/chef/chef-stacktrace.out"
   put.body = "error\n" + File.read("/root/chef/chef-stacktrace.out")
 
   # send the PUT request
-  http = Net::HTTP.new('<%= Settings.bucket_name %>.s3.amazonaws.com', 443)
+  http = Net::HTTP.new('<%= Settings.bucket_name %>.s3-<%= Settings.region %>.s3.amazonaws.com', 443)
   http.use_ssl = true
   http.start
   resp = http.request(put)
