@@ -19,7 +19,7 @@ cat << EOF > solo.json
 EOF
 
 # check for cheff error and write to s3 file if found
-cat << EOF > /root/chef/cookbooks/op/cheferror.rb
+cat << EOF > /root/chef/cookbooks/op/recipes/cheferror.rb
 ruby_block 'chef_error' do
 	block do
 		if File.exists? "/root/chef/chef-stacktrace.out"
