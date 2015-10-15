@@ -3,10 +3,22 @@ script "instant_bash_history" do
     user "root"
     cwd "/tmp"
     code <<-EOH
-    if grep -q "export HISTTIMEFORMAT='%T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r; echo !!,$? >> ~/.exit_status';exec &> >(tee ~/.stdout.log)" >> /etc/bash.bashrc; then
+    # If not present, adds these lines to /etc/bash.bashrc
+    # Changes bash history timeformat to simply display time
+    # Changes history functionality to write to the history file after every command
+    # Adds command to capture exit status [not currently working]
+
+    if grep -q "echo $? >> ~/.exit_status; echo $(history | tail -n1) | sed "s/[0-9]* //" >> ~/.exit_status;export HISTTIMEFORMAT='%T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r; echo !!,$? >> ~/.exit_status'" /etc/bash.bashrc; then
         :
     else
-        echo "export HISTTIMEFORMAT='%T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r; echo !!,$? >> ~/.exit_status';exec &> >(tee ~/.stdout.log)" >> /etc/bash.bashrc
+        echo "echo $? >> ~/.exit_status; echo $(history | tail -n1) | sed "s/[0-9]* //" >> ~/.exit_status;export HISTTIMEFORMAT='%T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r; echo !!,$? >> ~/.exit_status'" >> /etc/bash.bashrc
+    fi
+
+    # If not present, adds terminal logging utility 'script' to /etc/profile
+    if grep -q "script -a -q ~/.script_log.txt" /etc/profile; then
+       :
+    else
+	echo "script -a -q ~/.script_log.txt" >> /etc/profile
     fi
     EOH
 end
