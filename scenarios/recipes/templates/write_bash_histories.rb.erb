@@ -3,22 +3,23 @@ script "instant_bash_history" do
     user "root"
     cwd "/tmp"
     code <<-EOH
+
     # If not present, adds these lines to /etc/bash.bashrc
     # Changes bash history timeformat to simply display time
     # Changes history functionality to write to the history file after every command
-    # Adds command to capture exit status [not currently working]
+    # Adds command to capture exit status
 
     if grep -q "shopt -s histappend" /etc/bash.bashrc; then
         :
     else
-        echo "shopt -s histappend;export PROMPT_COMMAND='echo $? >> ~/.exit_status; echo $(history | tail -n1) | sed "s/[0-9]* //" >> ~/.exit_status;export HISTTIMEFORMAT='%T ';history -a; history -c; history -r" >> /etc/bash.bashrc
+        echo "shopt -s histappend;export PROMPT_COMMAND='echo \$? >> ~/.exit_status; echo \$(history | tail -n1) | sed \"s/[0-9]* //\" >> ~/.exit_status;history -a; history -c; history -r'" >> /etc/bash.bashrc
     fi
 
     # If not present, adds terminal logging utility 'script' to /etc/profile
-    if grep -q "script -a -q ~/.script_log.txt" /etc/profile; then
+    if grep -q "script -a -q ~/.script.log" /etc/profile; then
        :
     else
-	echo "script -a -q ~/.script_log.txt" >> /etc/profile
+	echo "script -a -q ~/.script.log;export HISTTIMEFORMAT='%T '" >> /etc/profile
     fi
     EOH
 end
