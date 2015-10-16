@@ -27,5 +27,5 @@
                 - history_lines = @statistic.bash_histories.split(/#/)
                 - history_lines.each do |line|
                     %br
-                    = if /1443.*/.match(line) then Time.at(Integer(line[0..10])).strftime("%I:%M %p") + ' ' + line[11..-1] else line end
+                    = if /\d\d\d\d\d\d\d\d\d\d.*/.match(line) then Time.at(Integer(line[0..10])).strftime("%I:%M %p") + ' ' + line[11..-1] else line end
             
