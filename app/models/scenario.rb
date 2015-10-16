@@ -218,7 +218,7 @@ class Scenario < ActiveRecord::Base
           admin = access["Administrator"]
           user = access["User"]
 
-          group = self.groups.new(name: yaml_group["Name"])
+          group = self.groups.new(name: yaml_group["Name"], instructions: yaml_group["Instructions"])
           if not group.save
             self.destroy_dependents
             errors.add(:load, "error creating group. #{group.errors.messages}")
