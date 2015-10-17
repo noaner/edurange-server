@@ -22,6 +22,7 @@
                 = link_to 'Download', download_statistic_path(@statistic), class: 'btn btn-default'
                 = link_to 'All Statistics', statistics_path, class: 'btn btn-default'
                 = link_to 'Destroy Statistic', destroyme_statistic_path(@statistic), method: :post, remote: true, :data => { :confirm => 'Are you sure?' }, class: 'btn btn-default'
+            // Uses regular expressions to display bash history nicely, converting the unix timestamp into a readable time
             %div.panel.panel-body{id: "bash-histories-field"}
                 %h3 Bash Histories
                 - history_lines = @statistic.bash_histories.split(/#/)
