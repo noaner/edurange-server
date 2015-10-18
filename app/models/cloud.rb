@@ -24,7 +24,7 @@ class Cloud < ActiveRecord::Base
       errors.add(:running, "can not modify while scenario is not stopped")
       return false
     end
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update_attribute(:modified, true)
     end
     true
@@ -40,7 +40,7 @@ class Cloud < ActiveRecord::Base
   end
 
   def update_scenario_modified
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update_attribute(:modified, true)
     end
     true

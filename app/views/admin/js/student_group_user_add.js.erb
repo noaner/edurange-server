@@ -1,0 +1,18 @@
+<% if @student_group_user %>
+	<% if @student_group.errors.any? %>
+	  alert('Error add user to student group.');
+	<% else %>
+		<% if @student_group_user.errors.any? %>
+			<% if @student_group_user.errors[:user].any? %>
+				$('#modal-student-group-user-add').find('#name-div').addClass('has-error');
+  			$('#modal-student-group-user-add').find('#name-help').text('User already exists in Student Group <%= @student_group.name %>');
+  		<% end %>
+		<% else %>
+			$('#modal-student-group-user-add').modal('toggle');
+			$('#student-group-<%= @student_group.id %>-table').append('<%= escape_javascript(render("/admin/student_group_student", student_group: @student_group, sgu: @student_group_user)) %>')
+		<% end %>
+	<% end %>
+<% else %>
+  $('#modal-student-group-user-add').find('#name-div').addClass('has-error');
+  $('#modal-student-group-user-add').find('#name-help').text('could not find Student Group');
+<% end %>

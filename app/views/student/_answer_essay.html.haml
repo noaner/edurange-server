@@ -1,0 +1,15 @@
+%tr{ id: "answer-#{answer.id}" }
+  %td= link_to 'show', answer_essay_show_student_path(answer_id: answer), remote: true, method: :post
+
+  %td= answer.essay_points_earned != nil
+  %td= answer.essay_points_earned != nil ? answer.essay_points_earned : '-'
+  %td= answer.question.points
+  - if answer.comment
+    %td= link_to 'show'
+  -else
+    %td -
+  %td= answer.created_at.to_formatted_s(:db)
+  - if answer.essay_points_earned == nil
+    %td= link_to 'delete', answer_essay_delete_student_path(@scenario, answer_id: answer.id), remote: true, method: :post
+  - else
+    %td

@@ -1,0 +1,12 @@
+%tr{ id: "student-#{user.id}-answers-tr", class: "student-questions", student_id: user.id }
+  %td{ colspan: 5 }
+    - scenario.questions.order(:order).each_with_index do |question, question_index|
+      %b= question.order.to_s + '.'
+      = question.text
+      %p
+      %dl
+        %div{ id: "" }
+          %label Answer Type:
+          = question.type_of
+          %div{ id: "student-#{user.id}-question-#{question.id}-answers-table-div" }
+            = render '/scenarios/show/student_question_answer_table', question: question, question_index: question_index, user: user

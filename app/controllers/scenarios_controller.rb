@@ -5,12 +5,16 @@ class ScenariosController < ApplicationController
   # Scenario
   before_action :set_scenario, only: [
     :clone, :destroyme, :edit, :modify, :show, :update, :save, :save_as,
-    :boot, :boot_status, :unboot, :pause, :start,
+    :boot, :status, :unboot, :pause, :start,
     :cloud_add, 
     :player_modify, :player_student_group_add, :player_add, :player_group_add, :player_delete, :player_group_admin_access_add, :player_group_user_access_add,
     :role_recipe_add, :role_add,
     :recipe_custom_add, :recipe_global_add, :recipe_global_get, :recipe_remove, :recipe_update, :recipe_update_view, :recipe_view,
-    :group_add
+    :group_add, :group_instructions_get, :group_instructions_modify,
+    :scoring_question_add, :scoring_answers_show, :scoring_answer_essay_show, :scoring_answer_comment, :scoring_answer_comment_show,
+    :scoring_answer_comment_edit, :scoring_answer_comment_edit_show, :scoring_answer_essay_grade, :scoring_answer_essay_grade_edit,
+    :scoring_answer_essay_grade_delete,
+    :instructions_get, :instructions_modify, :instructions_student_get, :instructions_student_modify
   ]
 
   # Cloud
@@ -30,7 +34,8 @@ class ScenariosController < ApplicationController
 
   # Group
   before_action :set_group, only: [
-    :group_delete, :group_modify, :group_admin_access_add, :group_user_access_add, :group_player_add, :group_student_group_add, :group_student_group_remove
+    :group_delete, :group_modify, :group_admin_access_add, :group_user_access_add, :group_player_add, 
+    :group_student_group_add, :group_student_group_remove, :group_instructions_get, :group_instructions_modify
   ]
   before_action :set_instance_group, only: [
     :group_admin_access_remove, :group_user_access_remove
@@ -52,6 +57,17 @@ class ScenariosController < ApplicationController
   before_action :set_instance_role, only: [
     :instance_role_remove
   ]
+  before_action :set_question, only: [
+    :scoring_question_delete, :scoring_question_modify, :scoring_question_move_up, :scoring_question_move_down
+  ]
+  before_action :set_student, only: [
+    :scoring_answers_show
+  ]
+  before_action :set_answer, only: [
+    :scoring_answer_essay_show, :scoring_answer_comment, :scoring_answer_comment_show, 
+    :scoring_answer_comment_edit_show, :scoring_answer_comment_edit, :scoring_answer_essay_grade,
+    :scoring_answer_essay_grade_edit, :scoring_answer_essay_grade_delete
+  ]
 
   # GET /scenarios
   # GET /scenarios.json
@@ -68,17 +84,25 @@ class ScenariosController < ApplicationController
   # GET /scenarios/1.json
   def show
     # @clone = params[:clone]
-    @scenario.check_status
+    #@scenario.check_status
   end
 
   # GET /scenarios/new
   def new
     @scenario = Scenario.new
-    @templates = YmlRecord.yml_headers
-    @templates_user = YmlRecord.yml_headers_user(@user)
-    puts @templates
-    puts
-    puts @templates_user
+    @templates = []
+    if Rails.env == 'production'
+      @templates << {title: 'Production', headers: YmlRecord.yml_headers('production', @user)}
+      @templates << {title: 'Local', headers: YmlRecord.yml_headers('local', @user)}
+    elsif Rails.env == 'development'
+      @templates << {title: 'Development', headers: YmlRecord.yml_headers('development', @user)}
+      @templates << {title: 'Production', headers: YmlRecord.yml_headers('production', @user)}
+      @templates << {title: 'Local', headers: YmlRecord.yml_headers('local', @user)}
+      @templates << {title: 'Test', headers: YmlRecord.yml_headers('test', @user)}
+    elsif Rails.env == 'test'
+      @templates << {title: 'Test', headers: YmlRecord.yml_headers('test', @user)}
+    end
+    @templates << {title: 'Custom', headers: YmlRecord.yml_headers('custom', @user)}
   end
 
   # GET /scenarios/1/edit
@@ -89,20 +113,15 @@ class ScenariosController < ApplicationController
   # POST /scenarios
   # POST /scenarios.json
   def create
-    # scrub this template input
-    if template = scenario_params["template"]
-      @scenario = YmlRecord.load_yml(scenario_params["template"], @user)
-    else
-      @scenario = Scenario.new(scenario_params)
-    end
+    @scenario = @user.scenarios.new(scenario_params)
+    @scenario.save
 
     respond_to do |format|
-      if @scenario.save
-        format.html { redirect_to @scenario, notice: 'Scenario was successfully created.' }
-        format.json { render :show, status: :created, location: @scenario }
+      if @scenario.errors.any?
+        @scenario.destroy
+        format.html { redirect_to '/scenarios/new', alert: "There was an error creating Scenario #{@scenario.name} please contact administrator."}
       else
-        format.html { render :new }
-        format.json { render json: @scenario.errors, status: :unprocessable_entity }
+        format.html { redirect_to @scenario, notice: 'Scenario was successfully created.' }
       end
     end
   end
@@ -147,7 +166,7 @@ class ScenariosController < ApplicationController
 
   def destroyme
 
-    if not @scenario.custom?
+    if not @scenario.modifiable?
       if @scenario.destroy
         respond_to do |format|
           format.js { render js: "window.location.pathname='/scenarios'" }
@@ -202,6 +221,25 @@ class ScenariosController < ApplicationController
   def clone_set
     clone = Scenario.find(params[:clone_id])
     redirect_to clone, notice: 'Scenario was successfully cloned.'
+  end
+
+  def status
+    @student_answers_update = []
+    if params[:student_answers]
+      params[:student_answers].each do |key, value|
+        if student = @scenario.find_student(value['student_id'].to_i)
+          oldlist = value['answers'].split(',').map{ |n| n.to_i}
+          newlist = @scenario.answers_list(student)
+          if (oldlist.size != newlist.size) or not (oldlist - newlist).blank?
+            @student_answers_update << { student: student, show: value['show'] }
+          end
+        end
+      end
+    end  
+
+    respond_to do |format|
+      format.js { render 'scenarios/js/status.js.erb', :layout => false }
+    end
   end
 
   #############################################################
@@ -263,12 +301,6 @@ class ScenariosController < ApplicationController
     end
   end
 
-  def boot_status
-    respond_to do |format|
-      format.js { render 'scenarios/js/boot/boot_status.js.erb', :layout => false }
-    end
-  end
-
   def pause
     @scenario.pause
     respond_to do |format|
@@ -285,6 +317,33 @@ class ScenariosController < ApplicationController
 
   ###############################################################
   #  Resource Modification
+
+  # Instructions
+  def instructions_get
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instructions/get.js.erb', layout: false }
+    end
+  end
+
+  def instructions_modify
+    @scenario.update_instructions(params[:text])
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instructions/modify.js.erb', layout: false }
+    end
+  end
+
+  def instructions_student_get
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instructions/student_get.js.erb', layout: false }
+    end
+  end
+
+  def instructions_student_modify
+    @scenario.update_instructions_student(params[:text])
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instructions/student_modify.js.erb', layout: false }
+    end
+  end
 
   # CLOUD
   def cloud_add
@@ -425,6 +484,20 @@ class ScenariosController < ApplicationController
     @group.update(name: params[:name])
     respond_to do |format|
       format.js { render template: 'scenarios/js/group/modify.js.erb', layout: false }
+    end
+  end
+
+  def group_instructions_get
+    @instructions = @group.instructions.gsub("\n", "<br>").gsub(" ", "&nbsp").gsub("'", "\"").gsub(/\r/, "").html_safe;
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/instructions_get.js.erb', layout: false }
+    end
+  end
+
+  def group_instructions_modify
+    @group.update_instructions(params[:text])
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/group/instructions_modify.js.erb', layout: false }
     end
   end
 
@@ -607,6 +680,147 @@ class ScenariosController < ApplicationController
   end
 
   ###############################################################
+  #  Scoring
+
+  # Questions
+  def scoring_question_add
+    values = nil
+    if params[:values]
+      values = []
+      params[:values].each_with_index do |val, i| values << { value: val, points: params[:value_points][i] } end
+    end
+
+    @question = @scenario.questions.new(
+      type_of: params[:type],
+      options: params["#{params[:type].downcase}_options"] ? params["#{params[:type].downcase}_options"] : [],
+      text: params[:text],
+      values: params[:type] == "Essay" ? [] : values,
+      # because rails typecasts strings to integer '0' put in '-1' instead if not an integer to get proper validation
+      points: params[:points].is_integer? ? params[:points] : '-1'
+    )
+    @question.save
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/question/add.js.erb', layout: false }
+    end
+  end
+
+  def scoring_question_delete
+    @question.destroy
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/question/delete.js.erb', layout: false }
+    end
+  end
+
+  def scoring_question_modify
+    values = nil
+    if params[:values]
+      values = []
+      params[:values].each_with_index do |val, i| values << { value: val, points: params[:value_points][i] } end
+    end
+
+    puts values
+    
+    @question.update(
+      type_of: params[:type],
+      options: params["#{params[:type].downcase}_options"] ? params["#{params[:type].downcase}_options"] : [],
+      text: params[:text],
+      values: params[:type] == "Essay" ? [] : values,
+      points: params[:points].is_integer? ? params[:points] : '-1'
+    )
+    @question.save
+
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/question/modify.js.erb', layout: false }
+    end
+  end
+
+  def scoring_question_move_up
+    @question2 = @question.move_up
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/question/move_up.js.erb', layout: false }
+    end
+  end
+    
+  def scoring_question_move_down
+    @question2 = @question.move_down
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/question/move_down.js.erb', layout: false }
+    end
+  end
+
+  # Answers
+  def scoring_answers_show
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/show.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_essay_show
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/essay_show.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_essay_grade
+    @answer.essay_points_earned = params[:points]
+    @answer.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/essay_grade.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_essay_grade_edit
+    @answer.essay_points_earned = params[:points]
+    @answer.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/essay_grade_edit.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_essay_grade_delete
+    @answer.essay_points_earned = nil
+    @answer.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/essay_grade_delete.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_comment
+    @answer.comment = params[:comment]
+    @answer.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/comment.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_comment_show
+    @question_index = params[:question_index].to_i + 1
+    @answer_index = params[:answer_index].to_i + 1
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/comment_show.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_comment_edit
+    @answer.comment = params[:comment]
+    @answer.save
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/comment_edit.js.erb', layout: false }
+    end
+  end
+
+  def scoring_answer_comment_edit_show
+    @question_index = params[:question_index].to_i + 1
+    @answer_index = params[:answer_index].to_i + 1
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/scoring/answer/comment_edit_show.js.erb', layout: false }
+    end
+  end
+
+
+
+  ###############################################################
   #  Helpers
 
   def log_get
@@ -644,7 +858,9 @@ class ScenariosController < ApplicationController
     end
 
     def set_scenario
-      @scenario = Scenario.find(params[:id])
+      if not @scenario = Scenario.find_by_id(params[:id])
+        redirect_to '/scenarios/'
+      end
       if not @user.owns? @scenario
         head :ok, content_type: "text/html"
         return
@@ -731,8 +947,32 @@ class ScenariosController < ApplicationController
       end
     end
 
+    def set_question
+      @question = Question.find(params[:question_id])
+      if not @user.owns? @question
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_student
+      @student = User.find(params[:student_id])
+      if not @scenario.has_student? @student
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
+    def set_answer
+      @answer = Answer.find(params[:answer_id])
+      if not @scenario.has_question? @answer.question
+        head :ok, content_type: "text/html"
+        return
+      end
+    end
+
     # Never trust parameters from the scary internet, only allow the white list through.
     def scenario_params
-      params.require(:scenario).permit(:game_type, :name, :template)
+      params.require(:scenario).permit(:game_type, :name, :template, :location)
     end
 end

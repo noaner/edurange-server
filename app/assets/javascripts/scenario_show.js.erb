@@ -1,77 +1,285 @@
-// var ready = function() {
-//   console.log("In ready!")
-//   var id = $('#scenario').data('id');
-//   if (id) {
-//     PrivatePub.subscribe("/scenarios/" + id, function(data, channel) {
-//       if (data.scenario_status != undefined) {
-//         $('#scenario-status').text(data.scenario_status);
 
-//         if (data.scenario_status == "booted") {
-//           $('#boot-button').html("Unboot");
-//           $('#boot-message').html('Scenario has successfully Booted.');
-//           $('#scenario-status-dot').show();
-//           $('#scenario-status-dot').removeClass().addClass('booted');
-//         }
-//         else if (data.scenario_status == "stopped") {
-//           $('#boot-button').html("Boot");
-//           $('#boot-message').html('Scenario has successfully Unbooted.');
-//           $('#scenario-status-dot').show();
-//           $('#scenario-status-dot').removeClass().addClass('stopped');
-//         }
-//         else if (data.scenario_status == "boot_failed") {
-//           $('#boot-message').html('Scenario has failed to boot.');
-//           $('#boot-button').html("Unboot");
-//           $('#scenario-status-dot').show();
-//           $('#scenario-status-dot').removeClass().addClass('failed');
-//         }
-//         else if (data.scenario_status == "unboot_failed") {
-//           $('#boot-message').html('Scenario has failed to unboot.');
-//           $('#boot-button').html("Unboot");
-//           $('#scenario-status-dot').show();
-//           $('#scenario-status-dot').removeClass().addClass('failed');
-//         }
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+// Scoring
 
-//       } else if (data.instance_progress == 1) {
-//         var count = $('#instance-count').text();
-//         $('#instance-count').text(parseInt(count) + 1);
-//       } else if (data.instance_progress == -1) {
-//         var count = $('#instance-count').text();
-//         $('#instance-count').text(parseInt(count) - 1);
-//       } else if (data.subnet_progress == 1) {
-//         var count = $('#subnet-count').text();
-//         $('#subnet-count').text(parseInt(count) + 1);
-//       } else if (data.subnet_progress == -1) {
-//         var count = $('#subnet-count').text();
-//         $('#subnet-count').text(parseInt(count) - 1);
-//       } else if (data.cloud_progress == 1) {
-//         var count = $('#cloud-count').text();
-//         $('#cloud-count').text(parseInt(count) + 1);
-//       } else if (data.cloud_progress == -1) {
-//         var count = $('#cloud-count').text();
-//         $('#cloud-count').text(parseInt(count) - 1);
-//       } else if (data.log_message != undefined) {
-//         $("#console").append(data.log_message + '<br>');
-//         $('#console').scrollTop($('#console').prop("scrollHeight"));
-//       } else if (data.answered != undefined) {
-//         $('#answered-student-' + data.answered[0]).text(data.answered[1]);
-//       }
+// Questions
+function scoring_question_modal_add_value(modal) {
+	val = $('#modal-scoring-question-value-add').find('#value').val().replace(/[\""]/g, "'").trim();
+	valid = val.replace(/[\ .]/g, "_");
+	points = $('#modal-scoring-question-value-add').find('#points').val();
+	err = false;
 
-//       if (data.public_ip != undefined) {
-//         $('#public-ip').text(data.public_ip);
-//       }
+	if (/^\s*$/.test(val)) {
+		$('#modal-scoring-question-value-add').find('#value-div').attr('class', 'has-error');
+		$('#modal-scoring-question-value-add').find('#value-help').text('must not be blank');
+		err = true;
+	} 
+	else {
 
-//     });
-//   }
+		// check for duplicate values
+		if ($('#' + modal).find('#' + valid).length) {
+			$('#modal-scoring-question-value-add').find('#value-div').attr('class', 'has-error');
+			$('#modal-scoring-question-value-add').find('#value-help').text('value already exists');
+			err = true;
+		}
+		else {
+			// if type is number make sure value is numeric
+			if ( ($('#' + modal).find('#type').val() == "Number") && !($.isNumeric(val)) ) {
+				$('#modal-scoring-question-value-add').find('#value-div').attr('class', 'has-error');
+				$('#modal-scoring-question-value-add').find('#value-help').text('must be numeric');
+				err = true;
+			}
+			else {
+				$('#modal-scoring-question-value-add').find('#value-div').attr('class', '');
+				$('#modal-scoring-question-value-add').find('#value-help').text('');
+			}
+		}
+	}
 
-// };
+	if (!(/^[0-9]+$/.test(points))) {
+		$('#modal-scoring-question-value-add').find('#points-div').attr('class', 'has-error');
+		$('#modal-scoring-question-value-add').find('#points-help').text('must be zero or a positive integer');
+		err = true;
+	} else {
+		$('#modal-scoring-question-value-add').find('#points-div').attr('class', '');
+		$('#modal-scoring-question-value-add').find('#points-help').text('');
+	}
 
-// $(document).ready(ready);
+	if (!err) {
+		$('#' + modal).find('#values-div').attr('class', '');
+		$('#' + modal).find('#values-help').text('');
 
-var set_players_modal = function () {
-	$('#modal-add-player').find('#group-div').attr('class', '');
-	$('#modal-add-player').find('#group-help').text('');
-	$('#modal-add-player').find('#login-div').attr('class', '');
-	$('#modal-add-player').find('#login-help').text('');
-	$('#modal-add-player').find('#password-div').attr('class', '');
-	$('#modal-add-player').find('#password-help').text('');
+		divid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    	var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+    	return v.toString(16);
+		});
+
+		$('#' + modal).find('#values-div').append('<div id="' + divid + '" class="modal-values"><b>value: </b><span id="' + valid +  '">' + val + '</span><br><b>points: </b>' + points + '<br><a href="javascript:void(0)" onclick="' + '$(\'#' + divid + '\').remove();' + '">remove</a><p></div>');
+		$('#' + modal).find('#' + divid + '').append('<input type="text" class="hidden" name="values[]" value="' + val + '"></input>');
+		$('#' + modal).find('#' + divid + '').append('<input type="text" class="hidden" name="value_points[]" value="' + points + '"></input>');
+		$('#modal-scoring-question-value-add').modal('toggle');
+	}
+
+	// $('#modal-scoring-question-add-submit-button').focus();
+}
+
+function scoring_question_modal_add_value_setup(modal) {
+	$('#modal-scoring-question-value-add').find('#value').val('');
+	$('#modal-scoring-question-value-add').find('#value-div').removeClass('has-error'); 
+	$('#modal-scoring-question-value-add').find('#value-help').html('');
+	$('#modal-scoring-question-value-add').find('#points').val('');
+	$('#modal-scoring-question-value-add').find('#points-div').removeClass('has-error'); 
+	$('#modal-scoring-question-value-add').find('#points-help').html('');
+	$('#modal-scoring-question-value-add').find('#submit-button').attr('onclick', 'scoring_question_modal_add_value("' + modal + '");')
+}
+
+function scoring_question_modal_set_options(modal, id) {
+	type = $('#' + modal).find('#type').val();
+
+	<% Question::OPTIONS_STRING.each do |option| %>
+		$('#' + modal).find('#option-<%= option %>-div').attr('class', 'hidden');
+		$('#' + modal).find('#option-<%= option %>').attr('checked', false);
+	<% end %>
+	<% Question::OPTIONS_NUMBER.each do |option| %>
+		$('#' + modal).find('#option-<%= option %>-div').attr('class', 'hidden');
+		$('#' + modal).find('#option-<%= option %>').attr('checked', false);
+	<% end %>
+	<% Question::OPTIONS_ESSAY.each do |option| %>
+		$('#' + modal).find('#option-<%= option %>-div').attr('class', 'hidden');
+		$('#' + modal).find('#option-<%= option %>').attr('checked', false);
+	<% end %>
+
+	$('#' + modal).find('#values-header-div').attr('class', 'hidden');
+	$('#' + modal).find('#points-div').attr('class', 'hidden');
+
+	if (type == 'String') {
+		<% Question::OPTIONS_STRING.each do |option| %>
+			$('#' + modal).find('#option-<%= option %>-div').attr('class', '');
+		<% end %>
+		$('#' + modal).find('#values-header-div').attr('class', '');
+	}
+	else if (type == 'Number') {
+		<% Question::OPTIONS_NUMBER.each do |option| %>
+			$('#' + modal).find('#option-<%= option %>-div').attr('class', '');
+		<% end %>
+		$('#' + modal).find('#values-header-div').attr('class', '');
+	}
+	else if (type == 'Essay') {
+		<% Question::OPTIONS_ESSAY.each do |option| %>
+			$('#' + modal).find('#option-<%= option %>-div').attr('class', '');
+		<% end %>
+		$('#' + modal).find('#values-header-div').attr('class', 'hidden');
+		$('#' + modal).find('#points-div').attr('class', '');
+		$('#' + modal).find('#points-div').find('#points').val('');
+	}
+
+	$('#' + modal).find('#options-div').attr('class', '');
+	$('#' + modal).find('#options-help').html('');
+
+	$('#' + modal).find('#text-div').attr('class', '');
+	$('#' + modal).find('#text').val('');
+	$('#' + modal).find('#text-help').html('');
+
+
+	$('#' + modal).find('#values-div').attr('class', '');
+	$('#' + modal).find('#values-div').empty();
+	$('#' + modal).find('#values-div').append('<div id="values-help" class="help-block"></div>');
+	$('#' + modal).find('#values-div').find('.modal-values').each(function () {
+		this.remove();
+	});
+
+	$('#' + modal).find('#points-div').removeClass('has-error');
+	$('#' + modal).find('#points-help').html('');
+
+	if (id) {
+		type = $('#' + modal).find('#type').val();
+		if (type == $('#question-' + id + '-type').text().trim()) {
+			$('#' + modal).find('#text').val($('#question-' + id + '-text').text().trim());
+			if (type == "Essay") {
+				$('#' + modal).find('#points-div').find('#points').val($('#question-' + id + '-points').text().trim());
+			}
+			else {
+				// do options
+				$('#question-' + id + '-options').html().split(', ').forEach(function(option) {
+					$('#' + modal).find('#option-' + option.trim().replace(" ", "-")).prop('checked', true);
+				});
+
+				// do values
+				$('#' + modal).find('#values-div').empty();
+				$('#' + modal).find('#values-div').append('<div id="values-help" class="help-block"></div>');
+				$('#question-' + id + '-values').find('li').each(function(li) {
+
+					val = $(this).find('#value').html().trim();
+					valid = val.replace(/[\ ]/g, "_");
+					points = $(this).find('#points').html().trim();
+
+					divid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+			    	var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+			    	return v.toString(16);
+					});
+
+					$('#' + modal).find('#values-div').append('<div id="' + divid + '"><b>value: </b><span id="' + valid +  '">' + val + '</span><br><b>points: </b>' + points + '<br><a href="javascript:void(0)" onclick="' + '$(\'#' + divid + '\').remove();' + '">remove</a><p></div>');
+					$('#' + modal).find('#' + divid + '').append('<input type="text" class="hidden" name="values[]" value="' + val + '"></input>');
+					$('#' + modal).find('#' + divid + '').append('<input type="text" class="hidden" name="value_points[]" value="' + points + '"></input>');
+				
+				});
+			}
+		}
+	}
+}
+
+function scoring_question_modal_modify_set_fields(id) {
+
+}
+
+function scoring_question_modal_add_question_setup() {
+	$('#modal-scoring-question-add').find('#type').val('String');
+	scoring_question_modal_set_options('modal-scoring-question-add', null);
+	$('#modal-scoring-question-add').find('#text').val('');
+	$('#modal-scoring-question-add').find('#text-div').removeClass('has-error'); 
+	$('#modal-scoring-question-add').find('#text-help').html('');
+	$('#modal-scoring-question-add').find('#values-div').empty();
+	$('#modal-scoring-question-add').find('#values-div').append('<div id="values-help" class="help-block"></div>');
+}
+
+function scoring_question_modal_modify_question_setup(id) {
+	// Add question id to form
+	$('#modal-scoring-question-modify').find('#question_id').val(id);
+
+	// Set Type
+	$('#modal-scoring-question-modify').find('#type').val($('#question-' + id + '-type').html().trim());
+	$('#modal-scoring-question-modify').find('#type').attr('onchange', 'scoring_question_modal_set_options("modal-scoring-question-modify",' + id + ');')
+	scoring_question_modal_set_options('modal-scoring-question-modify', id);
+	
+	// Set Options
+	$('#modal-scoring-question-modify').find('#option-ignore-case').prop('checked', false);
+	$('#modal-scoring-question-modify').find('#option-accept-hex').prop('checked', false);
+	$('#modal-scoring-question-modify').find('#option-accept-decimal').prop('checked', false);
+	$('#question-' + id + '-options').html().split(', ').forEach(function(option) {
+		$('#modal-scoring-question-modify').find('#option-' + option.trim().replace(" ", "-")).prop('checked', true);
+	});
+
+	// Text
+	$('#modal-scoring-question-modify').find('#text').val($('#question-' + id + '-text').html().trim());
+
+	// Values
+	$('#modal-scoring-question-modify').find('#values-div').empty();
+	$('#modal-scoring-question-modify').find('#values-div').append('<div id="values-help" class="help-block"></div>');
+	$('#question-' + id + '-values').find('li').each(function(li) {
+
+		val = $(this).find('#value').html().trim();
+		valid = val.replace(/[\ ]/g, "_");
+		points = $(this).find('#points').html().trim();
+
+		divid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    	var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+    	return v.toString(16);
+		});
+
+		$('#modal-scoring-question-modify').find('#values-div').append('<div id="' + divid + '"><b>value: </b><span id="' + valid +  '">' + val + '</span><br><b>points: </b>' + points + '<br><a href="javascript:void(0)" onclick="' + '$(\'#' + divid + '\').remove();' + '">remove</a><p></div>');
+		$('#modal-scoring-question-modify').find('#' + divid + '').append('<input type="text" class="hidden" name="values[]" value="' + val + '"></input>');
+		$('#modal-scoring-question-modify').find('#' + divid + '').append('<input type="text" class="hidden" name="value_points[]" value="' + points + '"></input>');
+	
+	});
+
+	// Points
+	$('#modal-scoring-question-modify').find('#points').val($('#question-' + id + '-points').html().trim());
+}
+
+// Answers
+function scoring_answers_hide(id) {
+	$('#student-' + id + '-answers-tr').remove();
+	$('#student-' + id + '-answers-show-button').attr('class', '');
+	$('#student-' + id + '-answers-hide-button').attr('class', 'hidden');
+}
+
+function scoring_answer_essay_grade(student_name, question_index, answer_index, answer_id) {
+	$('#modal-scoring-answer-essay-grade').find('#student-name').text(student_name);
+	$('#modal-scoring-answer-essay-grade').find('#question-index').text(question_index);
+	$('#modal-scoring-answer-essay-grade').find('#answer-index').text(answer_index);
+	$('#modal-scoring-answer-essay-grade').find('#points-possible').text($('#answer-' + answer_id + '-points-possible').html().trim());
+	$('#modal-scoring-answer-essay-grade').find('#answer_id').val(answer_id);
+	$('#modal-scoring-answer-essay-grade').find('#points-div').attr('class', '');
+	$('#modal-scoring-answer-essay-grade').find('#points').val('');
+	$('#modal-scoring-answer-essay-grade').find('#points-help').text('');
+	$('#modal-scoring-answer-essay-grade').find('#comment-div').attr('class', '');
+	$('#modal-scoring-answer-essay-grade').find('#comment-help').text('');
+	$('#modal-scoring-answer-essay-grade').find('#comment').val('');
+}
+
+function scoring_answer_essay_grade_edit(student_name, question_index, answer_index, answer_id) {
+	$('#modal-scoring-answer-essay-grade-edit').find('#student-name').text(student_name);
+	$('#modal-scoring-answer-essay-grade-edit').find('#question-index').text(question_index);
+	$('#modal-scoring-answer-essay-grade-edit').find('#answer-index').text(answer_index);
+	$('#modal-scoring-answer-essay-grade-edit').find('#points-possible').text($('#answer-' + answer_id + '-points-possible').html().trim());
+	$('#modal-scoring-answer-essay-grade-edit').find('#answer_id').val(answer_id);
+	$('#modal-scoring-answer-essay-grade-edit').find('#points-div').attr('class', '');
+	$('#modal-scoring-answer-essay-grade-edit').find('#points').val($('#answer-' + answer_id + '-essay-points-earned').html().trim());
+	$('#modal-scoring-answer-essay-grade-edit').find('#points-help').text('');
+	$('#modal-scoring-answer-essay-grade-edit').find('#comment-div').attr('class', '');
+	$('#modal-scoring-answer-essay-grade-edit').find('#comment-help').text('');
+	$('#modal-scoring-answer-essay-grade-edit').find('#comment').val('');
+}
+
+function scoring_answer_comment(student_name, question_index, answer_index, answer_id) {
+	$('#modal-scoring-answer-comment').find('#student-name').text(student_name);
+	$('#modal-scoring-answer-comment').find('#question-index').text(question_index);
+	$('#modal-scoring-answer-comment').find('#answer-index').text(answer_index);
+	$('#modal-scoring-answer-comment').find('#answer_id').val(answer_id);
+	$('#modal-scoring-answer-comment').find('#comment-div').attr('class', '');
+	$('#modal-scoring-answer-comment').find('#comment-help').text('');
+	$('#modal-scoring-answer-comment').find('#comment').val('');
+}
+
+// Student Answers
+function scoring_student_answers_get(id, student_id) {
+  resource = resource = '/scenarios/' + id + "/scoring_answers_show?student_id=" + student_id;
+  $.post(resource);
+}
+
+function scoring_student_answers_reload(id) {
+	$('.student-questions').each(function(i, obj) {
+    $(obj).remove();
+    scoring_student_answers_get(id, $(obj).attr('student_id'));
+  });
 }

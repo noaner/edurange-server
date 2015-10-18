@@ -4,14 +4,14 @@ class Recipe < ActiveRecord::Base
   has_one :user, through: :scenario
 
   validates :name, presence: true, uniqueness: { scope: :scenario, message: "Name taken" }
-  after_validation :check_custom
-  after_create :set_defaults
+
+  after_create :set_custom
 
   after_save :update_scenario_modified
   after_destroy :update_scenario_modified
 
   def update_scenario_modified
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update(modified: true)
     end
   end
@@ -29,42 +29,32 @@ class Recipe < ActiveRecord::Base
     true
   end
 
-  def filename
+  def path
     if self.custom?
-      if self.scenario.custom?
-        return "#{Settings.app_path}/scenarios/user/#{self.scenario.user.id}/#{self.scenario.name.downcase}/recipes/#{self.name}.rb"
-      else
-        return "#{Settings.app_path}/scenarios/local/#{self.scenario.name.downcase}/recipes/#{self.name.downcase}.rb"
-      end
+      return "#{self.scenario.path_recipes}/#{self.name.filename_safe}.rb"
     end
-    "#{Settings.app_path}/scenarios/recipes/#{self.name.filename_safe}.rb.erb"
+    "#{Settings.app_path}/scenarios/recipes/#{self.name.downcase}.rb.erb"
   end
 
-  def check_custom
-    if File.exists? "#{Settings.app_path}/scenarios/recipes/#{self.name.downcase}.rb.erb" and self.custom
-      errors.add(:name, "A global recipe with that name already exists")
-    end
-  end
-
-  def set_defaults
+  def set_custom
     if File.exists? "#{Settings.app_path}/scenarios/recipes/#{self.name.downcase}.rb.erb"
       self.custom = false
     else
       self.custom = true
-      if not File.exists? self.filename
-        FileUtils.touch self.filename
+      if not File.exists? self.path
+        FileUtils.touch self.path
       end
     end
     self.save
   end
 
   def text
-    File.read(self.filename)
+    File.read(self.path)
   end
 
   def text_update(text)
     if self.custom
-      f = File.open(self.filename, "w")
+      f = File.open(self.path, "w")
       f.write(text)
       f.close
     end

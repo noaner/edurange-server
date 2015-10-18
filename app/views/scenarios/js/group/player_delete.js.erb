@@ -1,5 +1,9 @@
 $('#player-<%= @player.id.to_s %>').remove();
-<% if @player.group.scenario.custom? %>
+<% if @player.user %>
+	$('#student-<%= @player.user.id %>-answers').remove();
+	$('#student-<%= @player.user.id %>-answers-tr').remove();
+<% end %>
+<% if @player.group.scenario.modifiable? %>
   $('#save-button-li').removeClass('disabled');
   $('#save-button').attr('href', '/scenarios/<%= @player.group.scenario.id %>/save');
 <% end %>

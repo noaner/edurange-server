@@ -1,0 +1,141 @@
+Name: ScapyHunt
+Description: A series of Network Security puzzles and challenges designed to educate users on packet manipulation and common network attacks."
+Instructions:
+
+Roles:
+  - Name: NAT
+    Recipes:
+      - sshd_password_login
+
+  - Name: Player
+    Packages:
+      - git
+      - tshark
+      - nmap
+      - python
+      - python-scapy
+      - dsniff
+    Recipes:
+      - sshd_password_login
+      - scapyhunt
+
+Groups:
+  - Name: Instructor
+    Access:
+      User:
+        - NAT_Instance
+      Administrator:
+        - Team1_Instance
+        - Team2_Instance
+        - Team3_Instance
+        - Team4_Instance
+        - Team5_Instance
+    Users:
+      - Login: instructor
+        Password: 4pjiggDk
+    Description: Describe this Player
+
+  - Name: Team1
+    Access:
+      User:
+        - NAT_Instance
+      Administrator:
+        - Team1_Instance
+    Users:
+      - Login: team1
+        Password: 8TnsTq7a
+    Description: Describe this Player
+
+  - Name: Team2
+    Access:
+      User:
+        - NAT_Instance
+      Administrator:
+        - Team2_Instance
+    Users:
+      - Login: team2
+        Password: 1AxFFTFS
+    Description: Describe this Player
+
+  - Name: Team3
+    Access:
+      User:
+        - NAT_Instance
+      Administrator:
+        - Team3_Instance
+    Users:
+      - Login: team3
+        Password: BMsRRhm7
+    Description: Describe this Player
+
+  - Name: Team4
+    Access:
+      User:
+        - NAT_Instance
+      Administrator:
+        - Team4_Instance
+    Users:
+      - Login: team4
+        Password: Atneviqy
+    Description: Describe this Player
+
+  - Name: Team5
+    Access:
+      User:
+        - NAT_Instance
+      Administrator:
+        - Team5_Instance
+    Users:
+      - Login: team5
+        Password: bfuj6u99
+    Description: Describe this Player
+
+Clouds:
+  - Name: Cloud_1
+    CIDR_Block: 10.0.0.0/16
+    Subnets:
+      - Name: NAT_Subnet
+        CIDR_Block: 10.0.129.0/24
+        Internet_Accessible: true
+        Instances:
+          - Name: NAT_Instance
+            Subnet: NAT_Subnet
+            OS: nat
+            IP_Address: 10.0.129.5
+            Internet_Accessible: true
+            Roles:
+              - NAT
+
+      - Name: Player_Subnet
+        CIDR_Block: 10.0.130.0/24
+        Internet_Accessible: false
+        Instances:
+          - Name: Team1_Instance
+            OS: ubuntu
+            IP_Address: 10.0.130.5
+            Roles:
+              - Player
+
+          - Name: Team2_Instance
+            OS: ubuntu
+            IP_Address: 10.0.130.6
+            Roles:
+              - Player
+
+          - Name: Team3_Instance
+            OS: ubuntu
+            IP_Address: 10.0.130.7
+            Roles:
+              - Player
+
+          - Name: Team4_Instance
+            OS: ubuntu
+            IP_Address: 10.0.130.8
+            Roles:
+              - Player
+
+          - Name: Team5_Instance
+            OS: ubuntu
+            IP_Address: 10.0.130.9
+            Roles:
+              - Player

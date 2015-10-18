@@ -1,0 +1,7 @@
+<% if @student_group_user.errors.any? %>
+	<% if @student_group_user.errors[:user].any? %>
+		alert('Student Group User <%= @student_group_user.errors[:user][0] %>');
+	<% end %>
+<% else %>
+	$('#student-group-<%= @student_group.id %>-table').append('<%= escape_javascript(render("/admin/student_group_student", student_group: @student_group, sgu: @student_group_user)) %>')
+<% end %>

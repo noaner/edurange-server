@@ -13,14 +13,14 @@ class InstanceRole < ActiveRecord::Base
       errors.add(:running, "instance must be stopped")
       return false
     end
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update_attribute(:modified, true)
     end
     true
   end
 
   def update_scenario_modified
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update_attribute(:modified, true)
     end
     true

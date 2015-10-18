@@ -1,0 +1,14 @@
+%div{ id: "student-group-#{student_group.id}"}
+  %label
+    = student_group.name
+  - if student_group.name != "All"
+    = link_to 'delete', admin_student_group_destroy_path(student_group_id: student_group.id), remote: true, method: :post, data: { confirm: "Are you sure you want to delete Student Group #{student_group.name}?" }
+  %table.table{ id: "student-group-#{student_group.id}-table"}
+    %tr
+      %th Name
+      %th Email
+      %th Organization
+      %th
+      %th
+    - student_group.student_group_users.each do |sgu|
+      = render 'student_group_student', student_group: student_group, sgu: sgu

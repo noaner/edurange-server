@@ -1,0 +1,4 @@
+$('#user-<%= @user.id %>').remove();
+$('.student-group-user-<%= @user.id %>').each(function(i, obj) {
+	$(obj).remove();
+});

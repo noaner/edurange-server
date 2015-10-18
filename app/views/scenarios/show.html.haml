@@ -5,8 +5,7 @@
     %li
       %h4
         %b
-          %span#scenario-name
-            = @scenario.name
+          %span#scenario-name= @scenario.name
           \:
     %li
       &nbsp;
@@ -22,7 +21,7 @@
       = link_to 'Clone', "#modal-scenario-clone", :data => {:toggle=>"modal"}, :onclick => "$('#modal-scenario-clone').find('#name-div').removeClass('has-error'); $('#modal-scenario-clone').find('#name').val(''); $('#modal-scenario-clone').find('#name-help').html('');", class: 'btn btn-default'
     %li{ id: 'destroy-button-li', class: @scenario.stopped? ? "" : "disabled" }
       = link_to 'Destroy', destroyme_scenario_path(@scenario), method: :post, remote: true, id: 'destroy-button', class: 'btn btn-default'
-    - if @scenario.custom?
+    - if @scenario.modifiable?
       %li{ id: "save-button-li", class: @scenario.modified? ? "" : "disabled" }
         = link_to 'Save', save_scenario_path(@scenario), method: :post, remote: true, id: 'save-button', class: 'btn btn-default', href: @scenario.modified? ? "/scenarios/#{@scenario.id}/save" : "javascript: void(0)"
       %li{ id: 'save-as-button-li', class: @scenario.stopped? ? "" : "disabled" }
@@ -32,20 +31,39 @@
 
   %div.indent.panel-body
     // Instructions
-    %label
-      Instructions:
-    %div.indent
+    %label Instructor Instructions:
+    - if @scenario.modifiable?
+      %div.inline-block
+        %div.dropdown{id:'dropdown-instructions'}
+          %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-instructions', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+            %span.caret
+          %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-instructions'}
+            %li{ id: 'instructions-modify-button-li' }
+              = link_to 'Modify', instructions_get_scenario_path(@scenario), method: :post, remote: true
+    %div.indent#instructor-instructions
       = @scenario.instructions
     %p
 
+    %label Student Instructions:
+    - if @scenario.modifiable?
+      %div.inline-block
+        %div.dropdown{id:'dropdown-instructions-student'}
+          %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-instructions-student', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+            %span.caret
+          %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-instructions-student'}
+            %li{ id: 'instructions-student-modify-button-li' }
+              = link_to 'Modify', instructions_student_get_scenario_path(@scenario), method: :post, remote: true
+    %div.indent#instructor-instructions-student
+      = @scenario.instructions_student
+    %p
+    
+
     // Scenario
-    %label
-      Scenario:
+    %label Scenario:
 
     %div.indent
       Status:
-      %span#scenario-status
-        = @scenario.status
+      %span#scenario-status= @scenario.status
       %div{ id: "scenario-status-dot", class: "inline-block #{@scenario.status} #{(@scenario.booting? or @scenario.unbooting?) ? 'hidden' : ''}" }
         &#9679;
       %div{ id: "scenario-spinner", class: "inline-block #{(@scenario.booting? or @scenario.unbooting?) ? 'spin' : ''}" }
@@ -56,10 +74,9 @@
       %br
 
       // Clouds
-      %label
-        Clouds:
+      %label Clouds:
       %div.inline-block
-        - if @scenario.custom?
+        - if @scenario.modifiable?
           %div.dropdown
             %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-clouds', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
               %span.caret
@@ -71,9 +88,8 @@
           = render '/scenarios/show/cloud', cloud: cloud
 
     // Groups
-    %label
-      Groups:
-    - if @scenario.custom?
+    %label Groups:
+    - if @scenario.modifiable?
       %div.inline-block
         %div.dropdown{id:'dropdown-roles'}
           %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-roles', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -86,10 +102,8 @@
         = render '/scenarios/show/group', group: group
 
     %p
-    // Roles
-    %label
-      Roles:
-    - if @scenario.custom?
+    %label Roles:
+    - if @scenario.modifiable?
       %div.inline-block
         %div.dropdown{id:'dropdown-roles'}
           %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-roles', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -103,9 +117,8 @@
         = render '/scenarios/show/role', role: role
 
     // Recipes
-    %label
-      Recipes:
-    - if @scenario.custom?
+    %label Recipes:
+    - if @scenario.modifiable?
       %div.inline-block
         %div.dropdown{id:'dropdown-recipes'}
           %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-recipes', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -119,11 +132,37 @@
       - @scenario.recipes.each do |recipe|
         = render '/scenarios/show/recipe', recipe: recipe
 
+    %label Scoring:
+    - if @scenario.modifiable?
+      %div.inline-block
+        %div.dropdown{id:'dropdown-scoring'}
+          %button.btn.btn-default.dropdown-toggle{type:'button', id:'dropdown-button-scoring', "data-toggle" => 'dropdown', "aria-expanded" => "true"}
+            %span.caret
+          %ul.dropdown-menu{role: 'menu', "aria-labelledby" => 'dropdown-button-scoring'}
+            %li{ id: 'scoring-add-button-li' }
+              = link_to 'Add Question', "#modal-scoring-question-add", :data => {:toggle=>"modal"}, onclick: "scoring_question_modal_add_question_setup();", id: 'scoring-add-button'
+    %ul
+      %label Questions:
+      %ul#questions
+        - @scenario.questions.order(:order).each_with_index do |question, index| 
+          = render '/scenarios/show/question', question: question, index: index
+      %br
+      %label Student Answers:
+      %table.table#student-answers-table
+        %tr
+          %th
+          %th Name
+          %th Email
+          %th Answered
+          %th Correct
+        - @scenario.students.each do |user|
+          = render '/scenarios/show/student_answers_header', scenario: @scenario, user: user
+
 = link_to 'Back', scenarios_path, class: 'btn btn-default'
 
 %script
   - if @clone
     update_flash("Scenario successfully cloned");
 %script
-  = "get_boot_status('#{@scenario.id}');"
+  = "get_scnario_status('#{@scenario.id}');"
   

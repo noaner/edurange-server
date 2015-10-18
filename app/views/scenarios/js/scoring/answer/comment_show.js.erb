@@ -1,0 +1,5 @@
+$('#modal-scoring-answer-comment-show').find('#student-name').html('<%= @answer.user.name %>');
+$('#modal-scoring-answer-comment-show').find('#question-index').html('<%= @question_index %>');
+$('#modal-scoring-answer-comment-show').find('#answer-index').html('<%= @answer_index %>');
+$('#modal-scoring-answer-comment-show').modal('show');
+$('#modal-scoring-answer-comment-show').find('#modalbody').html('<%= escape_javascript @answer.comment.gsub("\n", "<br>").html_safe %>');

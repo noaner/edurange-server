@@ -1,0 +1,10 @@
+<% if @student_group.errors.any? %>
+  <% if @student_group.errors[:name].any? %>
+    $('#modal-student-group-create').find('#name-div').addClass('has-error');
+    $('#modal-student-group-create').find('#name-help').text('<%= @student_group.errors[:name][0] %>');
+  <% end %>
+<% else %>
+  $('#student-groups').append('<%= escape_javascript(render("/admin/student_group", student_group: @student_group)) %>');
+  $('#modal-student-group-create').modal('toggle');
+  update_flash("Created Student Group '<%= @student_group.name %>'.");
+<% end %>

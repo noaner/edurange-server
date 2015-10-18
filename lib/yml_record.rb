@@ -12,12 +12,19 @@ module YmlRecord
     return output
   end
 
-  def self.yml_headers
+  def self.yml_headers(location, user)
     output = []
-    Dir.foreach(Settings.app_path + "scenarios/local") do |filename|
+
+    if location == 'custom'
+      path = Settings.app_path + "scenarios/custom/#{user.id}"
+    else
+      path = Settings.app_path + "scenarios/#{location}"
+    end
+
+    Dir.foreach(path) do |filename|
       next if filename == '.' or filename == '..'
-      file = YAML.load_file(Settings.app_path + "scenarios/local/#{filename}/#{filename}.yml")
-      output.push( { filename: filename, name: file["Name"], description: file["Description"] } )
+      file = YAML.load_file("#{path}/#{filename}/#{filename}.yml")
+      output.push( { filename: filename, name: file["Name"], description: file["Description"], location: location } )
     end
     return output
   end
@@ -63,14 +70,14 @@ module YmlRecord
     instances = file["Instances"]
     roles = file["Roles"]
     groups = file["Groups"]
-    questions = file["Questions"]
-    answers = file["Answers"]
+    scoring = file["Scoring"]
 
     scenario = Scenario.new
     scenario.custom = custom
     scenario.name = file["Name"]
     scenario.description = file["Description"]
-    scenario.instructions = file["Instructions"]
+    scenario.instructions = file["Instructions"] ? file["Instructions"] : ""
+    scenario.instructions_student = file["InstructionsStudent"] ? file["InstructionsStudent"] : ""
     answers ||= []
     scenario.answers = answers.join("\n")
     scenario.uuid = `uuidgen`.chomp
@@ -169,6 +176,7 @@ module YmlRecord
 
         group = Group.new
         group.name = yaml_group["Name"]
+        group.instructions = yaml_group["Instructions"] ? yaml_group["Instructions"] : ""
         group.scenario_id = scenario.id
         group.save!
 
@@ -176,31 +184,22 @@ module YmlRecord
           users.each do |user|
             login = user["Login"]
             password = user["Password"]
-            user_id = user["Id"]
 
             player = group.players.new
             player.login = login
             player.password = password
             player.group = group
+            player.user_id = user["UserId"]
+            player.student_group_id = user["StudentGroupId"]
 
-            if User.find_by_id(user_id)
-              player.user_id = user_id
+            if user_id = user["Id"]
+              if User.find_by_id(user_id)
+                player.save!
+              end
+            else
+              player.save!
             end
 
-            player.save!
-          end
-        end
-
-        # Do questions
-        if questions
-          questions.each do |yml_question|
-            question = scenario.questions.new
-            question.question_text = yml_question["Question"]
-            question.kind = yml_question["Type"]
-            if question.kind == "StringMatch"
-              question.answer_text = yml_question["Answer"]
-            end
-            question.save!
           end
         end
 
@@ -222,6 +221,24 @@ module YmlRecord
         end
       end
     end
+
+    # Do scoring
+    if scoring
+      scoring.each do |yml_question|
+        question = scenario.questions.new(type_of: yml_question['Type'], text: yml_question['Text'])
+        if yml_question["Options"]
+          yml_question['Options'].each do |opt| question.options << opt end
+        end
+        if yml_question["Values"]
+          question.values = []
+          yml_question['Values'].each do |val| question.values << { value: val["Value"], points: val["Points"] } end
+        end
+        question.points = yml_question["Points"]
+        question.order = yml_question["Order"]
+        question.save!
+      end
+    end
+
     scenario.update(modified: false)
     scenario.save
     return scenario # Return the scenario we created

@@ -1,0 +1,17 @@
+<% if @user.errors.any? %>
+    <% if @user.errors[:email].any? %>
+        $('#modal-create-instructor').find('#email-div').addClass('has-error');
+        $('#modal-create-instructor').find('#email-help').text('<%= @user.errors[:email][0] %>');
+    <% end %>
+    <% if @user.errors[:name].any? %>
+        $('#modal-create-instructor').find('#name-div').addClass('has-error');
+        $('#modal-create-instructor').find('#name-help').text('<%= @user.errors[:name][0] %>');
+    <% end %>
+    <% if @user.errors[:organization].any? %>
+        $('#modal-create-instructor').find('#organization-div').addClass('has-error');
+        $('#modal-create-instructor').find('#organization-help').text('<%= @user.errors[:organization][0] %>');
+    <% end %>
+<% else %>
+    $('#instructors-table').append('<%= escape_javascript(render("/admin/instructor", user: @user)) %>'); 
+    $('#modal-create-instructor').modal('toggle');
+<% end %>

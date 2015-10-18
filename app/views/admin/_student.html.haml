@@ -1,0 +1,8 @@
+%tr{ id: "user-#{user.id}" }
+  %td= user.name
+  %td= user.email
+  %td= user.organization
+  %td= link_to 'delete', admin_user_delete_path(id: user.id), remote: true, method: :post, :data => { :confirm => "Are you sure you want to delete Student #{user.name}?" }
+  %td= link_to 'make instructor', admin_student_to_instructor_path(id: user.id), remote: true, method: :post, :data => { :confirm => "Are you sure you want to make Student #{user.name} an instructor?" }
+  %td= link_to 'reset password', admin_reset_password_path(id: user.id), remote: true, method: :post, :data => { :confirm => "This will assign the user a random password and email it to them. Are you sure?" }
+  %td= link_to 'add to All', admin_student_add_to_all_path(id: user.id), remote: true, method: :post

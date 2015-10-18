@@ -14,6 +14,8 @@ class Management
     Recipe.delete_all
     InstanceGroup.delete_all
     InstanceRole.delete_all
+    Question.delete_all
+    Answer.delete_all
     debug "Finished purging local DB!"
   end
   # handle_asynchronously :purge
@@ -30,6 +32,8 @@ class Management
     puts Recipe.all
     puts InstanceGroup.all
     puts InstanceRole.all
+    puts Question.all
+    puts Answer.all
   end
 
 end

@@ -1,6 +1,6 @@
 class Group < ActiveRecord::Base
   belongs_to :scenario
-  has_many :instance_groups
+  has_many :instance_groups, dependent: :destroy
   has_many :instances, through: :instance_groups
   has_many :players, dependent: :destroy
   has_one :user, through: :scenario
@@ -13,7 +13,7 @@ class Group < ActiveRecord::Base
   after_destroy :update_scenario_modified
 
   def update_scenario_modified
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       return self.scenario.update_attribute(:modified, true)
     end
   end
@@ -100,6 +100,20 @@ class Group < ActiveRecord::Base
     end
     self.update_scenario_modified
     players
+  end
+
+  def find_player_by_student_id(student_id)
+    self.players.each do |player|
+      if player.user
+        return player if player.user.id == student_id
+      end
+    end
+    nil
+  end
+
+  def update_instructions(instructions)
+    self.update_attribute(:instructions, instructions)
+    self.update_scenario_modified
   end
 
 end

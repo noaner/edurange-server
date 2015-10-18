@@ -1,6 +1,18 @@
 
-function get_boot_status (id) {
-  var resource = '/scenarios/' + id + '/boot_status';
+function get_scnario_status (id) {
+  // resource = resource = '/scenarios/' + id + "/status/?" + $.param(student_answers);
+
+  student_answers = [];
+  $('.student-answers-header').each(function(i,obj) {
+    student_answers.push({ 
+      student_id: $(obj).attr('student_id'), 
+      answers: $(obj).attr('answers'), 
+      show: ($('#student-' + $(obj).attr('student_id') + '-answers-tr').length > 0) 
+    });
+  });
+  // console.log(student_answers);
+
+  resource = resource = '/scenarios/' + id + "/status/?" + $.param({student_answers: student_answers});
   $.post(resource, function(data) {
     // alert('done');
   });

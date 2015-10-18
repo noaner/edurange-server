@@ -11,15 +11,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150728194650) do
+ActiveRecord::Schema.define(version: 20150929023359) do
 
   create_table "answers", force: :cascade do |t|
-    t.integer  "student_id"
-    t.string   "answer_text"
     t.boolean  "correct"
     t.integer  "question_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "text"
+    t.text     "text_essay"
+    t.text     "comment"
+    t.integer  "value_index"
+    t.string   "essay_points_earned"
+    t.integer  "user_id"
   end
 
   add_index "answers", ["question_id"], name: "index_answers_on_question_id"
@@ -58,6 +62,7 @@ ActiveRecord::Schema.define(version: 20150728194650) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "scenario_id"
+    t.text     "instructions", default: ""
   end
 
   create_table "instance_groups", force: :cascade do |t|
@@ -115,13 +120,16 @@ ActiveRecord::Schema.define(version: 20150728194650) do
   add_index "players", ["group_id"], name: "index_players_on_group_id"
 
   create_table "questions", force: :cascade do |t|
-    t.string   "answer_id"
-    t.string   "kind"
-    t.string   "question_text"
-    t.string   "answer_text"
     t.integer  "scenario_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "order"
+    t.string   "text"
+    t.string   "type_of"
+    t.string   "options",        default: "--- []\n"
+    t.string   "values"
+    t.integer  "points"
+    t.integer  "points_penalty"
   end
 
   add_index "questions", ["scenario_id"], name: "index_questions_on_scenario_id"
@@ -165,10 +173,12 @@ ActiveRecord::Schema.define(version: 20150728194650) do
     t.string   "answers_url"
     t.text     "scoring_pages_content", default: ""
     t.integer  "user_id"
-    t.string   "instructions"
     t.string   "com_page"
-    t.boolean  "custom"
     t.boolean  "modified",              default: false
+    t.text     "instructions",          default: ""
+    t.text     "instructions_student",  default: ""
+    t.integer  "location",              default: 0
+    t.boolean  "modifiable",            default: false
   end
 
   create_table "statistics", force: :cascade do |t|

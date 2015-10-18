@@ -2,4 +2,20 @@
 test1:
   id: 1
   name: test1
+  description: none
   status: booted
+
+two:
+  id: 2
+  name: test1
+  description: none
+  status: stopped
+  log:
+  answers:
+  scoring_pages:
+  answers_url:
+  scoring_pages_content:
+  user_id: 1
+  instructions:
+  com_page:
+  modified:

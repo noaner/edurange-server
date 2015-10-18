@@ -1,0 +1,6 @@
+%tr{ id: "student-group-user-#{sgu.id}", class: "student-group-user-#{sgu.user.id}" }
+  %td= sgu.user.name
+  %td= sgu.user.email
+  %td= sgu.user.organization
+  %td= link_to 'add to student group', '#modal-student-group-user-add', data: {toggle: "modal"}, onclick: "$('#modal-student-group-user-add').find('#user-name').html('#{sgu.user.name}'); $('#modal-student-group-user-add').find('#user_id').val('#{sgu.user.id}'); $('#modal-student-group-user-add').find('#name-div').removeClass('has-error'); $('#modal-student-group-user-add').find('#student_group_name').val(''); $('#modal-student-group-user-add').find('#name-help').html('');"
+  %td= link_to 'remove', admin_student_group_user_remove_path(student_group_user_id: sgu.id), remote: :true, method: :post, data: { confirm: "Are you sure you want to delete Student Group User #{sgu.user.name}?" }

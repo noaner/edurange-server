@@ -9,29 +9,30 @@ module Aws
   # #  Boot and Unboot
 
   def aws_boot_scenario(options = {})
+
     # Do nothing if already booted
     if self.booted?
-      return
+      return true
     end
-
-    
 
     # Do initial scoring setup
     begin
       self.aws_scenario_initialize_scoring
     rescue => e
       self.boot_error(e)
-      return
+      return false
     end
 
     # Boot each Cloud
     if options[:dependents]
       self.clouds.each do |cloud|
         begin
-          cloud.boot(options)
+          if not cloud.boot(options)
+            return false
+          end
         rescue => e
           self.boot_error(e)
-          return
+          return false
         end
       end
 
@@ -49,6 +50,7 @@ module Aws
         end
       rescue => e
         self.boot_error(e)
+        return false
       end
 
       # Check if any clouds have failed to boot
@@ -58,7 +60,7 @@ module Aws
         end
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # Wait for subnets to finish booting
@@ -75,6 +77,7 @@ module Aws
         end
       rescue => e
         self.boot_error(e)
+        return false
       end
 
       # Wait for all instances to finish booting
@@ -91,13 +94,14 @@ module Aws
         end
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
     end
 
     self.set_booted
     self.debug_booting_finished
+    true
   end
 
   def aws_unboot_scenario(options = {})
@@ -105,10 +109,12 @@ module Aws
     if options[:dependents]
       self.clouds.each do |cloud|
         begin
-          cloud.unboot(options)
+          if not cloud.unboot(options)
+            return false
+          end
         rescue => e
           self.unboot_error(e)
-          return
+          return false
         end
       end
 
@@ -126,7 +132,7 @@ module Aws
         end
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # Check clouds for unboot errors
@@ -136,7 +142,7 @@ module Aws
         end
       rescue => e
         self.unboot_error(e)
-        return
+        return false
       end
 
     end
@@ -146,11 +152,12 @@ module Aws
       aws_scenario_scoring_purge
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     self.set_stopped
     self.debug_unbooting_finished
+    true
   end
 
   def aws_pause_scenario
@@ -177,7 +184,7 @@ module Aws
       self.scenario.aws_scenario_initialize_scoring
     rescue => e
       self.boot_error(e)
-      return
+      return false
     end
 
     # Boot if not booted
@@ -189,7 +196,7 @@ module Aws
         ec2vpc = AWS::EC2.new.vpcs.create(self.cidr_block)
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # Assign driver_id
@@ -198,7 +205,7 @@ module Aws
         self.update_attribute(:driver_id, ec2vpc.id)
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # Create Internet Gateway
@@ -207,7 +214,7 @@ module Aws
         ec2vpc.internet_gateway = AWS::EC2.new.internet_gateways.create
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # Wait for VPC to become available
@@ -219,12 +226,12 @@ module Aws
           cnt += 1
           if cnt == 30
             raise "timeout - waiting for VPC to become available"
-            return
+            return false
           end
         end
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # Create routing rules
@@ -239,7 +246,7 @@ module Aws
         ec2vpc.security_groups.first.authorize_egress('10.0.0.0/16') # enable all traffic outbound to subnets
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       tries = 0
@@ -281,46 +288,44 @@ module Aws
         end
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       self.set_booted
       self.debug_booting_finished
     else
       self.set_stopped
-      return
+      return false
     end
 
     # boot dependent Subnets
     if options[:dependents]
       self.subnets.each do |subnet|
         begin
-          subnet.boot(options)
+          if not subnet.boot(options)
+            return false
+          end
         rescue => e
           self.boot_error(e)
-          return
+          return false
         end
       end
     end
-
+    true
   end
 
   def aws_unboot_cloud(options = {})
 
-    if self.driver_id == nil
-      self.set_stopped
-      return "cloud is already unbooted"
-    end
-
     # Unboot dependents
     if options[:dependents]
-
       self.subnets.each do |subnet|
         begin
-          subnet.unboot(options)
+          if not subnet.unboot(options)
+            return false
+          end
         rescue => e
           self.unboot_error(e)
-          return
+          return false
         end
       end
 
@@ -338,7 +343,7 @@ module Aws
         end
       rescue => e
         self.unboot_error(e)
-        return
+        return false
       end
 
       # Check subnets for unboot errors
@@ -348,7 +353,7 @@ module Aws
         end
       rescue => e
         self.unboot_error(e)
-        return
+        return false
       end
 
     end
@@ -359,7 +364,7 @@ module Aws
       vpc = AWS::EC2.new.vpcs[self.driver_id]
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     # Detach and delete any InternetGateways 
@@ -371,7 +376,7 @@ module Aws
         vpc.internet_gateway.detach(vpc)
       rescue => e
         self.unboot_error(e)
-        return
+        return false
       end
 
       debug "deleting - EC2 InternetGateway #{igw.internet_gateway_id}"
@@ -379,7 +384,7 @@ module Aws
         igw.delete
       rescue => e
         self.unboot_error(e)
-        return
+        return false
       end
 
     end
@@ -404,6 +409,14 @@ module Aws
     begin
       debug "unbooting - VPC #{self.driver_id}"
       vpc.delete
+    rescue AWS::EC2::Errors::InvalidVpcID::NotFound => e
+      if tries < 120
+        sleep 2
+        tries += 1
+      else
+        self.unboot_error(e)
+        return false
+      end
     rescue AWS::EC2::Errors::DependencyViolation => e
       if tries < 120
         if aws_instances_stopping?(self.scenario.instances)
@@ -412,20 +425,21 @@ module Aws
           retry
         else
           self.unboot_error(e)
-          return
+          return false
         end
       else 
         self.unboot_error(e)
-        return
+        return false
       end
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     self.update_attribute(:driver_id, nil)
     self.set_stopped
     self.debug_unbooting_finished
+    true
   end
 
   # Boots {Subnet}, and all of its {Instance Instances}.
@@ -435,15 +449,13 @@ module Aws
 
     if self.driver_id == nil
 
-      
-
       # create Subnet
       debug "creating - EC2 Subnet"
       begin
         ec2subnet = AWS::EC2::SubnetCollection.new.create(self.cidr_block, vpc_id: self.cloud.driver_id)
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # set driver_id
@@ -452,7 +464,7 @@ module Aws
         self.update_attribute(:driver_id, ec2subnet.id)
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # wait till Subnet is available
@@ -465,7 +477,7 @@ module Aws
           if cnt == 9
             raise "Timedout waiting for VPC to become available"
             self.boot_error($!)
-            return
+            return false
           end
         end
       rescue AWS::EC2::Errors::InvalidSubnetID::NotFound
@@ -473,7 +485,7 @@ module Aws
         retry
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # do routing 
@@ -482,7 +494,7 @@ module Aws
         ec2route_table = AWS::EC2::RouteTableCollection.new.create(vpc_id: self.cloud.driver_id)
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       debug "assigning - EC2 Route Table #{ec2route_table.id} to EC2 Subnet #{self.driver_id}"
@@ -490,7 +502,7 @@ module Aws
         ec2subnet.route_table = ec2route_table
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       debug "getting - EC2 Cloud #{self.cloud.driver_id}"
@@ -498,7 +510,7 @@ module Aws
         ec2cloud = AWS::EC2.new.vpcs[self.cloud.driver_id]
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       if self.internet_accessible
@@ -507,7 +519,7 @@ module Aws
           ec2route_table.create_route("0.0.0.0/0", { internet_gateway: ec2cloud.internet_gateway} )
         rescue => e
           self.boot_error(e)
-          return
+          return false
         end
       end
 
@@ -524,7 +536,7 @@ module Aws
         AWS::EC2.new.tags.create(ec2route_table, "scenario", value: self.scenario.id)
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       debug "booted - Subnet #{self.name}"
@@ -535,24 +547,19 @@ module Aws
     if options[:dependents]
       self.instances.select{ |i| !i.driver_id}.each do |instance|
         begin
-          instance.boot(options)
+          if not instance.boot(options)
+            return false
+          end
         rescue => e
           self.boot_error(e)
-          return
+          return false
         end
       end
     end
-
+    true
   end
 
   def aws_unboot_subnet(options = {})
-    
-
-    # only unboot if instances are not booted
-    if self.driver_id == nil
-      self.set_stopped
-      return
-    end
 
     debug "unbooting - Subnet #{self.id}"
 
@@ -563,7 +570,9 @@ module Aws
             # instance.set_unbooting
             instance.delay(queue: 'instance').unboot
           else
-            instance.unboot
+            if not instance.unboot
+              return false
+            end
           end
         else
           instance.set_stopped
@@ -583,7 +592,7 @@ module Aws
         end
       rescue => e
         self.unboot_error(e)
-        return
+        return false
       end
 
     else
@@ -594,7 +603,7 @@ module Aws
           raise "Instances not unbooted"
         rescue => e
           self.unboot_error(e)
-          return
+          return false
         end
       end
 
@@ -608,7 +617,7 @@ module Aws
       # debug "after"
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     # debug "deleting - subnets route table"
@@ -616,7 +625,7 @@ module Aws
     #   AWS::EC2.new.subnets[self.driver_id].route_table.delete
     # rescue => e
     #   self.unboot_error(e)
-    #   return
+    #   return false
     # end
 
     debug "unbooting - EC2 Subnet #{self.driver_id}"
@@ -629,16 +638,17 @@ module Aws
         retry
       else
         self.unboot_error(e)
-        return
+        return false
       end
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     self.update_attribute(:driver_id, nil)
     self.debug_unbooting_finished
     self.set_stopped
+    true
   end
 
   # # Boots {Instance}, generating required cookbooks and startup scripts.
@@ -647,8 +657,6 @@ module Aws
   # # Additionally, it uploads and stores the cookbook_url, which is generated by calling {#aws_instance_upload_cookbook}
   # # @return [nil]
   def aws_boot_instance(options = {})
-
-    
 
     # scoring
     if self.roles.select { |r| r.recipes.find_by_name('scoring') }.size > 0
@@ -659,7 +667,7 @@ module Aws
         self.scenario.aws_scenario_write_to_scoring_pages
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
     end
 
@@ -677,19 +685,14 @@ module Aws
       cloud_init = self.generate_init
     rescue => e
       self.boot_error(e)
-      return
+      return false
     end
 
     # get ami based on OS
-    if self.os == 'ubuntu'
-      # aws_instance_ami = 'ami-31727d58' # Private ubuntu image with chef and deps, updates etc.
-      # aws_instance_ami = 'ami-1ea3d176'
-      # aws_instance_ami = 'ami-56e7953e'
-      # aws_instance_ami = 'ami-d2ec9eba'
-      aws_instance_ami = 'ami-b80b76d0'
-    elsif self.os == 'nat'
-      # aws_instance_ami = 'ami-51727d38' # Private NAT image with chef and deps, updates etc.
-      aws_instance_ami = 'ami-7092d118'
+    if self.os == 'nat'
+      aws_instance_ami = Settings.ami_nat
+    elsif self.os == 'ubuntu'
+      aws_instance_ami = Settings.ami_ubuntu
     end
 
     # create EC2 Instance
@@ -715,18 +718,18 @@ module Aws
     rescue NoMethodError => e
       debug "- NoMethodError"
       self.boot_error(e)
-      return
+      return false
     rescue AWS::EC2::Errors::InvalidParameterCombination => e
       debug "- InvalidParameterCombination"
       # wrong instance type
       self.boot_error(e)
-      return
+      return false
     rescue AWS::EC2::Errors::InvalidSubnetID::NotFound => e
       debug "- InvalidSubnet"
       tries += 1
       if tries > 3
         self.boot_error(e)
-        return
+        return false
       end
       sleep 2
       retry
@@ -737,21 +740,21 @@ module Aws
         retry
       else
         self.boot_error(e)
-        return
+        return false
       end
     rescue AWS::EC2::Errors::Unsupported => e
       debug "- Unsupported"
       tries += 1
       if tries > 3
         self.boot_error(e)
-        return
+        return false
       end
       sleep 10
       retry
     rescue => e
       debug "- Other Error"
       self.boot_error(e)
-      return
+      return false
     end
 
     # wait for Instance to become available
@@ -765,20 +768,20 @@ module Aws
         if cnt == 20
           raise "Timeout Waiting for VPC to become available"
           self.boot_error($!)
-          return
+          return false
         end
       end
     rescue AWS::EC2::Errors::InvalidInstanceID::NotFound => e
       if tries > 5
         self.boot_error(e)
-        return
+        return false
       end
       tries += 1
       sleep 3
       retry
     rescue => e
       self.boot_error(e)
-      return
+      return false
     end
 
     # for Internet Accessible instances
@@ -789,7 +792,7 @@ module Aws
         ec2eip = AWS::EC2::ElasticIpCollection.new.create(vpc: true)
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # wait for EIP to become available
@@ -801,7 +804,7 @@ module Aws
         if cnt == 20
           raise "Timeout Waiting for VPC to become available"
           self.boot_error($!)
-          return
+          return false
         end
       end
 
@@ -811,7 +814,7 @@ module Aws
         ec2instance.associate_elastic_ip(ec2eip)
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
 
       # accept packets coming in
@@ -821,7 +824,7 @@ module Aws
         ec2instance.network_interfaces.first.source_dest_check = false
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
     end
 
@@ -842,7 +845,7 @@ module Aws
 
       rescue => e
         self.boot_error(e)
-        return
+        return false
       end
     end
     
@@ -855,21 +858,16 @@ module Aws
       AWS::EC2.new.tags.create(ec2instance, "scenario", value: self.scenario.id)
     rescue => e
       self.boot_error(e)
-      return
+      return false
     end
 
     self.set_booted
     self.debug_booting_finished
     debug "[x] booted - Instance #{self.name}"
+    true
   end
 
   def aws_unboot_instance(options = {})
-    
-
-    if self.driver_id == nil
-      self.set_stopped
-      return
-    end
 
     # check if instance exists
 
@@ -878,7 +876,7 @@ module Aws
       ec2instance = AWS::EC2.new.instances[self.driver_id]
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     debug "setting - EC2 Instance #{self.driver_id} volumes deleteOnTermination"
@@ -892,7 +890,7 @@ module Aws
       end
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     debug "deleting any - EC2 Instance EIP's"
@@ -903,7 +901,7 @@ module Aws
       end
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     debug "deleting - EC2 Instance #{self.driver_id}"
@@ -911,7 +909,7 @@ module Aws
       ec2instance.delete
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     debug "stopping - EC2 Instance #{self.driver_id}"
@@ -926,12 +924,12 @@ module Aws
         if cnt > 9
           raise "EC2 Instance Terminate Wait Timeout"
           self.unboot_error($!)
-          return
+          return false
         end
       end
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     # remove s3 files
@@ -942,17 +940,18 @@ module Aws
       self.aws_instance_delete_scoring_page
     rescue => e
       self.unboot_error(e)
-      return
+      return false
     end
 
     self.update_attribute(:driver_id, nil)
     self.set_stopped
     self.debug_unbooting_finished
+    true
   end
 
   def aws_pause_instance
     if (not self.driver_id) or (not self.booted?)
-      return
+      return false
     end
 
     self.set_pausing
@@ -973,15 +972,16 @@ module Aws
       end
     rescue => e
       self.boot_error(e)
-      return
+      return false
     end
 
     self.set_paused
+    true
   end
 
   def aws_start_instance
     if (not self.driver_id) or (not self.paused?)
-      return
+      return false
     end
 
     self.set_starting
@@ -997,15 +997,16 @@ module Aws
         if cnt == 20
           raise "Timeout Waiting for VPC to start"
           self.boot_error($!)
-          return
+          return false
         end
       end
     rescue => e
       self.boot_error(e)
-      return
+      return false
     end
 
     self.set_booted
+    true
   end
 
   ## Unboot Helpers
@@ -1157,8 +1158,9 @@ module Aws
     begin 
       return @public_ip ||= self.aws_instance_driver_object.public_ip_address
     rescue AWS::EC2::Errors::InvalidInstanceID::NotFound => e
-      if cnt < 3
-        sleep 1
+      if cnt < 60
+        sleep 2
+        cnt += 1
         retry
       else
         return false
@@ -1267,7 +1269,7 @@ module Aws
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[aws_instance_com_page_name].write("waiting")
-      self.update_attribute(:com_page, bucket.objects[aws_instance_com_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
+      self.update_attribute(:com_page, bucket.objects[aws_instance_com_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain', endpoint: 's3-us-west-2.amazonaws.com')).to_s
     rescue
       raise
       return
@@ -1367,6 +1369,10 @@ module Aws
     begin 
       AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_scoring_pages_name].delete
       self.update_attribute(:scoring_pages, nil)
+    rescue AWS::S3::Errors::PermanentRedirect 
+      return true
+    rescue AWS::S3::Errors::NoSuchBucket
+      return true
     rescue
       raise
       return
@@ -1397,6 +1403,8 @@ module Aws
     begin 
       AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_answers_url_name].delete
       self.update_attribute(:answers_url, nil)
+    rescue AWS::S3::Errors::PermanentRedirect
+      return true
     rescue
       raise
       return

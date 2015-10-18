@@ -5,41 +5,32 @@
         New Scenario:
 
   %div.panel-body
-    %h3 Default Scenarios:
-    %ul
-      - @templates.each do |template|
-        %b Name:
-        = template[:name]
-        %br
-        %b Description:
-        = template[:description]
-        %p
-        = simple_form_for(@scenario) do |f|
-          = f.hidden_field :template, :value => template[:filename]
-          = f.button :submit, 'Create ' + template[:name], class: 'btn btn-primary'
-        %p
-        %br
+    - @templates.each do |template_kind|
+      %h3= "#{template_kind[:title]} Scenarios"
+      %ul
+        - if template_kind[:headers].empty?
+          none
+        - else
+          - template_kind[:headers].each do |template|
+            %b Name:
+            = template[:name]
+            %br
+            %b Description:
+            = template[:description]
+            %p
+            %div.nav.nav-pills
+              %li
+                = simple_form_for(@scenario) do |f|
+                  = f.hidden_field :name, :value => template[:filename]
+                  = f.hidden_field :location, :value => template[:location]
+                  = f.button :submit, 'Create ' + template[:name], class: 'btn btn-primary'
+              - if template_kind[:title] == 'Custom'
+                %li
+                  &nbsp;&nbsp;
+                %li
+                  = link_to 'Obliterate', scenarios_obliterate_custom_path(filename: template[:filename]), remote: true, method: :post, :data => { confirm: "This will completely erase the scenario. Are you sure?" }, class: 'btn btn-danger'
+            %p
+            %br
 
-    %h3 My Scenarios:
-    %ul
-      - @templates_user.each do |template|
-        %div{ id: "scenario-custom-#{template[:filename]}" }
-          %b Name:
-          = template[:name]
-          %br
-          %b Description:
-          = template[:description]
-          %p
-          %div.nav.nav-pills
-            %li
-              = simple_form_for(@scenario) do |f|
-                = f.hidden_field :template, :value => template[:filename]
-                = f.button :submit, 'Create ' + template[:name], class: 'btn btn-primary'
-            %li
-              &nbsp;&nbsp;
-            %li
-              = link_to 'Obliterate', scenarios_obliterate_custom_path(filename: template[:filename]), remote: true, method: :post, :data => { confirm: "This will completely erase the scenario. Are you sure?" }, class: 'btn btn-danger'
-  %p
-  
 = link_to 'Back', scenarios_path, class: 'btn btn-default'
 

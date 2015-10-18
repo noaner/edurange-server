@@ -19,7 +19,7 @@
     /   = form_tag '/scoring/answer_question/' + @scenario.id.to_s + '/' + question.id.to_s do
     /     = text_field_tag :answer_text
     /     = submit_tag "submit"
-    - if question.kind == "Essay"
+    - if question.type == "Essay"
       %div{ id: "question-#{question.id}-answer"}
         - if answer = question.answers.where("student_id = #{@user.id}").first
           = answer.answer_text.gsub("\n", "<br>").remove("\r").html_safe

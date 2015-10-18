@@ -1,7 +1,7 @@
 %li{ id: "role-#{role.id}" }
   %label#role-name
     = role.name
-  - if role.scenario.custom?
+  - if role.scenario.modifiable?
     %div.inline-block
       %div.dropdown{ id: "role-#{role.id}-dropdown"  }
         %button.btn.btn-default.dropdown-toggle{type:'button', id:"role-#{role.id}-dropdown", "data-toggle" => 'dropdown', "aria-expanded" => "true"}
@@ -20,6 +20,6 @@
     - role.role_recipes.each do |role_recipe|
       %li{ id: "role-recipe-#{role_recipe.id}"}
         = role_recipe.recipe.name
-        - if role.scenario.custom?
+        - if role.scenario.modifiable?
           = link_to 'remove', role_recipe_remove_scenario_path(role_recipe_id: role_recipe.id), remote: true, method: :post, id: "role-recipe-#{role_recipe.id}-remove-button", class: role.instances_stopped? ? "" : "hidden"
                   

@@ -1,0 +1,8 @@
+<% if @answer.errors.any? %>
+	<% if @answer.errors[:comment].any? %>
+    $('#modal-scoring-answer-comment-edit').find('#comment-div').addClass('has-error');
+    $('#modal-scoring-answer-comment-edit').find('#comment-help').text('<%= @answer.errors[:comment][0] %>');
+  <% end %>
+<% else %>
+	$('#modal-scoring-answer-comment-edit').modal('toggle');
+<% end %>

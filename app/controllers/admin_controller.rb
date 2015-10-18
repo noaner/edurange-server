@@ -20,7 +20,7 @@ class AdminController < ApplicationController
     end
 
     respond_to do |format|
-      format.js { render 'admin/instructor_create.js.erb', :layout => false }
+      format.js { render 'admin/js/instructor_create.js.erb', :layout => false }
     end
   end
 
@@ -35,17 +35,19 @@ class AdminController < ApplicationController
     end
 
     respond_to do |format|
-      format.js { render 'admin/reset_password.js.erb', :layout => false }
+      format.js { render 'admin/js/reset_password.js.erb', :layout => false }
     end
   end
 
   def user_delete
     if @user = User.find(params[:id])
-      @user.destroy
+      if @user != User.find(current_user.id)
+        @user.destroy
+      end
     end
     
     respond_to do |format|
-      format.js { render 'admin/user_delete.js.erb', :layout => false }
+      format.js { render 'admin/js/user_delete.js.erb', :layout => false }
     end
   end
 
@@ -54,12 +56,26 @@ class AdminController < ApplicationController
       if not @user.is_student?
         @user.errors.add(:email, "User is not a student")
       else
-        @user.set_instructor_role
+        @user.student_to_instructor
       end
     end
 
     respond_to do |format|
-      format.js { render 'admin/student_to_instructor.js.erb', :layout => false }
+      format.js { render 'admin/js/student_to_instructor.js.erb', :layout => false }
+    end
+  end
+
+  def student_add_to_all
+    if @user = User.find(params[:id])
+      if not @user.is_student?
+        @user.errors.add(:email, "User is not a student")
+      else
+        @student_group, @student_group_user = User.find(current_user.id).student_add_to_all(@user)
+      end
+    end
+
+    respond_to do |format|
+      format.js { render 'admin/js/student_add_to_all.js.erb', :layout => false }
     end
   end
 
@@ -68,12 +84,12 @@ class AdminController < ApplicationController
       if not @user.is_instructor?
         @user.errors.add(:email, "User is not a student")
       else
-        @user.set_student_role
+        @student_group, @student_group_user = @user.instructor_to_student(User.find(current_user.id))
       end
     end
 
     respond_to do |format|
-      format.js { render 'admin/instructor_to_student.js.erb', :layout => false }
+      format.js { render 'admin/js/instructor_to_student.js.erb', :layout => false }
     end
   end
 
@@ -83,14 +99,14 @@ class AdminController < ApplicationController
     @student_group.save
 
     respond_to do |format|
-      format.js { render 'admin/student_group_create.js.erb', :layout => false }
+      format.js { render 'admin/js/student_group_create.js.erb', :layout => false }
     end
   end
 
   def student_group_destroy
     @student_group.destroy
     respond_to do |format|
-      format.js { render 'admin/student_group_delete.js.erb', :layout => false }
+      format.js { render 'admin/js/student_group_delete.js.erb', :layout => false }
     end
   end
 
@@ -102,7 +118,7 @@ class AdminController < ApplicationController
     end
 
     respond_to do |format|
-      format.js { render 'admin/student_group_user_add.js.erb', :layout => false }
+      format.js { render 'admin/js/student_group_user_add.js.erb', :layout => false }
     end
   end
 
@@ -113,7 +129,7 @@ class AdminController < ApplicationController
     end
 
     respond_to do |format|
-      format.js { render 'admin/student_group_user_remove.js.erb', :layout => false }
+      format.js { render 'admin/js/student_group_user_remove.js.erb', :layout => false }
     end
   end
 

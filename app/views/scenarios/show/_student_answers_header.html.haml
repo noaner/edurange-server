@@ -1,0 +1,18 @@
+%tr{ id: "student-#{user.id}-answers", class: 'student-answers-header', style: "background-color: #F8F8F8", student_id: user.id, answers: scenario.answers_list(user).join(',') }
+  %td
+    = link_to 'show', scoring_answers_show_scenario_path(scenario, student_id: user.id), remote: :true, method: :post, id: "student-#{user.id}-answers-show-button"
+    = link_to 'hide', 'javascript: void(0)', onclick: "scoring_answers_hide('#{user.id}')", id: "student-#{user.id}-answers-hide-button", class: 'hidden'
+  %td= user.name
+  %td= user.email
+  %td
+    %span{ id: "student-#{user.id}-answered" }
+      = scenario.questions_answered(user)
+    \/
+    %span{ id: "student-#{user.id}-answered-out-of", class: 'student-answers-out-of' }
+      = scenario.questions.size
+  %td
+    %span{ id: "student-#{user.id}-correct" }
+      = scenario.questions_correct(user)
+    \/
+    %span{ id: "student-#{user.id}-correct-out-of", class: 'student-answers-out-of' }
+      = scenario.questions.size

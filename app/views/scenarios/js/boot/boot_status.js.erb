@@ -157,8 +157,10 @@ update_status('scenario', '<%= @scenario.status %>')
   <% end %>
 <% end %>
 
+// Look for student answers
+
 <% if @scenario.queued? or @scenario.booting? or @scenario.unbooting? %>
-  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 2000);
+  setTimeout(function() { get_scenario_status('<%= @scenario.id %>'); }, 2000);
 <% else %>
-  setTimeout(function() { get_boot_status('<%= @scenario.id %>'); }, 4000);
+  setTimeout(function() { get_scenario_status('<%= @scenario.id %>'); }, 1000);
 <% end %>

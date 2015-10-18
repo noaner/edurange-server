@@ -19,7 +19,7 @@ class Subnet < ActiveRecord::Base
       errors.add(:running, "can not modify while subnet is booted")
       return false
     end
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update_attribute(:modified, true)
     end
     true
@@ -35,7 +35,7 @@ class Subnet < ActiveRecord::Base
   end
 
   def update_scenario_modified
-    if self.scenario.custom?
+    if self.scenario.modifiable?
       self.scenario.update_attribute(:modified, true)
     end
     true
