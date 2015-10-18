@@ -36,6 +36,7 @@ gem 'netaddr'
 gem 'chartkick'
 gem 'groupdate'
 gem 'active_median'
+gem 'rubyzip'
 
 group :development do
   gem 'better_errors'

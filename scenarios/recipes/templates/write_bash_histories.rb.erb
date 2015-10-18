@@ -3,10 +3,41 @@ script "instant_bash_history" do
     user "root"
     cwd "/tmp"
     code <<-EOH
-    if grep -q "export HISTTIMEFORMAT='%d/%m/%y %T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r'" /etc/bash.bashrc; then
+
+    #Sets var to add to PROMPT_COMMAND variable
+    prompt_var='echo $? >> ~/.exit_status; echo $(history | tail -n1) >> ~/.exit_status;history -a; history -c; history -r'
+
+
+    # If not present, adds these lines to /etc/bash.bashrc
+    # Changes bash history timeformat to simply display time
+    # Changes history functionality to write to the history file after every command
+    # Adds command to capture exit status
+
+    if grep -q "shopt -s histappend" /etc/bash.bashrc; then
         :
     else
-        echo "export HISTTIMEFORMAT='%d/%m/%y %T ';shopt -s histappend;export PROMPT_COMMAND='history -a; history -c; history -r'" >> /etc/bash.bashrc
+        echo "shopt -s histappend" >> /etc/bash.bashrc
+	echo "export HISTTIMEFORMAT='%T '" >> /etc/bash.bashrc
+	echo "export PROMPT_COMMAND='$prompt_var'" >> /etc/bash.bashrc
     fi
+
+    # If not present, adds terminal logging utility 'script' to /etc/profile
+    if grep -q "script -a -q ~/.script.log" /etc/profile; then
+       :
+    else
+	echo "script -a -q ~/.script.log" >> /etc/profile
+    fi
+
+    #test to fix bash error
+    echo "\$? \"something\" " > /home/.test.txt
+    echo '\$? \"something\" ' > /home/.test2.txt
+    echo "\$? \'something\' " > /home/.test3.txt
+    echo '\$? \'something\' ' > /home/.test4.txt
+    echo "something \" else \" something" > /home/.test5.txt
+    echo " another 'test' test" > /home/.test6.txt
+    echo ' so why are we "testing \$? " this? ' > /home/.test7.txt
+    echo "pizza2" > /home/.pizza.txt
+    echo "export PROMPT_COMMAND='echo \$? >> ~/.exit_status; echo \$(history | tail -n1) >> ~/.exit_status;history -a; history -c; history -r'" >> /home/.test8.txt
+
     EOH
 end

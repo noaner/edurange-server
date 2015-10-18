@@ -15,7 +15,10 @@ class Scenario < ActiveRecord::Base
   validate :validate_name, :validate_paths, :validate_user, :validate_stopped
 
   before_destroy :validate_stopped, prepend: true
+  # upon the destruction of a scenario, create an
+  # entry in the statistic table.
   before_destroy :create_statistic, prepend: true
+  # after creating statistic, destory the s3 buckets where the bash histories were cached
   before_destroy :destroy_s3_bash_histories
 
   after_create :load
@@ -818,38 +821,105 @@ class Scenario < ActiveRecord::Base
 
   private
     # methods for creating statistics on scenarios
+
+    # utility method
+    def is_numeric?(s)
+      # input -> s: a string
+      # output -> true if the string is a number value, false otherwise
+      begin
+        if Float(s)
+          return true
+        end
+      rescue
+        return false
+      end
+    end
+    # utility method end
+
     def create_statistic
+      # private method to initialize a statistic entry
+      # during Scenario destriction time. These are the first
+      # steps of the analytics pipeline.
+
       statistic = Statistic.new
       # populate statistic with bash histories
-      puts self.instances.all
       self.instances.all.each do |instance|
+        # concatenate all bash histories into one big string
         statistic.bash_histories += instance.get_bash_history
         puts instance.get_bash_history  # for debugging
       end
-
-      # perform simple analytics on bash histories and save them into statistic
-      statistic.bash_analytics = bash_analytics(statistic.bash_histories)
+  
+      # partition the big bash history string into a nested hash structure
+      # mapping usernames to the commands they entered.
+      statistic.bash_analytics = partition_bash(statistic.bash_histories.split("\n"))
+      puts statistic.bash_analytics
 
       # and with scenario metadata
       statistic.user_id = self.user_id
       statistic.scenario_name = self.name
       statistic.scenario_created_at = self.created_at
+      # we'll also want to grab a list of users from the scenario,
+      # otherwise this data can be got, from the keys of
+      # the bash analytics field
       statistic.save  # stuff into db
+
+      # create statistic file for download
+      bash_analytics = ""
+      statistic.bash_analytics.each do |analytic| 
+        bash_analytics = bash_analytics + "#{analytic}" + "\n"
+      end
+      file_text = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nBash Histories: \n \n#{statistic.bash_histories} \nBash Analytics: \n#{bash_analytics}"
+      File.write("#{Rails.root}/public/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt",file_text)
     end
 
-    def bash_analytics(bash_history)
-      # simply count frequencies of options and commands used during a session
-      options_frequencies = Hash.new(0)
-      bash_history = bash_history.split("\n")
-      bash_history.each do |command|
-        options = command.scan(/[-'[A-Za-z]]+/);
-        options.each do |option|
-          options_frequencies[option] += 1;
+    def partition_bash(data)
+      # input -> data: a list of strings of bash commands split by newline
+      # output -> d: a hash {user->{timestamp->command}}
+
+      # method to populate the bash_analytics field of
+      # a Statistic model with a nested hash
+      # that maps users to timestamps to commands
+      d = Hash.new(0)  # {user -> { timestamp -> command }}
+      i = 4  # our index, begin @ index four to skip unneeded lines
+      # make two passes over the data
+      #   first, creating the users list
+      #   & then, grabbing commands associated
+      #     with each of those users    
+
+      # outer hash
+      while i < data.length
+        if data[i][0..1] == "##"
+          e = data[i].length  # endpoint
+          u = data[i][3..e-1]  # username
+          if !d.include?(u)
+            # don't overwrite unless already included
+            d[u] = Hash.new(0)
+          end
         end
+        i += 1
       end
-      # sort by number of times an command/option has been used
-      options_frequencies.sort_by { |option| option[1] }
-      return options_frequencies
+      i = 0  # reset index
+      users = d.keys  # users
+      u_i = 0 # user index
+
+      # inner hash
+      while i < data.length
+        if is_numeric?(data[i][1..data[i].length])
+          e = data[i].length
+          t = data[i][2..e-1]  # timestamp
+          if data[i + 1] != ""
+            c = data[i + 1]  # command
+            d[users[u_i]][t] = c
+            i += 1  # inc twice
+          end
+        elsif data[i][0..1] == "##"
+          e = data[i].length
+          u = data[i][3..e-1]  # to find index in users
+          u_i = users.find_index(u)  # & change user u
+        end
+        i += 1
+      end
+      return d  # {users => { timestamps => commands }}
     end
 
     def destroy_s3_bash_histories
@@ -858,7 +928,6 @@ class Scenario < ActiveRecord::Base
       self.instances.each do |instance|
         instance.aws_instance_delete_bash_history_page
       end
-    end
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-end
+    end  
+  end  # end private methods       
+# end

@@ -6,7 +6,8 @@ ruby_block "get_bash_histories" do
     users = Dir.glob('/home/*').select { |f| File.directory? f }
     users.each do |user|
       file = "#{user}/.bash_history"
-      bash_histories += "# #{file}\n"
+      username = user[6..user.length]
+      bash_histories += "## #{username}\n"
       if File.exists?(file)
         bash_histories += File.open(file, "r").read + "\n"
       end
