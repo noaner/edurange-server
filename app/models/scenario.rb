@@ -99,6 +99,7 @@ class Scenario < ActiveRecord::Base
     
     begin
       file = YAML.load_file(self.path_yml)
+      #file = YAML.load_file(Settings.app_path + self.path_yml)
       clouds = file["Clouds"]
       subnets = file["Subnets"]
       instances = file["Instances"]
@@ -870,6 +871,20 @@ class Scenario < ActiveRecord::Base
       end
       file_text = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nBash Histories: \n \n#{statistic.bash_histories} \nBash Analytics: \n#{bash_analytics}"
       File.write("#{Rails.root}/public/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt",file_text)
+      
+      #Create Script Log File
+
+      #Referencing script log by statistic.script_log
+      #script_out = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nScript Log: \n \n#{statistic.script_log} \n"
+      #File.write("#{Rails.root}/public/statistics/#{statistic.id}_Script_#{statistic.scenario_name}.txt",script_out)
+
+      #Create Exit Status file
+
+      #Referencing exit status log by statistic.exit_status
+      #exit_stat_out = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nExit Status Log: \n \n#{statistic.exit_status} \n"
+      #File.write("#{Rails.root}/public/statistics/#{statistic.id}_Exit_Status_#{statistic.scenario_name}.txt",exit_stat_out)
+
+
     end
 
     def partition_bash(data)
