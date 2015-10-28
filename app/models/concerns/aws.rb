@@ -1269,7 +1269,7 @@ module Aws
       bucket = s3.buckets[Settings.bucket_name]
       s3.buckets.create(Settings.bucket_name) unless bucket.exists?
       bucket.objects[aws_instance_com_page_name].write("waiting")
-      self.update_attribute(:com_page, bucket.objects[aws_instance_com_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain', endpoint: "s3-#{ENV['AWS_REGION']}.amazonaws.com")).to_s
+      self.update_attribute(:com_page, bucket.objects[aws_instance_com_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain', endpoint: Settings.endpoint)).to_s
     rescue
       raise
       return
