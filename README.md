@@ -55,6 +55,14 @@ bundle install
 
 ####  IV. Contact the project aws administrator to get the credentials to place in your ENV variables.
 
+You should recieve three global environment variables from which the AWS code will read to authenticate the creation of EC2 instances. Fire up your favorite text-editor on the ~/.bashrc file and add these lines to the very bottom.
+
+```bash
+export AWS_ACCESS_KEY_ID='your-access-key-id'
+export AWS_SECRET_ACCESS_KEY='you-secret-access-key'
+export AWS_REGION='your-aws-region'
+```
+
 
 Now you should be all ready to start your server and create some users.
 
@@ -109,12 +117,6 @@ With this newly created admin user, try logging into EDURange by using the email
 
 
 ##### Booting a Scenario
-Now that you have an admin user you can boot a scenario after some minor configurations. If you have AWS access keys already (provided by current AWS EDURange admins) then from there all you should have to do is set up some global environment variables from which the AWS code will read to authenticate the creation of EC2 instances. Fire up your favorite text-editor on the ~/.bashrc file and add these lines to the very bottom.
-
-```bash
-export AWS_ACCESS_KEY_ID='your-access-key-id'
-export AWS_SECRET_ACCESS_KEY='you-secret-access-key'
-export AWS_REGION='your-aws-region'
-```
+Now that you have an admin user you can boot a scenario after some minor configurations. 
 
 After doing that, go ahead and navigate to the "Scenarios" tab and load a new scenario. Choose from the default scenarios available. Once the scenario is loaded you should be brought to a detail view where you can boot the scenario.
