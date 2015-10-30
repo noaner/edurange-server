@@ -4,16 +4,27 @@
 EDURange is an NSF-funded project with the aim of building a platform for cloud-based interactive computer security exercises. 
 
 
-## Installation
-First, clone this git repository:
+## Developer Installation
+
+To setup the developer server running on your machine, there are five main steps.
+
+1. Clone the repository from github
+2. Set up RVM (Ruby Version Manager), rails, rubygems, and bundler
+3. Create a settings.local.yml file in /config
+4. Add credential variables to your user's ENV on your machine (usually in ~/.profile)
+5. Run the server, and create a new user(s)
+
+1. Clone the git repository:
 ```bash
 git clone https://github.com/edurange/edurange.git
 ```
 
-If you haven't already installed RVM (Ruby Version Manager), follow this [guide](https://rvm.io/rvm/install). This project uses Ruby 2.1.5 so use RVM to install and select the correct version of Ruby:
+2. Install RVM (Ruby Version Manager), rails, rubygems, and bundler
+
+  Follow this guide: (https://rvm.io/rvm/install). This project uses Ruby 2.1.5 so use RVM to install and select the    correct   version of Ruby:
 ```bash
-rvm install 2.1.5
-rvm use 2.1.5
+rvm install [ruby version number eg 2.2.1]
+rvm use [ruby version number eg 2.2.1]
 ```
 
 You may have to do something like: `bin/bash --login` in order to set the RVM ruby version (which doens't refer to the system ruby version).
@@ -39,8 +50,13 @@ bundle update
 bundle install
 ```
 
-Now you should be all ready to go!
+3. Ask a current developer to get a the right configuration to place in config/settings.local.yml
+4. Contact the project aws administrator to get the credentials to place in your ENV variables.
 
+
+Now you should be all ready to start your server and create some users.
+
+5. 
 ## Development
 Once you've got the development environment put together the dev server can be started.
 If this is your first time running the edurange you'll probably have to run a database migration by saying:
