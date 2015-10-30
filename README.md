@@ -14,14 +14,13 @@ To setup the developer server running on your machine, there are five main steps
 4. Add credential variables to your user's ENV on your machine (usually in ~/.profile)
 5. Run the server, and create a new user(s)
 
-## The sets point by point
 
-  I. Clone the git repository:
+####  I. Clone the git repository:
 ```bash
 git clone https://github.com/edurange/edurange.git
 ```
 
-  II. Install RVM (Ruby Version Manager), rails, rubygems, and bundler
+####  II. Install RVM (Ruby Version Manager), rails, rubygems, and bundler
 
   Follow this guide: (https://rvm.io/rvm/install). This project uses Ruby 2.1.5 so use RVM to install and select the    correct   version of Ruby:
 ```bash
@@ -52,16 +51,15 @@ bundle update
 bundle install
 ```
 
-  III. Ask a current developer to get a the right configuration to place in config/settings.local.yml
+####  III. Ask a current developer to get a the right configuration to place in config/settings.local.yml
 
-  IV. Contact the project aws administrator to get the credentials to place in your ENV variables.
+####  IV. Contact the project aws administrator to get the credentials to place in your ENV variables.
 
 
 Now you should be all ready to start your server and create some users.
 
-  V. Run the server and create a user
+####  V. Run the server and create a user
   
-## Development
 Once you've got the development environment put together the dev server can be started.
 If this is your first time running the edurange you'll probably have to run a database migration by saying:
 ```bash
@@ -110,7 +108,7 @@ With this newly created admin user, try logging into EDURange by using the email
 ![alt-tag](http://i.imgur.com/fxaqNbc.jpg)
 
 
-### Booting a Scenario
+##### Booting a Scenario
 Now that you have an admin user you can boot a scenario after some minor configurations. If you have AWS access keys already (provided by current AWS EDURange admins) then from there all you should have to do is set up some global environment variables from which the AWS code will read to authenticate the creation of EC2 instances. Fire up your favorite text-editor on the ~/.bashrc file and add these lines to the very bottom.
 
 ```bash
