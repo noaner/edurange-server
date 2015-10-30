@@ -14,12 +14,14 @@ To setup the developer server running on your machine, there are five main steps
 4. Add credential variables to your user's ENV on your machine (usually in ~/.profile)
 5. Run the server, and create a new user(s)
 
-1. Clone the git repository:
+## The sets point by point
+
+  I. Clone the git repository:
 ```bash
 git clone https://github.com/edurange/edurange.git
 ```
 
-2. Install RVM (Ruby Version Manager), rails, rubygems, and bundler
+  II. Install RVM (Ruby Version Manager), rails, rubygems, and bundler
 
   Follow this guide: (https://rvm.io/rvm/install). This project uses Ruby 2.1.5 so use RVM to install and select the    correct   version of Ruby:
 ```bash
@@ -50,13 +52,15 @@ bundle update
 bundle install
 ```
 
-3. Ask a current developer to get a the right configuration to place in config/settings.local.yml
-4. Contact the project aws administrator to get the credentials to place in your ENV variables.
+  III. Ask a current developer to get a the right configuration to place in config/settings.local.yml
+
+  IV. Contact the project aws administrator to get the credentials to place in your ENV variables.
 
 
 Now you should be all ready to start your server and create some users.
 
-5. 
+  V. Run the server and create a user
+  
 ## Development
 Once you've got the development environment put together the dev server can be started.
 If this is your first time running the edurange you'll probably have to run a database migration by saying:
@@ -112,6 +116,7 @@ Now that you have an admin user you can boot a scenario after some minor configu
 ```bash
 export AWS_ACCESS_KEY_ID='your-access-key-id'
 export AWS_SECRET_ACCESS_KEY='you-secret-access-key'
+export AWS_REGION='your-aws-region'
 ```
 
 After doing that, go ahead and navigate to the "Scenarios" tab and load a new scenario. Choose from the default scenarios available. Once the scenario is loaded you should be brought to a detail view where you can boot the scenario.
