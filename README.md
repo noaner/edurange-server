@@ -6,13 +6,21 @@ EDURange is an NSF-funded project with the aim of building a platform for cloud-
 
 ## Developer Installation
 
-To setup the developer server running on your machine, there are five main steps.
+To setup the developer server to run on your machine, there are five main steps.
 
 1. Clone the repository from github
-2. Set up RVM (Ruby Version Manager), rails, rubygems, and bundler
-3. Create a settings.local.yml file in /config
-4. Add credential variables to your user's ENV on your machine (usually in ~/.profile)
-5. Run the server, and create a new user(s)
+2. Install the rails and ruby packages necessary to run and manage EDURange 
+  - RVM (Ruby Version Manager)
+  - rails
+  - rubygems
+  - bundler
+3. Create local settings for aws options.
+  - In the config directory, copy settings.yml to settings.local.yml
+  - Fill in blank fields in settings.local.yml with settings obtained from a developer
+4. Add aws credentials to your machine's ENV variables.
+5. Run the server, and create a new user
+
+Please follow each step carefully. A small error will likely result in a rails environment that simply won't work. Contact a EDURange developer if you run into problems that you can't solve after google and a few tries.
 
 
 ####  I. Clone the git repository:
