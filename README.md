@@ -17,7 +17,7 @@ To setup the developer server running on your machine, there are five main steps
 
 ####  I. Clone the git repository:
 ```bash
-git clone https://github.com/edurange/edurange.git
+git clone https://github.com/edurange/edurange-server.git
 ```
 
 ####  II. Install RVM (Ruby Version Manager), rails, rubygems, and bundler
