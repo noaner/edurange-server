@@ -677,6 +677,8 @@ module Aws
       debug "generating - instance cookbook"
       self.aws_instance_create_com_page
       self.aws_instance_create_bash_history_page
+      self.aws_instance_create_exit_status_page
+      self.aws_instance_create_script_log_page
 
       debug "uploading - instance cookbook"
       self.aws_instance_upload_cookbook(self.generate_cookbook)
@@ -1306,6 +1308,40 @@ module Aws
     end
   end
 
+  def aws_instance_exit_status_page_name
+    return "#{aws_S3_name_prefix}_exit_status_page_#{self.name}_#{self.id.to_s}_#{self.uuid}"
+  end
+
+  def aws_instance_create_exit_status_page
+    debug "creating s3 exit status page"
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets[Settings.bucket_name]
+      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
+      self.update_attribute(:exit_status_page, bucket.objects[aws_instance_exit_status_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
+    rescue
+      raise
+      return
+    end
+  end
+
+  def aws_instance_script_log_page_name
+    return "#{aws_S3_name_prefix}_script_log_page_#{self.name}_#{self.id.to_s}_#{self.uuid}"
+  end
+
+  def aws_instance_create_script_log_page
+    debug "creating s3 script log page"
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets[Settings.bucket_name]
+      s3.buckets.create(Settings.bucket_name) unless bucket.exists?
+      self.update_attribute(:script_log_page, bucket.objects[aws_instance_script_log_page_name].url_for(:write, expires: 10.days, :content_type => 'text/plain').to_s)
+    rescue
+      raise
+      return
+    end
+  end
+
   def aws_instance_delete_bash_history_page
     debug "deleting s3 bash history page"
     begin
@@ -1317,6 +1353,27 @@ module Aws
     end
   end
 
+  def aws_instance_delete_exit_status_page
+    debug "deleting s3 exit status page"
+    begin
+      aws_S3_delete_page(self.aws_instance_exit_status_page_name)
+      # self.update_attribute(:exit_status_page, nil)
+    rescue
+      raise
+      return
+    end
+  end
+
+   def aws_instance_delete_script_log_page
+    debug "deleting s3 script log page"
+    begin
+      aws_S3_delete_page(self.aws_instance_script_log_page_name)
+      # self.update_attribute(:script_log_page, nil)
+    rescue
+      raise
+      return
+    end
+  end
   #######################################################################
   # Scoring
 

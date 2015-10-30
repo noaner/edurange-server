@@ -153,6 +153,40 @@ class Instance < ActiveRecord::Base
     return ""
   end
 
+  def get_exit_status
+    return "" if (!self.exit_status_page or (self.exit_status_page == ""))
+
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets[Settings.bucket_name]
+      if bucket.objects[self.aws_instance_exit_status_page_name].exists?
+        exit_status =  bucket.objects[self.aws_instance_exit_status_page_name].read()
+        return exit_status == nil ? "" : exit_status
+      end
+    rescue
+      return "error getting exit status"
+    end
+
+    return ""
+  end
+
+  def get_script_log
+    return "" if (!self.script_log_page or (self.script_log_page == ""))
+
+    begin
+      s3 = AWS::S3.new
+      bucket = s3.buckets[Settings.bucket_name]
+      if bucket.objects[self.aws_instance_script_log_page_name].exists?
+        script_log =  bucket.objects[self.aws_instance_script_log_page_name].read()
+        return script_log == nil ? "" : script_log
+      end
+    rescue
+      return "error getting script log"
+    end
+
+    return ""
+  end
+
   def get_chef_error
     return "" if !self.bash_history_page
     s3 = AWS::S3.new
