@@ -157,7 +157,7 @@ class Scenario < ActiveRecord::Base
       if clouds
         clouds.each do |yaml_cloud|
 
-          cloud = scenario.clouds.new(name: yaml_cloud["Name"], cidr_block: yaml_cloud["CIDR_Block"])
+          cloud = self.clouds.new(name: yaml_cloud["Name"], cidr_block: yaml_cloud["CIDR_Block"])
           if not cloud.save
             self.destroy_dependents
             errors.add(:load, "error creating cloud. #{cloud.errors.messages}")
@@ -283,7 +283,7 @@ class Scenario < ActiveRecord::Base
       if scoring
         scoring.each do |yaml_question|
 
-          question = scenario.questions.new(
+          question = self.questions.new(
             type_of: yaml_question['Type'], 
             text: yaml_question['Text'],
             points: yaml_question["Points"],
@@ -310,8 +310,8 @@ class Scenario < ActiveRecord::Base
       self.update_attribute(:modifiable, true)
     end
 
-    self.update(modified: false)
-    scenario.save
+    self.reload
+    self.update_attribute(:modified, false)
   end
 
   def path
@@ -336,8 +336,6 @@ class Scenario < ActiveRecord::Base
     return path if File.exists? path
     false
   end
-
-  #
 
   def update_modified
     if self.modifiable?
@@ -598,49 +596,17 @@ class Scenario < ActiveRecord::Base
   end
 
   def clone(name)
-    clone = Scenario.new(name: name.strip, custom: true, user_id: self.user_id)
+    ScenarioManagement.new.clone_from_name(self.name, self.location, name, self.user)
+  end
 
-    # validate name
-    if clone.name == ""
-      clone.errors.add(:name, "Can not be blank")
-      return clone
-    elsif /\W/.match(clone.name)
-      clone.errors.add(:name, "Name can only contain alphanumeric and underscore")
-      return clone
-    elsif /^_*_$/.match(clone.name)
-      clone.errors.add(:name, "Name not allowed")
-      return clone
-    elsif File.exists?("#{Settings.app_path}scenarios/local/#{clone.name.downcase}") or (clone.name.downcase == self.name.downcase)
-      clone.errors.add(:name, "Name taken")
-      return clone
+  def obliterate
+    if not self.custom?
+      self.errors.add(:obliterate, "can not obliterate non cusom scenario")
+      return false
     end
-
-    # make user directory
-    userdir = "#{Settings.app_path}/scenarios/user/#{self.user.id}"
-    Dir.mkdir userdir unless File.exists? userdir
-
-    # make clone directory
-    Dir.mkdir clone.path
-
-    # make recipe directory and copy every recipe
-    Dir.mkdir "#{clone.path}/recipes"
-    Dir.foreach("#{self.path}/recipes") do |recipe|
-      next if recipe == '.' or recipe == '..'
-      FileUtils.cp "#{self.path}/recipes/#{recipe}", "#{clone.path}/recipes"
-    end
-
-    # Copy yml file and replace Name:
-    newyml = File.open(clone.yml_path, "w")
-    File.open(self.yml_path).each do |line|
-      if /\s*Name:\s*#{self.name}/.match(line)
-        line = line.gsub("#{self.name}", clone.name)
-      end
-      newyml.write line
-    end
-    newyml.close
-
-    # create and return cloned scenario
-    return YmlRecord.load_yml(clone.name, self.user)
+    name, path_graveyard_scenario = ScenarioManagement.new.obliterate_custom(self.name, self.user)
+    self.destroy
+    return path_graveyard_scenario
   end
 
   def make_custom

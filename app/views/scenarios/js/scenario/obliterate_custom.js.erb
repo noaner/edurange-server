@@ -1,1 +1,5 @@
-$('#scenario-custom-<%= @filename %>').remove();
+<% if @name %>
+	$('#scenario-custom-<%= @name.downcase %>').remove();
+<% else %>
+	alert('Failed to obliterate custom Scenario contact Administrator.')
+<% end %>
