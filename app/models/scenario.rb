@@ -333,8 +333,10 @@ class Scenario < ActiveRecord::Base
 
   def path_recipes
     path = "#{self.path}/recipes"
-    return path if File.exists? path
-    false
+    if not File.exists? path
+      FileUtils.mkdir path
+    end
+    return path
   end
 
   def update_modified
