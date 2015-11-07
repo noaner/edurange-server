@@ -848,6 +848,16 @@ class Scenario < ActiveRecord::Base
         # concatenate all bash histories into one big string
         statistic.bash_histories += instance.get_bash_history
         puts instance.get_bash_history  # for debugging
+
+        # Concatenate all script logs
+        # Will look messy
+        statistic.script_log += instance.get_script_log
+        puts instance.get_script_log # for debugging
+
+        # Concatenate all exit status logs
+        statistic.exit_status += instance.get_exit_status
+        puts instance.get_exit_status # for debugging
+        
       end
   
       # partition the big bash history string into a nested hash structure
@@ -875,14 +885,14 @@ class Scenario < ActiveRecord::Base
       #Create Script Log File
 
       #Referencing script log by statistic.script_log
-      #script_out = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nScript Log: \n \n#{statistic.script_log} \n"
-      #File.write("#{Rails.root}/public/statistics/#{statistic.id}_Script_#{statistic.scenario_name}.txt",script_out)
+      script_out = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nScript Log: \n \n#{statistic.script_log} \n"
+      File.write("#{Rails.root}/public/statistics/#{statistic.id}_Script_#{statistic.scenario_name}.txt",script_out)
 
       #Create Exit Status file
 
       #Referencing exit status log by statistic.exit_status
-      #exit_stat_out = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nExit Status Log: \n \n#{statistic.exit_status} \n"
-      #File.write("#{Rails.root}/public/statistics/#{statistic.id}_Exit_Status_#{statistic.scenario_name}.txt",exit_stat_out)
+      exit_stat_out = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nExit Status Log: \n \n#{statistic.exit_status} \n"
+      File.write("#{Rails.root}/public/statistics/#{statistic.id}_Exit_Status_#{statistic.scenario_name}.txt",exit_stat_out)
 
 
     end
