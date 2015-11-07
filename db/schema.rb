@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151029225805) do
+ActiveRecord::Schema.define(version: 20151107005015) do
 
   create_table "answers", force: :cascade do |t|
     t.boolean  "correct"
@@ -191,6 +191,8 @@ ActiveRecord::Schema.define(version: 20151029225805) do
     t.text     "bash_analytics",      default: "--- []\n"
     t.string   "scenario_name"
     t.datetime "scenario_created_at"
+    t.string   "script_log"
+    t.string   "exit_status"
   end
 
   create_table "student_group_users", force: :cascade do |t|
