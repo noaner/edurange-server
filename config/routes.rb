@@ -16,7 +16,9 @@ Edurange::Application.routes.draw do
       # destorying statistics
       post 'destroyme'
       # downloading statistics
-      get 'download'
+      get 'download_bash_history'
+      get 'download_exit_status'
+      get 'download_script_log'
       get 'download_all'  
       # analytics, complicated query params
       get 'generate_analytics' 

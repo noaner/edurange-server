@@ -47,15 +47,30 @@ class StatisticsController < ApplicationController
       @statistics = Statistic.where(user_id: current_user.id)
     end
 
-    folder = "#{Rails.root}/public/statistics/"
+    folder = "#{Rails.root}/data/statistics/"
     input_filepaths = []
     input_filenames = []
     @statistics.each do |statistic|
-      file_path = "#{Rails.root}/public/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt"
+      # add bash histories
+      file_path = "#{Rails.root}/data/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt"
       file_name = "#{statistic.id}_Statistic_#{statistic.scenario_name}.txt"
       if File.exist?(file_path)
         input_filepaths.push(file_path)
         input_filenames.push(file_name)
+      end
+      # add exit statuses
+      exit_status_path = "#{Rails.root}/data/statistics/#{statistic.id}_Exit_Status_#{statistic.scenario_name}.txt"
+      exit_status_name = "#{statistic.id}_Exit_Status_#{statistic.scenario_name}.txt"
+      if File.exist?(exit_status_path)
+        input_filepaths.push(exit_status_path)
+        input_filenames.push(exit_status_name)
+      end
+      # add script logs
+      script_log_path = "#{Rails.root}/data/statistics/#{statistic.id}_Script_Log_#{statistic.scenario_name}.txt"
+      script_log_name = "#{statistic.id}_Script_Log_#{statistic.scenario_name}.txt"
+      if File.exist?(script_log_path)
+        input_filepaths.push(script_log_path)
+        input_filenames.push(script_log_name)
       end
     end
     #create a temporary zip file
@@ -82,21 +97,51 @@ class StatisticsController < ApplicationController
   
   # GET /statistic/<id>/download
   # download statistic data
-  def download
-    # save statistic as pdf
+  def download_bash_history
+    # save statistic bash history
     statistic = Statistic.find(params[:id])
+    
+    # Download bash histories and analytics in a file
     bash_analytics = ""
     statistic.bash_analytics.each do |analytic| 
       bash_analytics = bash_analytics + "#{analytic}" + "\n"
     end
     file_text = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nBash Histories: \n \n#{statistic.bash_histories} \nBash Analytics: \n#{bash_analytics}"
-    file_path = "#{Rails.root}/public/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt"
+    file_path = "#{Rails.root}/data/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt"
     file_name = "#{statistic.id}_Statistic_#{statistic.scenario_name}.txt"
     if File.exist?(file_path)
       send_file(file_path, filename: file_name, type: "application/txt")
     else
       send_data(file_text, filename: file_name, type: "application/txt")
     end
+  end
+
+def download_exit_status
+    # Download exit statuses
+    statistic = Statistic.find(params[:id])
+
+    exit_status_text = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nExit Status Data: \n \n#{statistic.exit_status} \n"
+    exit_status_path = "#{Rails.root}/data/statistics/#{statistic.id}_Exit_Status_#{statistic.scenario_name}.txt"
+    exit_status_name = "#{statistic.id}_Exit_Status_#{statistic.scenario_name}.txt"
+    if File.exist?(exit_status_path)
+      send_file(exit_status_path, filename: exit_status_name, type: "application/txt")
+    else
+      send_data(exit_status_text, filename: exit_status_name, type: "application/txt")
+    end
+  end
+
+def download_script_log
+    # Download script logs
+    statistic = Statistic.find(params[:id])
+
+    script_log_text = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nScript Log Data: \n \n#{statistic.script_log} \n"
+    script_log_path = "#{Rails.root}/data/statistics/#{statistic.id}_Script_Log_#{statistic.scenario_name}.txt"
+    script_log_name = "#{statistic.id}_Script_Log_#{statistic.scenario_name}.txt"
+    if File.exist?(script_log_path)
+      send_file(script_log_path, filename: script_log_name, type: "application/txt")
+    else
+      send_data(script_log_text, filename: script_log_name, type: "application/txt")
+    end   
   end
 
   # method called via AJAX request, sends javascript response after performing analytics  

@@ -19,7 +19,7 @@ ruby_block "get_bash_histories" do
       if File.exists?(exit_file)
         exit_statuses += File.open(exit_file, "r").read + "\n"
       end      
-      script_file = "#{user}/.bash_history"
+      script_file = "#{user}/.script.log"
       username = user[6..user.length]
       script_logs += "## #{username}\n"
       if File.exists?(script_file)
