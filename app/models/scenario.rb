@@ -880,19 +880,19 @@ class Scenario < ActiveRecord::Base
         bash_analytics = bash_analytics + "#{analytic}" + "\n"
       end
       file_text = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nBash Histories: \n \n#{statistic.bash_histories} \nBash Analytics: \n#{bash_analytics}"
-      File.write("#{Rails.root}/public/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt",file_text)
+      File.write("#{Rails.root}/data/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt",file_text)
       
       #Create Script Log File
 
       #Referencing script log by statistic.script_log
       script_out = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nScript Log: \n \n#{statistic.script_log} \n"
-      File.write("#{Rails.root}/public/statistics/#{statistic.id}_Script_#{statistic.scenario_name}.txt",script_out)
+      File.write("#{Rails.root}/data/statistics/#{statistic.id}_Script_Log_#{statistic.scenario_name}.txt",script_out)
 
       #Create Exit Status file
 
       #Referencing exit status log by statistic.exit_status
       exit_stat_out = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nExit Status Log: \n \n#{statistic.exit_status} \n"
-      File.write("#{Rails.root}/public/statistics/#{statistic.id}_Exit_Status_#{statistic.scenario_name}.txt",exit_stat_out)
+      File.write("#{Rails.root}/data/statistics/#{statistic.id}_Exit_Status_#{statistic.scenario_name}.txt",exit_stat_out)
 
 
     end
@@ -952,7 +952,8 @@ class Scenario < ActiveRecord::Base
       # only once scenario is destroyed are they deleted from s3 bucket
       self.instances.each do |instance|
         instance.aws_instance_delete_bash_history_page
+        instance.aws_instance_delete_exit_status_page
+        instance.aws_instance_delete_script_log_page
       end
     end  
-  end  # end private methods       
-# end
+  end

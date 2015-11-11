@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151110234700) do
+ActiveRecord::Schema.define(version: 20151111230152) do
 
   create_table "answers", force: :cascade do |t|
     t.boolean  "correct"
@@ -103,8 +103,8 @@ ActiveRecord::Schema.define(version: 20151110234700) do
     t.string   "com_page"
     t.string   "log",                 default: ""
     t.string   "bash_history_page",   default: ""
-    t.string   "exit_status_page"
-    t.string   "script_log_page"
+    t.string   "exit_status_page",    default: ""
+    t.string   "script_log_page",     default: ""
   end
 
   add_index "instances", ["subnet_id"], name: "index_instances_on_subnet_id"
