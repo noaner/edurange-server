@@ -47,6 +47,7 @@ Edurange::Application.routes.draw do
 
       post 'log_get'
       post 'clone'
+      post 'clone_new'
       get  'clone_set'
       post 'save'
       post 'save_as'

@@ -1,3 +1,26 @@
+%div.modal#modal-scenario-clone{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Clone Scenario
+      %div.modal-body#modalbody
+        = form_tag clone_new_scenario_path(0), remote: true, method: :post do 
+          %p
+          = hidden_field_tag "location"
+          = hidden_field_tag "name"
+          %div#name-div
+            = label_tag nil, "Name:"
+            = text_field_tag "newname", nil, class: 'form-control'
+            %span.help-block.inline#name-help
+          %br
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
 %div.panel.panel-default
   %div.panel-heading.nav.nav-pills
     %li
@@ -12,25 +35,29 @@
           none
         - else
           - template_kind[:headers].each do |template|
-            %b Name:
-            = template[:name]
-            %br
-            %b Description:
-            = template[:description]
-            %p
-            %div.nav.nav-pills
-              %li
-                = simple_form_for(@scenario) do |f|
-                  = f.hidden_field :name, :value => template[:filename]
-                  = f.hidden_field :location, :value => template[:location]
-                  = f.button :submit, 'Create ' + template[:name], class: 'btn btn-primary'
-              - if template_kind[:title] == 'Custom'
+            %div{ id: "scenario-#{template[:location]}-#{template[:name].downcase}"}
+              %b Name:
+              = template[:name]
+              %br
+              %b Description:
+              = template[:description]
+              %p
+              %div.nav.nav-pills
                 %li
-                  &nbsp;&nbsp;
+                  = simple_form_for(@scenario) do |f|
+                    = f.hidden_field :name, :value => template[:filename]
+                    = f.hidden_field :location, :value => template[:location]
+                    = f.button :submit, 'Create ' + template[:name], class: 'btn btn-primary'
                 %li
-                  = link_to 'Obliterate', scenarios_obliterate_custom_path(filename: template[:filename]), remote: true, method: :post, :data => { confirm: "This will completely erase the scenario. Are you sure?" }, class: 'btn btn-danger'
-            %p
-            %br
+                  = link_to 'Clone', "#modal-scenario-clone", :data => {:toggle=>"modal"}, onclick: "$('#modal-scenario-clone').find('#name-div').removeClass('has-error'); $('#modal-scenario-clone').find('#newname').val(''); $('#modal-scenario-clone').find('#name-help').html(''); $('#modal-scenario-clone').find('#name').val('#{template[:name]}'); $('#modal-scenario-clone').find('#location').val('#{template[:location]}')", class: 'btn btn-default'
+
+                - if template_kind[:title] == 'Custom'
+                  %li
+                    &nbsp;&nbsp;
+                  %li
+                    = link_to 'Obliterate', scenarios_obliterate_custom_path(filename: template[:filename]), remote: true, method: :post, :data => { confirm: "This will completely erase the scenario. Are you sure?" }, class: 'btn btn-danger'
+              %p
+              %br
 
 = link_to 'Back', scenarios_path, class: 'btn btn-default'
 

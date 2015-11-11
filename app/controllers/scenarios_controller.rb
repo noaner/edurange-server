@@ -141,10 +141,11 @@ class ScenariosController < ApplicationController
   end
 
   def create_custom
-    @scenario = Scenario.new(name: params[:name], custom: true, user_id: @user.id)
-    if @scenario.make_custom
-      @scenario.save
-    end
+    # @scenario = Scenario.new(name: params[:name], location: :development, user_id: @user.id)
+    # @scenario.save
+    # # if @scenario.make_custom
+    # #   @scenario.save
+    # # end
 
     respond_to do |format|
       format.js { render "scenarios/js/scenario/create_custom.js.erb", layout: false }
@@ -152,12 +153,7 @@ class ScenariosController < ApplicationController
   end
 
   def obliterate_custom
-    @filename = params[:filename]
-    path = "#{Settings.app_path}/scenarios/user/#{@user.id}/#{params[:filename]}"
-    if not File.exists? path
-      @error = "does not exist."
-    end
-    FileUtils.rm_r path
+    @name, path_graveyard_scenario = ScenarioManagement.new.obliterate_custom(params[:filename], @user)
 
     respond_to do |format|
       format.js { render "scenarios/js/scenario/obliterate_custom.js.erb", layout: false }
@@ -165,7 +161,6 @@ class ScenariosController < ApplicationController
   end
 
   def destroyme
-
     if not @scenario.modifiable?
       if @scenario.destroy
         respond_to do |format|
@@ -215,6 +210,13 @@ class ScenariosController < ApplicationController
     @clone = @scenario.clone(params[:name])
     respond_to do |format|
       format.js { render "scenarios/js/scenario/clone.js.erb", layout: false }
+    end
+  end
+
+  def clone_new
+    @clone = ScenarioManagement.new.clone_from_name(params[:name], params[:location], params[:newname], @user)
+    respond_to do |format|
+      format.js { render "scenarios/js/scenario/clone_new.js.erb", layout: false }
     end
   end
 
@@ -564,7 +566,6 @@ class ScenariosController < ApplicationController
   def group_student_group_remove
     @student_group_name = params[:name]
     @players = @group.student_group_remove(params[:name])
-    puts @players
     respond_to do |format|
       format.js { render template: 'scenarios/js/group/student_group_remove.js.erb', layout: false }
     end
@@ -719,8 +720,6 @@ class ScenariosController < ApplicationController
       params[:values].each_with_index do |val, i| values << { value: val, points: params[:value_points][i] } end
     end
 
-    puts values
-    
     @question.update(
       type_of: params[:type],
       options: params["#{params[:type].downcase}_options"] ? params["#{params[:type].downcase}_options"] : [],

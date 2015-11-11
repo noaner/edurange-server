@@ -39,4 +39,58 @@ class ScenarioTest < ActiveSupport::TestCase
     end
   end
 
+  test 'clone' do
+    instructor = users(:instructor999999999)
+    scenario = instructor.scenarios.new(location: :test, name: 'test1')
+    scenario.save
+
+    assert_equal [], scenario.errors.keys
+
+    clone = scenario.clone('test1clone')
+    clone.save
+    assert_equal [], scenario.errors.keys
+
+    path = clone.path
+    path_yml = clone.path_yml
+    path_recipes = clone.path_recipes
+
+    assert path
+    assert path_yml
+    assert path_recipes
+
+    path_graveyard_scenario = clone.obliterate
+
+    assert_not File.exists? path
+    assert_not File.exists? path_yml
+    assert_not File.exists? path_recipes
+
+    path_graveyard = "#{Settings.app_path}/scenarios/custom/graveyard"
+    path_graveyard_user = "#{path_graveyard}/#{instructor.id}"
+    path_graveyard_scenario_yml = "#{path_graveyard_scenario}/#{clone.name.downcase}.yml"
+    
+    assert File.exists? path_graveyard
+    assert File.exists? path_graveyard_user
+    assert File.exists? path_graveyard_scenario
+    assert File.exists? path_graveyard_scenario_yml
+
+    FileUtils.rm_r "#{Settings.app_path}/scenarios/custom/#{instructor.id}"
+    FileUtils.rm_r path_graveyard_user
+
+  end
+
+  test 'scenario should not fail if recipe folders are missing' do
+    instructor = users(:instructor999999999)
+    scenario = instructor.scenarios.new(location: :test, name: 'missingrecipefolder')
+
+    assert File.exists? "#{scenario.path}/recipes"
+    FileUtils.rmdir "#{scenario.path}/recipes"
+    assert_not File.exists? "#{scenario.path}/recipes"
+
+    scenario.save
+
+    assert_not scenario.errors.any?
+    assert File.exists? "#{scenario.path}/recipes"
+
+  end
+
 end
