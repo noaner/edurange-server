@@ -16,11 +16,13 @@ module Aws
     end
 
     # Do initial scoring setup
-    begin
-      self.aws_scenario_initialize_scoring
-    rescue => e
-      self.boot_error(e)
-      return false
+    if self.recipes.select { |r| r.name == "scoring" }
+      begin
+        self.aws_scenario_initialize_scoring
+      rescue => e
+        self.boot_error(e)
+        return false
+      end
     end
 
     # Boot each Cloud
@@ -1404,6 +1406,8 @@ module Aws
       AWS::S3.new.buckets[Settings.bucket_name].objects[aws_scenario_answers_url_name].delete
       self.update_attribute(:answers_url, nil)
     rescue AWS::S3::Errors::PermanentRedirect
+      return true
+    rescue AWS::S3::Errors::NoSuchBucket
       return true
     rescue
       raise
