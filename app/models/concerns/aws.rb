@@ -16,13 +16,11 @@ module Aws
     end
 
     # Do initial scoring setup
-    if self.recipes.select { |r| r.name == "scoring" }
-      begin
-        self.aws_scenario_initialize_scoring
-      rescue => e
-        self.boot_error(e)
-        return false
-      end
+    begin
+      self.aws_scenario_initialize_scoring
+    rescue => e
+      self.boot_error(e)
+      return false
     end
 
     # Boot each Cloud

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150929023359) do
+ActiveRecord::Schema.define(version: 20151113231640) do
 
   create_table "answers", force: :cascade do |t|
     t.boolean  "correct"
@@ -103,6 +103,7 @@ ActiveRecord::Schema.define(version: 20150929023359) do
     t.string   "com_page"
     t.string   "log",                 default: ""
     t.string   "bash_history_page",   default: ""
+    t.string   "ip_address_dynamic"
   end
 
   add_index "instances", ["subnet_id"], name: "index_instances_on_subnet_id"
@@ -167,7 +168,7 @@ ActiveRecord::Schema.define(version: 20150929023359) do
     t.datetime "updated_at"
     t.integer  "status",                default: 0
     t.text     "log",                   default: ""
-    t.text     "answers"
+    t.string   "answers",               default: ""
     t.string   "uuid"
     t.string   "scoring_pages"
     t.string   "answers_url"

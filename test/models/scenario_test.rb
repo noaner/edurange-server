@@ -93,4 +93,12 @@ class ScenarioTest < ActiveSupport::TestCase
 
   end
 
+  test 'answers_url should not be nil' do
+    instructor = users(:instructor999999999)
+    scenario = instructor.scenarios.new(location: :test, name: 'test1')
+    scenario.save
+    assert scenario.answers != nil
+    assert scenario.answers.class == String
+  end
+
 end
