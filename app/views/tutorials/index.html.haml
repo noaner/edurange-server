@@ -26,24 +26,15 @@
     If you're looking for more advanced documentation on how to take advantage of all the features
     of edurange, you should consult the  
     %a{role: 'presentation', class: params[:controller] == 'tutorials' ? "active" : "" }
-      = link_to 'Instructor Manual', tutorials_instructor_manual_path
-    \. If you run into trouble with any of the
+      = link_to 'Instructor Manual.', tutorials_instructor_manual_path
+    If you run into trouble with any of the
     content covered in this guide, feel free to reach out to
-    %a{ :href => 'admin@edurange.org'}
-      EDURange help
-    \. If you are new to edurange, please follow all the steps carefully. The order of steps is important!
- 
-  %h2 
-    Instructor Setup
+    %a{role: 'presentation', class: params[:controller] == 'tutorials' ? "active" : "" }
+      = mail_to('admin@edurange.org', 'EDURange help.')
 
-  %h3 
-    I. Login to cloud.edurange.org with instructor credentials
-
-  %font{:size => 4}
-    The credentials to your instructor account should have been emailed to the email you provided.
-    If you do not yet have an account, please contact
-    %a{ :href => 'admin@edurange.org'}
-      EDURange help
+    If you are new to edurange, please follow all the steps carefully. The order of steps is important!
+    %a{role: 'presentation', class: params[:controller] == 'tutorials' ? "active" : "" }
+      = mail_to('admin@edurange.org', 'EDURange help')
     and they will email you with
     account credentials. Log in to cloud.edurange.org.
 
@@ -65,8 +56,8 @@
   %font{:size => 4}
     On your
     %a{ :href => 'https://cloud.edurange.org/instructor'}
-      home page
-    , scroll down to find
+      home page,
+    scroll down to find
     the blue button called "Create Student Groups". Once your group is created, you should see
     the new empty group under Student Groups, above the default group 'All'.
 
