@@ -1,0 +1,19 @@
+%nav.navbar.navbar-default
+  %a.navbar-brand
+    Tutorials 
+
+  %ul.nav.nav-tabs
+
+    %li{role: 'presentation', class: params[:controller] == 'tutorials' ? "active" : "" }
+      = link_to 'Quick Start', tutorials_path
+
+    %li{role: 'presentation', class: params[:controller] == 'scenarios' ? "active" : "" }
+      = link_to 'Making Scenarios', tutorials_path
+
+    %li{role: 'presentation', class: params[:controller] == 'statistics' ? "active" : "" }
+      = link_to 'Modifying Scenarios', tutorials_path
+
+%article{:role => "article", :class => "span9"}
+
+  %h2 
+    EDURange - Making Scenarios

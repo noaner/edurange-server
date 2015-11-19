@@ -1,4 +1,11 @@
 Edurange::Application.routes.draw do
+
+  #Static tutorial routes
+  get 'tutorials/index'
+  get 'tutorials/making_scenarios'
+  get 'tutorials/student_manual'
+  get 'tutorials/instructor_manual'
+
   get 'management/clean'
   get 'management/status'
   get 'management/purge'
@@ -11,6 +18,7 @@ Edurange::Application.routes.draw do
   resources :instances
   resources :subnets
   resources :clouds
+  resources :tutorials
   resources :statistics do
     member do  # define routing for the statistics controller methods
       # destorying statistics

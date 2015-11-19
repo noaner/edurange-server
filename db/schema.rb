@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151113231640) do
+ActiveRecord::Schema.define(version: 20151115234353) do
 
   create_table "answers", force: :cascade do |t|
     t.boolean  "correct"
@@ -222,6 +222,13 @@ ActiveRecord::Schema.define(version: 20151113231640) do
   end
 
   add_index "subnets", ["cloud_id"], name: "index_subnets_on_cloud_id"
+
+  create_table "tutorials", force: :cascade do |t|
+    t.string   "title"
+    t.text     "text"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "", null: false
