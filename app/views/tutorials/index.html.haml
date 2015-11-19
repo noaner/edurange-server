@@ -1,0 +1,115 @@
+%nav.navbar.navbar-default
+  %a.navbar-brand
+    Tutorials 
+
+  %ul.nav.nav-tabs
+
+    %li{role: 'presentation', class: params[:controller] == 'tutorials' ? "active" : "" }
+      = link_to 'Quick Start', tutorials_path
+
+    %li{role: 'presentation', class: params[:controller] == 'scenarios' ? "active" : "" }
+      = link_to 'Making Scenarios', tutorials_path
+
+    %li{role: 'presentation', class: params[:controller] == 'statistics' ? "active" : "" }
+      = link_to 'Modifying Scenarios', tutorials_path
+
+%article{:role => "article", :class => "span9"}
+
+  %h2 
+    EDURange - Quick Setup
+  %font{:size => 4}
+    This page will offer a brief tutorial for a new instructor to get scenarios up and running. 
+    If you're looking for more advanced documentation on how to take advantage of all the features
+    of edurange, you should consult the  
+    %a{ :href => 'http://blogs.evergreen.edu/edurange/edurange-project-summary/tutorial-sigcse-2014/'}
+      EDURange manual
+    \. If you run into trouble with any of the
+    content covered in this guide, feel free to reach out to
+    %a{ :href => 'weissr@evergreen.edu'}
+      EDURange help
+    \. If you are new to edurange, please follow all the steps carefully. The order of steps is important!
+ 
+  %h2 
+    Instructor Setup
+
+  %h3 
+    I. Login to cloud.edurange.org with instructor credentials
+
+  %font{:size => 4}
+    The credentials to your instructor account should have been emailed to the email you provided.
+    If you do not yet have an account, please contact
+    %a{ :href => 'weissr@evergreen.edu'}
+      EDURange help
+    and they will email you with
+    account credentials. Log in to cloud.edurange.org.
+
+  %h3
+    II. Give students registration code and have students sign up on cloud.edurange.org
+
+  %font{:size => 4}
+    In order for students to sign up at cloud.edurange.org, they need a registration code.
+    Once you are logged in as instructor, you can find your the code under the heading,
+    "Registration Code:" (It is located below AWS Settings and above User Information, it
+    should be an alphanumeric string like '23a6e9k2a5').
+
+    Give this code to your students and have them sign up at cloud.edurange.org. Students will
+    need to provide the registration code and a name, email, and password.
+
+  %h3 
+    III. Create a student group
+  
+  %font{:size => 4}
+    On your
+    %a{ :href => 'https://cloud.edurange.org/instructor'}
+      home page
+    , scroll down to find
+    the blue button called "Create Student Groups". Once your group is created, you should see
+    the new empty group under Student Groups, above the default group 'All'.
+
+  %h3 
+    IV. Add all students to student group
+
+  %font{:size => 4}
+    Once students have registered with the Registration Code you provided them, they should appear
+    under the 'All' group. To add them to the new student group you have created, click on the blue
+    'add to student group' link located to the right of the student's name and email. Enter the name of 
+    your newly created student group to add them to that group.
+
+  %h3 
+    V. Create Scenario
+
+  %font{:size => 4}
+    Select the 'Scenario' tab at the top of the page. Select the white button 'Load New Scenario'.
+    Most scenarios will be listed under 'Production Scenarios'. If you have designed and built
+    your own scenarios, those will be listed under 'Custom Scenarios'.
+
+  %h3 
+    VI. Add student group to scenario
+
+  %font{:size => 4}
+    Now that the scenario is created, scroll down to the section labeled 'Groups'. You should see
+    two sections, 'Instructor' and 'Student'. Click the drop down menu next to student and select
+    'Add Student Group'. Input the name of the student group that contains your students. It is
+    important that you add your student group 
+    %b
+      before 
+    you boot your scenario. If you have already
+    booted the scenario, unboot it, add the student group, and the boot it again.
+
+  %h3 
+    VII. Boot scenario
+
+  %font{:size => 4}
+    At the top of the scenario page, click the 'Boot' button on the left. The full booting process
+    can take anywhere from five minutes on smaller scenarios, to fifteen or twenty on the larger 
+    scenarios (like recon). Once the scenario is booted and fully initialized, your students should
+    be able to use their credentials (which they can see once logged into cloud.edurange.edu), to
+    ssh to the NAT instance.
+
+  %br
+  %br
+  %footer
+   
+    %br
+    %br
+    %br
