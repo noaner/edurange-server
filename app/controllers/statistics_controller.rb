@@ -101,12 +101,16 @@ class StatisticsController < ApplicationController
     # save statistic bash history
     statistic = Statistic.find(params[:id])
     
-    # Download bash histories and analytics in a file
-    bash_analytics = ""
-    statistic.bash_analytics.each do |analytic| 
-      bash_analytics = bash_analytics + "#{analytic}" + "\n"
-    end
-    file_text = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nBash Histories: \n \n#{statistic.bash_histories} \nBash Analytics: \n#{bash_analytics}"
+    # Download bash histories
+
+    # Currently we are not including the bash analytics as part of this file
+    # Instead, we are running analytics on the data using python scripts
+    #bash_analytics = ""
+    #statistic.bash_analytics.each do |analytic| 
+    #  bash_analytics = bash_analytics + "#{analytic}" + "\n"
+    #end
+
+    file_text = "Scenario #{statistic.scenario_name} created at #{statistic.scenario_created_at}\nStatistic #{statistic.id} created at #{statistic.created_at}\n\nBash Histories: \n \n#{statistic.bash_histories} \n"
     file_path = "#{Rails.root}/data/statistics/#{statistic.id}_Statistic_#{statistic.scenario_name}.txt"
     file_name = "#{statistic.id}_Statistic_#{statistic.scenario_name}.txt"
     if File.exist?(file_path)
