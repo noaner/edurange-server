@@ -33,7 +33,7 @@ class Scenario < ActiveRecord::Base
 
   def get_aws_prefixes
     content = open('https://ip-ranges.amazonaws.com/ip-ranges.json').read
-    arr = JSON.parse(content)["prefixes"].select { |p| p["region"] == "us-west-2" }.map { |p| p["ip_prefix"] }
+    arr = JSON.parse(content)["prefixes"].select { |p| p["region"] == "#{Settings.region}" }.map { |p| p["ip_prefix"] }
     self.update_attribute(:aws_prefixes, arr)
   end
 
