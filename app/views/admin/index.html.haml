@@ -104,10 +104,10 @@
         %div.failure
           FAILED TO VALIDATE CREDENTIALS
       %b Access Key ID:
-      = ENV["AWS_ACCESS_KEY_ID"]
+      = ENV["AWS_ACCESS_KEY_ID"].sub(/^.............../, "...............")
       %br
       %b Access Key:
-      = ENV["AWS_SECRET_ACCESS_KEY"]
+      = ENV["AWS_SECRET_ACCESS_KEY"].sub(/^.................................../, "...................................")
       %br
       %b Region:
       = ENV["AWS_REGION"]
