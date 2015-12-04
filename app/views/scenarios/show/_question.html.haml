@@ -46,6 +46,11 @@
             %b Value:
             %span{ id: "value"}
               = value[:value]
+            - if value[:special] != ''
+              %br
+              %b Special:
+              %span{ id: "special"}
+                = value[:special]
             %br
             %b Points:
             %span{ id: "points"}

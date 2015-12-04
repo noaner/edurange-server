@@ -15,7 +15,7 @@
           %li.divider
           - if instance.scenario.modifiable?
             %li{ id: "instance-#{instance.id}-modify-button-li", class: instance.stopped? ? "" : "disabled" }
-              = link_to 'Modify', "#modal-instance-modify", :data => {:toggle=>"modal"}, onclick: "$('#modal-instance-modify').find('#instance_id').val('#{instance.id}'); $('#modal-instance-modify').find('#instance-name').html($('#instance-#{instance.id}-name').html().trim()); $('#modal-instance-modify').find('#name-div').removeClass('has-error'); $('#modal-instance-modify').find('#name-help').html(''); $('#modal-instance-modify').find('#ip-div').removeClass('has-error'); $('#modal-instance-modify').find('#ip-help').html(''); $('#modal-instance-modify').find('#internet-accessible-div').removeClass('has-error'); $('#modal-instance-modify').find('#internet-accessible-help').html(''); $('#modal-instance-modify').find('#os-div').removeClass('has-error'); $('#modal-instance-modify').find('#os-help').html(''); $('#modal-instance-modify').find('#name').val($('#instance-#{instance.id}-name').html().trim()); $('#modal-instance-modify').find('#ip_address').val($('#instance-#{instance.id}-ip-address').html().trim()); $('#modal-instance-modify').find('#internet_accessible').val($('#instance-#{instance.id}-internet-accessible').html().trim()); $('#modal-instance-modify').find('#os').val($('#instance-#{instance.id}-os').html().trim()); $('#modal-instance-modify').find('#help-div').removeClass('has-error'); $('#modal-instance-modify').find('#help-help').html('');", id: "instance-#{instance.id}-modify-button"
+              = link_to 'Modify', "#modal-instance-modify", :data => {:toggle=>"modal"}, onclick: "instance_modify(#{instance.id})", id: "instance-#{instance.id}-modify-button"
           %li{ id: "instance-#{instance.id}-delete-button-li", class: instance.stopped? ? "" : "disabled" }
             = link_to 'Delete', instance_delete_scenario_path(instance_id: instance), method: :post, remote: true, id: "instance-#{instance.id}-delete-button"
           %li.divider
@@ -35,8 +35,16 @@
     = instance.driver_id == nil ? "not set" : instance.driver_id
   %br
   IP:
-  %span{ id: "instance-#{instance.id}-ip-address" }
+  %span{ id: "instance-#{instance.id}-ip-address", ipaddress: instance.name }
     = instance.ip_address
+  %br
+  IP Dynamic:
+  %span{ id: "instance-#{instance.id}-ip-address-dynamic" }
+    - if instance.ip_address_dynamic != "" and instance.ip_address_dynamic != nil
+      = instance.ip_address_dynamic.str
+  %span{ id: "instance-#{instance.id}-ip-address-dynamic-button", class: (instance.ip_address_dynamic == "" or not instance.stopped?) ? "hidden" : "" }
+    - if instance.scenario.modifiable?
+      = link_to 'roll for new ip', instance_dynamic_ip_roll_scenario_path(instance_id: instance), remote: true, method: :post
   %br
   Internet Accessible:
   %span{ id: "instance-#{instance.id}-internet-accessible" }

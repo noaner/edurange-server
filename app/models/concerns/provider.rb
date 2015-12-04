@@ -58,13 +58,12 @@ module Provider
       if not (self.stopped? or self.partially_booted?)
         errors.add(:boot, "#{self.class} must be stopped or partially booted to boot")
         return false
-      end
-    elsif not self.stopped?
-      errors.add(:boot, "#{self.class} must be stopped to boot")
-      return false
-    end
-
-    if classname == Subnet
+      end  
+    # elsif not self.stopped?
+    #   errors.add(:boot, "#{self.class} must be stopped to boot")
+    #   return false
+    # end
+    elsif classname == Subnet
       if not self.cloud.booted?
         errors.add(:boot, "Subnets cloud must be booted")
         return false
@@ -76,17 +75,13 @@ module Provider
       end
     end 
 
-
+    # don't try booting if vpc limit is reached
     if classname == Scenario or classname = Cloud
       if AWS::EC2.new.vpcs.count >= Settings.vpc_limit
         errors.add(:boot, "VPC limit of #{Settings.vpc_limit} reached, find AWS edurange admin for help.")
         return false
       end
     end
-
-
-    self.clear_log
-    self.debug_booting
     
     if options[:debug]
       self.bootme(options)
@@ -95,6 +90,8 @@ module Provider
       self.set_queued_boot
       self.delay(queue: self.class.to_s.downcase).bootme(options)
     else
+      self.clear_log
+      self.debug_booting
       if not self.bootme(options)
         return false
       end
@@ -104,10 +101,9 @@ module Provider
   end
 
   def bootme(options = {})
-    self.set_booting
-    if not self.send("provider_boot_#{self.class.to_s.downcase}", options)
-      return false
-    end
+    self.set_queued_boot
+    return false if not self.send("provider_boot_#{self.class.to_s.downcase}", options)
+    self.set_booted
     true
   end
 

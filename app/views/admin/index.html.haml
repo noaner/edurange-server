@@ -96,8 +96,13 @@
         From:
         =@user.last_sign_in_ip
 
+    
+
     %label AWS Settings:
     %dl
+      - if not @aws_working
+        %div.failure
+          FAILED TO VALIDATE CREDENTIALS
       %b Access Key ID:
       = ENV["AWS_ACCESS_KEY_ID"]
       %br

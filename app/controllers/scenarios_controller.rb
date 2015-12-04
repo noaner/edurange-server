@@ -1,3 +1,5 @@
+require 'dynamic_ip'
+
 class ScenariosController < ApplicationController
   before_action :authenticate_admin_or_instructor
   before_action :set_user
@@ -29,7 +31,8 @@ class ScenariosController < ApplicationController
 
   # Instance
   before_action :set_instance, only: [
-    :boot_instance, :unboot_instance, :instance_role_add, :instance_delete, :instance_bash_history, :instance_chef_error, :instance_modify
+    :boot_instance, :unboot_instance, :instance_role_add, :instance_delete, :instance_bash_history, :instance_chef_error, :instance_modify,
+    :instance_dynamic_ip_roll
   ]
 
   # Group
@@ -46,7 +49,7 @@ class ScenariosController < ApplicationController
 
   # Role
   before_action :set_role, only: [
-    :role_recipe_add, :role_delete, :role_modify
+    :role_recipe_add, :role_delete, :role_modify, :role_package_add, :role_package_remove
   ]
   before_action :set_recipe, only: [
     :recipe_remove, :recipe_update, :recipe_update_view, :recipe_update, :recipe_view
@@ -119,7 +122,11 @@ class ScenariosController < ApplicationController
     respond_to do |format|
       if @scenario.errors.any?
         @scenario.destroy
-        format.html { redirect_to '/scenarios/new', alert: "There was an error creating Scenario #{@scenario.name} please contact administrator."}
+        if Rails.env == 'production'
+          format.html { redirect_to '/scenarios/new', alert: "There was an error creating Scenario #{@scenario.name} please contact administrator."}
+        else
+          format.html { redirect_to '/scenarios/new', alert: "There was an error creating Scenario #{@scenario.name}. #{@scenario.errors.messages}"}
+        end
       else
         format.html { redirect_to @scenario, notice: 'Scenario was successfully created.' }
       end
@@ -427,6 +434,7 @@ class ScenariosController < ApplicationController
     @instance.update(
       name:  params[:name],
       ip_address:  params[:ip_address],
+      ip_address_dynamic:  params[:ip_address_dynamic],
       internet_accessible:  params[:internet_accessible],
       os:  params[:os]
     )
@@ -461,6 +469,13 @@ class ScenariosController < ApplicationController
     @chef_error = @instance.get_chef_error.gsub("\"", "\\\"").gsub(/\n/, "\\n").gsub(/\r/, "").html_safe
     respond_to do |format|
       format.js { render template: 'scenarios/js/instance/chef_error.js.erb', layout: false }
+    end
+  end
+
+  def instance_dynamic_ip_roll
+    @instance.ip_roll
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/instance/dynamic_ip_roll.js.erb', layout: false }
     end
   end
 
@@ -597,6 +612,22 @@ class ScenariosController < ApplicationController
     end
   end
 
+  def role_package_add
+    @package = params[:name]
+    @role.package_add(@package)
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/role/package_add.js.erb', layout: false }
+    end
+  end
+
+  def role_package_remove
+    @package = params[:name]
+    @role.package_remove(@package)
+    respond_to do |format|
+      format.js { render template: 'scenarios/js/role/package_remove.js.erb', layout: false }
+    end
+  end
+
   def role_recipe_add
     @recipe = @scenario.recipes.find_by_name(params[:name])
     if @recipe
@@ -688,7 +719,7 @@ class ScenariosController < ApplicationController
     values = nil
     if params[:values]
       values = []
-      params[:values].each_with_index do |val, i| values << { value: val, points: params[:value_points][i] } end
+      params[:values].each_with_index do |val, i| values << { value: val, special: params[:special][i], points: params[:value_points][i] } end
     end
 
     @question = @scenario.questions.new(
@@ -717,7 +748,7 @@ class ScenariosController < ApplicationController
     values = nil
     if params[:values]
       values = []
-      params[:values].each_with_index do |val, i| values << { value: val, points: params[:value_points][i] } end
+      params[:values].each_with_index do |val, i| values << { value: val, special: params[:special][i], points: params[:value_points][i] } end
     end
 
     @question.update(

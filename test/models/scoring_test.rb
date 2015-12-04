@@ -45,14 +45,14 @@ class ScoringTest < ActiveSupport::TestCase
 		assert_not q.valid?
 		assert_equal [:values], q.errors.keys
 
-		# hashes shoudl contain the fields 'value' and 'points'
+		# hashes shoudl contain the fields 'value', 'special' and 'points'
 		q.values = [{value: 1}]
 		q.save
 		assert_not q.valid?
 		assert_equal [:values], q.errors.keys
 
-		# hashses should not contain any extra fields
-		q.values = [{value: "foo", points: 1, extra: 2}]
+		# hashses should not contain more than 3 fields
+		q.values = [{value: "foo", special: 'special', points: 1, extra: 2}]
 		q.save
 		assert_not q.valid?
 		assert_equal [:values], q.errors.keys
@@ -87,7 +87,7 @@ class ScoringTest < ActiveSupport::TestCase
 		assert q.valid?
 		assert_equal [], q.errors.keys
 
-		# no equal values
+		# no equivalent values
 		q.type_of = "Number"
 		q.options = ["accept-integer", "accept-decimal"]
 		q.values = [{value: "1", points: 1}, {value: "1.0", points: 1}]
@@ -456,7 +456,7 @@ class ScoringTest < ActiveSupport::TestCase
 		st = users(:student1)
 		q1 = Question.new(text: "foo", type_of: "Number", options: ["accept-integer"], values: [{value: "1", points: 1}], scenario_id: s.id)
 		q1.save
-		assert q1.valid?
+		assert q1.valid?, q1.errors.messages
 		assert_equal [], q1.errors.keys
 
 		# question is not Essay type
@@ -479,6 +479,65 @@ class ScoringTest < ActiveSupport::TestCase
 		a = q1.answer_essay("foo", st.id)
 		assert_equal [], a.errors.keys
 		assert a.valid?
+	end
+
+	test 'special' do
+		scenario = scenarios(:ip_test_scenario)
+		instance = scenario.instances.select { |i| i.name == 'ip_test_instance' }.first
+
+		# test special string
+		q1 = scenario.questions.new(
+			text: "foo", 
+			type_of: "String", 
+			options: [],
+			values: [{value: "$ip_test_instance$", points: 1}]
+		)
+		q1.save
+		assert q1.valid?, q1.errors.messages
+		assert_equal [], q1.errors.keys
+		assert_equal(
+			q1.values.first[:value], 
+			instance.ip_address,
+			"#{q1.values.first[:value]} #{instance.ip_address}"
+		)
+		assert_equal "10.0.0.4", q1.values.first[:value]
+		assert_equal "$ip_test_instance$", q1.values.first[:special]
+
+		# test special string with added chars
+		q1 = scenario.questions.new(
+			text: "foo2", 
+			type_of: "String", 
+			options: [],
+			values: [{value: "before$ip_test_instance$after", points: 1}]
+		)
+		q1.save
+		assert q1.valid?, q1.errors.messages
+		assert_equal [], q1.errors.keys
+		assert_equal(
+			q1.values.first[:value], 
+			'before' + instance.ip_address + 'after',
+			"#{q1.values.first[:value]} #{instance.ip_address}"
+		)
+		assert_equal "before10.0.0.4after", q1.values.first[:value]
+		assert_equal "before$ip_test_instance$after", q1.values.first[:special]
+
+		# test failed special string
+		q1 = scenario.questions.new(
+			text: "foo3", 
+			type_of: "String", 
+			options: [],
+			values: [{value: "$none$p22", points: 1}]
+		)
+		q1.save
+		assert q1.valid?, q1.errors.messages
+		assert_equal [], q1.errors.keys
+		assert_equal(
+			q1.values.first[:value], 
+			"$none$p22",
+			"#{q1.values.first[:value]} #{instance.ip_address}"
+		)
+		assert_not q1.values.first[:special]
+		assert_equal "$none$p22", q1.values.first[:value]
 	end
 
 end

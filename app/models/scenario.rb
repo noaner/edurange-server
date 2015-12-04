@@ -1,7 +1,11 @@
 class Scenario < ActiveRecord::Base
   include Aws
   include Provider
-  attr_accessor :template # For picking a template when creating a new scenario
+  require 'open-uri'
+
+  # attr_accessor :template # For picking a template when creating a new scenario
+
+  serialize :aws_prefixes
   
   belongs_to :user
   has_many :clouds, dependent: :destroy
@@ -14,6 +18,8 @@ class Scenario < ActiveRecord::Base
 
   validate :validate_name, :validate_paths, :validate_user, :validate_stopped
 
+  after_create :get_aws_prefixes
+
   before_destroy :validate_stopped, prepend: true
   # upon the destruction of a scenario, create an
   # entry in the statistic table.
@@ -24,6 +30,12 @@ class Scenario < ActiveRecord::Base
   after_create :load
 
   enum location: [:development, :production, :local, :custom, :test]
+
+  def get_aws_prefixes
+    content = open('https://ip-ranges.amazonaws.com/ip-ranges.json').read
+    arr = JSON.parse(content)["prefixes"].select { |p| p["region"] == "us-west-2" }.map { |p| p["ip_prefix"] }
+    self.update_attribute(:aws_prefixes, arr)
+  end
 
   # Validations
 
@@ -113,6 +125,8 @@ class Scenario < ActiveRecord::Base
       self.uuid = `uuidgen`.chomp
       self.answers = ''
 
+      ip_lookup_hash = {}
+
       roles_name_lookup_hash = {}
       if roles
         roles.each do |yaml_role|
@@ -164,7 +178,7 @@ class Scenario < ActiveRecord::Base
             return false
           end
 
-          yaml_cloud["Subnets"].each do |yaml_subnet|
+          (yaml_cloud["Subnets"] ? yaml_cloud["Subnets"] : []).each do |yaml_subnet|
 
             subnet = cloud.subnets.new(
               name: yaml_subnet["Name"], 
@@ -178,28 +192,24 @@ class Scenario < ActiveRecord::Base
             end
 
             instance_ips = {}
-            yaml_subnet["Instances"].each do |yaml_instance|
-
-              ip_address, instance_ips = YmlRecord.parse_ip(yaml_instance["IP_Address"], instance_ips)
-              if not ip_address
-                errors.add(:load, "could not parse ip address for Instance #{yaml_instance['IP_Address']}")
-                return false
-              end
+            (yaml_subnet["Instances"] ? yaml_subnet["Instances"] : []).each do |yaml_instance|
 
               instance = subnet.instances.new(
                 name: yaml_instance["Name"],
-                ip_address: ip_address,
+                ip_address: yaml_instance["IP_Address"],
+                ip_address_dynamic: yaml_instance["IP_Address_Dynamic"] ? yaml_instance["IP_Address_Dynamic"] : "",
                 internet_accessible: yaml_instance["Internet_Accessible"] ? true : false,
                 os: yaml_instance["OS"],
                 uuid: `uuidgen`.chomp
               )
-              if not instance.save
+              if not instance.save or not instance.valid?
                 self.destroy_dependents
-                errors.add(:load, "error creating instance. #{instance.errors.messages}")
+                errors.add(:load, "error creating Instance #{instance.name}, #{instance.errors.messages}")
                 return false
               end
+              ip_lookup_hash[instance.name] = instance.ip_address
 
-              yaml_instance["Roles"].each do |role_name|
+              (yaml_instance["Roles"] ? yaml_instance["Roles"] : []).each do |role_name|
                 if not role = roles_name_lookup_hash[role_name]
                   errors.add(:load, 'role not found #{role_name}')
                   return false
@@ -259,7 +269,7 @@ class Scenario < ActiveRecord::Base
               instance.add_administrator(group)
               if not instance.save
                 self.destroy_dependents
-                errors.add(:load, "error adding group access admin to instance #{instance.name}")
+                errors.add(:load, "error adding group access admin to instance #{instance.name}, #{instance.errors.messages}")
                 return false
               end
             end
@@ -281,6 +291,7 @@ class Scenario < ActiveRecord::Base
 
       # Do scoring
       if scoring
+        self.reload
         scoring.each do |yaml_question|
 
           question = self.questions.new(
@@ -289,7 +300,9 @@ class Scenario < ActiveRecord::Base
             points: yaml_question["Points"],
             order: yaml_question["Order"],
             options: yaml_question["Options"] ? yaml_question['Options'] : [],
-            values: yaml_question["Values"] ? yaml_question['Values'].map { |val| ({ value: val["Value"], points: val["Points"] }) } : []
+            values: yaml_question["Values"] ? yaml_question['Values'].map { |val|
+              ({ value: val["Value"], points: val["Points"] })
+            } : []
           )
 
           if not question.save
@@ -311,6 +324,90 @@ class Scenario < ActiveRecord::Base
     end
 
     self.reload
+    self.update_attribute(:modified, false)
+  end
+
+  def update_yml
+    if not self.modifiable?
+      self.errors.add(:customizable, "Scenario is not modifiable.")
+      return false
+    end
+    if not self.modified?
+      self.errors.add(:modified, "Scenario is not modified.")
+      return false
+    end
+
+    yml = { 
+      "Name" => self.name, 
+      "Description" => self.description,
+      "Instructions" => self.instructions,
+      "InstructionsStudent" => self.instructions_student,
+      "Groups" => nil,
+      "Clouds" => nil,
+      "Subnets" => nil,
+      "Instances" => nil
+    }
+
+    yml["Roles"] = self.roles.empty? ? nil : self.roles.map { |r|
+      { "Name"=>r.name, 
+        "Packages" => r.packages.empty? ? nil : r.packages, 
+        "Recipes"=>r.recipes.empty? ? nil : r.recipes.map { |rec| rec.name }
+      }
+    }
+
+    yml["Groups"] = self.groups.empty? ? nil : self.groups.map { |group| 
+      { "Name" => group.name,
+        "Instructions" => group.instructions,
+        "Access" => { 
+          "Administrator" => group.instance_groups.select{ |ig| ig.administrator  }.map{ |ig| ig.instance.name },
+          "User" => group.instance_groups.select{ |ig| not ig.administrator  }.map{ |ig| ig.instance.name }
+        },
+        "Users" => group.players.empty? ? nil : group.players.map { |p| { 
+          "Login" => p.login, 
+          "Password" => p.password, 
+          "Id" => self.has_student?(p.user) ? p.user_id : nil,
+          "UserId" => p.user_id,
+          "StudentGroupId" => p.student_group_id
+          } 
+        }
+      }
+    }
+
+    yml["Clouds"] = self.clouds.empty? ? nil : self.clouds.map { |cloud|
+      { 
+      "Name" => cloud.name, 
+      "CIDR_Block" => cloud.cidr_block,
+      "Subnets" => cloud.subnets.empty? ? nil : cloud.subnets.map { |subnet| 
+        {
+        "Name" => subnet.name, 
+        "CIDR_Block" => subnet.cidr_block, 
+        "Internet_Accessible" => subnet.internet_accessible,
+        "Instances" => subnet.instances.empty? ? nil : subnet.instances.map { |instance| 
+          {
+          "Name" => instance.name, 
+          "OS" => instance.os,
+          "IP_Address" => instance.ip_address,
+          "IP_Address_Dynamic" => instance.has_dynamic_ip? ? instance.ip_address_dynamic.str : nil,
+          "Internet_Accessible" => instance.internet_accessible,
+          "Roles" => instance.roles.map { |r| r.name }
+          }
+        }}
+      }}
+    }
+
+    yml["Scoring"] = self.questions.empty? ? nil : self.questions.map { |question| {
+        "Text" => question.text,
+        "Type" => question.type_of,
+        "Options" => question.options,
+        "Values" => question.values == nil ? nil : question.values.map { |vals| { "Value" => vals[:special] == '' ? vals[:value] : vals[:special], "Points" => vals[:points] } },
+        "Order" => question.order,
+        "Points" => question.points
+      }
+    }
+
+    f = File.open("#{self.path}/#{self.name.downcase}.yml", "w")
+    f.write(yml.to_yaml)
+    f.close()
     self.update_attribute(:modified, false)
   end
 
@@ -640,89 +737,6 @@ class Scenario < ActiveRecord::Base
     self.update_yml
 
     return true
-  end
-
-  def update_yml
-    if not self.modifiable?
-      self.errors.add(:customizable, "Scenario is not modifiable.")
-      return false
-    end
-    if not self.modified?
-      self.errors.add(:modified, "Scenario is not modified.")
-      return false
-    end
-
-    yml = { 
-      "Name" => self.name, 
-      "Description" => self.description,
-      "Instructions" => self.instructions,
-      "InstructionsStudent" => self.instructions_student,
-      "Groups" => nil,
-      "Clouds" => nil,
-      "Subnets" => nil,
-      "Instances" => nil
-    }
-
-    yml["Roles"] = self.roles.empty? ? nil : self.roles.map { |r|
-      { "Name"=>r.name, 
-        "Packages" => r.packages.empty? ? nil : r.packages, 
-        "Recipes"=>r.recipes.empty? ? nil : r.recipes.map { |rec| rec.name }
-      }
-    }
-
-    yml["Groups"] = self.groups.empty? ? nil : self.groups.map { |group| 
-      { "Name" => group.name,
-        "Instructions" => group.instructions,
-        "Access" => { 
-          "Administrator" => group.instance_groups.select{ |ig| ig.administrator  }.map{ |ig| ig.instance.name },
-          "User" => group.instance_groups.select{ |ig| not ig.administrator  }.map{ |ig| ig.instance.name }
-        },
-        "Users" => group.players.empty? ? nil : group.players.map { |p| { 
-          "Login" => p.login, 
-          "Password" => p.password, 
-          "Id" => self.has_student?(p.user) ? p.user_id : nil,
-          "UserId" => p.user_id,
-          "StudentGroupId" => p.student_group_id
-          } 
-        }
-      }
-    }
-
-    yml["Clouds"] = self.clouds.empty? ? nil : self.clouds.map { |cloud|
-      { 
-      "Name" => cloud.name, 
-      "CIDR_Block" => cloud.cidr_block,
-      "Subnets" => cloud.subnets.empty? ? nil : cloud.subnets.map { |subnet| 
-        {
-        "Name" => subnet.name, 
-        "CIDR_Block" => subnet.cidr_block, 
-        "Internet_Accessible" => subnet.internet_accessible,
-        "Instances" => subnet.instances.empty? ? nil : subnet.instances.map { |instance| 
-          {
-          "Name" => instance.name, 
-          "OS" => instance.os,
-          "IP_Address" => instance.ip_address, 
-          "Internet_Accessible" => instance.internet_accessible,
-          "Roles" => instance.roles.map { |r| r.name }
-          }
-        }}
-      }}
-    }
-
-    yml["Scoring"] = self.questions.empty? ? nil : self.questions.map { |question| {
-        "Text" => question.text,
-        "Type" => question.type_of,
-        "Options" => question.options,
-        "Values" => question.values == nil ? nil : question.values.map { |vals| { "Value" => vals[:value], "Points" => vals[:points] } },
-        "Order" => question.order,
-        "Points" => question.points
-      }
-    }
-
-    f = File.open("#{self.path}/#{self.name.downcase}.yml", "w")
-    f.write(yml.to_yaml)
-    f.close()
-    self.update_attribute(:modified, false)
   end
 
   def has_student?(user)

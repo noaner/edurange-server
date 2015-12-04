@@ -103,6 +103,24 @@ class Question < ActiveRecord::Base
       end
       return false if err
 
+      # check for extra fields in hash
+      if not (value.size == 2 or value.size == 3)
+        errors.add(:values, "missing or extra fields in value hash #{values}")
+        return false
+      end
+
+      # remove value leading and trailing whitespace
+      value[:value] = value[:value].strip
+
+      # check for special
+      if match_data = /\$.+\$/.match(value[:value])
+        name = match_data.to_s.gsub("$", "")
+        if instance = self.scenario.instances.select { |i| i.name == name }.first
+          value[:special] = value[:value]
+          value[:value] = value[:special].gsub(match_data.to_s, instance.ip_address)
+        end
+      end
+
       # check that points are integers
       if not value[:points].to_i > 0 and value[:points].is_integer?
         errors.add(:values, "points is not zero or positive integer")
@@ -112,15 +130,6 @@ class Question < ActiveRecord::Base
 
       # add points to total
       points_total += value[:points].to_i
-
-      # check for extra fields in hash
-      if value.size != 2
-        errors.add(:values, "extra fields in value hash")
-        return false
-      end
-
-      # remove value leading and trailing whitespace
-      value[:value] = value[:value].strip
 
       # check for duplicate values keep track of values in valuearr
       if self.type_of == "String"
@@ -158,7 +167,7 @@ class Question < ActiveRecord::Base
         accepted = true if value[:value].is_hex?
       end
       if not accepted
-        errors.add(:values, 'value is not in an accepted format see options')
+        errors.add(:values, "value '#{value[:value]}' is not in an accepted format see options")
         return false
       end
     end
@@ -268,7 +277,6 @@ class Question < ActiveRecord::Base
     end
 
     if text == ""
-      puts "\nBLANKK"
       answer.errors.add(:text, 'can not be blank')
       return answer
     end

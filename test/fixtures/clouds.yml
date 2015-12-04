@@ -1,0 +1,9 @@
+
+iptest_cloud:
+  id: 333
+  name: 'iptest_cloud'
+  scenario_id: 333
+
+role_test_cloud:
+  id: 344
+  scenario_id: 344

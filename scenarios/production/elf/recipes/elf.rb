@@ -5,8 +5,8 @@ script "install_elf" do
 
   code <<-EOH
   cd /tmp
-  git clone https://github.com/kahea/elf
-  cd elf
+  git clone https://github.com/edurange/scenario-elf
+  cd scenario-elf
   ./install
   cd /tmp
   touch test-file

@@ -5,6 +5,14 @@ class AdminController < ApplicationController
   def index
     @instructors = User.where role: 3
     @students = User.where role: 4
+
+    begin
+      @aws_working = AWS::EC2.new.vpcs.count
+    rescue => e
+      puts e
+      puts e.backtrace
+      @aws_working = nil
+    end
   end
 
   def instructor_create

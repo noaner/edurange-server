@@ -33,7 +33,7 @@ Roles:
       - wheelie
 
 Groups:
-  - Name: Team_1
+  - Name: Instructor
     Access:
       Administrator:
         - Team_1_Instance
@@ -52,6 +52,13 @@ Groups:
     Users:
       - Login: instructor
         Password: vLCu3Crf
+
+  - Name: Team_1
+    Access:
+      Administrator:
+        - Team_1_Instance
+      User:
+        - NAT_Instance
 
 Clouds:
 - Name: Cloud_1
@@ -88,28 +95,32 @@ Clouds:
     - Name: Battlespace_1_Instance
       Subnet: Battlespace_Subnet
       OS: ubuntu
-      IP_Address: &bs_1_ip 10.0.0-32.2-255
+      IP_Address:
+      IP_Address_Dynamic: 10.0.0-32.4-255
       Roles:
         - web_server
 
     - Name: Battlespace_2_Instance
       Subnet: Battlespace_Subnet
       OS: ubuntu
-      IP_Address: &bs_2_ip 10.0.0-32.2-255
+      IP_Address:
+      IP_Address_Dynamic: 10.0.0-32.4-255
       Roles:
         - dns_server
 
     - Name: Battlespace_3_Instance
       Subnet: Battlespace_Subnet
       OS: ubuntu
-      IP_Address: &bs_3_ip 10.0.33-64.2-255
+      IP_Address:
+      IP_Address_Dynamic: 10.0.33-64.4-255
       Roles:
         - dns_server
 
     - Name: Battlespace_4_Instance
       Subnet: Battlespace_Subnet
       OS: ubuntu
-      IP_Address: &bs_4_ip 10.0.33-64.2-255
+      IP_Address:
+      IP_Address_Dynamic: 10.0.33-64.4-255
       Roles:
         - dns_server
         - web_server
@@ -117,42 +128,48 @@ Clouds:
     - Name: Battlespace_5_Instance
       Subnet: Battlespace_Subnet
       OS: ubuntu
-      IP_Address: &bs_5_ip 10.0.33-64.2-255
+      IP_Address:
+      IP_Address_Dynamic: 10.0.33-64.4-255
       Roles:
         - web_server
 
     - Name: Battlespace_6_Instance
       Subnet: Battlespace_Subnet
       OS: ubuntu
-      IP_Address: &bs_6_ip 10.0.65-100.2-255
+      IP_Address:
+      IP_Address_Dynamic: 10.0.65-100.4-255
       Roles:
         - web_server
 
     - Name: Battlespace_7_Instance
       Subnet: Battlespace_Subnet
       OS: ubuntu
-      IP_Address: &bs_7_ip 10.0.65-100.2-255
+      IP_Address:
+      IP_Address_Dynamic: 10.0.65-100.4-255
       Roles:
         - web_server
 
     - Name: Battlespace_8_Instance
       Subnet: Battlespace_Subnet
       OS: ubuntu
-      IP_Address: &bs_8_ip 10.0.64-127.2-255
+      IP_Address:
+      IP_Address_Dynamic: 10.0.64-127.4-255
       Roles:
         - web_server
 
     - Name: Battlespace_9_Instance
       Subnet: Battlespace_Subnet
       OS: ubuntu
-      IP_Address: &bs_9_ip 10.0.90-127.2-255
+      IP_Address:
+      IP_Address_Dynamic: 10.0.90-127.4-255
       Roles:
         - disable_ping
 
     - Name: Battlespace_10_Instance
       Subnet: Battlespace_Subnet
       OS: ubuntu
-      IP_Address: &bs_10_ip 10.0.120-127.2-255
+      IP_Address:
+      IP_Address_Dynamic: 10.0.120-127.4-255
       Roles:
         - disable_ping
         - ssh_port_2345

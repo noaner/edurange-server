@@ -1,0 +1,14 @@
+
+s3test:
+  name: 's3test'
+  os: 'ubuntu'
+
+ip_test_instance:
+  id: 333
+  name: 'ip_test_instance'
+  ip_address: '10.0.0.4'
+  subnet_id: 333
+
+role_test_instance:
+  id: 344
+  subnet_id: 344

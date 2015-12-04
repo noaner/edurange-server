@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+echo "starting - CLOUD INIT"
+
+# Ubuntu
+
+apt-get -y update
+
+hostname <%= instance.uuid %>

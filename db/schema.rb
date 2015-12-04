@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151115234353) do
+ActiveRecord::Schema.define(version: 20151202230626) do
 
   create_table "answers", force: :cascade do |t|
     t.boolean  "correct"
@@ -105,6 +105,7 @@ ActiveRecord::Schema.define(version: 20151115234353) do
     t.string   "bash_history_page",   default: ""
     t.string   "exit_status_page",    default: ""
     t.string   "script_log_page",     default: ""
+    t.string   "ip_address_dynamic",  default: ""
   end
 
   add_index "instances", ["subnet_id"], name: "index_instances_on_subnet_id"
@@ -181,6 +182,7 @@ ActiveRecord::Schema.define(version: 20151115234353) do
     t.text     "instructions_student",  default: ""
     t.integer  "location",              default: 0
     t.boolean  "modifiable",            default: false
+    t.string   "aws_prefixes"
   end
 
   create_table "statistics", force: :cascade do |t|

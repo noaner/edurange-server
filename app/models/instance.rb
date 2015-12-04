@@ -1,10 +1,10 @@
 class Instance < ActiveRecord::Base
   include Provider
   include Aws
+  require 'open-uri'
+  require 'dynamic_ip'
 
-  validates_presence_of :name, :os, :subnet
   belongs_to :subnet
-
   has_many :instance_groups, dependent: :destroy
   has_many :instance_roles, dependent: :destroy
   has_many :groups, through: :instance_groups, dependent: :destroy
@@ -12,10 +12,11 @@ class Instance < ActiveRecord::Base
   has_one :user, through: :subnet
   has_one :scenario, through: :subnet
 
-  before_create :ensure_has_ip
+  serialize :ip_address_dynamic
+
+  validates_presence_of :name, :os, :subnet
   validates :name, presence: true, uniqueness: { scope: :subnet, message: "Name taken" } 
-  validates :ip_address, presence: true
-  validate :ip_address_validate, :internet_accessible_validate, :validate_stopped
+  validate :validate_stopped, :validate_internet_accessible, :validate_ip_address
 
   after_destroy :update_scenario_modified
   before_destroy :validate_stopped
@@ -31,11 +32,70 @@ class Instance < ActiveRecord::Base
     true
   end
 
+  def validate_internet_accessible
+    if self.internet_accessible and not self.subnet.internet_accessible
+      errors.add(:internet_accessible, "Instances subnet must also be internet accessible")
+    end
+  end
+
+  def validate_ip_address
+    if not self.ip_address_dynamic == "" and self.ip_address_dynamic and not self.has_dynamic_ip?
+      dip = DynamicIP.new(self.ip_address_dynamic)
+      if dip.error?
+        errors.add(:ip_address_dynamic, "DynamicIP error: #{dip.error}")
+        return false
+      end
+      self.update_attribute(:ip_address_dynamic, dip)
+      if not self.ip_address or self.ip_address == ""
+        self.update_attribute(:ip_address, dip.ip)
+      else
+        dip.ip = self.ip_address
+        self.update_attribute(:ip_address_dynamic, dip)
+      end
+    end
+
+    ip = IPAddress.valid_ipv4?(self.ip_address)
+    if not ip
+      errors.add(:ip_address, "IP address is not valid")
+      return false
+    end
+
+    if not NetAddr::CIDR.create(self.subnet.cidr_block).cmp(self.ip_address)
+      errors.add(:ip_address, "IP address is not within instances subnet #{self.subnet.name} #{self.subnet.cidr_block}")
+      return false
+    end
+
+    self.subnet.instances.each do |instance|
+      next if self == instance
+      if self.ip_address == instance.ip_address
+        errors.add(:ip_address, "IP address is taken")
+        return false
+      end
+    end
+
+    if self.ip_address.split('.').last.to_i <= 3
+      errors.add(:ip_address, "the last octect of your ip address must be greater than 3. numbers less than 4 are reserved")
+      return false
+    end
+  end
+
+  def ip_roll
+    if self.ip_address_dynamic
+      self.ip_address_dynamic.roll
+      self.update_attribute(:ip_address, self.ip_address_dynamic.ip)
+      self.update_scenario_modified
+    end
+  end
+
   def update_scenario_modified
     if self.scenario.modifiable?
       self.scenario.update_attribute(:modified, true)
     end
     true
+  end
+
+  def has_dynamic_ip?
+    return self.ip_address_dynamic.respond_to?(:octets)
   end
 
   def role_add(role_name)
@@ -59,34 +119,6 @@ class Instance < ActiveRecord::Base
     ir.save
     update_scenario_modified
     return ir
-  end
-
-  def ip_address_validate
-
-    ip = IPAddress.valid_ipv4?(self.ip_address)
-    if not ip
-      errors.add(:ip_address, "IP Address is not valid")
-      return
-    end
-
-    if not NetAddr::CIDR.create(self.subnet.cidr_block).cmp(self.ip_address)
-      errors.add(:ip_address, "IP Address is not within instances subnet #{self.subnet.name} #{self.subnet.cidr_block}")
-      return
-    end
-
-    self.subnet.instances.each do |instance|
-      next if self == instance
-      if self.ip_address == instance.ip_address
-        errors.add(:ip_address, "IP Address is taken")
-      end
-    end 
-
-  end
-
-  def internet_accessible_validate
-    if self.internet_accessible and not self.subnet.internet_accessible
-      errors.add(:internet_accessible, "Instances subnet must also be internet accessible")
-    end
   end
 
   def bootable?
@@ -243,13 +275,6 @@ class Instance < ActiveRecord::Base
     return false
   end
 
-  def ensure_has_ip
-    if self.ip_address.blank?
-      return false # TODO set this to a valid IP in subnet cidr
-    end
-    true
-  end
-
   def s3_name_prefix
     scenario = self.subnet.cloud.scenario
     return scenario.user.name + scenario.name + scenario.id.to_s + scenario.uuid
@@ -275,10 +300,33 @@ class Instance < ActiveRecord::Base
         init += Erubis::Eruby.new(File.read(os_bootstrap_path)).result(instance: self) + "\n"
       end
 
+      # initiate chef
       init += Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/chef.sh.erb")).result(instance: self) + "\n"
+
+      # do routing rules
+      # routing_rules = Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/ip_tables.sh.erb")).result(instance: self) + "\n"
+      # s3_routing_rules = ''
+      # self.scenario.aws_prefixes.each do |aws_prefix|
+      #   s3_routing_rules += "iptables -A OUTPUT -d #{aws_prefix} -p tcp --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT\n"
+      #   s3_routing_rules += "iptables -A INPUT -d #{aws_prefix} -p tcp --sport 443 -m state --state ESTABLISHED -j ACCEPT\n"
+      # end
+      # init += routing_rules.gsub("<s3_routing_rules>", s3_routing_rules)
+
+      # enable ssh password login by default
       init += Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/sshd_password_login.sh.erb")).result(instance: self) + "\n"
 
-      # Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/recipes/templates/bootstrap.sh.erb")).result(instance: self) + "\n"
+      # message of the day
+      motd_folder_path = self.scenario.path + '/motd'
+      if not File.exists? motd_folder_path
+        FileUtils.mkdir motd_folder_path
+      end
+      motd_path = motd_folder_path + '/' + self.name.filename_safe
+      if File.exists? motd_path
+        motd = File.open(motd_path, 'r').read().gsub("\n", "\\n").gsub("\t", "\\t").gsub("\"", "\\\"")
+
+        init += 'echo -e "' + motd + '" >> /etc/motd'
+      end
+
       init
     rescue
       raise
@@ -310,6 +358,15 @@ class Instance < ActiveRecord::Base
       # This recipe changes /etc/bash.bashrc so that the bash history is written to file with every command
       cookbook += Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/write_bash_histories.rb.erb")).result(instance: self) + "\n"
       
+      # do iptables rules
+      routing_rules = Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/ip_tables.sh.erb")).result(instance: self) + "\n"
+      s3_routing_rules = ''
+      self.scenario.aws_prefixes.each do |aws_prefix|
+        s3_routing_rules += "iptables -A OUTPUT -d #{aws_prefix} -p tcp --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT\n"
+        s3_routing_rules += "iptables -A INPUT -d #{aws_prefix} -p tcp --sport 443 -m state --state ESTABLISHED -j ACCEPT\n"
+      end
+      cookbook += routing_rules.gsub("<s3_routing_rules>", s3_routing_rules)
+
       cookbook
     rescue
       raise

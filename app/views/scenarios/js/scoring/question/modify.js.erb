@@ -48,8 +48,14 @@
   <% end %>
 
   $('#question-<%= @question.id %>-values').empty();
+  
   <% @question.values.each_with_index do |value, i| %>
-    $('#question-<%= @question.id %>-values').append('<li id="value-<%= i %>-li"><b>Value: </b><span id="value"><%= value[:value] %></span></br><b>Points: </b><span id="points"><%= value[:points] %></span></li>');
+    special_span = ''
+    <% if value[:special] != '' %>
+      special_span = '<%= escape_javascript("</br><b>Special: </b><span id=\"special\">#{value[:special]}</span>".html_safe) %>';
+    <% end %>
+    
+    $('#question-<%= @question.id %>-values').append('<li id="value-<%= i %>-li"><b>Value: </b><span id="value"><%= value[:value] %></span>' + special_span + '</br><b>Points: </b><span id="points"><%= value[:points] %></span></li>');
   <% end %>
 
   $('#modal-scoring-question-modify').modal('toggle');

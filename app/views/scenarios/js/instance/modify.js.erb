@@ -13,6 +13,13 @@
     $('#modal-instance-modify').find('#ip-div').removeClass('has-error');
     $('#modal-instance-modify').find('#ip-help').text('');
   <% end %>
+  <% if @instance.errors[:ip_address_dynamic].any? %>
+    $('#modal-instance-modify').find('#ip-dynamic-div').addClass('has-error');
+    $('#modal-instance-modify').find('#ip-dynamic-help').text('<%= @instance.errors[:ip_address_dynamic][0] %>');
+  <% else %>
+    $('#modal-instance-modify').find('#ip-dynamic-div').removeClass('has-error');
+    $('#modal-instance-modify').find('#ip-dynamic-help').text('');
+  <% end %>
   <% if @instance.errors[:internet_accessible].any? %>
     $('#modal-instance-modify').find('#internet-accessible-div').addClass('has-error');
     $('#modal-instance-modify').find('#internet-accessible-help').text('<%= @instance.errors[:internet_accessible][0] %>');
@@ -47,6 +54,8 @@
 
   $('#instance-<%= @instance.id %>-name').text('<%= @instance.name %>');
   $('#instance-<%= @instance.id %>-ip-address').text('<%= @instance.ip_address %>');
+  $('#instance-<%= @instance.id %>-ip-address-dynamic').text('<%= @instance.ip_address_dynamic == "" ?  "" : @instance.ip_address_dynamic.str %>');
+  $('#instance-<%= @instance.id %>-ip-address-dynamic-button').attr('class', '<%= @instance.ip_address_dynamic == "" ? "hidden" : "" %>');
   $('#instance-<%= @instance.id %>-internet-accessible').text('<%= @instance.internet_accessible %>');
   $('#instance-<%= @instance.id %>-os').text('<%= @instance.os %>');
   $('#modal-instance-modify').modal('toggle');

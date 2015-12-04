@@ -15,13 +15,26 @@ class Role < ActiveRecord::Base
 
   def instances_stopped
     self.instance_roles.each do |instance_role|
+      instances = []
       if not instance_role.instance.stopped?
-        errors.add(:running, "instances using this role must be stopped before deletion")
+        instances << instance_role.instance.name
+      end
+      if instances.size > 0
+        errors.add(:running, "the following instances using this role must be stopped before deletion or modification of role. #{instances.to_s}")
         return false
       end
     end
     if self.scenario.modifiable?
       self.scenario.update(modified: true)
+    end
+    true
+  end
+
+  def instances_stopped?
+    self.instance_roles.each do |instance_role|
+      if not instance_role.instance.stopped?
+        return false
+      end
     end
     true
   end
@@ -33,9 +46,34 @@ class Role < ActiveRecord::Base
     true
   end
 
-  def instances_stopped?
-    self.instance_roles.each do |instance_role|
-      return false if not instance_role.instance.stopped? 
+  def package_add(name)
+    if name.class != String or name == ''
+      errors.add(:packages, 'package must be non blank String')
+      return false
+    end
+    if self.packages.include? name
+      errors.add(:packages, "package already exists")
+      return false
+    else
+      self.update(packages: packages << name )
+      if self.errors.any?
+        return false
+      end
+    end
+    true
+  end
+
+  def package_remove(name)
+    if not self.packages.include? name
+      errors.add(:packages, "package does not exist")
+      return false
+    else
+      packages = self.packages
+      packages.delete(name)
+      self.update(packages: packages)
+      if self.errors.any?
+        return false
+      end
     end
     true
   end

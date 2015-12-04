@@ -308,6 +308,11 @@
             = text_field_tag "ip_address", nil, class: 'form-control'
             %span.help-block.inline#ip-help
           %p
+          %div#ip-dynamic-div
+            = label_tag nil, "IP Address Dynamic:", class: 'control-label'
+            = text_field_tag "ip_address_dynamic", nil, class: 'form-control'
+            %span.help-block.inline#ip-dynamic-help
+          %p
           %div#internet-accessible-div
             = label_tag nil, "Internet Accessible:", class: 'control-label'
             = select_tag "internet_accessible", options_for_select(["true", "false"]), class: 'form-control'
@@ -590,6 +595,30 @@
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
+%div.modal#modal-role-package-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Add Package:
+          %span#role-name
+      %div.modal-body#modalbody
+        = form_tag role_package_add_scenario_path(@scenario), remote:true, method: :post do
+          = hidden_field_tag "role_id"
+          %div#name-div
+            = label_tag "Name:", nil, class: 'control-label'
+            = text_field_tag "name", nil, class: 'form-control'
+            %span.help-block#name-help
+          %p
+          %div#help-div
+            %span.help-block#help-help
+          = submit_tag "Submit", :class => 'btn btn-default'
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
 %div.modal#modal-role-recipe-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
@@ -834,7 +863,10 @@
           = label_tag "Value:"
           = text_field_tag "value", nil, class: 'form-control'
           %div.help-block#value-help
-        %br
+        / %div#special-div
+        /   = label_tag "Special:"
+        /   = text_field_tag "special", nil, class: 'form-control'
+        /   %div.help-block#special-help
         %div#points-div
           = label_tag "Points:"
           = text_field_tag "points", nil, class: 'form-control'

@@ -81,6 +81,7 @@ Edurange::Application.routes.draw do
       post 'instance_modify'
       post 'instance_role_add'
       post 'instance_role_remove'
+      post 'instance_dynamic_ip_roll'
 
       post 'group_add'
       post 'group_modify'
@@ -102,6 +103,8 @@ Edurange::Application.routes.draw do
       post 'role_add'
       post 'role_delete'
       post 'role_modify'
+      post 'role_package_add'
+      post 'role_package_remove'
       post 'role_recipe_add'
       post 'role_recipe_remove'
 

@@ -1,0 +1,9 @@
+
+iptest_subnet:
+  id: 333
+  name: 'iptest_subnet'
+  cloud_id: 333
+
+role_test_subnet:
+  id: 344
+  cloud_id: 344

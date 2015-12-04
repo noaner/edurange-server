@@ -101,4 +101,60 @@ class ScenarioTest < ActiveSupport::TestCase
     assert scenario.answers.class == String
   end
 
+  test 'ip address should be valid' do
+    instructor = users(:instructor999999999)
+    scenario = instructor.scenarios.new(location: :test, name: 'dynamicip')
+    scenario.save
+
+    assert_not scenario.errors.any?, scenario.errors.messages
+
+    instance = scenario.instances.first
+    ip = scenario.instances.first.ip_address
+    dip = scenario.instances.first.ip_address_dynamic
+
+    # ip address should be assigned
+    assert ip
+
+    # ip address should be valid and within subnets ip
+    assert IPAddress.valid_ipv4?(ip)
+    assert NetAddr::CIDR.create(instance.subnet.cidr_block).cmp(ip)
+
+    # assert that dynamic_ip is of class DynamicIP
+    assert dip.class == DynamicIP, "ip class is #{dip.class} should be DynamicIP"
+    assert_not dip.error?
+
+    # roll for a new IP
+    ip = instance.ip_address
+    instance.ip_roll
+    ip2 = instance.ip_address
+
+    assert ip != ip2, "ip should not be the same after roll. #{ip} != #{ip2}"
+  end
+
+  test 'dynamic ip address' do
+
+  end
+
+  test 'special question values' do
+    instructor = users(:instructor999999999)
+    scenario = instructor.scenarios.new(location: :test, name: 'special_question_values')
+    scenario.save
+    assert scenario.valid?, scenario.errors.messages
+
+    question = scenario.questions.first
+    assert_equal(
+      question.values.first[:value], 
+      scenario.instances.first.ip_address,
+      "#{question.values.first[:value]} != #{scenario.instances.first.ip_address}"
+    )
+    assert_equal question.values.first[:special], "$Instance_1$"
+    assert_equal(
+      question.values.second[:value], 
+      scenario.instances.second.ip_address,
+      "#{question.values.second[:value]} != #{scenario.instances.second.ip_address}"
+    )
+    assert_equal question.values.second[:special], "$Instance_2$"
+
+  end
+
 end

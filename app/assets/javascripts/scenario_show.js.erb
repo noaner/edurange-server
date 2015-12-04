@@ -1,15 +1,82 @@
 
+// Instances
+function instance_modify (id) {
+	$('#modal-instance-modify').find('#instance_id').val(id); 
+	$('#modal-instance-modify').find('#instance-name').html($('#instance-' + id + '-name').html().trim());
+
+	$('#modal-instance-modify').find('#name-div').removeClass('has-error'); 
+	$('#modal-instance-modify').find('#name-help').html('');
+	$('#modal-instance-modify').find('#name').val($('#instance-' + id + '-name').html().trim());
+
+	$('#modal-instance-modify').find('#ip-div').removeClass('has-error'); 
+	$('#modal-instance-modify').find('#ip-help').html('');
+	$('#modal-instance-modify').find('#ip_address').val($('#instance-' + id + '-ip-address').html().trim());
+
+	$('#modal-instance-modify').find('#ip-dynamic-div').removeClass('has-error'); 
+	$('#modal-instance-modify').find('#ip-dynamic-help').html('');
+	$('#modal-instance-modify').find('#ip_address_dynamic').val($('#instance-' + id + '-ip-address-dynamic').html().trim());
+
+	$('#modal-instance-modify').find('#internet-accessible-div').removeClass('has-error'); 
+	$('#modal-instance-modify').find('#internet-accessible-help').html('');
+	$('#modal-instance-modify').find('#internet_accessible').val($('#instance-' + id + '-internet-accessible').html().trim());
+
+	$('#modal-instance-modify').find('#os-div').removeClass('has-error'); 
+	$('#modal-instance-modify').find('#os-help').html(''); 
+	$('#modal-instance-modify').find('#os').val($('#instance-' + id + '-os').html().trim()); 
+	
+	$('#modal-instance-modify').find('#help-div').removeClass('has-error'); 
+	$('#modal-instance-modify').find('#help-help').html('');
+}
+
+// Roles
+function role_package_add (role_id, role_name) {
+	$('#modal-role-package-add').find('#title').html(role_name + ': Add Package'); 
+	$('#modal-role-package-add').find('#role_id').val(role_id); 
+	$('#modal-role-package-add').find('#name-div').removeClass('has-error'); 
+	$('#modal-role-package-add').find('#name').val(''); 
+	$('#modal-role-package-add').find('#name-help').html(''); 
+	$('#modal-role-package-add').find('#help-div').removeClass('has-error'); 
+	$('#modal-role-package-add').find('#help-help').html('');
+}
+
+function role_recipe_add (role_id, role_name) {
+	$('#modal-role-recipe-add').find('#title').html(role_name + ': Add Recipe'); 
+	$('#modal-role-recipe-add').find('#role_id').val(role_id); 
+	$('#modal-role-recipe-add').find('#name-div').removeClass('has-error'); 
+	$('#modal-role-recipe-add').find('#name').val(''); 
+	$('#modal-role-recipe-add').find('#name-help').html(''); 
+	$('#modal-role-recipe-add').find('#help-div').removeClass('has-error'); 
+	$('#modal-role-recipe-add').find('#help-help').html('');
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // Scoring
 
 // Questions
 function scoring_question_modal_add_value(modal) {
-	val = $('#modal-scoring-question-value-add').find('#value').val().replace(/[\""]/g, "'").trim();
-	valid = val.replace(/[\ .]/g, "_");
-	points = $('#modal-scoring-question-value-add').find('#points').val();
 	err = false;
 
-	if (/^\s*$/.test(val)) {
+	val = $('#modal-scoring-question-value-add').find('#value').val().replace(/[\""]/g, "'").trim();
+	val_id = val.replace(/[\ .]/g, "_");
+	points = $('#modal-scoring-question-value-add').find('#points').val();
+
+	is_special = false;
+	special = '';
+	if (/\$.+\$/.test(val)) {
+		namedollars = val.match(/\$.+\$/)[0];
+		name = val.match(/\$.+\$/)[0].replace(/\$/g, '');
+		obj = $("[ipaddress$='" + name + "']");
+		if (obj.text() != '') {
+			special = val;
+			ip = obj.text().trim();
+			val = val.replace(namedollars, ip);
+			val_id = val.replace(/[\ .]/g, "_");
+			is_special = true;
+		}
+	}
+
+	if (/^\s*$/.test(val) && !is_special) {
 		$('#modal-scoring-question-value-add').find('#value-div').attr('class', 'has-error');
 		$('#modal-scoring-question-value-add').find('#value-help').text('must not be blank');
 		err = true;
@@ -17,7 +84,7 @@ function scoring_question_modal_add_value(modal) {
 	else {
 
 		// check for duplicate values
-		if ($('#' + modal).find('#' + valid).length) {
+		if ($('#' + modal).find('#' + val_id).length) {
 			$('#modal-scoring-question-value-add').find('#value-div').attr('class', 'has-error');
 			$('#modal-scoring-question-value-add').find('#value-help').text('value already exists');
 			err = true;
@@ -36,6 +103,7 @@ function scoring_question_modal_add_value(modal) {
 		}
 	}
 
+	// make suer points are numbers
 	if (!(/^[0-9]+$/.test(points))) {
 		$('#modal-scoring-question-value-add').find('#points-div').attr('class', 'has-error');
 		$('#modal-scoring-question-value-add').find('#points-help').text('must be zero or a positive integer');
@@ -54,8 +122,14 @@ function scoring_question_modal_add_value(modal) {
     	return v.toString(16);
 		});
 
-		$('#' + modal).find('#values-div').append('<div id="' + divid + '" class="modal-values"><b>value: </b><span id="' + valid +  '">' + val + '</span><br><b>points: </b>' + points + '<br><a href="javascript:void(0)" onclick="' + '$(\'#' + divid + '\').remove();' + '">remove</a><p></div>');
+		special_span = ''
+		if (is_special) {
+			special_span = '</span><br><b>special: </b>' + special;
+		}
+
+		$('#' + modal).find('#values-div').append('<div id="' + divid + '" class="modal-values"><b>value: </b><span id="' + val_id +  '">' + val + special_span + '</span><br><b>points: </b>' + points + '<br><a href="javascript:void(0)" onclick="' + '$(\'#' + divid + '\').remove();' + '">remove</a><p></div>');
 		$('#' + modal).find('#' + divid + '').append('<input type="text" class="hidden" name="values[]" value="' + val + '"></input>');
+		$('#' + modal).find('#' + divid + '').append('<input type="text" class="hidden" name="special[]" value="' + special + '"></input>');
 		$('#' + modal).find('#' + divid + '').append('<input type="text" class="hidden" name="value_points[]" value="' + points + '"></input>');
 		$('#modal-scoring-question-value-add').modal('toggle');
 	}
@@ -208,16 +282,27 @@ function scoring_question_modal_modify_question_setup(id) {
 	$('#question-' + id + '-values').find('li').each(function(li) {
 
 		val = $(this).find('#value').html().trim();
-		valid = val.replace(/[\ ]/g, "_");
+		val_id = val.replace(/[\ ]/g, "_");
 		points = $(this).find('#points').html().trim();
+
+		special = '';
+		if ($(this).find('#special').length) {
+			special = $(this).find('#special').html().trim();
+		}
 
 		divid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     	var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
     	return v.toString(16);
 		});
 
-		$('#modal-scoring-question-modify').find('#values-div').append('<div id="' + divid + '"><b>value: </b><span id="' + valid +  '">' + val + '</span><br><b>points: </b>' + points + '<br><a href="javascript:void(0)" onclick="' + '$(\'#' + divid + '\').remove();' + '">remove</a><p></div>');
+		special_span = ''
+		if (special != '') {
+			special_span = '</span><br><b>special: </b>' + special;
+		}
+
+		$('#modal-scoring-question-modify').find('#values-div').append('<div id="' + divid + '"><b>value: </b><span id="' + val_id +  '">' + val + special_span + '</span><br><b>points: </b>' + points + '<br><a href="javascript:void(0)" onclick="' + '$(\'#' + divid + '\').remove();' + '">remove</a><p></div>');
 		$('#modal-scoring-question-modify').find('#' + divid + '').append('<input type="text" class="hidden" name="values[]" value="' + val + '"></input>');
+		$('#modal-scoring-question-modify').find('#' + divid + '').append('<input type="text" class="hidden" name="special[]" value="' + special + '"></input>');
 		$('#modal-scoring-question-modify').find('#' + divid + '').append('<input type="text" class="hidden" name="value_points[]" value="' + points + '"></input>');
 	
 	});
