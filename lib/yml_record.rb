@@ -21,6 +21,8 @@ module YmlRecord
       path = Settings.app_path + "scenarios/#{location}"
     end
 
+    Dir.mkdir path unless File.exists? path
+
     Dir.foreach(path) do |filename|
       next if filename == '.' or filename == '..'
       filepath = "#{path}/#{filename}/#{filename}.yml"
