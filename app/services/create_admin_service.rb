@@ -6,6 +6,10 @@ class CreateAdminService
   	end
   	user.password = Rails.application.secrets.admin_password
   	user.password_confirmation = Rails.application.secrets.admin_password
+	if not user.save
+		puts "FAILED TO CREATE USER: #{user.errors.messages}"
+		return false
+        end
   	user.set_admin_role
     user
   end
