@@ -4,7 +4,7 @@
     $('#modal-student-group-create').find('#name-help').text('<%= @student_group.errors[:name][0] %>');
   <% end %>
 <% else %>
-  $('#student-groups').append("<div id='student-group-<%= @student_group.id %>'> <label><%= @student_group.name %></label> <a href='/instructor/student_group_destroy?student_group_id=<%= @student_group.id %>' data-method='post' rel='nofollow' data-remote='true' data-confirm='Are you sure you want to delete Student Group <%= @student_group.name %>'>delete</a> <table id='student-group-<%= @student_group.id %>-table' class='table'><tr><th>Name</th><th>Email</th><th>Organization</th></tr></table></div>");
+  $('#student-groups').append("<%= escape_javascript render partial: 'instructor/student_group_table', object: @student_group, as: :student_group, locals: { scenario: @scenario } %>");
   $('#modal-student-group-create').modal('toggle');
   update_flash("Created Student Group '<%= @student_group.name %>'.");
 <% end %>

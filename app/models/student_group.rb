@@ -15,16 +15,26 @@ class StudentGroup < ActiveRecord::Base
   # 	true
   # end
 
-  def user_add(user)
-  	student_group_all = self.user.student_groups.find_by_name("All")
-  	if not student_group_all.users.find(user.id)
-  		errors.add(:user, "user not found")
-  		return false
-  	end
+  def user_add(users)
+  	if not users.respond_to? "each"
+		users = [users]
+	end
 
-  	sgu = self.student_group_users.new(user_id: user.id)
-    sgu.save
-  	return sgu
+  	student_group_all = self.user.student_groups.find_by_name("All")
+	student_group_users = []
+
+	users.each do |user|
+		if not student_group_all.users.find(user.id)
+			errors.add(:user, "#{user.name} not found")
+			return false
+		end
+
+		sgu = self.student_group_users.new(user_id: user.id)
+		sgu.save
+		student_group_users.push(sgu)
+	end
+
+  	return student_group_users
   end
 
 end

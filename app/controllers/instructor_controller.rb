@@ -24,10 +24,10 @@ class InstructorController < ApplicationController
   end
 
   def student_group_user_add
-    user = User.find(params[:user_id])
-    @student_group_user = nil
+    users = User.find(params[:user_id])
+
     if @student_group = @user.student_groups.find_by_name(params[:student_group_name])
-      @student_group_user = @student_group.user_add(user)
+      @student_group_users = @student_group.user_add(users)
     end
 
     respond_to do |format|
@@ -35,7 +35,7 @@ class InstructorController < ApplicationController
     end
   end
 
-  def student_group_user_remove
+   def student_group_user_remove
     @student_group_user = StudentGroupUser.find(params[:student_group_user_id])
     if @student_group_user.student_group.user == User.find(current_user.id)
       @student_group_user.destroy
