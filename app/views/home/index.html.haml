@@ -3,14 +3,14 @@
     %div.panel-heading
       %h1
         EDURange
+        %small
+          the cybersecurity training ground
     %div.panel-body
-      %div.lead
-        The cybersecurity training ground
       %h2
         Sign in
         %small
           or
-          = link_to 'sign up', 'users/sign_up'
+          = link_to 'sign up with a registration code', 'users/sign_up'
       %hr
       = form_tag session_path(:user), class: 'form-horizontal' do
         %div.form-group

@@ -32,7 +32,8 @@
           %span#user-name
           = hidden_field_tag 'user_id'
           %div#name-div
-            = label_tag nil, "Student Group Name:"
+            = label_tag nil, "Add to group"
+            //= select "student_group_name", nil, options_for_select(StudentGroup.all.collect { |u| u.name })
             = text_field_tag "student_group_name", nil, class: 'form-control'
             %span.help-block.inline#name-help
           %br
@@ -41,6 +42,7 @@
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
+
 %div.panel.panel-default
   %div.panel-heading.nav.nav-pills
     %li
@@ -48,56 +50,28 @@
         Instructor Home
 
   %div.panel-body
-    %label Account Information: 
-    %div
-      %dl
-        Name: 
-        =@user.name
-        %br
-        Email:
-        =@user.email
-        %br
-        Password: ********
-        %p
-        = link_to 'edit', edit_user_registration_path, class: 'btn btn-primary'
-        %p
-        Last Sign In:
-        =@user.last_sign_in_at
-        From:
-        =@user.last_sign_in_ip
+    = render 'helpers/account_information.html.haml'
+    %hr
 
     %label Registration Code:
     %dl
       = @user.registration_code
-    %p
 
-    %label Student Groups:
-    = link_to 'Create Student Group', '#modal-student-group-create', data: {toggle: "modal"}, class: 'btn btn-primary', onclick: "$('#modal-student-group-create').find('#name-div').removeClass('has-error'); $('#modal-student-group-create').find('#name').val(''); $('#modal-student-group-create').find('#name-help').html(''); "
-    %dl{ id: "student-groups" }
-      - @user.student_groups.each do |student_group|
-        %div{ id: "student-group-#{student_group.id}"}
-          %label
-            = student_group.name
-          - if student_group.name != "All"
-            = link_to 'delete', instructor_student_group_destroy_path(student_group_id: student_group.id), remote: true, method: :post, data: { confirm: "Are you sure you want to delete Student Group #{student_group.name}?" }
-          %table.table{ id: "student-group-#{student_group.id}-table"}
-            %tr
-              %th Name
-              %th Email
-              %th Organization
-              %th
-              %th
-            - student_group.student_group_users.each do |sgu|
-              %tr{ id: "student-group-user-#{sgu.id}" }
-                %td= sgu.user.name
-                %td= sgu.user.email
-                %td= sgu.user.organization
-                - if student_group.name == "All"
-                  %td
-                    = link_to 'add to student group', '#modal-student-group-user-add', data: {toggle: "modal"}, onclick: "$('#modal-student-group-user-add').find('#user-name').html('#{sgu.user.name}'); $('#modal-student-group-user-add').find('#user_id').val('#{sgu.user.id}'); $('#modal-student-group-user-add').find('#name-div').removeClass('has-error'); $('#modal-student-group-user-add').find('#student_group_name').val(''); $('#modal-student-group-user-add').find('#name-help').html('');"
-                - else
-                  %td
-                    = link_to 'remove', instructor_student_group_user_remove_path(student_group_user_id: sgu.id), remote: :true, method: :post, data: { confirm: "Are you sure you want to delete Student Group User #{sgu.user.name}?" }
+    %hr
+
+    %div.row
+      %div.col-sm-6
+        %label Student Groups:
+      %div.col-sm-6.text-right
+        = link_to '+ create student group', '#modal-student-group-create', data: {toggle: "modal"},   |
+            onclick: "$('#modal-student-group-create').find('#name-div').removeClass('has-error');" + |
+                     "$('#modal-student-group-create').find('#name').val('');" +                      |
+                     "$('#modal-student-group-create').find('#name-help').html('');"                  |
+
+    %ul#student-groups
+      = render partial: 'instructor/student_group_table', collection: @user.student_groups, as: :student_group, locals: { scenario: @scenario }
+          
+    %hr
 
     %label Running Scenarios:
     - if @players.size == 0

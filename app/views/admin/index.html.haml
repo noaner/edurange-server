@@ -26,27 +26,27 @@
 
       %div.modal-footer
         %button.btn.btn-default{"data-dismiss" => "modal"}
-          Close
+          close
 
-%div.modal#modal-student-group-create{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+%div.modal#modal-student-group-create{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "mymodallabel", "aria-hidden" => "true"}
   %div.modal-dialog
     %div.modal-content
       %div.modal-header
         %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
           &times;
         %h3.modal-title.inline#title
-          Create Student Group
+          create student group
       %div.modal-body#modalbody
         = form_tag admin_student_group_create_path(@scenario), remote: true, method: :post do 
           %div#name-div
-            = label_tag nil, "Name:"
+            = label_tag nil, "name:"
             = text_field_tag "name", nil, class: 'form-control'
             %span.help-block.inline#name-help
           %br
-          = submit_tag "Submit", :class => 'btn btn-default'
+          = submit_tag "submit", :class => 'btn btn-default'
       %div.modal-footer
         %button.btn.btn-default{"data-dismiss" => "modal"}
-          Close
+          close
 
 %div.modal#modal-student-group-user-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
   %div.modal-dialog
@@ -78,54 +78,38 @@
         Admin Home
 
   %div.panel-body
-    %label Account Information: 
-    %div
-      %dl
-        Name: 
-        =@user.name
-        %br
-        Email:
-        =@user.email
-        %br
-        Password: ********
-        %p
-        = link_to 'edit', edit_user_registration_path, class: 'btn btn-primary'
-        %p
-        Last Sign In:
-        =@user.last_sign_in_at
-        From:
-        =@user.last_sign_in_ip
-
-    
+    = render 'helpers/account_information.html.haml'
+    %hr
 
     %label AWS Settings:
-    %dl
-      - if not @aws_working
-        %div.failure
-          FAILED TO VALIDATE CREDENTIALS
-      %b Access Key ID:
-      = ENV["AWS_ACCESS_KEY_ID"].sub(/^.............../, "...............")
-      %br
-      %b Access Key:
-      = ENV["AWS_SECRET_ACCESS_KEY"].sub(/^.................................../, "...................................")
-      %br
-      %b Region:
-      = ENV["AWS_REGION"]
-      %br
-      %b EC2 Key:
-      = Settings.ec2_key
-      %br
-      %b Bucket Name:
-      = Settings.bucket_name
-      %br
-      %b VPC Limit:
-      = Settings.vpc_limit
-      %br
-      %b AMI NAT:
-      = Settings.ami_nat
-      %br
-      %b AMI Ubuntu:
-      = Settings.ami_ubuntu
+    - if not @aws_working
+      %div.failure
+        FAILED TO VALIDATE CREDENTIALS
+    %div.row
+      %div.col-sm-6
+        %b Access Key ID:
+        = ENV["AWS_ACCESS_KEY_ID"].sub(/^.............../, "...............")
+        %br
+        %b Access Key:
+        = ENV["AWS_SECRET_ACCESS_KEY"].sub(/^.................................../, "...................................")
+        %br
+        %b Region:
+        = ENV["AWS_REGION"]
+        %br
+        %b EC2 Key:
+        = Settings.ec2_key
+      %div.col-sm-6
+        %b Bucket Name:
+        = Settings.bucket_name
+        %br
+        %b VPC Limit:
+        = Settings.vpc_limit
+        %br
+        %b AMI NAT:
+        = Settings.ami_nat
+        %br
+        %b AMI Ubuntu:
+        = Settings.ami_ubuntu
     %p
 
     %label Registration Code:
@@ -133,12 +117,14 @@
       = @user.registration_code
     %p
 
+    %hr
+
     %label User Information:
-    = link_to 'Create Instructor', "#modal-create-instructor", :data => {:toggle=>"modal"}, class: 'btn btn-primary', onclick: "$('#modal-create-instructor').find('#email').val(''); $('#modal-create-instructor').find('#name').val(''); $('#modal-create-instructor').find('#organization').val('');"
 
     %div
       %dl
         %label Instructors:
+        = link_to 'Create instructor', "#modal-create-instructor", :data => {:toggle=>"modal"}, onclick: "$('#modal-create-instructor').find('#email').val(''); $('#modal-create-instructor').find('#name').val(''); $('#modal-create-instructor').find('#organization').val('');"
         %table.table#instructors-table
           %tr
             %th Name
@@ -163,8 +149,8 @@
             = render 'student', user: user
 
       %dl
-        %label Student Groups:
-        = link_to 'Create Student Group', '#modal-student-group-create', data: {toggle: "modal"}, class: 'btn btn-primary', onclick: "$('#modal-student-group-create').find('#name-div').removeClass('has-error'); $('#modal-student-group-create').find('#name').val(''); $('#modal-student-group-create').find('#name-help').html(''); "
+        %label Student groups:
+        = link_to 'Create student group', '#modal-student-group-create', data: {toggle: "modal"}, onclick: "$('#modal-student-group-create').find('#name-div').removeClass('has-error'); $('#modal-student-group-create').find('#name').val(''); $('#modal-student-group-create').find('#name-help').html(''); "
         %dl{ id: "student-groups" }
           - @user.student_groups.each do |student_group|
             = render 'student_group', student_group: student_group
