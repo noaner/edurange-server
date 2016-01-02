@@ -1,5 +1,8 @@
 %tr{ id: "student-group-user-#{sgu.id}" }
-  %td= check_box_tag "user_id[]", sgu.user.id
+  - if student_group.name == "All"
+    %td= check_box_tag "user_id[]", sgu.user.id
+  - else
+    %td= check_box_tag "student_group_user_id[]", sgu.id
   %td= sgu.user.name
   %td= sgu.user.email
   %td= sgu.user.organization

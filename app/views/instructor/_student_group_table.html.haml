@@ -10,7 +10,7 @@
   
   %div.collapse{ id: "student-group-#{student_group.id}-collapse" }
   
-    = form_tag (student_group.name == "All" ? instructor_student_group_user_add_path(scenario) : instructor_student_group_user_remove_multiple_path(scenario)),
+    = form_tag (student_group.name == "All" ? instructor_student_group_user_add_path(scenario) : instructor_student_group_user_remove_path(scenario)),
         remote: true, method: :post, class: 'form-inline' do
   
       %table.table{ id: "student-group-#{student_group.id}-table"}
