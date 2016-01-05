@@ -7,9 +7,8 @@
     %li{role: 'presentation', class: params[:controller] == 'tutorials' ? "active" : "" }
       = link_to 'Quick Start', tutorials_path
 
-    /
-      %li{role: 'presentation', class: params[:controller] == 'scenarios' ? "active" : "" }
-        = link_to 'Making Scenarios', tutorials_making_scenarios_path
+    %li{role: 'presentation', class: params[:controller] == 'scenarios' ? "active" : "" }
+      = link_to 'Making Scenarios', tutorials_making_scenarios_path
 
     %li{role: 'presentation'}
       = link_to 'Instructor Manual', tutorials_instructor_manual_path
@@ -43,7 +42,7 @@
 
   %font{:size => 4}
     In order for students to sign up at cloud.edurange.org, they need a registration code.
-    Once you are logged in as instructor, you can find your the code under the heading,
+    You can find your code on the home tab under the heading,
     "Registration Code:" (It is located below AWS Settings and above User Information, it
     should be an alphanumeric string like '23a6e9k2a5').
 
@@ -82,29 +81,26 @@
     VI. Add student group to scenario
 
   %font{:size => 4}
-    Now that the scenario is created, scroll down to the section labeled 'Groups'. You should see
-    two sections, 'Instructor' and 'Student'. Click the drop down menu next to student and select
-    'Add Student Group'. Input the name of the student group that contains your students. It is
-    important that you add your student group 
-    %b
-      before 
-    you boot your scenario. If you have already
+    Now that the scenario is created, scroll down to the section labeled 'Groups'. You should multiple groups. 
+    , including Instructor and one or more groups for students. Click the drop down menu next to a group you would
+    like add students to, and and select 'Add Student Group'. Input the name of the student group that contains your students. 
+    It is important that you add your student <strong>group</strong> before you boot your scenario. If you have already
     booted the scenario, unboot it, add the student group, and the boot it again.
 
-  %h3 
-    VII. Boot scenario
+%h3 
+  VII. Boot scenario
 
-  %font{:size => 4}
-    At the top of the scenario page, click the 'Boot' button on the left. The full booting process
-    can take anywhere from five minutes on smaller scenarios, to fifteen or twenty on the larger 
-    scenarios (like recon). Once the scenario is booted and fully initialized, your students should
-    be able to use their credentials (which they can see once logged into cloud.edurange.edu), to
-    ssh to the NAT instance.
+%font{:size => 4}
+  At the top of the scenario page, click the 'Boot' button on the left. The full booting process
+  can take anywhere from five minutes on smaller scenarios, to fifteen minutes on the larger 
+  scenarios (like recon). Once the scenario is booted and fully initialized, your students should
+  be able to use their credentials (which they can see once logged into cloud.edurange.edu), to
+  ssh to the NAT instance.
 
+%br
+%br
+%footer
+ 
   %br
   %br
-  %footer
-   
-    %br
-    %br
-    %br
+  %br
