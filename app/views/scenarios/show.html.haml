@@ -87,8 +87,8 @@
         - @scenario.clouds.each do |cloud|
           = render '/scenarios/show/cloud', cloud: cloud
 
-    // Groups
-    %label Groups:
+    // Teams, previously called Groups
+    %label Teams:
     - if @scenario.modifiable?
       %div.inline-block
         %div.dropdown{id:'dropdown-roles'}
