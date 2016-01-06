@@ -26,12 +26,12 @@
   
       - if student_group.name == "All"
         %div.form-group.form-group-sm
-          = submit_tag 'Add selected to group', class: 'btn btn-link'
+          = link_to 'add selected to group', "javascript:void(0)", onclick: "$('#student-group-#{student_group.id} form').submit();"
         %div.form-group.form-group-sm
           = select_tag 'student_group_name', options_for_select(StudentGroup.all.select{ |s| s.name != "All" }.collect{ |s| s.name }),
               include_blank: true, class: 'form-control input-sm'
       - else
         %div.form-group.form-group-sm
-          = submit_tag 'Remove selected from group', class: 'btn btn-link'
+          = link_to 'remove selected from group', "javascript:void(0)", onclick: "$('#student-group-#{student_group.id} form').submit();"
   
   %hr

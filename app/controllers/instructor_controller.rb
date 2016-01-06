@@ -35,8 +35,13 @@ class InstructorController < ApplicationController
     end
   end
 
-   def student_group_user_remove
+  def student_group_user_remove
     @student_group_users = StudentGroupUser.find(params[:student_group_user_id])
+
+    # student_group_user_id may or may not contain multiple ids
+    if not @student_group_users.respond_to? "each"
+      @student_group_users = [@student_group_users]
+    end
 
     @student_group_users.each do |sgu|
       if sgu.student_group.user == User.find(current_user.id)
