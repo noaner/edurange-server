@@ -1,0 +1,27 @@
+%nav.navbar.navbar-default
+  %a.navbar-brand
+    Help Documentation 
+
+  %ul.nav.nav-tabs
+
+    %li{role: 'presentation' }
+      = link_to 'Help Docs', tutorials_path
+
+    %li{role: 'presentation' }
+      = link_to 'SSH Inception Help', tutorials_ssh_inception_path
+     
+    %li{role: 'presentation', class: params[:controller] == 'tutorials' ? "active" : "" }
+      = link_to 'Total Recon Help', tutorials_total_recon_path
+
+    %li{role: 'presentation'}
+      = link_to 'Student Manual', tutorials_student_manual_path
+
+
+%article{:role => "article", :class => "span9"}
+
+  %h2 
+    Total Recon Help
+
+  %font{:size => 4}
+    Welcome to the Help page for the scenario Total Recon. The purpose of this scenario
+    is to familiarize you with the basics of nmap.
