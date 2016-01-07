@@ -1,13 +1,16 @@
 %nav.navbar.navbar-default
   %a.navbar-brand
-    Tutorials 
+    Help Documentation
 
   %ul.nav.nav-tabs
 
-    %li{role: 'presentation', class: params[:controller] == 'tutorials' ? "active" : "" }
-      = link_to 'Quick Start', tutorials_path
+    %li{role: 'presentation'}
+      = link_to 'Help Docs', tutorials_path
 
-    %li{role: 'presentation', class: params[:controller] == 'scenarios' ? "active" : "" }
+    %li{role: 'presentation', class: params[:controller] == 'tutorials' ? "active" : "" }
+      = link_to 'Quick Start', tutorials_quick_start_guide_path
+
+    %li{role: 'presentation'}
       = link_to 'Making Scenarios', tutorials_making_scenarios_path
 
     %li{role: 'presentation'}
