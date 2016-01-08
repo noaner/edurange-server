@@ -1,5 +1,4 @@
 class TutorialsController < ApplicationController
-  before_action :authenticate_admin_or_instructor
   before_action :set_user
 
   def index
