@@ -5,6 +5,10 @@ Edurange::Application.routes.draw do
   get 'tutorials/making_scenarios'
   get 'tutorials/student_manual'
   get 'tutorials/instructor_manual'
+  get 'tutorials/quick_start_guide'
+
+  get 'tutorials/ssh_inception'
+  get 'tutorials/total_recon'
 
   get 'management/clean'
   get 'management/status'
