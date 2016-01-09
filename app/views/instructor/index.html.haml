@@ -50,7 +50,7 @@
         Instructor Home
 
   %div.panel-body
-    = render 'helpers/account_information.html.haml'
+    = render 'partials/account_information.html.haml'
     %hr
 
     %label Registration Code:
@@ -68,7 +68,7 @@
                      "$('#modal-student-group-create').find('#name').val('');" +                      |
                      "$('#modal-student-group-create').find('#name-help').html('');"                  |
 
-    %ul#student-groups
+    %div.panel-group#student-groups
       = render partial: 'instructor/student_group_table', collection: @user.student_groups, as: :student_group, locals: { scenario: @scenario }
           
     %hr

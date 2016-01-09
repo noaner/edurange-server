@@ -9,11 +9,13 @@ $('#modal-student-group-user-add').modal('hide');
                                         alert('<%= sgu.user.name %> is already in <%= @student_group.name %>');
                                 <% end %>
                         <% else %>
-                                $('#student-group-<%= @student_group.id %>-table').append(
+                                $('#student-group-<%= @student_group.id %>-table #foot').before(
                                   "<%= escape_javascript render partial: 'instructor/student_group_table_entry', locals: { sgu: sgu, student_group: @student_group } %>"
                                 );
                         <% end %>
                 <% end %>
+                $('#student-group-<%= @student_group.id %> .collapse').collapse('show');
+                $('#student-group-2 :checkbox').prop('checked', false);
 	<% end %>
 <% else %>
 	alert('Could not find student group: <%= @student_group.name %>');
