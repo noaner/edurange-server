@@ -34,6 +34,8 @@ config/settings.local.yml
 config/settings/*.local.yml
 config/environments/*.local.yml
 
+scenarios/custom/*
+
 .ruby-version
 ._.DS_Store
 .DS_Store
