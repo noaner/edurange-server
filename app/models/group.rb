@@ -116,4 +116,20 @@ class Group < ActiveRecord::Base
     self.update_scenario_modified
   end
 
+  def admin_access_add(instance)
+    instance_group = self.instance_groups.new(instance_id: instance.id, administrator: true)
+    if not instance_group.save
+      errors.add(:instance_group, "could not create instance group: #{instance_group.errors.messages}")
+    end
+    return instance_group
+  end
+
+  def user_access_add(instance)
+    instance_group = self.instance_groups.new(instance_id: instance.id, administrator: false)
+    if not instance_group.save
+      errors.add(:instance_group, "could not create instance group: #{instance_group.errors.messages}")
+    end
+    return instance_group
+  end
+
 end
