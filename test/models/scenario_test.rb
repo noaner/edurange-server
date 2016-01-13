@@ -82,14 +82,13 @@ class ScenarioTest < ActiveSupport::TestCase
     instructor = users(:instructor999999999)
     scenario = instructor.scenarios.new(location: :test, name: 'missingrecipefolder')
 
-    assert File.exists? "#{scenario.path}/recipes"
-    FileUtils.rmdir "#{scenario.path}/recipes"
     assert_not File.exists? "#{scenario.path}/recipes"
 
     scenario.save
 
     assert_not scenario.errors.any?
     assert File.exists? "#{scenario.path}/recipes"
+    FileUtils.rmdir "#{scenario.path}/recipes"
 
   end
 
