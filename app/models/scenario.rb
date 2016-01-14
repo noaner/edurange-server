@@ -187,7 +187,7 @@ class Scenario < ActiveRecord::Base
             )
             if not subnet.save
               self.destroy_dependents
-              errors.add(:load, "error creating subnet. #{subnet.errors.messages}")
+              errors.add(:load, "error creating Subnet #{subnet.name}. #{subnet.errors.messages}")
               return false
             end
 
@@ -427,7 +427,6 @@ class Scenario < ActiveRecord::Base
     else
       path = "#{Settings.app_path}scenarios/#{self.location}/#{self.name.downcase}"
     end
-
     return path if File.exists? path
     false
   end
