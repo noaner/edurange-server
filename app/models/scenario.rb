@@ -121,7 +121,7 @@ class Scenario < ActiveRecord::Base
 
       self.name = file["Name"]
       self.description = file["Description"]
-      self.instructions = file["Instructions"]
+      self.instructions = file["Instructions"] if file["Instructions"]
       self.uuid = `uuidgen`.chomp
       self.answers = ''
 
