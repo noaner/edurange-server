@@ -521,8 +521,7 @@ class ScenariosController < ApplicationController
   def group_admin_access_add
     @instance = @group.scenario.instances.select { |i| i.name == params[:name] }.first
     if @instance
-      @instance_group = @group.instance_groups.new(instance_id: @instance.id, administrator: true)
-      @instance_group.save
+      @instance_group = @group.admin_access_add(@instance)
     end
     respond_to do |format|
       format.js { render template: 'scenarios/js/group/admin_access_add.js.erb', layout: false }
@@ -539,8 +538,7 @@ class ScenariosController < ApplicationController
   def group_user_access_add
     @instance = @group.scenario.instances.select { |i| i.name == params[:name] }.first
     if @instance
-      @instance_group = @group.instance_groups.new(instance_id: @instance.id, administrator: false)
-      @instance_group.save
+      @instance_group = @group.user_access_add(@instance)
     end
     respond_to do |format|
       format.js { render template: 'scenarios/js/group/user_access_add.js.erb', layout: false }

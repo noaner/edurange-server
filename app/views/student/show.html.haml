@@ -12,6 +12,29 @@
         %button.btn.btn-default{"data-dismiss" => "modal"}
           Close
 
+%div.modal#modal-scoring-answer-comment-show{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
+  %div.modal-dialog
+    %div.modal-content
+      %div.modal-header
+        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
+          &times;
+        %h3.modal-title.inline#title
+          Essay Answer:
+        %br
+        %b student: 
+        %span#student-name
+        %br
+        %b question: 
+        %span#question-index
+        %br
+        %b answer: 
+        %span#answer-index
+      %div.modal-body#modalbody
+        
+      %div.modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal"}
+          Close
+
 %div.panel.panel-default
   %div.panel-heading.nav.nav-pills
     %li
@@ -66,7 +89,7 @@
     %label Questions:
     %p
 
-    - @scenario.questions.order(:order).each do |question|
+    - @scenario.questions.order(:order).each_with_index do |question, question_index|
       %dl{ id: "question.#{question.id}" }
         %b= question.order.to_s + '.'
         = question.text
@@ -87,8 +110,8 @@
                     %th Points
                     %th Comments
                     %th Date
-                  - answers.each do |answer|
-                    = render 'answer_string_number', answer: answer
+                  - answers.each_with_index do |answer, answer_index|
+                    = render 'answer_string_number', answer: answer, question_index: question_index, answer_index: answer_index
 
             - elsif question.type_of == "Essay"
               %label My Answers:

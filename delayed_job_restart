@@ -1,0 +1,3 @@
+#!/bin/bash
+./delayed_job_stop
+./delayed_job_start

@@ -73,9 +73,9 @@ class Subnet < ActiveRecord::Base
       return
     end
 
-    # Check that CIDR is a subset of its cloud CIDR
-    ord = NetAddr::CIDR.create(self.cidr_block) <=> self.cloud.cidr_block
-    if ord == -1
+    # Check that CIDR is a subset of its cloud CIDRs
+    cloud_cidr = NetAddr::CIDR.create(self.cloud.cidr_block)
+    if not (cloud_cidr == self.cidr_block or cloud_cidr.contains? self.cidr_block)
       self.errors.add(:cidr_block, "Subnets CIDR block is not with its clouds CIDR block")
       return
     end

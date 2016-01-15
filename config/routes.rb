@@ -168,6 +168,7 @@ Edurange::Application.routes.draw do
   post 'student/:id/answer_essay', to: 'student#answer_essay', as: 'answer_essay_student'
   post 'student/:id/answer_essay_delete', to: 'student#answer_essay_delete', as: 'answer_essay_delete_student'
   post 'student/:id/answer_essay_show', to: 'student#answer_essay_show', as: 'answer_essay_show_student'
+  post 'student/:id/answer_comment_show', to: 'student#answer_comment_show', as: 'answer_comment_show_student'
 
   root :to => "home#index"
   devise_for :users, :controllers => {:registrations => "registrations"}

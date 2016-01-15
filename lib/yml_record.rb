@@ -16,9 +16,16 @@ module YmlRecord
     output = []
 
     if location == 'custom'
+      if not File.exists?(Settings.app_path + "scenarios/custom")
+        FileUtils.mkdir(Settings.app_path + "scenarios/custom")
+      end
       path = Settings.app_path + "scenarios/custom/#{user.id}"
     else
       path = Settings.app_path + "scenarios/#{location}"
+    end
+
+    if not File.exists? path
+      FileUtils.mkdir path
     end
 
     Dir.foreach(path) do |filename|

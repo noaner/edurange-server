@@ -40,7 +40,7 @@
           %span.caret
         %ul.dropdown-menu{role: 'menu', "aria-labelledby" => "group-#{group.id}-admin-access-dropdown-button" }
           %li{ id: "group-#{group.id}-admin-access-button-li", class: group.instances_stopped? ? "" : "disabled" }
-            = link_to 'Add Instance', "#modal-group-admin-access-add", :data => {:toggle=>"modal"}, onclick: "$('#modal-group-admin-access-add').find('#group-name').html($('#group-#{group.id}-name').html().trim()); $('#modal-group-admin-access-add').find('#group_id').val('#{group.id}'); $('#modal-group-admin-access-add').find('#name').val(''); $('#modal-group-admin-access-add').find('#name-div').removeClass('has-error'); $('#modal-group-admin-access-add').find('#name-help').html('');"
+            = link_to 'Add Instance', "#modal-group-admin-access-add", :data => {:toggle=>"modal"}, onclick: "$('#modal-group-admin-access-add').find('#group-name').html($('#group-#{group.id}-name').html().trim()); $('#modal-group-admin-access-add').find('#group_id').val('#{group.id}'); $('#modal-group-admin-access-add').find('#name').val(''); $('#modal-group-admin-access-add').find('#name-div').removeClass('has-error'); $('#modal-group-admin-access-add').find('#name-help').html(''); $('#modal-group-admin-access-add').find('#help-div').removeClass('has-error'); $('#modal-group-admin-access-add').find('#help-help').html('');"
   
   %ul{ id: "group-#{group.id}-admin-access" }
     - group.instance_groups.select{ |ig| ig.administrator == true }.each do |instance_group|

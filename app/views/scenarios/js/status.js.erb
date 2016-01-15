@@ -63,6 +63,8 @@ update_status('scenario', '<%= @scenario.status %>')
         $("#instance-role-<%= instance_role.id %>-remove-button").attr('class', '<%= instance.stopped? ? "" : "hidden" %>');
       <% end %>
 
+      $("#instance-<%= instance.id %>-ip-address-dynamic-button").attr('class', '<%= instance.stopped? ? "" : "hidden" %>');
+
     <% end %>
   <% end %>
 <% end %>
