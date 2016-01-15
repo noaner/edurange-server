@@ -4,7 +4,7 @@ class StudentController < ApplicationController
   before_action :set_user
   before_action :set_scenario, only: [:show, :answer_string, :answer_number, :answer_essay]
   before_action :set_question, only: [:answer_string, :answer_number, :answer_essay]
-  before_action :set_answer, only: [:answer_essay_delete, :answer_essay_show]
+  before_action :set_answer, only: [:answer_essay_delete, :answer_essay_show, :answer_comment_show]
 
   def index
     @scenarios = []
@@ -47,6 +47,14 @@ class StudentController < ApplicationController
   def answer_essay_show
     respond_to do |format|
       format.js { render "student/js/answer_essay_show.js.erb", layout: false }
+    end
+  end
+
+  def answer_comment_show
+    @question_index = params[:question_index].to_i + 1
+    @answer_index = params[:answer_index].to_i + 1
+    respond_to do |format|
+      format.js { render "student/js/answer_comment_show.js.erb", layout: false }
     end
   end
 

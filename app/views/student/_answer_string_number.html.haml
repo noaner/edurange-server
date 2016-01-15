@@ -3,7 +3,7 @@
   %td= answer.correct
   %td= answer.correct ? answer.question.values[answer.value_index][:points] : 0
   - if answer.comment
-    %td= link_to 'show'
+    %td= link_to 'show', answer_comment_show_student_path(answer_id: answer.id, question_index: question_index, answer_index: answer_index), remote: true, method: :post
   -else
     %td -
   %td= answer.created_at.to_formatted_s(:db)
