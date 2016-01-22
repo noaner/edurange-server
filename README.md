@@ -101,7 +101,10 @@ If this is your first time running the edurange you'll probably have to run a da
 ```bash
 bin/rake db:migrate RAILS_ENV=development
 ```
-
+You'll need to run the delayed jobs start script:
+```bash
+./delayed_job_start
+```
 Now bootup the developement server:
 ```bash
 rails server
@@ -148,3 +151,14 @@ With this newly created admin user, try logging into EDURange by using the email
 Now that you have an admin user you can boot a scenario after some minor configurations. 
 
 After doing that, go ahead and navigate to the "Scenarios" tab and load a new scenario. Choose from the default scenarios available. Once the scenario is loaded you should be brought to a detail view where you can boot the scenario.
+
+##### Keeping things working
+From time to time, you might find parts of your scenario stuck on "queued_boot". To fix this, run the delayed jobs
+restart script.
+```bash
+./delayed_job_restart
+```
+After you pull changes from the github repository, if the database was changed you'll need to rake the database:
+```bash
+rake db:migrate
+```
