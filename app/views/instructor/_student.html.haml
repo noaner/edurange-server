@@ -1,4 +1,4 @@
-%tr{ id: "student-group-user-#{student.id}" }
+%tr{ id: "student-group-user-#{student.id}", class: "user-#{student.user.id }" }
   - if student_group.name == "All"
     %td= check_box_tag "user_id[]", student.user.id
   - else
