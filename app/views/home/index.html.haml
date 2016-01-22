@@ -1,20 +1,32 @@
-
-
-%div.panel.panel-default
-  %div.panel-heading
-    %h1.inline
-      EDURange -
-    %h2.inline
-      The cybersecurity training ground.
-  %div.panel-body
-    %h2.page-description.fadeIn
-    = form_tag session_path(:user), class: 'inline' do
-      = text_field_tag 'user[email]'
-      = password_field_tag 'user[password]'
-      = check_box_tag 'user[remember_me]'
-      = label_tag 'user[remember_me]', 'Remember me'
-      = button_tag "Sign In", class: 'btn btn-primary'
-    &nbsp;
-    or
-    &nbsp;
-    = link_to 'Sign Up', 'users/sign_up', class: 'btn btn-primary'
+%div.col-md-8.col-md-offset-2
+  %div.panel.panel-default
+    %div.panel-heading
+      %h1
+        EDURange
+        %small
+          the cybersecurity training ground
+    %div.panel-body
+      %h2
+        Sign in
+        %small
+          or
+          = link_to 'sign up with a registration code', 'users/sign_up'
+      %hr
+      = form_tag session_path(:user), class: 'form-horizontal' do
+        %div.form-group
+          = label_tag 'user[email]', 'email', class: 'col-md-2 control-label'
+          %div.col-md-10
+            = text_field_tag 'user[email]', nil, class: 'form-control', placeholder: 'email'
+        %div.form-group
+          = label_tag 'user[password]', 'password', class: 'col-md-2 control-label'
+          %div.col-md-10
+            = password_field_tag 'user[password]', nil, class: 'form-control', placeholder: 'password'
+        %div.form-group
+          %div.col-md-10.col-md-offset-2
+            %div.checkbox
+              %label
+                = check_box_tag 'user[remember_me]', nil, class: 'form-control'
+                Remember me
+        %div.form-group
+          %div.col-md-10.col-md-offset-2
+            = button_tag "Sign In", class: 'btn btn-primary'

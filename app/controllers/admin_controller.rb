@@ -48,12 +48,12 @@ class AdminController < ApplicationController
   end
 
   def user_delete
-    if @user = User.find(params[:id])
-      if @user != User.find(current_user.id)
-        @user.destroy
-      end
+    @users = [*User.find(params[:id])]
+
+    @users.each do |user|
+      user.destroy unless user.id == current_user.id
     end
-    
+
     respond_to do |format|
       format.js { render 'admin/js/user_delete.js.erb', :layout => false }
     end
@@ -74,11 +74,16 @@ class AdminController < ApplicationController
   end
 
   def student_add_to_all
-    if @user = User.find(params[:id])
-      if not @user.is_student?
-        @user.errors.add(:email, "User is not a student")
+    @users = User.find(params[:id])
+    @users = [@users] unless @users.respond_to? "each"
+
+    @student_group_users = []
+    @users.each do |user|
+      if not user.is_student?
+        user.errors.add(:email, "#{user.name} is not a student")
       else
-        @student_group, @student_group_user = User.find(current_user.id).student_add_to_all(@user)
+        @student_group, student_group_user = current_user.student_add_to_all(user)
+        @student_group_users.push(student_group_user)
       end
     end
 
@@ -119,10 +124,11 @@ class AdminController < ApplicationController
   end
 
   def student_group_user_add
-    user = User.find(params[:user_id])
-    @student_group_user = nil
-    if @student_group = @user.student_groups.find_by_name(params[:student_group_name])
-      @student_group_user = @student_group.user_add(user)
+    users = [*StudentGroupUser.find(params[:student_group_user_id])].collect{ |sgu| sgu.user }
+    @student_group = @user.student_groups.find_by_name(params[:student_group_name])
+
+    if not @student_group.nil?
+      @student_group_users = @student_group.user_add(users)
     end
 
     respond_to do |format|
@@ -131,9 +137,12 @@ class AdminController < ApplicationController
   end
 
   def student_group_user_remove
-    @student_group_user = StudentGroupUser.find(params[:student_group_user_id])
-    if @student_group_user.student_group.user == User.find(current_user.id)
-      @student_group_user.destroy
+    @student_group_users = [*StudentGroupUser.find(params[:student_group_user_id])]
+
+    @student_group_users.each do |student_group_user|
+      if student_group_user.student_group.user.id == current_user.id
+        student_group_user.destroy
+      end
     end
 
     respond_to do |format|
