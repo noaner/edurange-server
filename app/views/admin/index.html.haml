@@ -1,75 +1,6 @@
-%div.modal#modal-create-instructor{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
-  %div.modal-dialog
-    %div.modal-content
-      %div.modal-header
-        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
-          &times;
-        %h3.modal-title.inline#title= "Create Instructor"
-      %div.modal-body#modalbody
-        = form_tag admin_instructor_create_path(), remote:true, method: :post do 
-          %div#email-div
-            This will assign a random password for the instructor and will automatically send an email to the instructor with their credentials.
-            %p
-            = label_tag nil, 'Email:', class: 'control-label'
-            = text_field_tag :email, nil, class: 'form-control'
-            %span.help-block.inline#email-help
-          %div#name-div
-            = label_tag nil, 'Name:', class: 'control-label'
-            = text_field_tag :name, nil, class: 'form-control'
-            %span.help-block.inline#name-help
-          %div#organization-div
-            = label_tag nil, 'Organization:', class: 'control-label'
-            = text_field_tag :organization, nil, class: 'form-control'
-            %span.help-block.inline#organization-help
-          %p
-          = submit_tag 'Create', :class => 'btn btn-default'
-
-      %div.modal-footer
-        %button.btn.btn-default{"data-dismiss" => "modal"}
-          close
-
-%div.modal#modal-student-group-create{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "mymodallabel", "aria-hidden" => "true"}
-  %div.modal-dialog
-    %div.modal-content
-      %div.modal-header
-        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
-          &times;
-        %h3.modal-title.inline#title
-          create student group
-      %div.modal-body#modalbody
-        = form_tag admin_student_group_create_path(@scenario), remote: true, method: :post do 
-          %div#name-div
-            = label_tag nil, "name:"
-            = text_field_tag "name", nil, class: 'form-control'
-            %span.help-block.inline#name-help
-          %br
-          = submit_tag "submit", :class => 'btn btn-default'
-      %div.modal-footer
-        %button.btn.btn-default{"data-dismiss" => "modal"}
-          close
-
-%div.modal#modal-student-group-user-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
-  %div.modal-dialog
-    %div.modal-content
-      %div.modal-header
-        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
-          &times;
-        %h3.modal-title.inline#title
-          Add User to Student Group
-      %div.modal-body#modalbody
-        = form_tag admin_student_group_user_add_path(@scenario), remote: true, method: :post do
-          = label_tag nil, "User:"
-          %span#user-name
-          = hidden_field_tag 'user_id'
-          %div#name-div
-            = label_tag nil, "Student Group Name:"
-            = text_field_tag "student_group_name", nil, class: 'form-control'
-            %span.help-block.inline#name-help
-          %br
-          = submit_tag "Submit", :class => 'btn btn-default'
-      %div.modal-footer
-        %button.btn.btn-default{"data-dismiss" => "modal"}
-          Close
+= render 'admin/modals/create_instructor'
+= render 'admin/modals/student_group_create'
+= render 'admin/modals/student_group_user_add'
 
 %div.panel.panel-default
   %div.panel-heading.nav.nav-pills
@@ -78,7 +9,7 @@
         Admin Home
 
   %div.panel-body
-    = render 'helpers/account_information.html.haml'
+    = render 'partials/account_information.html.haml'
     %hr
 
     %label AWS Settings:
@@ -91,7 +22,8 @@
         = ENV["AWS_ACCESS_KEY_ID"].sub(/^.............../, "...............")
         %br
         %b Access Key:
-        = ENV["AWS_SECRET_ACCESS_KEY"].sub(/^.................................../, "...................................")
+        = ENV["AWS_SECRET_ACCESS_KEY"].sub(/^.................................../,
+            "...................................")
         %br
         %b Region:
         = ENV["AWS_REGION"]
@@ -110,7 +42,8 @@
         %br
         %b AMI Ubuntu:
         = Settings.ami_ubuntu
-    %p
+
+    %hr
 
     %label Registration Code:
     %dl
@@ -121,36 +54,57 @@
 
     %label User Information:
 
-    %div
+    %dl
+      %span.pull-right= link_to '+ create instructor', "#modal-create-instructor", :data => {:toggle=>"modal"}, |
+              onclick: "$('#modal-create-instructor').find('#email').val('');" +                  |
+                       "$('#modal-create-instructor').find('#name').val('');" +                   |
+                       "$('#modal-create-instructor').find('#organization').val('');"             |
+      %label Instructors:
       %dl
-        %label Instructors:
-        = link_to 'Create instructor', "#modal-create-instructor", :data => {:toggle=>"modal"}, onclick: "$('#modal-create-instructor').find('#email').val(''); $('#modal-create-instructor').find('#name').val(''); $('#modal-create-instructor').find('#organization').val('');"
+
         %table.table#instructors-table
           %tr
             %th Name
             %th Email
             %th Organization
             %th
-            %th
-            %th
           - @instructors.each do |user|
             = render 'instructor', user: user
 
-      %dl
-        %label Students:
-        %table.table#students-table
-          %tr
-            %th Name
-            %th Email
-            %th Organization
-            %th
-            %th
-          - @students.each do |user|
-            = render 'student', user: user
+      %label
+        Students:
+        = link_to 'expand/collapse', '#students-table',
+            data: { toggle: 'collapse', target: '#students-table-collapse' }
 
       %dl
-        %label Student groups:
-        = link_to 'Create student group', '#modal-student-group-create', data: {toggle: "modal"}, onclick: "$('#modal-student-group-create').find('#name-div').removeClass('has-error'); $('#modal-student-group-create').find('#name').val(''); $('#modal-student-group-create').find('#name-help').html(''); "
+        %div.collapse.in#students-table-collapse
+          = form_tag '#', method: :post, remote: true, class: 'form-inline', id: 'students-table-form' do
+            = hidden_field_tag 'action', value: 'delete'
+            %table.table#students-table
+              %tr
+                %td
+                  <a href="javascript:$('#students-table input:checkbox').prop('checked', true);">all</a>,
+                  <a href="javascript:$('#students-table input:checkbox').prop('checked', false);">none</a>
+                %th Name
+                %th Email
+                %th Organization
+                %th
+              - @students.each do |user|
+                = render 'student', user: user
+              %tr#foot
+                %td{ colspan: "5" }
+                  <a href="javascript:$('#students-table input:checkbox').prop('checked', true);">all</a>,
+                  <a href="javascript:$('#students-table input:checkbox').prop('checked', false);">none</a>,
+                  %b with selected:
+                  = (link_to 'add to all', "javascript:void(0);",
+                    onclick: "$('#students-table-form').attr('action', '#{admin_student_add_to_all_path}');$('#students-table-form').submit();") + ','
+                  = link_to('delete', "javascript:void(0);", remote: true, method: :post,
+                    onclick: "$('#students-table-form').attr('action', '#{admin_user_delete_path}');$('#students-table-form').submit();",
+                    :data => { :confirm => "Are you sure you want to delete all selected students?" })
+
+      %span.pull-right= link_to '+ create student group', '#modal-student-group-create', data: {toggle: "modal"}, onclick: "$('#modal-student-group-create').find('#name-div').removeClass('has-error'); $('#modal-student-group-create').find('#name').val(''); $('#modal-student-group-create').find('#name-help').html(''); "
+      %label Student groups:
+      %dl
         %dl{ id: "student-groups" }
           - @user.student_groups.each do |student_group|
-            = render 'student_group', student_group: student_group
+            = render 'student_group', student_group: student_group, scenario: @scenario

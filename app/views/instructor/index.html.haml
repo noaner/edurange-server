@@ -1,47 +1,5 @@
-%div.modal#modal-student-group-create{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
-  %div.modal-dialog
-    %div.modal-content
-      %div.modal-header
-        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
-          &times;
-        %h3.modal-title.inline#title
-          Create Student Group
-      %div.modal-body#modalbody
-        = form_tag instructor_student_group_create_path(@scenario), remote: true, method: :post do 
-          %div#name-div
-            = label_tag nil, "Name:"
-            = text_field_tag "name", nil, class: 'form-control'
-            %span.help-block.inline#name-help
-          %br
-          = submit_tag "Submit", :class => 'btn btn-default'
-      %div.modal-footer
-        %button.btn.btn-default{"data-dismiss" => "modal"}
-          Close
-
-%div.modal#modal-student-group-user-add{ :tabindex => "-1", :role => "dialog", "aria-labelledby" => "myModalLabel", "aria-hidden" => "true"}
-  %div.modal-dialog
-    %div.modal-content
-      %div.modal-header
-        %button.close{ :type => "button", "data-dismiss" => "modal", "aria-hidden" => "true"}
-          &times;
-        %h3.modal-title.inline#title
-          Add User to Student Group
-      %div.modal-body#modalbody
-        = form_tag instructor_student_group_user_add_path(@scenario), remote: true, method: :post do
-          = label_tag nil, "User:"
-          %span#user-name
-          = hidden_field_tag 'user_id'
-          %div#name-div
-            = label_tag nil, "Add to group"
-            //= select "student_group_name", nil, options_for_select(StudentGroup.all.collect { |u| u.name })
-            = text_field_tag "student_group_name", nil, class: 'form-control'
-            %span.help-block.inline#name-help
-          %br
-          = submit_tag "Submit", :class => 'btn btn-default'
-      %div.modal-footer
-        %button.btn.btn-default{"data-dismiss" => "modal"}
-          Close
-
+= render 'instructor/modals/student_group_create'
+= render 'instructor/modals/student_group_user_add'
 
 %div.panel.panel-default
   %div.panel-heading.nav.nav-pills
@@ -68,9 +26,10 @@
                      "$('#modal-student-group-create').find('#name').val('');" +                      |
                      "$('#modal-student-group-create').find('#name-help').html('');"                  |
 
-    %div.panel-group#student-groups
-      = render partial: 'instructor/student_group_table', collection: @user.student_groups, as: :student_group, locals: { scenario: @scenario }
-          
+    %div.list-group#student-groups
+      - @user.student_groups.each do |student_group|
+        = render 'student_group', student_group: student_group, scenario: @scenario
+
     %hr
 
     %label Running Scenarios:

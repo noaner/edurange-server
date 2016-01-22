@@ -12,14 +12,14 @@ class InstructorController < ApplicationController
     @student_group.save
 
     respond_to do |format|
-      format.js { render 'instructor/student_group_create.js.erb', :layout => false }
+      format.js { render 'instructor/js/student_group_create.js.erb', :layout => false }
     end
   end
 
   def student_group_destroy
     @student_group.destroy
     respond_to do |format|
-      format.js { render 'instructor/student_group_delete.js.erb', :layout => false }
+      format.js { render 'instructor/js/student_group_delete.js.erb', :layout => false }
     end
   end
 
@@ -31,7 +31,7 @@ class InstructorController < ApplicationController
     end
 
     respond_to do |format|
-      format.js { render 'instructor/student_group_user_add.js.erb', :layout => false }
+      format.js { render 'instructor/js/student_group_user_add.js.erb', :layout => false }
     end
   end
 
@@ -50,7 +50,7 @@ class InstructorController < ApplicationController
     end
 
     respond_to do |format|
-      format.js { render 'instructor/student_group_user_remove.js.erb', :layout => false }
+      format.js { render 'instructor/js/student_group_user_remove.js.erb', :layout => false }
     end
   end
 
