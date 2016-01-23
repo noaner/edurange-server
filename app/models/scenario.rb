@@ -811,6 +811,10 @@ class Scenario < ActiveRecord::Base
     self.update_modified
   end
 
+  def get_nat
+    self.instances.select { |i| i.os == "nat" }.first
+  end
+
   private
     # methods for creating statistics on scenarios
 

@@ -73,6 +73,14 @@ module Provider
         errors.add(:boot, "Instances subnet must be booted")
         return false
       end
+      if options[:solo] and self.os != "nat" and not self.internet_accessible?
+        if nat = self.scenario.get_nat
+          if not nat.booted?
+            errors.add(:boot, "NAT must be booted")
+            return false
+          end
+        end
+      end
     end 
 
     # don't try booting if vpc limit is reached
