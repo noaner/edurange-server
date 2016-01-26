@@ -1,0 +1,20 @@
+%tr{ id: "student-group-user-#{student.id}", class: "user-#{student.user.id }" }
+  - if student_group.name == "All"
+    %td= check_box_tag "user_id[]", student.user.id
+  - else
+    %td= check_box_tag "student_group_user_id[]", student.id
+  %td= student.user.name
+  %td= student.user.email
+  %td= student.user.organization
+  - if student_group.name == "All"
+    %td
+      = link_to 'add to student group', '#modal-student-group-user-add', data: {toggle: "modal"},      |
+          onclick: "$('#modal-student-group-user-add').find('#user-name').html('#{student.user.name}');" + |
+                   "$('#modal-student-group-user-add').find('#user_id').val('#{student.user.id}');" +      |
+                   "$('#modal-student-group-user-add').find('#name-div').removeClass('has-error');" +  |
+                   "$('#modal-student-group-user-add').find('#student_group_name').val('');" +         |
+                   "$('#modal-student-group-user-add').find('#name-help').html('');"                   |
+  - else
+    %td
+      = link_to 'remove', instructor_student_group_user_remove_path(student_group_user_id: student.id), remote: :true,
+          method: :post, data: { confirm: "Are you sure you want to delete Student Group User #{student.user.name}?" }

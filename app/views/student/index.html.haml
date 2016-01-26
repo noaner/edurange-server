@@ -4,23 +4,9 @@
       %h3 Student Home
 
   %div.panel-body
-    %label Account Information: 
-    %div
-      %dl
-        Name: 
-        =@user.name
-        %br
-        Email:
-        =@user.email
-        %br
-        Password: ********
-        %p
-        = link_to 'edit', edit_user_registration_path, class: 'btn btn-primary'
-        %p
-        Last Sign In:
-        =@user.last_sign_in_at
-        From:
-        =@user.last_sign_in_ip
+    = render 'partials/account_information.html.haml'
+
+    %hr
 
     %label Scenarios:
     %dl
