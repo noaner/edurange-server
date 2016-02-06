@@ -811,6 +811,10 @@ class Scenario < ActiveRecord::Base
     self.update_modified
   end
 
+  def get_nat
+    self.instances.select { |i| i.os == "nat" }.first
+  end
+
   private
     # methods for creating statistics on scenarios
 
@@ -838,23 +842,19 @@ class Scenario < ActiveRecord::Base
       self.instances.all.each do |instance|
         # concatenate all bash histories into one big string
         statistic.bash_histories += instance.get_bash_history
-        puts instance.get_bash_history  # for debugging
 
         # Concatenate all script logs
         # Will look messy
         statistic.script_log += instance.get_script_log
-        puts instance.get_script_log # for debugging
 
         # Concatenate all exit status logs
         statistic.exit_status += instance.get_exit_status
-        puts instance.get_exit_status # for debugging
         
       end
   
       # partition the big bash history string into a nested hash structure
       # mapping usernames to the commands they entered.
       statistic.bash_analytics = partition_bash(statistic.bash_histories.split("\n"))
-      puts statistic.bash_analytics
 
       # and with scenario metadata
       statistic.user_id = self.user_id
