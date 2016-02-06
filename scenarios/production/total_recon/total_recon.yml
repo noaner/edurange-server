@@ -1,6 +1,6 @@
 ---
-Name: total_recon
-Description: 
+Name: Total_Recon
+Description: 'Total Recon is a progressive, story-based game designed to teach nmap network reconnaissance.'
 Instructions: ''
 InstructionsStudent: ''
 Groups:
@@ -320,7 +320,7 @@ Scoring:
   - accept-decimal
   - accept-hex
   Values:
-  - Value: 
+  - Value: '444'
     Points: '10'
   Order: 1
   Points: 10
@@ -331,7 +331,7 @@ Scoring:
   - accept-decimal
   - accept-hex
   Values:
-  - Value: 
+  - Value: '80'
     Points: '10'
   Order: 2
   Points: 10
@@ -339,7 +339,7 @@ Scoring:
   Type: String
   Options: []
   Values:
-  - Value: 
+  - Value: 10.0.0.17
     Points: '10'
   Order: 3
   Points: 10
@@ -348,7 +348,7 @@ Scoring:
   Options:
   - ignore-case
   Values:
-  - Value: 
+  - Value: filtered
     Points: '10'
   Order: 4
   Points: 10
@@ -356,7 +356,7 @@ Scoring:
   Type: String
   Options: []
   Values:
-  - Value: 
+  - Value: 10.0.200.33
     Points: '10'
   Order: 7
   Points: 10
@@ -368,7 +368,7 @@ Scoring:
   - accept-decimal
   - accept-hex
   Values:
-  - Value: 
+  - Value: '300'
     Points: '10'
   Order: 5
   Points: 10
@@ -377,9 +377,9 @@ Scoring:
   Type: String
   Options: []
   Values:
-  - Value: 
+  - Value: -sn
     Points: '10'
-  - Value: 
+  - Value: -sP
     Points: '10'
   Order: 6
   Points: 20
@@ -389,7 +389,7 @@ Scoring:
   - accept-integer
   - accept-decimal
   Values:
-  - Value: 
+  - Value: '123'
     Points: '10'
   Order: 8
   Points: 10
@@ -399,7 +399,7 @@ Scoring:
   - accept-integer
   - accept-decimal
   Values:
-  - Value: 
+  - Value: '2345'
     Points: '10'
   Order: 9
   Points: 10
@@ -409,7 +409,7 @@ Scoring:
   - accept-integer
   - accept-decimal
   Values:
-  - Value: 
+  - Value: '632'
     Points: '20'
   Order: 10
   Points: 20
@@ -419,7 +419,7 @@ Scoring:
   Options:
   - ignore-case
   Values:
-  - Value: 
+  - Value: xmas tree
     Points: '10'
   Order: 11
   Points: 10
@@ -429,7 +429,7 @@ Scoring:
   Options:
   - ignore-case
   Values:
-  - Value: 
+  - Value: 'null'
     Points: '10'
   Order: 12
   Points: 10
@@ -439,7 +439,7 @@ Scoring:
   Options:
   - ignore-case
   Values:
-  - Value: 
+  - Value: fin
     Points: '10'
   Order: 13
   Points: 10
@@ -449,7 +449,7 @@ Scoring:
   - accept-integer
   - accept-decimal
   Values:
-  - Value: 
+  - Value: '16382'
     Points: '15'
   Order: 14
   Points: 15
