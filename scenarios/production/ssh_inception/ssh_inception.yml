@@ -1,0 +1,320 @@
+---
+Name: SSH_Inception
+Description: This game teaches the basics of elf infection. Students can use tools
+  like readelf, objdump, strace, and gdb to determine what files are infected and
+  with what.
+Instructions: Students need to first login to the NAT. Find the Public IP Address
+  of the NAT_Instance listed below under Instances and ssh to that address using logins
+  credentials listed under Players below. If you are an Instructor you can use the
+  Player with the login name 'instructor'. After you have logged into the NAT ssh
+  into the Instace named Team_1_Instance. Now you need to examin the file '/tmp/bin/dist/bad-ls'
+  and find the starting address and ending address of the malicous code.
+InstructionsStudent: ''
+Groups:
+- Name: Instructor
+  Instructions: 
+  Access:
+    Administrator:
+    - anon_ftp
+    - starting_line
+    - first_stop
+    - second_stop
+    - third_stop
+    - fourth_stop
+    - satan_palace
+    - fifth_stop
+    User:
+    - NAT_Instance
+  Users:
+  - Login: instructor
+    Password: vLCu3Crf
+    Id: 
+    UserId: 
+    StudentGroupId: 
+- Name: Students
+  Instructions: 
+  Access:
+    Administrator: []
+    User:
+    - NAT_Instance
+  Users:
+  - Login: student
+    Password: f26679f
+    Id: 
+    UserId: 
+    StudentGroupId: 
+- Name: Starting_Line
+  Instructions: ''
+  Access:
+    Administrator: []
+    User:
+    - starting_line
+  Users:
+  - Login: inceptor
+    Password: readyplayerone
+    Id: 
+    UserId: 
+    StudentGroupId: 
+- Name: First_Stop
+  Instructions: ''
+  Access:
+    Administrator: []
+    User:
+    - first_stop
+  Users:
+  - Login: mal
+    Password: inception
+    Id: 
+    UserId: 
+    StudentGroupId: 
+- Name: Second_Stop
+  Instructions: ''
+  Access:
+    Administrator: []
+    User:
+    - second_stop
+  Users:
+  - Login: christopher
+    Password: dicaprio
+    Id: 
+    UserId: 
+    StudentGroupId: 
+- Name: Third_Stop
+  Instructions: ''
+  Access:
+    Administrator: []
+    User:
+    - third_stop
+  Users:
+  - Login: cobb
+    Password: pizza_wins_now
+    Id: 
+    UserId: 
+    StudentGroupId: 
+- Name: Fourth_Stop
+  Instructions: ''
+  Access:
+    Administrator: []
+    User:
+    - fourth_stop
+  Users:
+  - Login: toodeep
+    Password: subconcious_security
+    Id: 
+    UserId: 
+    StudentGroupId: 
+- Name: Fifth_Stop
+  Instructions: ''
+  Access:
+    Administrator: []
+    User:
+    - fifth_stop
+  Users:
+  - Login: neo
+    Password: red_pill
+    Id: 
+    UserId: 
+    StudentGroupId: 
+- Name: Satans_Palace
+  Instructions: ''
+  Access:
+    Administrator: []
+    User:
+    - satan_palace
+  Users:
+  - Login: satan
+    Password: hell_is_the_deepest_level
+    Id: 
+    UserId: 
+    StudentGroupId: 
+Clouds:
+- Name: Cloud_1
+  CIDR_Block: 10.0.0.0/16
+  Subnets:
+  - Name: NAT_Subnet
+    CIDR_Block: 10.0.129.0/24
+    Internet_Accessible: true
+    Instances:
+    - Name: NAT_Instance
+      OS: nat
+      IP_Address: 10.0.129.5
+      Internet_Accessible: true
+      Roles:
+      - NAT
+  - Name: Player_Subnet
+    CIDR_Block: 10.0.0.0/27
+    Internet_Accessible: false
+    Instances:
+    - Name: starting_line
+      OS: ubuntu
+      IP_Address: 10.0.0.5
+      Internet_Accessible: false
+      Roles:
+      - Starting_Line_Role
+      - Net_Tools
+    - Name: first_stop
+      OS: ubuntu
+      IP_Address: 10.0.0.7
+      Internet_Accessible: false
+      Roles:
+      - First_Stop_Role
+      - Net_Tools
+    - Name: second_stop
+      OS: ubuntu
+      IP_Address: 10.0.0.10
+      Internet_Accessible: false
+      Roles:
+      - Second_Stop_Role
+      - Net_Tools
+    - Name: satan_palace
+      OS: ubuntu
+      IP_Address: 10.0.0.13
+      Internet_Accessible: false
+      Roles:
+      - Satan_Role
+    - Name: third_stop
+      OS: ubuntu
+      IP_Address: 10.0.0.15
+      Internet_Accessible: false
+      Roles:
+      - Third_Stop_Role
+      - Net_Tools
+    - Name: fourth_stop
+      OS: ubuntu
+      IP_Address: 10.0.0.16
+      Internet_Accessible: false
+      Roles:
+      - Fourth_Stop_Role
+      - Net_Tools
+    - Name: fifth_stop
+      OS: ubuntu
+      IP_Address: 10.0.0.17
+      Internet_Accessible: false
+      Roles:
+      - Fifth_Stop_Role
+      - Net_Tools
+    - Name: anon_ftp
+      OS: ubuntu
+      IP_Address: 10.0.0.14
+      Internet_Accessible: false
+      Roles:
+      - Anon_FTP
+Subnets: 
+Instances: 
+Roles:
+- Name: NAT
+  Packages: 
+  Recipes:
+  - nat_motd
+- Name: First_Stop_Role
+  Packages: 
+  Recipes:
+  - ssh_port_123
+  - motd_first_stop
+- Name: Second_Stop_Role
+  Packages: 
+  Recipes:
+  - second_stop_script
+  - motd_second_stop
+- Name: Starting_Line_Role
+  Packages: 
+  Recipes:
+  - motd_starting_line
+- Name: Anon_FTP
+  Packages: 
+  Recipes:
+  - anon_ftp
+- Name: Fourth_Stop_Role
+  Packages: 
+  Recipes:
+  - fourth_stop
+  - motd_fourth_stop
+- Name: Third_Stop_Role
+  Packages: 
+  Recipes:
+  - third_stop_script
+  - too_man_dirs
+  - motd_third_stop
+- Name: Fifth_Stop_Role
+  Packages: 
+  Recipes:
+  - fifth_stop_script
+  - motd_fifth_stop
+- Name: Satan_Role
+  Packages: 
+  Recipes:
+  - ssh_port_666
+  - motd_satan_palace
+  - satan_get_out
+  - satans_flag_script
+- Name: Net_Tools
+  Packages:
+  - nmap
+  Recipes:
+  - no_bash_history
+Scoring:
+- Text: What is the password to Starting Line?
+  Type: String
+  Options: []
+  Values:
+  - Value: readyplayerone
+    Points: '1'
+  Order: 1
+  Points: 1
+- Text: What is the password to First Stop?
+  Type: String
+  Options: []
+  Values:
+  - Value: inception
+    Points: '1'
+  Order: 2
+  Points: 1
+- Text: What is the password to Second Stop?
+  Type: String
+  Options: []
+  Values:
+  - Value: dicaprio
+    Points: '1'
+  Order: 3
+  Points: 1
+- Text: What is the password to Third Stop?
+  Type: String
+  Options: []
+  Values:
+  - Value: pizza_wins_now
+    Points: '1'
+  Order: 4
+  Points: 1
+- Text: What is the password to Fourth Stop?
+  Type: String
+  Options: []
+  Values:
+  - Value: subconcious_security
+    Points: '1'
+  Order: 5
+  Points: 1
+- Text: What is the password to Fifth Stop?
+  Type: String
+  Options: []
+  Values:
+  - Value: red_pill
+    Points: '1'
+  Order: 6
+  Points: 1
+- Text: What is the password to Satan's Palace?
+  Type: String
+  Options: []
+  Values:
+  - Value: hell_is_the_deepest_level
+    Points: '1'
+  Order: 7
+  Points: 1
+- Text: What is the decrypted string of the file 'final_flag' on Satan's palace?
+  Type: String
+  Options: []
+  Values:
+  - Value: If youve dropped a shell and are reading this, youve defeated the final
+      enemy and won the game. Congratulations.
+    Points: '1'
+  Order: 8
+  Points: 1
