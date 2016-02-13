@@ -1,0 +1,25 @@
+#ssh inception notes
+
+#### Getting to Starting Line
+Using the credentials provided by the instructor, players ssh to the nat
+then ssh from the nat to Starting Line.
+
+#### Starting line to First Stop
+Students must use a different port (ssh -p PORTNUM )
+
+#### First Stop to Second Stop
+Students must use a public key pair (shh -i IDENTITY_FILE)
+
+#### Second Stop to Third Stop
+
+#### Third Stop to Fourth Stop
+
+#### Fourth Stop to Fifth Stop
+
+#### Fifth Stop to Satan's Palace
+
+
+###TODO
+
+- [ ] Add level where students create a key pair and add their key to a server
+- [ ] 
