@@ -841,15 +841,17 @@ class Scenario < ActiveRecord::Base
       # populate statistic with bash histories
       self.instances.all.each do |instance|
         # concatenate all bash histories into one big string
+	statistic.bash_histories += '###' + instance.name + "\n"
         statistic.bash_histories += instance.get_bash_history
 
         # Concatenate all script logs
         # Will look messy
+	statistic.script_log += '###' + instance.name + "\n"
         statistic.script_log += instance.get_script_log
 
         # Concatenate all exit status logs
-        statistic.exit_status += instance.get_exit_status
-        
+	statistic.exit_status += '###' + instance.name + "\n"
+        statistic.exit_status += instance.get_exit_status 
       end
   
       # partition the big bash history string into a nested hash structure
