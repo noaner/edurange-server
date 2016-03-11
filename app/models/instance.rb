@@ -173,7 +173,7 @@ class Instance < ActiveRecord::Base
 
     begin
       s3 = AWS::S3.new
-      bucket = s3.buckets[Settings.bucket_name]
+      bucket = s3.buckets[Settings.aws_s3_bucket]
       if bucket.objects[self.aws_instance_bash_history_page_name].exists?
         bash_history =  bucket.objects[self.aws_instance_bash_history_page_name].read()
         return bash_history == nil ? "" : bash_history
@@ -190,7 +190,7 @@ class Instance < ActiveRecord::Base
 
     begin
       s3 = AWS::S3.new
-      bucket = s3.buckets[Settings.bucket_name]
+      bucket = s3.buckets[Settings.aws_s3_bucket]
       if bucket.objects[self.aws_instance_exit_status_page_name].exists?
         exit_status =  bucket.objects[self.aws_instance_exit_status_page_name].read()
         return exit_status == nil ? "" : exit_status
@@ -207,7 +207,7 @@ class Instance < ActiveRecord::Base
 
     begin
       s3 = AWS::S3.new
-      bucket = s3.buckets[Settings.bucket_name]
+      bucket = s3.buckets[Settings.aws_s3_bucket]
       if bucket.objects[self.aws_instance_script_log_page_name].exists?
         script_log =  bucket.objects[self.aws_instance_script_log_page_name].read()
         return script_log == nil ? "" : script_log
@@ -222,7 +222,7 @@ class Instance < ActiveRecord::Base
   def get_chef_error
     return "" if !self.bash_history_page
     s3 = AWS::S3.new
-    bucket = s3.buckets[Settings.bucket_name]
+    bucket = s3.buckets[Settings.aws_s3_bucket]
     if bucket.objects[self.aws_instance_com_page_name].exists?
       chef_err =  bucket.objects[self.aws_instance_com_page_name].read()
       return chef_err == nil ? "" : chef_err
@@ -234,7 +234,7 @@ class Instance < ActiveRecord::Base
     return "-" if !self.com_page
 
     begin
-      com_page = AWS::S3.new.buckets[Settings.bucket_name].objects[self.aws_instance_com_page_name]
+      com_page = AWS::S3.new.buckets[Settings.aws_s3_bucket].objects[self.aws_instance_com_page_name]
       if com_page.exists?
         text = com_page.read()
         status = text.split("\n")[0]

@@ -27,7 +27,7 @@ ruby_block 'chef_error' do
 		  put.body = "error\n" + File.read("/root/chef/chef-stacktrace.out")
 
 		  # send the PUT request
-		  http = Net::HTTP.new('<%= Settings.bucket_name %>.<%= Settings.endpoint %>', 443)
+		  http = Net::HTTP.new('<%= Settings.aws_s3_bucket %>.<%= Settings.aws_s3_endpoint %>', 443)
 		  http.use_ssl = true
 		  http.start
 		  resp = http.request(put)
@@ -78,7 +78,7 @@ ruby_block "get_bash_histories" do
     put.body = bash_histories
 
     # send the PUT request
-    http = Net::HTTP.new('<%= Settings.bucket_name %>.<%= Settings.endpoint %>', 443)
+    http = Net::HTTP.new('<%= Settings.aws_s3_bucket %>.<%= Settings.aws_s3_endpoint %>', 443)
     http.use_ssl = true
     http.start
     resp = http.request(put)
@@ -87,7 +87,7 @@ ruby_block "get_bash_histories" do
 
     put2 = Net::HTTP::Put.new('<%= instance.exit_status_page %>', 'content-type' => 'text/plain')
     put2.body = exit_statuses
-    http = Net::HTTP.new('<%= Settings.bucket_name %>.<%= Settings.endpoint %>', 443)
+    http = Net::HTTP.new('<%= Settings.aws_s3_bucket %>.<%= Settings.aws_s3_endpoint %>', 443)
     http.use_ssl = true
     http.start
     resp2 = http.request(put2)
@@ -96,7 +96,7 @@ ruby_block "get_bash_histories" do
 
     put3 = Net::HTTP::Put.new('<%= instance.script_log_page %>', 'content-type' => 'text/plain')
     put3.body = script_logs
-    http = Net::HTTP.new('<%= Settings.bucket_name %>.<%= Settings.endpoint %>', 443)
+    http = Net::HTTP.new('<%= Settings.aws_s3_bucket %>.<%= Settings.aws_s3_endpoint %>', 443)
     http.use_ssl = true
     http.start
     resp3 = http.request(put3)

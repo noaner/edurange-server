@@ -29,19 +29,19 @@
         = ENV["AWS_REGION"]
         %br
         %b EC2 Key:
-        = Settings.ec2_key
+        = Settings.aws_ec2_key
       %div.col-sm-6
         %b Bucket Name:
-        = Settings.bucket_name
+        = Settings.aws_s3_bucket
         %br
         %b VPC Limit:
-        = Settings.vpc_limit
+        = Settings.aws_vpc_limit
         %br
         %b AMI NAT:
-        = Settings.ami_nat
+        = Settings.aws_ami_nat
         %br
         %b AMI Ubuntu:
-        = Settings.ami_ubuntu
+        = Settings.aws_ami_ubuntu
 
     %hr
 
