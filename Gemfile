@@ -37,6 +37,7 @@ gem 'chartkick'
 gem 'groupdate'
 gem 'active_median'
 gem 'rubyzip'
+gem 'flag_shih_tzu', '~> 0.3.15' # adds easy bitwise flags
 
 group :development do
   gem 'better_errors'
