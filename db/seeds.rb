@@ -9,3 +9,12 @@ user = CreateAdminService.new.call
 puts 'CREATED ADMIN USER: ' << user.email
 # Environment variables (ENV['...']) can be set in the file config/application.yml.
 # See http://railsapps.github.io/rails-environment-variables.html
+if Rails.env == 'development' then
+    admin = User.new(name: 'admin', email: 'admin@foo.bar', password: 'password123')
+    admin.set_admin_role
+    admin.save
+
+    10.times do |i|
+        User.create(name: "student#{i}", email: "student#{i}@foo.bar", password: 'password123')
+    end
+end
