@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160115194021) do
+ActiveRecord::Schema.define(version: 20160313202015) do
 
   create_table "answers", force: :cascade do |t|
     t.boolean  "correct"
@@ -109,6 +109,30 @@ ActiveRecord::Schema.define(version: 20160115194021) do
   end
 
   add_index "instances", ["subnet_id"], name: "index_instances_on_subnet_id"
+
+  create_table "key_chains", force: :cascade do |t|
+    t.integer  "flags"
+    t.string   "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "key_chains_users", id: false, force: :cascade do |t|
+    t.integer "key_chain_id", null: false
+    t.integer "user_id",      null: false
+  end
+
+  create_table "keys", force: :cascade do |t|
+    t.integer  "resource_id"
+    t.string   "resource_type"
+    t.integer  "key_chain_id"
+    t.integer  "flags"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  add_index "keys", ["key_chain_id"], name: "index_keys_on_key_chain_id"
+  add_index "keys", ["resource_type", "resource_id"], name: "index_keys_on_resource_type_and_resource_id"
 
   create_table "players", force: :cascade do |t|
     t.string   "login"

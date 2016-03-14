@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  resource_id: 
+  resource_type: Resource
+  key_chain_id: 
+  flags: 1
+
+two:
+  resource_id: 
+  resource_type: Resource
+  key_chain_id: 
+  flags: 1
