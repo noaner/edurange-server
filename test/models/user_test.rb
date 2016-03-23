@@ -233,6 +233,14 @@ class UserTest < ActiveSupport::TestCase
     assert_not StudentGroupUser.find_by_id(sgu2.id)
   end
 
+  test 'should be able to access users through keys' do
+    assert users(:admin1).users.include? users(:student1)
+  end
+
+  test 'should be able to access owner through keys' do
+    assert users(:student1).owners.include? users(:admin1)
+  end
+
   test 'should own all resources belonging to scenario and student groups' do
     user = users(:test1)
     user.set_admin_role

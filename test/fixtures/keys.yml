@@ -1,13 +1,7 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  resource_id: 
-  resource_type: Resource
-  key_chain_id: 
-  flags: 1
-
-two:
-  resource_id: 
-  resource_type: Resource
-  key_chain_id: 
-  flags: 1
+<% 1.upto(10) do |i| %>
+student<%= i %>_key:
+  key_chain: admin
+  resource: student<%= i %> (User)
+<% end %>

@@ -13,6 +13,18 @@ class User < ActiveRecord::Base
   validates :name, presence: true
   validate :validate_name, :validate_running
 
+  # pushing ActiveRecord to the very limits ;)
+  # NOTE: this might be slightly insane
+  # EXTRA NOTE: I definitely might be going slightly insane
+  has_and_belongs_to_many :key_chains
+  has_many :keys, through: :key_chains
+  has_many :users, through: :keys, source: :resource, source_type: User
+
+  # keys/key_chains/users that own this user
+  has_many :super_keys, as: :resource, class_name: 'Key'
+  has_many :super_key_chains, through: :super_keys, source: :key_chain
+  has_many :owners, through: :super_key_chains, source: :users
+
   def validate_name
     return if not self.name
     self.name = self.name.strip
@@ -130,5 +142,7 @@ class User < ActiveRecord::Base
     self.set_student_role
     return sg, sgu
   end
+
+
 
 end
