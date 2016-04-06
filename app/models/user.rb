@@ -4,14 +4,9 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
   enum role: [:user, :vip, :admin, :instructor, :student]
 
-  has_many :scenarios
+  #has_many :scenarios
   has_many :student_groups, dependent: :destroy
   has_many :student_group_users, dependent: :destroy
-
-  after_initialize :set_defaults, :if => :new_record?
-  validates :email, uniqueness: true
-  validates :name, presence: true
-  validate :validate_name, :validate_running
 
   # pushing ActiveRecord to the very limits ;)
   # NOTE: this might be slightly insane
@@ -19,11 +14,17 @@ class User < ActiveRecord::Base
   has_and_belongs_to_many :key_chains
   has_many :keys, through: :key_chains
   has_many :users, through: :keys, source: :resource, source_type: User
+  has_many :scenarios, through: :keys, source: :resource, source_type: Scenario
 
   # keys/key_chains/users that own this user
   has_many :super_keys, as: :resource, class_name: 'Key'
   has_many :super_key_chains, through: :super_keys, source: :key_chain
   has_many :owners, through: :super_key_chains, source: :users
+
+  after_initialize :set_defaults, :if => :new_record?
+  validates :email, uniqueness: true
+  validates :name, presence: true
+  validate :validate_name, :validate_running
 
   def validate_name
     return if not self.name
@@ -60,6 +61,23 @@ class User < ActiveRecord::Base
     elsif cl == StudentGroupUser
       return obj.student_group.user == self
     end
+  end
+
+  def create_key_chain_if_not_exists
+    self.create_key_chain if self.key_chains.find_by(name: self.name).nil?
+  end
+
+  def create_key_chain
+    self.key_chains.create(name: self.name)
+  end
+
+  def add_resource(obj)
+    create_key_chain_if_not_exists
+    self.key_chains.find_by(name: self.name).keys.create(resource: obj).resource
+  end
+
+  def add_scenario(scenario)
+    add_resource scenario
   end
 
   def set_defaults

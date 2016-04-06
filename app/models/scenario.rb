@@ -6,7 +6,7 @@ class Scenario < ActiveRecord::Base
   # attr_accessor :template # For picking a template when creating a new scenario
 
   serialize :aws_prefixes
-  
+
   belongs_to :user
   has_many :clouds, dependent: :destroy
   has_many :questions, dependent: :destroy
