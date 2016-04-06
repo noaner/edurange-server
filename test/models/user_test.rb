@@ -48,8 +48,7 @@ class UserTest < ActiveSupport::TestCase
   test 'should not allow name update while scenario is running' do
     user = users(:instructor1)
 
-    scenario = user.scenarios.new(location: :test, name: 'test1')
-    scenario.save
+    scenario = user.add_scenario Scenario.new(location: :test, name: 'test1', user: user)
     assert scenario.valid?
 
     scenario.set_booted
@@ -112,7 +111,7 @@ class UserTest < ActiveSupport::TestCase
   test 'should have student group user if instructor or admin' do
     user = users(:instructor1)
     student = users(:student1)
-    scenario = user.scenarios.new(location: :test, name: 'test1')
+    scenario = user.add_scenario Scenario.new(location: :test, name: 'test1', user: user)
 
     # test instructor role
     user.set_instructor_role
@@ -255,13 +254,13 @@ class UserTest < ActiveSupport::TestCase
     end
 
     # test ownership of scenario and its resources
-    scenario = user.scenarios.new(location: :production, name: 'strace')
+    scenario = user.add_scenario Scenario.new(user: user, location: :production, name: 'strace')
     scenario.save
     assert user.owns? scenario
 
     scenario.clouds.each do |cloud|
       assert user.owns? cloud
-      
+
       cloud.subnets.each do |subnet|
         assert user.owns? subnet
 
