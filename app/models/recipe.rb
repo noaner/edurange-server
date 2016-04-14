@@ -33,11 +33,11 @@ class Recipe < ActiveRecord::Base
     if self.custom?
       return "#{self.scenario.path_recipes}/#{self.name.filename_safe}.rb"
     end
-    "#{Settings.app_path}/scenarios/recipes/#{self.name.downcase}.rb.erb"
+    "#{Rails.root}/scenarios/recipes/#{self.name.downcase}.rb.erb"
   end
 
   def set_custom
-    if File.exists? "#{Settings.app_path}/scenarios/recipes/#{self.name.downcase}.rb.erb"
+    if File.exists? "#{Rails.root}/scenarios/recipes/#{self.name.downcase}.rb.erb"
       self.custom = false
     else
       self.custom = true

@@ -13,36 +13,10 @@
     %hr
 
     %label AWS Settings:
-    - if not @aws_working
+    - if not @aws_vpc_cnt
       %div.failure
         FAILED TO VALIDATE CREDENTIALS
-    %div.row
-      %div.col-sm-6
-        %b Access Key ID:
-        = ENV["AWS_ACCESS_KEY_ID"].sub(/^.............../, "...............")
-        %br
-        %b Access Key:
-        = ENV["AWS_SECRET_ACCESS_KEY"].sub(/^.................................../,
-            "...................................")
-        %br
-        %b Region:
-        = ENV["AWS_REGION"]
-        %br
-        %b EC2 Key:
-        = Settings.aws_ec2_key
-      %div.col-sm-6
-        %b Bucket Name:
-        = Settings.aws_s3_bucket
-        %br
-        %b VPC Limit:
-        = Settings.aws_vpc_limit
-        %br
-        %b AMI NAT:
-        = Settings.aws_ami_nat
-        %br
-        %b AMI Ubuntu:
-        = Settings.aws_ami_ubuntu
-
+    = render 'admin/aws_settings.html.haml'
     %hr
 
     %label Registration Code:

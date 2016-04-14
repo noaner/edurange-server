@@ -129,24 +129,6 @@ class Instance < ActiveRecord::Base
     return (self.booted? or self.boot_failed? or self.unboot_failed?)
   end
 
-  def generate_cookbooker
-
-    # template = File.read(Settings.app_path + "lib/templates/cookbook_template_new.rb.erb")
-    # template = Erubis::Eruby.new(template)
-    cookbook = "# Instance cookbook\n"
-
-    self.roles.each do |role|
-        role.recipes.each do |recipe|
-          fname = Settings.app_path + "scenarios/recipes/" + recipe + ".rb.erb"
-          if File.file?(fname)
-            cookbook += Erubis::Eruby.new(File.read(fname)).result + "\n"
-          end
-        end
-      end
-
-      cookbook
-  end
-
   def scenario
     return self.subnet.cloud.scenario
   end
@@ -173,7 +155,7 @@ class Instance < ActiveRecord::Base
 
     begin
       s3 = AWS::S3.new
-      bucket = s3.buckets[Settings.aws_s3_bucket]
+      bucket = s3.buckets[Rails.configuration.x.aws['s3_bucket_name']]
       if bucket.objects[self.aws_instance_bash_history_page_name].exists?
         bash_history =  bucket.objects[self.aws_instance_bash_history_page_name].read()
         return bash_history == nil ? "" : bash_history
@@ -190,7 +172,7 @@ class Instance < ActiveRecord::Base
 
     begin
       s3 = AWS::S3.new
-      bucket = s3.buckets[Settings.aws_s3_bucket]
+      bucket = s3.buckets[Rails.configuration.x.aws['s3_bucket_name']]
       if bucket.objects[self.aws_instance_exit_status_page_name].exists?
         exit_status =  bucket.objects[self.aws_instance_exit_status_page_name].read()
         return exit_status == nil ? "" : exit_status
@@ -207,7 +189,7 @@ class Instance < ActiveRecord::Base
 
     begin
       s3 = AWS::S3.new
-      bucket = s3.buckets[Settings.aws_s3_bucket]
+      bucket = s3.buckets[Rails.configuration.x.aws['s3_bucket_name']]
       if bucket.objects[self.aws_instance_script_log_page_name].exists?
         script_log =  bucket.objects[self.aws_instance_script_log_page_name].read()
         return script_log == nil ? "" : script_log
@@ -222,7 +204,7 @@ class Instance < ActiveRecord::Base
   def get_chef_error
     return "" if !self.bash_history_page
     s3 = AWS::S3.new
-    bucket = s3.buckets[Settings.aws_s3_bucket]
+    bucket = s3.buckets[Rails.configuration.x.aws['s3_bucket_name']]
     if bucket.objects[self.aws_instance_com_page_name].exists?
       chef_err =  bucket.objects[self.aws_instance_com_page_name].read()
       return chef_err == nil ? "" : chef_err
@@ -234,7 +216,7 @@ class Instance < ActiveRecord::Base
     return "-" if !self.com_page
 
     begin
-      com_page = AWS::S3.new.buckets[Settings.aws_s3_bucket].objects[self.aws_instance_com_page_name]
+      com_page = AWS::S3.new.buckets[Rails.configuration.x.aws['s3_bucket_name']].objects[self.aws_instance_com_page_name]
       if com_page.exists?
         text = com_page.read()
         status = text.split("\n")[0]
@@ -295,16 +277,16 @@ class Instance < ActiveRecord::Base
     begin
       # Returns the bash code to initialize an instance with chef-solo
       init = ""
-      os_bootstrap_path = "#{Settings.app_path}scenarios/bootstrap/os_#{self.os.filename_safe}.sh.erb"
+      os_bootstrap_path = "#{Rails.root}/scenarios/bootstrap/os_#{self.os.filename_safe}.sh.erb"
       if File.exists? os_bootstrap_path
         init += Erubis::Eruby.new(File.read(os_bootstrap_path)).result(instance: self) + "\n"
       end
 
       # initiate chef
-      init += Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/chef.sh.erb")).result(instance: self) + "\n"
+      init += Erubis::Eruby.new(File.read(Rails.root + "scenarios/bootstrap/chef.sh.erb")).result(instance: self) + "\n"
 
       # do routing rules
-      # routing_rules = Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/ip_tables.sh.erb")).result(instance: self) + "\n"
+      # routing_rules = Erubis::Eruby.new(File.read(Rails.root + "scenarios/bootstrap/ip_tables.sh.erb")).result(instance: self) + "\n"
       # s3_routing_rules = ''
       # self.scenario.aws_prefixes.each do |aws_prefix|
       #   s3_routing_rules += "iptables -A OUTPUT -d #{aws_prefix} -p tcp --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT\n"
@@ -313,7 +295,7 @@ class Instance < ActiveRecord::Base
       # init += routing_rules.gsub("<s3_routing_rules>", s3_routing_rules)
 
       # enable ssh password login by default
-      init += Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/sshd_password_login.sh.erb")).result(instance: self) + "\n"
+      init += Erubis::Eruby.new(File.read(Rails.root + "scenarios/bootstrap/sshd_password_login.sh.erb")).result(instance: self) + "\n"
 
       # message of the day
       motd_folder_path = self.scenario.path + '/motd'
@@ -337,11 +319,11 @@ class Instance < ActiveRecord::Base
   def generate_cookbook
     begin
       # Find out if this is a global or custom recipe
-      scenario_path = "#{Settings.app_path}scenarios/user/#{self.scenario.user.name.filename_safe}/#{self.scenario.name.filename_safe}"
-      scenario_path = "#{Settings.app_path}scenarios/local/#{self.scenario.name.filename_safe}" if not File.exists? scenario_path
+      scenario_path = "#{Rails.root}/scenarios/user/#{self.scenario.user.name.filename_safe}/#{self.scenario.name.filename_safe}"
+      scenario_path = "#{Rails.root}/scenarios/local/#{self.scenario.name.filename_safe}" if not File.exists? scenario_path
 
       # This recipe sets up packages and users and is run for every instance
-      cookbook = Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/packages_and_users.rb.erb")).result(instance: self) + "\n"
+      cookbook = Erubis::Eruby.new(File.read("#{Rails.root}/scenarios/recipes/templates/packages_and_users.rb.erb")).result(instance: self) + "\n"
 
       self.roles.each do |role|
         role.recipes.each do |recipe|
@@ -354,12 +336,12 @@ class Instance < ActiveRecord::Base
       end
 
       # This recipe signals the com page and also gets the bash histories
-      cookbook += Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/com_page_and_bash_histories.rb.erb")).result(instance: self) + "\n"
+      cookbook += Erubis::Eruby.new(File.read("#{Rails.root}/scenarios/recipes/templates/com_page_and_bash_histories.rb.erb")).result(instance: self) + "\n"
       # This recipe changes /etc/bash.bashrc so that the bash history is written to file with every command
-      cookbook += Erubis::Eruby.new(File.read("#{Settings.app_path}scenarios/recipes/templates/write_bash_histories.rb.erb")).result(instance: self) + "\n"
+      cookbook += Erubis::Eruby.new(File.read("#{Rails.root}/scenarios/recipes/templates/write_bash_histories.rb.erb")).result(instance: self) + "\n"
       
       # do iptables rules
-      routing_rules = Erubis::Eruby.new(File.read(Settings.app_path + "scenarios/bootstrap/ip_tables.sh.erb")).result(instance: self) + "\n"
+      routing_rules = Erubis::Eruby.new(File.read(Rails.root + "scenarios/bootstrap/ip_tables.sh.erb")).result(instance: self) + "\n"
       s3_routing_rules = ''
       self.scenario.aws_prefixes.each do |aws_prefix|
         s3_routing_rules += "iptables -A OUTPUT -d #{aws_prefix} -p tcp --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT\n"

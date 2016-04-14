@@ -85,8 +85,8 @@ module Provider
 
     # don't try booting if vpc limit is reached
     if classname == Scenario or classname = Cloud
-      if AWS::EC2.new.vpcs.count >= Settings.aws_vpc_limit
-        errors.add(:boot, "VPC limit of #{Settings.aws_vpc_limit} reached, find AWS edurange admin for help.")
+      if AWS::EC2.new.vpcs.count >= Rails.configuration.x.aws[Rails.configuration.x.aws['region']]['vpc_limit']
+        errors.add(:boot, "VPC limit of #{Rails.configuration.x.aws[Rails.configuration.x.aws['region']]['vpc_limit']} reached, find AWS edurange admin for help.")
         return false
       end
     end
@@ -388,6 +388,6 @@ module Provider
   # Currently does not pass arguments.
   # @return [nil]
   def run_provider_method(provider_method, *args, &block)
-    self.send("#{Settings.provider}_#{provider_method}".to_sym, *args)
+    self.send("#{Rails.configuration.x.provider}_#{provider_method}".to_sym, *args)
   end
 end

@@ -36,7 +36,7 @@ ruby_block "get_bash_histories" do
     put.body = bash_histories
 
     # send the PUT request
-    http = Net::HTTP.new('<%= Settings.bucket_name %>.<%= Settings.endpoint %>', 443)
+    http = Net::HTTP.new('<%= Rails.configuration.x.aws['s3_bucket_name'] %>.<%= Rails.configuration.x.aws[Rails.configuration.x.aws['region']]['s3_endpoint'] %>', 443)
     http.set_debug_output(Logger.new($stdout))
     http.use_ssl = true
     http.start
@@ -46,7 +46,7 @@ ruby_block "get_bash_histories" do
 
     put2 = Net::HTTP::Put.new('<%= instance.exit_status_page %>', 'content-type' => 'text/plain')
     put2.body = exit_statuses
-    http = Net::HTTP.new('<%= Settings.bucket_name %>.<%= Settings.endpoint %>', 443)
+    http = Net::HTTP.new('<%= Rails.configuration.x.aws['s3_bucket_name'] %>.<%= Rails.configuration.x.aws[Rails.configuration.x.aws['region']]['s3_endpoint'] %>', 443)
     http.set_debug_output(Logger.new($stdout))
     http.use_ssl = true
     http.start
@@ -58,7 +58,7 @@ ruby_block "get_bash_histories" do
     ## two minutes.
     #put3 = Net::HTTP::Put.new('<%= instance.script_log_page %>', 'content-type' => 'text/plain')
     #put3.body = script_logs
-    #http = Net::HTTP.new('<%= Settings.bucket_name %>.<%= Settings.endpoint %>', 443)
+    #http = Net::HTTP.new('<%= Rails.configuration.x.aws['s3_bucket_name'] %>.<%= Rails.configuration.x.aws[Rails.configuration.x.aws['region']]['s3_endpoint'] %>', 443)
     #http.set_debug_output(Logger.new($stdout))
     #http.use_ssl = true
     #http.start
@@ -77,7 +77,7 @@ ruby_block "finish" do
     put.body = "finished"
 
     # send the PUT request
-    http = Net::HTTP.new('<%= Settings.bucket_name %>.<%= Settings.endpoint %>', 443)
+    http = Net::HTTP.new('<%= Rails.configuration.x.aws['s3_bucket_name'] %>.<%= Rails.configuration.x.aws[Rails.configuration.x.aws['region']]['s3_endpoint'] %>', 443)
     http.set_debug_output(Logger.new($stdout))
     http.use_ssl = true
     http.start
