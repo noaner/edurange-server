@@ -64,7 +64,7 @@ class ScenarioTest < ActiveSupport::TestCase
     assert_not File.exists? path_yml
     assert_not File.exists? path_recipes
 
-    path_graveyard = "#{Settings.app_path}/scenarios/custom/graveyard"
+    path_graveyard = "#{Rails.root}/scenarios/custom/graveyard"
     path_graveyard_user = "#{path_graveyard}/#{instructor.id}"
     path_graveyard_scenario_yml = "#{path_graveyard_scenario}/#{clone.name.downcase}.yml"
     
@@ -73,7 +73,7 @@ class ScenarioTest < ActiveSupport::TestCase
     assert File.exists? path_graveyard_scenario
     assert File.exists? path_graveyard_scenario_yml
 
-    FileUtils.rm_r "#{Settings.app_path}/scenarios/custom/#{instructor.id}"
+    FileUtils.rm_r "#{Rails.root}/scenarios/custom/#{instructor.id}"
     FileUtils.rm_r path_graveyard_user
 
   end

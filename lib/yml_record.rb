@@ -2,9 +2,9 @@ module YmlRecord
   # Returns an array of [filename, scenario name, description]
   def self.yml_headers_old
     output = []
-    Dir.foreach(Settings.app_path + "scenarios-yml/") do |filename|
+    Dir.foreach(Rails.root + "scenarios-yml/") do |filename|
       next if filename == '.' or filename == '..' or filename == 'ddos.yml'
-      scenario = YAML.load_file(Settings.app_path + "scenarios-yml/#{filename}")["Scenarios"][0]
+      scenario = YAML.load_file(Rails.root + "scenarios-yml/#{filename}")["Scenarios"][0]
       name = scenario["Name"]
       description = scenario["Description"]
       output.push [filename, name, description]
@@ -16,12 +16,12 @@ module YmlRecord
     output = []
 
     if location == 'custom'
-      if not File.exists?(Settings.app_path + "scenarios/custom")
-        FileUtils.mkdir(Settings.app_path + "scenarios/custom")
+      if not File.exists?(Rails.root + "scenarios/custom")
+        FileUtils.mkdir(Rails.root + "scenarios/custom")
       end
-      path = Settings.app_path + "scenarios/custom/#{user.id}"
+      path = Rails.root + "scenarios/custom/#{user.id}"
     else
-      path = Settings.app_path + "scenarios/#{location}"
+      path = Rails.root + "scenarios/#{location}"
     end
 
     if not File.exists? path
@@ -41,9 +41,9 @@ module YmlRecord
 
   def self.yml_headers_user(user)
     output = []
-    Dir.foreach(Settings.app_path + "scenarios/user/#{user.id}") do |filename|
+    Dir.foreach(Rails.root + "scenarios/user/#{user.id}") do |filename|
       next if filename == '.' or filename == '..'
-      file = YAML.load_file(Settings.app_path + "scenarios/user/#{user.id}/#{filename}/#{filename}.yml")
+      file = YAML.load_file(Rails.root + "scenarios/user/#{user.id}/#{filename}/#{filename}.yml")
       output.push( { filename: filename, name: file["Name"], description: file["Description"] } )
     end
     return output
@@ -71,8 +71,8 @@ module YmlRecord
       pathname = "scenarios/user/#{user.id}/#{name.downcase}/#{name.downcase}.yml"
     end
 
-    file = YAML.load_file(Settings.app_path + pathname)
-    # file = YAML.load_file(Settings.app_path + "scenarios/local/#{name.filename_safe}/#{name.filename_safe}.yml")
+    file = YAML.load_file(Rails.root + pathname)
+    # file = YAML.load_file(Rails.root + "scenarios/local/#{name.filename_safe}/#{name.filename_safe}.yml")
 
     scenarios = file["Scenarios"]
     clouds = file["Clouds"]

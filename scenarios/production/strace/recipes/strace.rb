@@ -5,7 +5,7 @@ script "install_strace" do
   cwd "/tmp"
   code <<-EOH
   cd /tmp
-  git clone https://github.com/kahea/strace-lyn
+  git clone https://github.com/edurange/strace-lyn
   cd /tmp/strace-lyn
   ./install
   cd /tmp
