@@ -7,12 +7,12 @@ class ScenarioTest < ActiveSupport::TestCase
     instructor = users(:instructor1)
     admin = users(:admin1)
 
-    scenario = student.add_scenario Scenario.new(user: student, location: :test, name: 'test1')
+    scenario = student.create_scenario(location: :test, name: 'test1')
     scenario.save
     assert_not scenario.valid?
     assert_equal [:user], scenario.errors.keys
 
-    scenario = instructor.add_scenario Scenario.new(user: student, location: :test, name: 'test1')
+    scenario = instructor.create_scenario(location: :test, name: 'test1')
     scenario.save
     assert scenario.valid?
     assert_equal [], scenario.errors.keys
@@ -20,11 +20,11 @@ class ScenarioTest < ActiveSupport::TestCase
 
   test 'should rescue when yml is corrupted' do
     instructor = users(:instructor1)
-    scenario = instructor.add_scenario Scenario.new(user: instructor, location: :test, name: 'badyml')
+    scenario = instructor.create_scenario(location: :test, name: 'badyml')
     scenario.save
     assert_equal [:load], scenario.errors.keys
 
-    scenario = instructor.add_scenario Scenario.new(user: instructor, location: :test, name: 'badyml2')
+    scenario = instructor.create_scenario(location: :test, name: 'badyml2')
     scenario.save
     assert_equal [:load], scenario.errors.keys
   end
@@ -33,7 +33,7 @@ class ScenarioTest < ActiveSupport::TestCase
     instructor = users(:instructor1)
     Dir.foreach('scenarios/production') do |filename|
       next if ['.','..'].include? filename
-      scenario = instructor.add_scenario Scenario.new(user: instructor, location: :production, name: filename)
+      scenario = instructor.create_scenario(location: :production, name: filename)
       scenario.save
       assert_equal [], scenario.errors.keys, "production scenario #{filename} does not load. #{scenario.errors.messages}"
     end
@@ -41,7 +41,7 @@ class ScenarioTest < ActiveSupport::TestCase
 
   test 'clone' do
     instructor = users(:instructor999999999)
-    scenario = instructor.add_scenario Scenario.new(user: instructor, location: :test, name: 'test1')
+    scenario = instructor.create_scenario(location: :test, name: 'test1')
     scenario.save
 
     assert_equal [], scenario.errors.keys
@@ -80,7 +80,7 @@ class ScenarioTest < ActiveSupport::TestCase
 
   test 'scenario should not fail if recipe folders are missing' do
     instructor = users(:instructor999999999)
-    scenario = instructor.add_scenario Scenario.new(user: instructor, location: :test, name: 'missingrecipefolder')
+    scenario = instructor.create_scenario(location: :test, name: 'missingrecipefolder')
 
     FileUtils.rm_rf "#{scenario.path}/recipes" if File.exists? "#{scenario.path}/recipes"
 
@@ -94,7 +94,7 @@ class ScenarioTest < ActiveSupport::TestCase
 
   test 'answers_url should not be nil' do
     instructor = users(:instructor999999999)
-    scenario = instructor.add_scenario Scenario.new(user: instructor, location: :test, name: 'test1')
+    scenario = instructor.create_scenario(location: :test, name: 'test1')
     scenario.save
     assert scenario.answers != nil
     assert scenario.answers.class == String
@@ -102,7 +102,7 @@ class ScenarioTest < ActiveSupport::TestCase
 
   test 'ip address should be valid' do
     instructor = users(:instructor999999999)
-    scenario = instructor.add_scenario Scenario.new(user: instructor, location: :test, name: 'dynamicip')
+    scenario = instructor.create_scenario(location: :test, name: 'dynamicip')
     scenario.save
 
     assert_not scenario.errors.any?, scenario.errors.messages
@@ -136,7 +136,7 @@ class ScenarioTest < ActiveSupport::TestCase
 
   test 'special question values' do
     instructor = users(:instructor999999999)
-    scenario = instructor.add_scenario Scenario.new(user: instructor, location: :test, name: 'special_question_values')
+    scenario = instructor.create_scenario(location: :test, name: 'special_question_values')
     scenario.save
     assert scenario.valid?, scenario.errors.messages
 

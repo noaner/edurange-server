@@ -45,10 +45,21 @@ class UserTest < ActiveSupport::TestCase
     assert user.role == "student"
   end
 
+  test 'should create new resources on default key chain' do
+    user = users(:instructor1)
+    scenario = user.create_scenario(location: :test, name: 'test1')
+
+    key_ring = KeyChain.find_by(name: user.name)
+    assert_not_nil key_ring
+
+    key = key_ring.keys.find{ |k| k.resource == scenario }
+    assert_not_nil key
+  end
+
   test 'should not allow name update while scenario is running' do
     user = users(:instructor1)
 
-    scenario = user.add_scenario Scenario.new(location: :test, name: 'test1', user: user)
+    scenario = user.create_scenario(location: :test, name: 'test1')
     assert scenario.valid?
 
     scenario.set_booted
@@ -111,7 +122,7 @@ class UserTest < ActiveSupport::TestCase
   test 'should have student group user if instructor or admin' do
     user = users(:instructor1)
     student = users(:student1)
-    scenario = user.add_scenario Scenario.new(location: :test, name: 'test1', user: user)
+    scenario = user.create_scenario(location: :test, name: 'test1')
 
     # test instructor role
     user.set_instructor_role
@@ -254,7 +265,7 @@ class UserTest < ActiveSupport::TestCase
     end
 
     # test ownership of scenario and its resources
-    scenario = user.add_scenario Scenario.new(user: user, location: :production, name: 'strace')
+    scenario = user.create_scenario(location: :production, name: 'strace')
     scenario.save
     assert user.owns? scenario
 

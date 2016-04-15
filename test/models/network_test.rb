@@ -5,7 +5,7 @@ class NetworkTest < ActiveSupport::TestCase
   test 'cidr within cloud' do
 
     instructor = users(:instructor1)
-    scenario = instructor.scenarios.new(location: :test, name: 'network_test')
+    scenario = instructor.create_scenario(location: :test, name: 'network_test')
     scenario.save
     assert scenario.valid?, scenario.errors.messages
 

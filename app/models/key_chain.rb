@@ -5,6 +5,10 @@ class KeyChain < ActiveRecord::Base
   has_and_belongs_to_many :users
 
   # boolean bitfield provided by flag_shih_tzu gem
-  has_flags 1 => :can_create_user,
-            2 => :can_create_scenario
+  has_flags 1 => :create_user,
+            2 => :create_scenario
+
+  def can?(flag)
+    return self.send flag
+  end
 end

@@ -43,7 +43,7 @@ class User < ActiveRecord::Base
   end
 
   def validate_running
-    if self.scenarios.select{ |s| not s.stopped? }.size > 0
+    if self.scenarios.any?{ |s| not s.stopped? }
       errors.add(:running, "can not modify while a scenario is running")
       return false
     end
@@ -63,6 +63,14 @@ class User < ActiveRecord::Base
     end
   end
 
+  def can?(flag)
+    self.key_chains.any?{ |kc| kc.can? flag }
+  end
+
+  def can?(flag, resource)
+    self.keys.find{ |k| k.resource == resource }.any?{ |k| k.can? flag }
+  end
+
   def create_key_chain_if_not_exists
     self.create_key_chain if self.key_chains.find_by(name: self.name).nil?
   end
@@ -78,6 +86,10 @@ class User < ActiveRecord::Base
 
   def add_scenario(scenario)
     add_resource scenario
+  end
+
+  def create_scenario(**opts)
+    self.add_scenario Scenario.new(user: self, **opts)
   end
 
   def set_defaults
