@@ -47,7 +47,7 @@ class User < ActiveRecord::Base
       errors.add(:running, "can not modify while a scenario is running")
       return false
     end
-    true
+    return true
   end
 
   def owns?(obj)
