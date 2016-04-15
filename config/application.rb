@@ -34,5 +34,32 @@ module Edurange
     config.autoload_paths += %W(#{config.root}/lib)
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
 
+    # choose provider
+    config.x.provider = 'aws'
+
+    # AWS
+    config.x.aws = config_for(:aws)
+
+    # get iam user name and set some aws configs
+    begin
+      AWS::IAM::Client.new.create_access_key
+    rescue => e
+      config.x.aws['iam_user_name'] = /user\/.* is/.match(e.message).to_s.gsub("user\/", "").gsub(" is", "")
+    end
+    config.x.aws['s3_bucket_name'] = config.x.aws['iam_user_name']
+    config.x.aws['ec2_key_pair_name'] = "#{config.x.aws['iam_user_name']}-#{config.x.aws['region']}"
+
+    # create keypair if it doesn't already exist
+    aws_key_pair_path = "#{Rails.root}/keys/#{config.x.aws['ec2_key_pair_name']}"
+    FileUtils.mkdir("#{Rails.root}/keys") if not File.exists?("#{Rails.root}/keys")
+    if not File.exists?(aws_key_pair_path)
+      begin
+        aws_key_pair = AWS::EC2::Client.new.create_key_pair(key_name: config.x.aws['ec2_key_pair_name'])
+        File.open(aws_key_pair_path, "w") { |f| f.write(aws_key_pair[:key_material]) }
+        FileUtils.chmod(0400, aws_key_pair_path)
+      rescue
+      end
+    end
+
   end
 end

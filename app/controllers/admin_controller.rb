@@ -7,11 +7,11 @@ class AdminController < ApplicationController
     @students = User.where role: 4
 
     begin
-      @aws_working = AWS::EC2.new.vpcs.count
+      @aws_vpc_cnt = AWS::EC2.new.vpcs.count
+      @aws_instance_cnt = AWS::EC2.new.instances.count
     rescue => e
-      puts e
-      puts e.backtrace
-      @aws_working = nil
+      @aws_vpc_cnt = nil
+      @aws_instance_cnt = nil
     end
   end
 

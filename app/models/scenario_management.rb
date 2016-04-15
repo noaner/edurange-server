@@ -1,11 +1,11 @@
 class ScenarioManagement
 
 	def obliterate_custom(name, user)
-    path = "#{Settings.app_path}/scenarios/custom/#{user.id}/#{name.downcase}"
+    path = "#{Rails.root}/scenarios/custom/#{user.id}/#{name.downcase}"
     if not File.exists? path
       return false
     end
-    path_graveyard = "#{Settings.app_path}/scenarios/custom/graveyard"
+    path_graveyard = "#{Rails.root}/scenarios/custom/graveyard"
     FileUtils.mkdir path_graveyard if not File.exists? path_graveyard
     path_graveyard_user = "#{path_graveyard}/#{user.id}"
     FileUtils.mkdir path_graveyard_user if not File.exists? path_graveyard_user
@@ -54,9 +54,9 @@ class ScenarioManagement
 
     Scenario::locations.each do |location,v|
       if location == 'custom'
-        path = "#{Settings.app_path}/scenarios/custom/#{user.id}/#{clone.name.downcase}"
+        path = "#{Rails.root}/scenarios/custom/#{user.id}/#{clone.name.downcase}"
       else
-        path = "#{Settings.app_path}/scenarios/#{location}/#{clone.name.downcase}"
+        path = "#{Rails.root}/scenarios/#{location}/#{clone.name.downcase}"
       end
       if File.exists? path
         clone.errors.add(:name, "Name taken")
@@ -66,9 +66,9 @@ class ScenarioManagement
 
     # check that scenario exists for name
     if location == :custom
-      scenario_path = "#{Settings.app_path}/scenarios/custom/#{user.id}/#{name.downcase}"
+      scenario_path = "#{Rails.root}/scenarios/custom/#{user.id}/#{name.downcase}"
     else
-     	scenario_path = "#{Settings.app_path}/scenarios/#{location}/#{name.downcase}"
+     	scenario_path = "#{Rails.root}/scenarios/#{location}/#{name.downcase}"
     end
     scenario_path_yml = "#{scenario_path}/#{name.downcase}.yml"
     scenario_path_recipes = "#{scenario_path}/recipes"
@@ -84,11 +84,11 @@ class ScenarioManagement
    	end
 
     # make user directory if it doesn't already exist
-    userdir = "#{Settings.app_path}/scenarios/custom/#{user.id}"
+    userdir = "#{Rails.root}/scenarios/custom/#{user.id}"
     Dir.mkdir userdir unless File.exists? userdir
 
     # make clone directory
-    clone_path = "#{Settings.app_path}/scenarios/custom/#{user.id}/#{clone.name.downcase}"
+    clone_path = "#{Rails.root}/scenarios/custom/#{user.id}/#{clone.name.downcase}"
     if File.exists? clone_path
     	clone.errors.add(:file, 'path already exists.')
     else
@@ -96,14 +96,14 @@ class ScenarioManagement
     end
 
     # make recipe directory and copy every recipe
-    Dir.mkdir "#{Settings.app_path}/scenarios/custom/#{user.id}/#{clone.name.downcase}/recipes"
+    Dir.mkdir "#{Rails.root}/scenarios/custom/#{user.id}/#{clone.name.downcase}/recipes"
     Dir.foreach(scenario_path_recipes) do |recipe|
       next if recipe == '.' or recipe == '..'
       FileUtils.cp "#{scenario_path_recipes}/#{recipe}", "#{clone.path_recipes}"
     end
 
     # Copy yml file and replace Name:
-    newyml = File.open("#{Settings.app_path}/scenarios/custom/#{user.id}/#{clone.name.downcase}/#{clone.name.downcase}.yml", "w")
+    newyml = File.open("#{Rails.root}/scenarios/custom/#{user.id}/#{clone.name.downcase}/#{clone.name.downcase}.yml", "w")
     File.open(scenario_path_yml).each do |line|
       if /\s*Name:\s*#{name}/.match(line)
         line = line.gsub("#{name}", clone.name)

@@ -459,7 +459,7 @@ class ScenariosController < ApplicationController
   end
 
   def instance_bash_history
-    @bash_history = @instance.get_bash_history.gsub("\n", "<br>").html_safe;
+    @bash_history = @instance.get_bash_history.gsub("\n", "<br>").gsub('"', "'").html_safe;
     respond_to do |format|
       format.js { render template: 'scenarios/js/instance/bash_history.js.erb', layout: false }
     end
