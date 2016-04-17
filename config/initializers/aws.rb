@@ -3,20 +3,24 @@ if Rails.configuration.x.provider == 'aws'
 
   # test for correct environment variables
   begin
-    raise 'err' if not ENV['AWS_ACCESS_KEY_ID']
-    raise 'err' if not ENV['AWS_SECRET_ACCESS_KEY']
-    raise 'err' if not ENV['AWS_REGION']
+    raise 'MissingAWSEnv' if not ENV['AWS_ACCESS_KEY_ID']
+    raise 'MissingAWSEnv' if not ENV['AWS_SECRET_ACCESS_KEY']
+    raise 'MissingAWSEnv' if not ENV['AWS_REGION']
     AWS::EC2.new.vpcs.count
-  rescue AWS::EC2::Errors::AuthFailure, Exception
-    puts "\nOne or more of your Aws environment variables are invalid:\n\n"
-    puts "AWS_ACCESS_KEY_ID=" + ENV['AWS_ACCESS_KEY_ID']
-    puts "AWS_SECRET_ACCESS_KEY" + ENV['AWS_SECRET_ACCESS_KEY']
-    puts "AWS_REGION=" + ENV['AWS_REGION']
+  rescue
+    if !ENV['AWS_ACCESS_KEY_ID'] or !ENV['AWS_SECRET_ACCESS_KEY'] or !ENV['AWS_REGION']
+      puts "\nThe following Aws required environment variables are missing:\n\n"
+      puts "AWS_ACCESS_KEY_ID" if not ENV['AWS_ACCESS_KEY_ID']
+      puts "AWS_SECRET_ACCESS_KEY" if not ENV['AWS_SECRET_ACCESS_KEY']
+      puts "AWS_REGION" if not ENV['AWS_REGION']
+    else
+      puts "\nOne or more of your Aws environment variables are invalid:\n\n"
+      puts "AWS_ACCESS_KEY_ID=#{ENV['AWS_ACCESS_KEY_ID']}"
+      puts "AWS_SECRET_ACCESS_KEY#{ENV['AWS_SECRET_ACCESS_KEY']}"
+      puts "AWS_REGION=#{ENV['AWS_REGION']}"
+    end
+
     puts ""
-    raise 'AWS Config Error'
-  rescue => e
-    puts "\nGet the following from your EDURange Aws admin and place them in your environment variables:\n\n"
-    puts "AWS_SECRET_ACCESS_KEY\nAWS_REGION\nAWS_ACCESS_KEY_ID\n\n"
     raise 'AWS Config Error'
   end
 
