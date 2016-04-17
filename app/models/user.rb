@@ -63,20 +63,23 @@ class User < ActiveRecord::Base
     end
   end
 
-  def can?(flag)
-    self.key_chains.any?{ |kc| kc.can? flag }
-  end
-
-  def can?(flag, resource)
-    self.keys.find{ |k| k.resource == resource }.any?{ |k| k.can? flag }
+  def can?(flag, resource=nil)
+    if resource == nil
+      self.key_chains.any?{ |kc| kc.can? flag }
+    else
+      self.keys.find{ |k| k.resource == resource }.any?{ |k| k.can? flag }
+    end
   end
 
   def create_key_chain_if_not_exists
-    self.create_key_chain if self.key_chains.find_by(name: self.name).nil?
+    if self.key_chains.find_by(name: self.name).nil?
+      self.key_chains.create(name: self.name)
+    end
   end
 
-  def create_key_chain
-    self.key_chains.create(name: self.name)
+  def key_chain
+    create_key_chain_if_not_exists
+    self.key_chains.find_by(name: self.name)
   end
 
   def add_resource(obj)
@@ -84,12 +87,8 @@ class User < ActiveRecord::Base
     self.key_chains.find_by(name: self.name).keys.create(resource: obj).resource
   end
 
-  def add_scenario(scenario)
-    add_resource scenario
-  end
-
   def create_scenario(**opts)
-    self.add_scenario Scenario.new(user: self, **opts)
+    self.add_resource Scenario.new(user: self, **opts)
   end
 
   def set_defaults

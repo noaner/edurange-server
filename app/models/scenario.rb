@@ -78,24 +78,24 @@ class Scenario < ActiveRecord::Base
   end
 
   def validate_user
-    #if not self.user
-    #  errors.add(:user, 'must have a user')
-    #  return false
-    #end
+    if not self.user or not user = User.find_by_id(self.user)
+      errors.add(:user, 'must have a user')
+      return false
+    end
     #if not user = User.find_by_id(self.user)
     #  errors.add(:user, 'must have a user')
     #  return false
     #end
-    #if not (user.is_admin? or user.is_instructor?)
-    #  errors.add(:user, 'must be admin or instructor.')
-    #  return
-    #end
+    if not user.can? :create_scenario
+      errors.add(:user, 'must be admin or instructor.')
+      return false
+    end
 
+    true
     # I think authorization logic should be in the controller, not the model?
     # Especially since we're trying to eliminate hard-coded roles, so this check
     # gets a bit more complicated.
     # -noah
-    true
   end
 
   # Loading and file structure

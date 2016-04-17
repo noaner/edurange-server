@@ -1,3 +1,6 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html 
 admin:
-  flags: 1
+  flags: 3
+
+instructor:
+  flags: 3
