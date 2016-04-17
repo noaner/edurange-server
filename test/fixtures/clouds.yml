@@ -7,3 +7,8 @@ iptest_cloud:
 role_test_cloud:
   id: 344
   scenario_id: 344
+
+relations_cloud:
+  name: "cloud"
+  id: 4
+  scenario_id: 4

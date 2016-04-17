@@ -39,3 +39,25 @@ instructor999999999:
   email: instructor999999999@edurange.org
   encrypted_password: <%= User.new.send(:password_digest, 'passwordfoo') %>
   role: 3
+
+# student groups
+student_group_instructor:
+  id: 6
+  name: student_group_instructor
+  email: student_group_instructor@edurange.org
+  encrypted_password: <%= User.new.send(:password_digest, 'passwordfoo') %>
+  role: 3
+
+student_group_user_1:
+  id: 7
+  name: student_group_user_1
+  email: student_group_user_1@edurange.org
+  encrypted_password: <%= User.new.send(:password_digest, 'passwordfoo') %>
+  role: 4
+
+student_group_user_2:
+  id: 8
+  name: student_group_user_2
+  email: student_group_user_2@edurange.org
+  encrypted_password: <%= User.new.send(:password_digest, 'passwordfoo') %>
+  role: 4

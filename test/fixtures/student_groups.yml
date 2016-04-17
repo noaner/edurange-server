@@ -1,0 +1,9 @@
+student_group_all_instructor:
+  id: 1
+  user_id: 6
+  name: "All"
+
+student_group_other_instructor:
+  id: 2
+  user_id: 6
+  name: "Other"
