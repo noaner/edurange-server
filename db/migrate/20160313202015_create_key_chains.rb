@@ -1,7 +1,7 @@
 class CreateKeyChains < ActiveRecord::Migration
   def change
     create_table :key_chains do |t|
-      t.integer :flags
+      t.integer :flags, null: false, default: 0
       t.string :name
 
       t.timestamps null: false

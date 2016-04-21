@@ -6,10 +6,14 @@ class KeyChain < ActiveRecord::Base
 
   # boolean bitfield provided by flag_shih_tzu gem
   # default false
-  has_flags 1 => :create_user,
-            2 => :create_scenario
+  has_flags 1 => :can_create_user,
+            2 => :can_create_scenario
 
   def can?(flag)
-    return self.send flag
+    return self.send "can_" + flag.to_s
+  end
+
+  def keys_for(resource)
+    self.keys.select{ |k| k.resource == resource }
   end
 end

@@ -75,23 +75,21 @@ class ScenariosController < ApplicationController
   # GET /scenarios
   # GET /scenarios.json
   def index
-    @scenarios = []
-    if @user.is_admin?
-      @scenarios = Scenario.all
-    else
-      @scenarios = Scenario.where(user_id: current_user.id)
-    end
+    @scenarios = policy_scope(Scenario)
   end
 
   # GET /scenarios/1
   # GET /scenarios/1.json
   def show
+    authorize @scenario
     # @clone = params[:clone]
     #@scenario.check_status
   end
 
   # GET /scenarios/new
   def new
+    authorize Scenario
+
     @scenario = Scenario.new
     @templates = []
     if Rails.env == 'production'
@@ -116,7 +114,9 @@ class ScenariosController < ApplicationController
   # POST /scenarios
   # POST /scenarios.json
   def create
-    @scenario = @user.scenarios.new(scenario_params)
+    authorize Scenario
+
+    @scenario = @user.create_scenario(scenario_params)
     @scenario.save
 
     respond_to do |format|
@@ -136,6 +136,8 @@ class ScenariosController < ApplicationController
   # PATCH/PUT /scenarios/1
   # PATCH/PUT /scenarios/1.json
   def update
+    authorize @scenario
+
     respond_to do |format|
       if @scenario.update(scenario_params)
         format.html { redirect_to @scenario, notice: 'Scenario was successfully updated.' }
@@ -1001,6 +1003,6 @@ class ScenariosController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def scenario_params
-      params.require(:scenario).permit(:game_type, :name, :template, :location)
+      params.require(:scenario).permit(:game_type, :name, :template, :location).symbolize_keys
     end
 end

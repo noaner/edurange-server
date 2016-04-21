@@ -67,7 +67,7 @@ class User < ActiveRecord::Base
     if resource == nil
       self.key_chains.any?{ |kc| kc.can? flag }
     else
-      self.keys.find{ |k| k.resource == resource }.any?{ |k| k.can? flag }
+      self.keys.select{ |k| k.resource == resource }.any?{ |k| k.can? flag }
     end
   end
 
@@ -83,12 +83,16 @@ class User < ActiveRecord::Base
   end
 
   def add_resource(obj)
-    create_key_chain_if_not_exists
-    self.key_chains.find_by(name: self.name).keys.create(resource: obj).resource
+    self.key_chain.keys.create(resource: obj).resource
   end
 
   def create_scenario(**opts)
-    self.add_resource Scenario.new(user: self, **opts)
+    scenario = self.add_resource Scenario.new(user: self, **opts)
+
+    # give creator absolute permissions
+    self.key_chain.keys_for(scenario).first.can :edit, :view, :destroy
+
+    return scenario
   end
 
   def set_defaults
