@@ -9,11 +9,29 @@ class KeyChain < ActiveRecord::Base
   has_flags 1 => :can_create_user,
             2 => :can_create_scenario
 
+  # return all keys to a specific resource
+  def keys_for(resource)
+    self.keys.select{ |k| k.resource == resource }
+  end
+
+  # check whether a flag is set
   def can?(flag)
     return self.send "can_" + flag.to_s
   end
 
-  def keys_for(resource)
-    self.keys.select{ |k| k.resource == resource }
+  # set a flag or flags to true
+  def can(*flags)
+    flags.each do |flag|
+      self.send "can_#{flag.to_s}=", true
+    end
+    self.save
+  end
+
+  # set a flag or flags to false
+  def cannot(*flags)
+    flags.each do |flag|
+      self.send "can_#{flag.to_s}=", false
+    end
+    self.save
   end
 end

@@ -23,4 +23,12 @@ class Key < ActiveRecord::Base
     end
     self.save
   end
+
+  # set a flag or flags to false
+  def cannot(*flags)
+    flags.each do |flag|
+      self.send "can_#{flag.to_s}=", false
+    end
+    self.save
+  end
 end
