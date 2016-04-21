@@ -16,4 +16,8 @@ class ScenarioPolicy < ApplicationPolicy
   def show?
     user.can? :view, record
   end
+
+  def destroy?
+    user.can? :destroy, record
+  end
 end

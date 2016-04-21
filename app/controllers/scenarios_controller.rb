@@ -108,6 +108,8 @@ class ScenariosController < ApplicationController
 
   # GET /scenarios/1/edit
   def edit
+    authorize @scenario
+
     @templates = []
   end
 
@@ -170,6 +172,8 @@ class ScenariosController < ApplicationController
   end
 
   def destroyme
+    authorize @scenario, :destroy?
+
     if not @scenario.modifiable?
       if @scenario.destroy
         respond_to do |format|
