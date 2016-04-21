@@ -82,8 +82,6 @@ class ScenariosController < ApplicationController
   # GET /scenarios/1.json
   def show
     authorize @scenario
-    # @clone = params[:clone]
-    #@scenario.check_status
   end
 
   # GET /scenarios/new
@@ -171,6 +169,7 @@ class ScenariosController < ApplicationController
     end
   end
 
+  # GET /scenarios/1/destroyme
   def destroyme
     authorize @scenario, :destroy?
 
