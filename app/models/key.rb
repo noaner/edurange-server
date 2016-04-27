@@ -19,7 +19,7 @@ class Key < ActiveRecord::Base
   end
 
   # set a flag or flags to true
-  def can(*flags)
+  def can!(*flags)
     flags.each do |flag|
       self.send "can_#{flag.to_s}=", true
     end
@@ -27,7 +27,7 @@ class Key < ActiveRecord::Base
   end
 
   # set a flag or flags to false
-  def cannot(*flags)
+  def cannot!(*flags)
     flags.each do |flag|
       self.send "can_#{flag.to_s}=", false
     end
