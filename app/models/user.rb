@@ -1,30 +1,32 @@
 class User < ActiveRecord::Base
+  include FlagShihTzu
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
+  devise :database_authenticatable, :registerable, :recoverable, :rememberable,
+         :trackable, :validatable
   enum role: [:user, :vip, :admin, :instructor, :student]
 
-  #has_many :scenarios
   has_many :student_groups, dependent: :destroy
   has_many :student_group_users, dependent: :destroy
 
-  # pushing ActiveRecord to the very limits ;)
-  # NOTE: this might be slightly insane
-  # EXTRA NOTE: I definitely might be going slightly insane
-  has_and_belongs_to_many :key_chains
-  has_many :keys, through: :key_chains
-  has_many :users, through: :keys, source: :resource, source_type: User
+  # relationships managed via keys
+  has_many :keys, dependent: :destroy
   has_many :scenarios, through: :keys, source: :resource, source_type: Scenario
 
-  # keys/key_chains/users that own this user
-  has_many :super_keys, as: :resource, class_name: 'Key'
-  has_many :super_key_chains, through: :super_keys, source: :key_chain
-  has_many :owners, through: :super_key_chains, source: :users
+  # user-level permission flags
+  has_flags 1 => :can_create_scenario,
+            2 => :can_create_users
 
   after_initialize :set_defaults, :if => :new_record?
   validates :email, uniqueness: true
   validates :name, presence: true
   validate :validate_name, :validate_running
+
+
+  #---------------------------------------------------------------------------#
+  # Custom validations
+  #---------------------------------------------------------------------------#
 
   def validate_name
     return if not self.name
@@ -50,50 +52,84 @@ class User < ActiveRecord::Base
     return true
   end
 
+
+  #---------------------------------------------------------------------------#
+  # Capabilities
+  #---------------------------------------------------------------------------#
+
+  # object ownership methods
+
+  def key_for(obj)
+    keys.find { |k| k.resource == obj }
+  end
+
   def owns?(obj)
-    return true if self.is_admin?
-    cl = obj.class
-    arr = [Cloud, Group, Instance, Scenario, StudentGroup, Subnet, InstanceRole, InstanceGroup, Role, RoleRecipe, Recipe, Answer]
-    if arr.include? cl
-      return obj.user == self
-    elsif cl == Player
-      return obj.group.user == self
-    elsif cl == StudentGroupUser
-      return obj.student_group.user == self
-    end
-  end
-
-  def can?(flag, resource=nil)
-    if resource == nil
-      self.key_chains.any?{ |kc| kc.can? flag }
-    else
-      self.keys.select{ |k| k.resource == resource }.any?{ |k| k.can? flag }
-    end
-  end
-
-  def create_key_chain_if_not_exists
-    if self.key_chains.find_by(name: self.name).nil?
-      self.key_chains.create(name: self.name)
-    end
-  end
-
-  def key_chain
-    create_key_chain_if_not_exists
-    self.key_chains.find_by(name: self.name)
+    return keys_for(obj).nil?
+    #return true if self.is_admin?
+    #cl = obj.class
+    #arr = [Cloud, Group, Instance, Scenario, StudentGroup, Subnet,
+    #       InstanceRole, InstanceGroup, Role, RoleRecipe, Recipe, Answer]
+    #if arr.include? cl
+    #  return obj.user == self
+    #elsif cl == Player
+    #  return obj.group.user == self
+    #elsif cl == StudentGroupUser
+    #  return obj.student_group.user == self
+    #end
   end
 
   def add_resource(obj)
-    self.key_chain.keys.create(resource: obj).resource
+    self.keys.create resource: obj
+  end
+
+  def owns!(obj)
+    key = self.add_resource obj
+    key.flag_columns.each { |flag| key.send "#{flag.to_s}=", true }
+  end
+
+  def disown!(obj)
+    keys = self.keys.select { |key| key.resource == obj }
   end
 
   def create_scenario(**opts)
-    scenario = self.add_resource Scenario.new(user: self, **opts)
-
-    # give creator absolute permissions
-    self.key_chain.keys_for(scenario).first.can :edit, :view, :destroy
-
+    # creates a scenario and takes ownership of it
+    scenario = Scenario.new(user: self, **opts)
+    self.owns! scenario
     return scenario
   end
+
+
+  # flag management methods
+
+  def set_permission(flag, obj=nil, value=nil)
+    # check or set permissions on self or object
+    sendee = self if obj.nil? else self.key_for obj
+
+    if value.nil?
+      sendee.send "can_#{flag.to_s}"
+    else
+      sendee.send "can_#{flag.to_s}=", value
+    end
+
+    sendee.save
+  end
+
+  def can?(flag, obj=nil)
+    self.set_permission flag, obj
+  end
+
+  def can!(flag, obj=nil)
+    self.set_permission flag, obj, true
+  end
+
+  def cannot!(flag, obj=nil)
+    self.set_permission flag, obj, false
+  end
+
+
+  #---------------------------------------------------------------------------#
+  # Roles
+  #---------------------------------------------------------------------------#
 
   def set_defaults
     self.role ||= :student
@@ -178,7 +214,4 @@ class User < ActiveRecord::Base
     self.set_student_role
     return sg, sgu
   end
-
-
-
 end
