@@ -11,7 +11,6 @@ admin1:
   email: admin1@edurange.org
   encrypted_password: <%= User.new.send(:password_digest, 'passwordfoo') %>
   role: 2
-  key_chains: admin
 
 <% 1.upto(10) do |i| %>
 student<%= i %>:
@@ -41,7 +40,6 @@ instructor1:
   email: instructor1@edurange.org
   encrypted_password: <%= User.new.send(:password_digest, 'passwordfoo') %>
   role: 3
-  key_chains: instructor
 
 instructor999999999:
   id: 999999999
@@ -49,4 +47,3 @@ instructor999999999:
   email: instructor999999999@edurange.org
   encrypted_password: <%= User.new.send(:password_digest, 'passwordfoo') %>
   role: 3
-  key_chains: instructor

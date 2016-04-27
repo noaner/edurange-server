@@ -2,6 +2,6 @@
 
 <% 1.upto(10) do |i| %>
 student<%= i %>_key:
-  key_chain: admin
+  user: admin1
   resource: student<%= i %> (User)
 <% end %>
