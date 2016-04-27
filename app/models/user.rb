@@ -103,7 +103,10 @@ class User < ActiveRecord::Base
 
   def set_permission(flag, obj=nil, value=nil)
     # check or set permissions on self or object
-    sendee = self if obj.nil? else self.key_for obj
+    if obj.nil?
+      sendee = self
+    else
+      sendee = self.key_for obj
 
     if value.nil?
       sendee.send "can_#{flag.to_s}"
