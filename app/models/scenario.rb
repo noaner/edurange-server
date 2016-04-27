@@ -111,7 +111,7 @@ class Scenario < ActiveRecord::Base
     
     begin
       file = YAML.load_file(self.path_yml)
-      #file = YAML.load_file(Settings.app_path + self.path_yml)
+      #file = YAML.load_file(Rails.root + self.path_yml)
       clouds = file["Clouds"]
       subnets = file["Subnets"]
       instances = file["Instances"]
@@ -423,9 +423,9 @@ class Scenario < ActiveRecord::Base
 
   def path
     if self.custom?
-      path = "#{Settings.app_path}scenarios/custom/#{self.user.id}/#{self.name.downcase}"
+      path = "#{Rails.root}/scenarios/custom/#{self.user.id}/#{self.name.downcase}"
     else
-      path = "#{Settings.app_path}scenarios/#{self.location}/#{self.name.downcase}"
+      path = "#{Rails.root}/scenarios/#{self.location}/#{self.name.downcase}"
     end
     return path if File.exists? path
     false
@@ -476,13 +476,13 @@ class Scenario < ActiveRecord::Base
       errors.add(:custom, "Scenario must be modifiable to change name")
     elsif not self.stopped?
       errors.add(:running, "Scenario must be stopped before name can be changed")
-    elsif File.exists? "#{Settings.app_path}scenarios/local/#{name.downcase}/#{name.downcase}.yml"
+    elsif File.exists? "#{Rails.root}/scenarios/local/#{name.downcase}/#{name.downcase}.yml"
       errors.add(:name, "Name taken")
-    elsif File.exists? "#{Settings.app_path}scenarios/user/#{self.user.id}/#{name.downcase}/#{name.downcase}.yml"
+    elsif File.exists? "#{Rails.root}/scenarios/user/#{self.user.id}/#{name.downcase}/#{name.downcase}.yml"
       errors.add(:name, "Name taken")
     else
-      oldpath = "#{Settings.app_path}scenarios/user/#{self.user.id}/#{self.name.downcase}"
-      newpath = "#{Settings.app_path}scenarios/user/#{self.user.id}/#{name.downcase}"
+      oldpath = "#{Rails.root}/scenarios/user/#{self.user.id}/#{self.name.downcase}"
+      newpath = "#{Rails.root}/scenarios/user/#{self.user.id}/#{name.downcase}"
       FileUtils.cp_r oldpath, newpath
       FileUtils.mv "#{newpath}/#{self.name.downcase}.yml", "#{newpath}/#{name.downcase}.yml"
       FileUtils.rm_r oldpath
@@ -689,12 +689,12 @@ class Scenario < ActiveRecord::Base
 
   def get_global_recipes_and_descriptions
     recipes = { }
-    Dir.foreach("#{Settings.app_path}/scenarios/recipes") do |file|
+    Dir.foreach("#{Rails.root}/scenarios/recipes") do |file|
       next if file == '.' or file == '..'
 
       recipe = file.gsub(".rb.erb", "")
       description = ''
-      description_file = "#{Settings.app_path}/scenarios/recipes/descriptions/#{recipe}"
+      description_file = "#{Rails.root}/scenarios/recipes/descriptions/#{recipe}"
       if File.exists? description_file
         description += File.open(description_file).read
       end
@@ -730,12 +730,12 @@ class Scenario < ActiveRecord::Base
       return false
     end
 
-    if File.exists? "#{Settings.app_path}/scenarios/local/#{self.name.downcase}"
+    if File.exists? "#{Rails.root}/scenarios/local/#{self.name.downcase}"
       errors.add(:name, "A global scenario with that name already exists")
       return false
     end
 
-    if File.exists? "#{Settings.app_path}/scenarios/user/#{self.user.id}/#{self.name.downcase}"
+    if File.exists? "#{Rails.root}/scenarios/user/#{self.user.id}/#{self.name.downcase}"
       errors.add(:name, "A custom scenario with that name already exists")
       return false
     end

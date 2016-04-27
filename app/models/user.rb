@@ -70,8 +70,8 @@ class User < ActiveRecord::Base
     if not self.registration_code
       self.update(registration_code: SecureRandom.hex[0..7])
     end
-    if not File.exists? "#{Settings.app_path}scenarios/custom/#{self.id}"
-      FileUtils.mkdir "#{Settings.app_path}scenarios/custom/#{self.id}"
+    if not File.exists? "#{Rails.root}/scenarios/custom/#{self.id}"
+      FileUtils.mkdir "#{Rails.root}/scenarios/custom/#{self.id}"
     end
     if not self.student_groups.find_by_name("All")
       sg = self.student_groups.new(name: "All")
@@ -92,11 +92,11 @@ class User < ActiveRecord::Base
     if not self.registration_code
       self.update(registration_code: SecureRandom.hex[0..7])
     end
-    if not File.exists? "#{Settings.app_path}scenarios/custom"
-      FileUtils.mkdir "#{Settings.app_path}scenarios/custom"
+    if not File.exists? "#{Rails.root}/scenarios/custom"
+      FileUtils.mkdir "#{Rails.root}/scenarios/custom"
     end
-    if not File.exists? "#{Settings.app_path}scenarios/custom/#{self.id}"
-      FileUtils.mkdir "#{Settings.app_path}scenarios/custom/#{self.id}"
+    if not File.exists? "#{Rails.root}/scenarios/custom/#{self.id}"
+      FileUtils.mkdir "#{Rails.root}/scenarios/custom/#{self.id}"
     end
     if not self.student_groups.find_by_name("All")
       sg = self.student_groups.new(name: "All")
