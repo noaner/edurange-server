@@ -107,6 +107,7 @@ class User < ActiveRecord::Base
       sendee = self
     else
       sendee = self.key_for obj
+    end
 
     if value.nil?
       sendee.send "can_#{flag.to_s}"
