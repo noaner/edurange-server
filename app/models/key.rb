@@ -33,4 +33,13 @@ class Key < ActiveRecord::Base
     end
     self.save
   end
+
+  # set all flags to a value
+  def set_all_flags(value)
+    self.flag_mapping.each do |column, flags|
+      flags.each do |name, number|
+        self.send "#{name}=", value
+      end
+    end
+  end
 end

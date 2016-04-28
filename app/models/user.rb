@@ -63,71 +63,76 @@ class User < ActiveRecord::Base
     keys.find { |k| k.resource == obj }
   end
 
+  def key_for!(obj)
+    # creates key if one doesn't exist
+    key = self.key_for obj
+    Key.create(user: self, resource: obj) if key.nil?
+  end
+
   def owns?(obj)
-    return keys_for(obj).nil?
-    #return true if self.is_admin?
-    #cl = obj.class
-    #arr = [Cloud, Group, Instance, Scenario, StudentGroup, Subnet,
-    #       InstanceRole, InstanceGroup, Role, RoleRecipe, Recipe, Answer]
-    #if arr.include? cl
-    #  return obj.user == self
-    #elsif cl == Player
-    #  return obj.group.user == self
-    #elsif cl == StudentGroupUser
-    #  return obj.student_group.user == self
-    #end
+    if obj.class == Scenario
+      # use keys for scenario ownership
+      return key_for(obj).nil?
+    else
+      # revert to tradional model for everything else
+      return true if self.is_admin?
+      cl = obj.class
+      arr = [Cloud, Group, Instance, StudentGroup, Subnet, InstanceRole,
+             InstanceGroup, Role, RoleRecipe, Recipe, Answer]
+      if arr.include? cl
+        return obj.user == self
+      elsif cl == Player
+        return obj.group.user == self
+      elsif cl == StudentGroupUser
+        return obj.student_group.user == self
+      end
+    end
   end
 
   def add_resource(obj)
-    self.keys.create resource: obj
+    self.keys.create(resource: obj)
   end
 
   def owns!(obj)
-    key = self.add_resource obj
-    key.flag_columns.each { |flag| key.send "#{flag.to_s}=", true }
+    self.key_for!(obj).set_all_flags(true)
   end
 
   def disown!(obj)
-    keys = self.keys.select { |key| key.resource == obj }
+    keys.destroy_all(resource: obj)
   end
 
   def create_scenario(**opts)
     # creates a scenario and takes ownership of it
     scenario = Scenario.new(user: self, **opts)
-    self.owns! scenario
+    self.owns!(scenario)
     return scenario
   end
 
 
   # flag management methods
 
-  def set_permission(flag, obj=nil, value=nil)
-    # check or set permissions on self or object
-    if obj.nil?
-      sendee = self
-    else
-      sendee = self.key_for obj
-    end
-
-    if value.nil?
-      sendee.send "can_#{flag.to_s}"
-    else
-      sendee.send "can_#{flag.to_s}=", value
-    end
-
-    sendee.save
-  end
-
   def can?(flag, obj=nil)
-    self.set_permission flag, obj
+    if obj.nil?
+      self.send "can_#{flag.to_s}"
+    else
+      self.key_for(obj).can? flag
+    end
   end
 
   def can!(flag, obj=nil)
-    self.set_permission flag, obj, true
+    if obj.nil?
+      self.send "can_#{flag.to_s}=", true
+    else
+      self.key_for!(obj).can! flag
+    end
   end
 
   def cannot!(flag, obj=nil)
-    self.set_permission flag, obj, false
+    if obj.nil?
+      self.send "can_#{flag.to_s}=", false
+    else
+      self.key_for(obj).cannot! flag
+    end
   end
 
 

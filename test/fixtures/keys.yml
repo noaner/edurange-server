@@ -1,7 +1,6 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-<% 1.upto(10) do |i| %>
-student<%= i %>_key:
+test:
   user: admin1
-  resource: student<%= i %> (User)
-<% end %>
+  resource: test1 (Scenario)
+  flags: 0

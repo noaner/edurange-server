@@ -14,8 +14,23 @@ class KeyTest < ActiveSupport::TestCase
     key.save
     assert_not key.valid?
 
-    key = Key.new(key_chain: key_chains(:admin))
+    key = Key.new(user: users(:admin1))
     key.save
     assert_not key.valid?
+
+    key = Key.new(user: users(:admin1), resource: scenarios(:test1))
+    assert key.valid?
+  end
+
+  test 'should save flag state' do
+    key = keys(:test)
+
+    key.can! :edit
+    assert key.can? :edit
+    key.cannot! :edit
+    assert_not key.can? :edit
+
+    key.set_all_flags(true)
+    assert key.can? :edit
   end
 end
