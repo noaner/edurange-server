@@ -3,6 +3,8 @@ class Scenario < ActiveRecord::Base
   include Provider
   require 'open-uri'
 
+  FLAGS = [:view, :edit, :destroy, :boot]
+
   # attr_accessor :template # For picking a template when creating a new scenario
 
   serialize :aws_prefixes
@@ -85,6 +87,7 @@ class Scenario < ActiveRecord::Base
       errors.add(:user, 'must have a user')
       return false
     end
+
     if not user.can? :create_scenario
       errors.add(:user, 'must be admin or instructor.')
       return false

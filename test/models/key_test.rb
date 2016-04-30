@@ -23,7 +23,7 @@ class KeyTest < ActiveSupport::TestCase
   end
 
   test 'should save flag state' do
-    key = keys(:test)
+    key = Key.new(user: users(:admin1), resource: scenarios(:test1))
 
     key.can! :edit
     assert key.can? :edit

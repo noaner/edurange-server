@@ -7,21 +7,36 @@ class Key < ActiveRecord::Base
   validates :user, presence: true
   validates :resource, presence: true
 
+  DEFAULT_FLAGS = [:edit, :view, :destroy]
+  FLAG_LIMIT = 16
+
   # boolean bitfield provided by flag_shih_tzu gem
   # default false
-  has_flags 1 => :can_view,
-            2 => :can_edit,
-            3 => :can_destroy
+  (1..16).each do |i|
+    has_flags i => "flag_#{i}".to_sym
+  end
+
+  def flags_for(obj)
+    if defined? obj.class::FLAGS
+      obj.class::FLAGS
+    else
+      DEFAULT_FLAGS
+    end
+  end
+
+  def flag_name(flag)
+    "flag_#{flags_for(self.resource).index(flag) + 1}"
+  end
 
   # test whether a flag is set
   def can?(flag)
-    self.send "can_#{flag.to_s}"
+    self.send flag_name(flag)
   end
 
   # set a flag or flags to true
   def can!(*flags)
     flags.each do |flag|
-      self.send "can_#{flag.to_s}=", true
+      self.send "#{flag_name(flag)}=", true
     end
     self.save
   end
@@ -29,17 +44,15 @@ class Key < ActiveRecord::Base
   # set a flag or flags to false
   def cannot!(*flags)
     flags.each do |flag|
-      self.send "can_#{flag.to_s}=", false
+      self.send "#{flag_name(flag)}=", false
     end
     self.save
   end
 
   # set all flags to a value
   def set_all_flags(value)
-    self.flag_mapping.each do |column, flags|
-      flags.each do |name, number|
-        self.send "#{name}=", value
-      end
+    flags_for(self.resource).each do |flag|
+      self.send "#{flag_name(flag)}=", value
     end
   end
 end

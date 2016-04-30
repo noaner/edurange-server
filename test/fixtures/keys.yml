@@ -1,6 +1,1 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
-test:
-  user: admin1
-  resource: test1 (Scenario)
-  flags: 0

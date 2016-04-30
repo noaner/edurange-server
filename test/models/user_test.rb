@@ -45,17 +45,6 @@ class UserTest < ActiveSupport::TestCase
     assert user.role == "student"
   end
 
-  test 'should create new resources on default key chain' do
-    user = users(:instructor1)
-    scenario = user.create_scenario(location: :test, name: 'test1')
-
-    key_ring = KeyChain.find_by(name: user.name)
-    assert_not_nil key_ring
-
-    key = key_ring.keys.find{ |k| k.resource == scenario }
-    assert_not_nil key
-  end
-
   test 'should not allow name update while scenario is running' do
     user = users(:instructor1)
 
@@ -241,14 +230,6 @@ class UserTest < ActiveSupport::TestCase
 
     assert_not StudentGroup.find_by_id(sg.id)
     assert_not StudentGroupUser.find_by_id(sgu2.id)
-  end
-
-  test 'should be able to access users through keys' do
-    assert users(:admin1).users.include? users(:student1)
-  end
-
-  test 'should be able to access owner through keys' do
-    assert users(:student1).owners.include? users(:admin1)
   end
 
   test 'should own all resources belonging to scenario and student groups' do
