@@ -14,9 +14,12 @@ class User < ActiveRecord::Base
   has_many :keys, dependent: :destroy
   has_many :scenarios, through: :keys, source: :resource, source_type: Scenario
 
-  # user-level permission flags
-  has_flags 1 => :can_create_scenario,
-            2 => :can_create_users
+  # build can_create_* flags
+  CREATES = [Scenario]
+
+  CREATES.size.times do |i|
+    has_flags (i + 1) => "can_create_#{CREATES[i].to_s.underscore}".to_sym
+  end
 
   after_initialize :set_defaults, :if => :new_record?
   validates :email, uniqueness: true
@@ -24,9 +27,8 @@ class User < ActiveRecord::Base
   validate :validate_name, :validate_running
 
 
-  #---------------------------------------------------------------------------#
+  #############################################################################
   # Custom validations
-  #---------------------------------------------------------------------------#
 
   def validate_name
     return if not self.name
@@ -53,9 +55,8 @@ class User < ActiveRecord::Base
   end
 
 
-  #---------------------------------------------------------------------------#
+  #############################################################################
   # Capabilities
-  #---------------------------------------------------------------------------#
 
   # object ownership methods
 
@@ -136,9 +137,8 @@ class User < ActiveRecord::Base
   end
 
 
-  #---------------------------------------------------------------------------#
+  #############################################################################
   # Roles
-  #---------------------------------------------------------------------------#
 
   def set_defaults
     self.role ||= :student
