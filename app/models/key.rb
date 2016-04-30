@@ -1,6 +1,5 @@
 class Key < ActiveRecord::Base
-  # boolean bitfield provided by flag_shih_tzu gem
-  include FlagShihTzu
+  include FlagShihTzu   # provides has_flags for boolean bitfield
 
   belongs_to :resource, polymorphic: true
   belongs_to :user, dependent: :destroy
@@ -21,8 +20,8 @@ class Key < ActiveRecord::Base
 
   def flags_for(obj)
     # return a list of flags for an object
-    if defined? obj.class::FLAGS
-      obj.class::FLAGS
+    if defined? obj.class::CAN
+      obj.class::CAN
     else
       DEFAULT_FLAGS
     end
@@ -61,5 +60,14 @@ class Key < ActiveRecord::Base
     flags_for(self.resource).each do |flag|
       self.send "#{flag_name(flag)}=", value
     end
+  end
+
+  def owns?
+    # returns true if every flag is set
+    flags_for(self.resource).each do |flag|
+      return false if not self.send "#{flag_name(flag)}"
+    end
+
+    return true
   end
 end

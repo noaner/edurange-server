@@ -3,7 +3,7 @@ class Scenario < ActiveRecord::Base
   include Provider
   require 'open-uri'
 
-  FLAGS = [:view, :edit, :destroy, :boot]
+  CAN = [:view, :edit, :destroy, :boot]
 
   # attr_accessor :template # For picking a template when creating a new scenario
 
