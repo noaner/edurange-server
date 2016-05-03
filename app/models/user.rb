@@ -28,7 +28,7 @@ class User < ActiveRecord::Base
 
 
   #############################################################################
-  # Custom validations
+  # Validations
 
   def validate_name
     return if not self.name
@@ -47,6 +47,7 @@ class User < ActiveRecord::Base
   end
 
   def validate_running
+    self.scenarios.reload
     if self.scenarios.any?{ |s| not s.stopped? }
       errors.add(:running, "can not modify while a scenario is running")
       return false
@@ -58,27 +59,26 @@ class User < ActiveRecord::Base
   #############################################################################
   # Capabilities
 
-  # object ownership methods
-
   def key_for(obj)
     keys.find { |k| k.resource == obj }
   end
 
   def key_for!(obj)
     # creates key if one doesn't exist
-    key = self.key_for obj
-    Key.create(user: self, resource: obj) if key.nil?
+    key = key_for obj
+    key = keys.create(resource: obj) if key.nil?
+    return key
   end
 
   def owns?(obj)
-    if obj.class == Scenario
+    if [Scenario, Role, Recipe, Cloud, Subnet].include? obj.class
       # use keys for scenario ownership
-      return key_for(obj).nil?
+      return can? :edit, obj.scenario
     else
       # revert to tradional model for everything else
       return true if self.is_admin?
       cl = obj.class
-      arr = [Cloud, Group, Instance, StudentGroup, Subnet, InstanceRole,
+      arr = [Cloud, Group, Instance, StudentGroup, Subnet, InstanceRole, Scenario,
              InstanceGroup, Role, RoleRecipe, Recipe, Answer]
       if arr.include? cl
         return obj.user == self
@@ -90,10 +90,6 @@ class User < ActiveRecord::Base
     end
   end
 
-  def add_resource(obj)
-    self.keys.create(resource: obj)
-  end
-
   def owns!(obj)
     self.key_for!(obj).set_all_flags(true)
   end
@@ -102,21 +98,15 @@ class User < ActiveRecord::Base
     keys.destroy_all(resource: obj)
   end
 
-  def create_scenario(**opts)
-    # creates a scenario and takes ownership of it
-    scenario = Scenario.new(user: self, **opts)
-    self.owns!(scenario)
-    return scenario
-  end
-
-
-  # flag management methods
-
   def can?(flag, obj=nil)
     if obj.nil?
-      self.send "can_#{flag.to_s}"
+      send "can_#{flag.to_s}"
     else
-      self.key_for(obj).can? flag
+      if key_for(obj)
+        key_for(obj).can? flag
+      else
+        false
+      end
     end
   end
 
@@ -134,6 +124,17 @@ class User < ActiveRecord::Base
     else
       self.key_for(obj).cannot! flag
     end
+  end
+
+  def create_scenario(**opts)
+    # creates a scenario and takes ownership of it
+    scenario = Scenario.create(user: self, **opts)
+    self.owns! scenario
+    return scenario
+  end
+
+  def add_resource(obj)
+    self.keys.create(resource: obj)
   end
 
 
@@ -157,6 +158,7 @@ class User < ActiveRecord::Base
   end
 
   def set_instructor_role
+    self.can! :create_scenario
     if not self.registration_code
       self.update(registration_code: SecureRandom.hex[0..7])
     end
@@ -171,6 +173,7 @@ class User < ActiveRecord::Base
   end
 
   def set_student_role
+    self.cannot! :create_scenario
     if not self.validate_running
       return
     end
@@ -179,6 +182,7 @@ class User < ActiveRecord::Base
   end
 
   def set_admin_role
+    self.can! :create_scenario
     if not self.registration_code
       self.update(registration_code: SecureRandom.hex[0..7])
     end

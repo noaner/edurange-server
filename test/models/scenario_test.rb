@@ -21,11 +21,9 @@ class ScenarioTest < ActiveSupport::TestCase
   test 'should rescue when yml is corrupted' do
     instructor = users(:instructor1)
     scenario = instructor.create_scenario(location: :test, name: 'badyml')
-    scenario.save
     assert_equal [:load], scenario.errors.keys
 
     scenario = instructor.create_scenario(location: :test, name: 'badyml2')
-    scenario.save
     assert_equal [:load], scenario.errors.keys
   end
 
