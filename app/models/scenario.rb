@@ -278,12 +278,20 @@ class Scenario < ActiveRecord::Base
                 instance.add_administrator(group)
                 if not instance.save
                   self.destroy_dependents
-                  errors.add(:load, "error adding group access admin to instance #{instance.name}, #{instance.errors.messages}")
+                  errors.add(
+                      :load,
+                      "error adding group access admin to instance "\
+                      "#{instance.name}, #{instance.errors.messages}"
+                  )
                   return false
                 end
               else
                 self.destroy_dependents
-                errors.add(:load, "error adding admin access. Instance #{admin_instance} not found.")
+                errors.add(
+                    :load,
+                    "error adding admin access. Instance #{admin_instance} "\
+                    "not found."
+                )
                 return false
               end
             end
