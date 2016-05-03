@@ -148,14 +148,20 @@ class Scenario < ActiveRecord::Base
 
               if not recipe.save
                 self.destroy_dependents
-                errors.add(:load, "error creating recipe. #{recipe.errors.messages}")
+                errors.add(
+                  :load,
+                  "error creating recipe. #{recipe.errors.messages}"
+                )
                 return false
               end
 
               role_recipe = role.role_recipes.new(recipe_id: recipe.id)
               if not role_recipe.save
                 self.destroy_dependents
-                errors.add(:load, "error creating role recipe. #{role_recipe.errors.messages}")
+                errors.add(
+                  :load,
+                  "error creating role recipe. #{role_recipe.errors.messages}"
+                )
                 return false
               end
 
@@ -196,7 +202,11 @@ class Scenario < ActiveRecord::Base
             )
             if not subnet.save
               self.destroy_dependents
-              errors.add(:load, "error creating Subnet #{subnet.name}. #{subnet.errors.messages}")
+              errors.add(
+                :load,
+                "error creating Subnet #{subnet.name}. "\
+                "#{subnet.errors.messages}"
+              )
               return false
             end
 
@@ -286,12 +296,12 @@ class Scenario < ActiveRecord::Base
                   return false
                 end
               else
-                self.destroy_dependents
                 errors.add(
                     :load,
                     "error adding admin access. Instance #{admin_instance} "\
                     "not found."
                 )
+                self.destroy_dependents
                 return false
               end
             end
