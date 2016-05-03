@@ -60,6 +60,7 @@ class Key < ActiveRecord::Base
     flags_for(self.resource).each do |flag|
       self.send "#{flag_name(flag)}=", value
     end
+    self.save
   end
 
   def owns?
@@ -67,7 +68,6 @@ class Key < ActiveRecord::Base
     flags_for(self.resource).each do |flag|
       return false if not self.send "#{flag_name(flag)}"
     end
-
     return true
   end
 end
