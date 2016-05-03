@@ -47,7 +47,7 @@ class Subnet < ActiveRecord::Base
         if instance.internet_accessible
           errors.add(
               :internet_accessible,
-              "If subnet is not internet accessible then #{instance.name}"\
+              "If subnet is not internet accessible then #{instance.name} "\
               "should be the same"
           )
         end
@@ -67,8 +67,10 @@ class Subnet < ActiveRecord::Base
       elsif not /^\d*\d$/.match(mask)
         errors.add(:cidr_block, "Subnet mask is invalid!")
         return
-      elsif not (mask.to_i >= MAX_CLOUD_CIDR_BLOCK and mask.to_i <= MIN_CLOUD_CIDR_BLOCK)
-        errors.add(:cidr_block, "Subnet mask must be between #{MAX_CLOUD_CIDR_BLOCK} - #{MIN_CLOUD_CIDR_BLOCK}")
+      elsif not (mask.to_i >= MAX_CLOUD_CIDR_BLOCK and
+                 mask.to_i <= MIN_CLOUD_CIDR_BLOCK)
+        errors.add(:cidr_block, "Subnet mask must be between "\
+                   "#{MAX_CLOUD_CIDR_BLOCK} - #{MIN_CLOUD_CIDR_BLOCK}")
         return
       end
     else
@@ -80,14 +82,19 @@ class Subnet < ActiveRecord::Base
     # Check that CIDR is a subset of its cloud CIDRs
     cloud_cidr = NetAddr::CIDR.create(self.cloud.cidr_block)
     if not (cloud_cidr == self.cidr_block or cloud_cidr.contains? self.cidr_block)
-      self.errors.add(:cidr_block, "Subnets CIDR block is not with its clouds CIDR block")
+      self.errors.add(:cidr_block,
+                      "Subnets CIDR block is not with its clouds CIDR block")
       return
     end
 
     # Check that CIDR contains all subnet
     self.cloud.subnets.select{ |s| s != self }.each do |subnet|
       if NetAddr::CIDR.create(self.cidr_block).cmp(subnet.cidr_block) != nil
-        self.errors.add(:cidr_block, "CIDR block must not overlap with subnet #{subnet.name} #{subnet.cidr_block}")
+        self.errors.add(
+            :cidr_block,
+            "CIDR block must not overlap with subnet "\
+            "#{subnet.name} #{subnet.cidr_block}"
+        )
         return
       end
     end
@@ -95,7 +102,11 @@ class Subnet < ActiveRecord::Base
     # Check that all instances are within subnet
     self.instances.each do |instance|
       if NetAddr::CIDR.create(self.cidr_block).cmp(instance.ip_address) != 1
-        self.errors.add(:cidr_block, "CIDR does not contain instance #{instance.name} #{instance.ip_address}")
+        self.errors.add(
+            :cidr_block,
+            "CIDR does not contain instance "\
+            "#{instance.name} #{instance.ip_address}"
+        )
       end
     end
 
