@@ -45,7 +45,11 @@ class Subnet < ActiveRecord::Base
     if not self.internet_accessible
       self.instances.each do |instance|
         if instance.internet_accessible
-          errors.add(:internet_accessible, "If subnet is not internet accessible then #{instance.name} should be the same")
+          errors.add(
+              :internet_accessible,
+              "If subnet is not internet accessible then #{instance.name}"\
+              "should be the same"
+          )
         end
       end
     end

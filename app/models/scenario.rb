@@ -39,6 +39,7 @@ class Scenario < ActiveRecord::Base
     self.update_attribute(:aws_prefixes, arr)
   end
 
+  ##############################################################################
   # Validations
 
   def validate_name
@@ -96,6 +97,7 @@ class Scenario < ActiveRecord::Base
     true
   end
 
+  ##############################################################################
   # Loading and file structure
 
   def destroy_dependents
@@ -175,7 +177,10 @@ class Scenario < ActiveRecord::Base
       if clouds
         clouds.each do |yaml_cloud|
 
-          cloud = self.clouds.new(name: yaml_cloud["Name"], cidr_block: yaml_cloud["CIDR_Block"])
+          cloud = self.clouds.new(
+              name: yaml_cloud["Name"],
+              cidr_block: yaml_cloud["CIDR_Block"]
+          )
           if not cloud.save
             self.destroy_dependents
             errors.add(:load, "error creating cloud. #{cloud.errors.messages}")
@@ -448,6 +453,9 @@ class Scenario < ActiveRecord::Base
     end
     return path
   end
+
+  ##############################################################################
+  # Other
 
   def update_modified
     if self.modifiable?
