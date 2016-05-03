@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby '2.1.5'
+ruby '2.2.1'
 gem 'rails', '~> 4.2.0'
 gem 'sqlite3'
 gem 'sass-rails', '~> 4.0.3'
@@ -37,6 +37,7 @@ gem 'groupdate'
 gem 'active_median'
 gem 'rubyzip'
 gem 'flag_shih_tzu', '~> 0.3.15' # adds easy bitwise flags
+gem 'jquery-datatables-rails', '~> 3.3.0'
 
 group :development do
   gem 'better_errors'

@@ -260,6 +260,7 @@ class ScenariosController < ApplicationController
   # BOOTING
 
   def boot
+    authorize @scenario
     @scenario.boot(dependents: true)
     respond_to do |format|
       format.js { render 'scenarios/js/boot/boot_scenario.js.erb', :layout => false }
