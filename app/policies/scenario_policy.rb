@@ -20,4 +20,12 @@ class ScenarioPolicy < ApplicationPolicy
   def destroy?
     user.can? :destroy, record
   end
+
+  def boot?
+    user.can? :boot, record
+  end
+
+  def unboot?
+    user.can? :boot, record
+  end
 end
