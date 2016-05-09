@@ -25,3 +25,7 @@ ip_test_scenario:
 
 role_test_scenario:
   id: 344
+
+relations:
+  name: "scenario"
+  id: 4

@@ -12,3 +12,23 @@ ip_test_instance:
 role_test_instance:
   id: 344
   subnet_id: 344
+
+relations_instance_1:
+  id: 4
+  subnet_id: 4
+  name: "instance_a_1"
+
+relations_instance_2:
+  id: 5
+  subnet_id: 4
+  name: "instance_a_2"
+
+relations_instance_3:
+  id: 6
+  subnet_id: 5
+  name: "instance_b_3"
+
+relations_instance_4:
+  id: 7
+  subnet_id: 5
+  name: "instance_b_4"
