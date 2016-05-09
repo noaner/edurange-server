@@ -28,6 +28,9 @@ script "instant_bash_history" do
 	touch .script.log
 	chown root .script.log
 	chmod 622 .script.log
+	touch .exit_status
+	chown root .exit_status
+	chmod 622 .exit_status
     done
     EOH
 end

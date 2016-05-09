@@ -7,3 +7,13 @@ iptest_subnet:
 role_test_subnet:
   id: 344
   cloud_id: 344
+
+relations_subnet_1:
+  name: "subnet_a"
+  id: 4
+  cloud_id: 4
+
+relations_subnet_2:
+  name: "subnet_b"
+  id: 5
+  cloud_id: 4
