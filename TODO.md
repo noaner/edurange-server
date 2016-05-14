@@ -29,3 +29,11 @@
 - Implement scenario pausing
 
 - Implement scenario expiration time (unboot when this time is reached)
+
+- Scenario script editor
+
+  - User nice editor (google 'CodeMirror')
+
+  - Allow user to specify recipe type (bash/python/ruby/etc)
+
+  - Check syntax
