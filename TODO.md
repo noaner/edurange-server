@@ -21,6 +21,10 @@
 
 - Save scenario information (bash_histories, answers, etc) in a yml file when scenario is destroyed, place it in the instructors data folder
 
+- Push server
+
+- Packages whitelisting
+
 - Get bash_history in real time through the web client
 
 - Switch database to postgresql
