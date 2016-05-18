@@ -1,7 +1,6 @@
 # Edurange TODO list
 
 ## Server
-=======
 
 - **Add 'forgot my password' link on the signing page**
 
