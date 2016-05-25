@@ -1,5 +1,4 @@
 class HomeController < ApplicationController
-  layout 'home'
   def index
     if user_signed_in?
       user = User.find(current_user.id)
@@ -10,6 +9,8 @@ class HomeController < ApplicationController
       elsif user.is_student?
         redirect_to '/student'
       end
+    else
+      redirect_to new_user_session_path
     end
   end
 end
