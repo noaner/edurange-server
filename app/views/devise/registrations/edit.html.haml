@@ -1,15 +1,36 @@
 %h2
   Edit #{resource_name.to_s.humanize}
-= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put, :class => 'form-vertical' }) do |f|
-  = f.error_notification
+%hr/
+= form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put, :class => 'form-horizontal' }) do |f|
+  = devise_error_messages!
   = display_base_errors resource
-  = f.input :name, :autofocus => true
-  = f.input :email, :required => true
-  = f.input :password, :autocomplete => "off", :hint => "leave it blank if you don't want to change it", :required => false
-  = f.input :password_confirmation, :required => false
-  = f.input :current_password, :hint => "we need your current password to confirm your changes", :required => true
-  = f.button :submit, 'Update', :class => 'btn-primary'
-%h3 Cancel my account
-%p
-  Unhappy? #{link_to "Cancel my account", registration_path(resource_name), :data => { :confirm => "Are you sure?" }, :method => :delete}.
+  %div.form-group
+    = f.label :name, class: 'control-label col-md-3'
+    %div.col-md-9
+      = f.text_field :name, :autofocus => true, class: 'form-control'
+  %div.form-group
+    = f.label :email, class: 'control-label col-md-3'
+    %div.col-md-9
+      = f.email_field :email, :required => true, class: 'form-control'
+  %div.form-group
+    = f.label :password, class: 'control-label col-md-3'
+    %div.col-md-9
+      = f.password_field :password, :autocomplete => "off", :required => false, class: 'form-control'
+  %div.form-group
+    = f.label :password_confirmation, class: 'control-label col-md-3'
+    %div.col-md-9
+      = f.password_field :password_confirmation, :required => false, class: 'form-control'
+  %div.form-group
+    %p.col-md-9.col-md-offset-3 we need your current password to confirm your changes
+    = f.label :current_password, class: 'control-label col-md-3'
+    %div.col-md-9
+      = f.password_field :current_password, :required => true, class: 'form-control'
+  %div.form-group
+    %div.col-md-9.col-md-offset-3
+      = f.submit 'Update', class: 'btn btn-primary'
+%div.col-md-9.col-md-offset-3
+  %h3 Cancel my account
+  %p
+    Unhappy? We'll be sad to see you go.
+  = link_to "Cancel my account", registration_path(resource_name), :data => { :confirm => "Are you sure?" }, class: 'btn btn-danger', :method => :delete
 = link_to "Back", :back

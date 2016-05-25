@@ -1,0 +1,24 @@
+!!!
+%html
+  %head
+    %meta{:name => "viewport", :content => "width=device-width, initial-scale=1.0"}
+    %title= content_for?(:title) ? yield(:title) : 'Edurange'
+    %meta{:name => "description", :content => "#{content_for?(:description) ? yield(:description) : 'Edurange'}"}
+    = stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track' => true
+    = javascript_include_tag 'application', 'data-turbolinks-track' => true
+    = csrf_meta_tags
+    = yield(:head)
+  %body
+    %br/
+    %br/
+    %main{:role => "main"}
+      %div.col-md-8.col-md-offset-2
+        = render 'layouts/messages'
+        %div.panel.panel-default
+          %div.panel-heading
+            %h1
+              EDURange
+              %small
+                the cybersecurity training ground
+          %div.panel-body
+            = yield

@@ -9,10 +9,12 @@
       %li{role: 'presentation', class: (params[:controller] == 'instructor' or params[:controller] == 'admin') ? "active" : "" }
         = link_to 'Home', root_path
 
-      - if User.find(current_user.id).is_instructor? or User.find(current_user.id).is_admin?
+      - if policy(:navigation).scenarios?
 
         %li{role: 'presentation', class: params[:controller] == 'scenarios' ? "active" : "" }
           = link_to 'Scenarios', scenarios_path
+
+      - if User.find(current_user.id).is_instructor? or User.find(current_user.id).is_admin?
 
         %li{role: 'presentation', class: params[:controller] == 'statistics' ? "active" : "" }
           = link_to 'Analytics', statistics_path
