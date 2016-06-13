@@ -2,8 +2,6 @@
 
 ## Server
 
-- **Add 'forgot my password' link on the signing page**
-
 - Scenario script editor
 
   - User nice editor (google 'CodeMirror')
@@ -12,7 +10,11 @@
 
   - Check syntax
 
-- Create dashboard that shows booted scenarios right away
+- Add metadata (description, author, etc) to scenario YMLs
+
+- Create dashboard that shows booted scenarios right away - **Noah working on**
+
+- Get some kind of continuous integration setup going
 
 - Add instructor/student/team instructions to yml (done?)
 
